@@ -1,0 +1,22 @@
+graft docs
+graft examples
+graft conf
+graft src
+graft tests
+
+include *.komodoproject
+include .bumpversion.cfg
+include .coveragerc
+include .isort.cfg
+include .pylintrc
+
+include AUTHORS.rst
+include CHANGELOG.rst
+include CONTRIBUTING.rst
+include LICENSE
+include README.rst
+
+include bootstrap.py
+include tox.ini .travis.yml appveyor.yml
+
+global-exclude *.py[co] __pycache__
