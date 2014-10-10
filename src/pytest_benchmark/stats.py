@@ -42,4 +42,8 @@ class RunningStats(object):
     def stddev(self):
         return math.sqrt(self.variance)
 
+    def __str__(self):
+        return "Stats[%s runs in %.4fsec, min=%.4fsec, max=%.4fsec, average=%.4fsec, mean=%.4fsec, stddev=%.4fsec]" % (
+            self.runs, self.total, self.min, self.max, self.average, self.mean, self.stddev
+        )
 

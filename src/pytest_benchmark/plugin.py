@@ -21,7 +21,12 @@ def pytest_addoption(parser):
     group.addoption(
         '--benchmark-max-time',
         action="store", type=float, default=0.5,
-        help="Max time to spend in a benchmark."
+        help="Maximum time to spend in a benchmark."
+    )
+    group.addoption(
+        '--benchmark-max-iterations',
+        action="store", type=int, default=10000,
+        help="Maximum iterations to do."
     )
     group.addoption(
         '--benchmark-min-iterations',
@@ -41,42 +46,45 @@ def pytest_addoption(parser):
 
 
 class Benchmark(object):
-    def __init__(self, name, disable_gc, timer, min_iterations, max_time):
-        self.__disable_gc = disable_gc
-        self.__name = name
-        self.__timer = timer
-        self.__min_iterations = min_iterations
-        self.__max_time = max_time
-        self.__stats = RunningStats()
-        self.__called = False
-        self.__start = None
-        self.__gcenabled = None
+    def __init__(self, name, disable_gc, timer, min_iterations, max_iterations, max_time):
+        print((name, disable_gc, timer, min_iterations, max_time))
+        self._disable_gc = disable_gc
+        self._name = name
+        self._timer = timer
+        self._min_iterations = min_iterations
+        self._max_iterations = max_iterations
+        self._max_time = max_time
+        self._stats = RunningStats()
+        self._called = False
+        self._start = None
+        self._gcenabled = None
 
     @property
     def done(self):
-        return self.__stats.runs < self.__min_iterations or self.__stats.total < self.__max_time
+        return not (self._stats.runs < self._min_iterations or self._stats.total < self._max_time) or self._stats.runs >= self._max_iterations
 
     #def __call__(self, function):
     #    use_decorator
 
     def __enter__(self):
-        self.__gcenabled = gc.isenabled()
-        if self.__disable_gc:
+        self._gcenabled = gc.isenabled()
+        if self._disable_gc:
             gc.disable()
-        self.__start = self.__timer()
+        self._start = self._timer()
         return self
 
     def __exit__(self, *exc):
-        end = self.__timer()
-        if self.__gcenabled:
+        end = self._timer()
+        if self._gcenabled:
             gc.enable()
-        self.__stats.update(end - self.__start)
+        self._stats.update(end - self._start)
 
 
 class BenchmarkSession(object):
     def __init__(self, config):
         self.options = dict(
             max_time=config.getoption('benchmark_max_time'),
+            max_iterations=config.getoption('benchmark_max_iterations'),
             min_iterations=config.getoption('benchmark_min_iterations'),
             timer=config.getoption('benchmark_timer'),
             disable_gc=config.getoption('benchmark_disable_gc'),
@@ -107,6 +115,8 @@ def pytest_runtest_call(item):
     if isinstance(benchmark, Benchmark):
         while not benchmark.done:
             item.runtest()
+
+        print(benchmark._stats)
     else:
         item.runtest()
 
