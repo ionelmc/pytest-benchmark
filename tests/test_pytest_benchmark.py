@@ -1,4 +1,5 @@
-from pytest_benchmark.__main__ import main
 
-def test_main():
-    assert main([]) == 0
+def test_main(benchmark):
+    with benchmark:
+        range(1000000)
+    assert 1 == 0

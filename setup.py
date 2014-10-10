@@ -50,17 +50,17 @@ setup(
         "Topic :: Utilities",
     ],
     keywords=[
-        # eg: "keyword1", "keyword2", "keyword3",
+        "pytest", "benchmark",
     ],
     install_requires=[
-        # eg: "aspectlib==1.1.1", "six>=1.7",
+        "pytest>=2.6",
     ],
     extras_require={
         # eg: 'rst': ["docutils>=0.11"],
     },
     entry_points={
-        "console_scripts": [
-            "pytest_benchmark = pytest_benchmark.__main__:main"
+        "pytest11": [
+            "benchmark = pytest_benchmark.plugin"
         ]
     }
 
