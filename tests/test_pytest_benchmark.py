@@ -9,7 +9,7 @@ import time
 
 def test_fast(benchmark):
     with benchmark:
-        time.sleep(0.0001)
+        time.sleep(0.000001)
     assert 1 == 1
 
 def test_slow(benchmark):

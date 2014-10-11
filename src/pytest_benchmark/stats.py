@@ -7,7 +7,7 @@ class RunningStats(object):
     def __init__(self):
         self.runs = 0
         self.total = 0
-        self.min = 0
+        self.min = float('inf')
         self.max = 0
         self.__old_mean = self.__new_mean = self.__old_exp = self.__new_exp = None
 
