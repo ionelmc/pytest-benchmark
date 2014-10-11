@@ -109,7 +109,7 @@ class BenchmarkSession(object):
         tr = terminalreporter
         tr.write_sep('-',
                      'benchmark: {0} tests, {1.min_iterations} min interations, {1.max_iterations} max iterations,'
-                     ' {1.max_time} max time'.format(len(self._benchmarks), type('', (), self._options)),
+                     ' {1.max_time}s max time'.format(len(self._benchmarks), type('', (), self._options)),
                      yellow=True)
         worst = {}
         best = {}
