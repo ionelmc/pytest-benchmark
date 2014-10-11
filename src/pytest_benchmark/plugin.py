@@ -1,10 +1,13 @@
 from __future__ import division
-import gc
-import timeit
-import pytest
-import sys
+
 import collections
+import gc
+import sys
+import timeit
+from itertools import chain
+
 import pytest
+
 from .stats import RunningStats
 
 def loadtimer(string):
@@ -45,26 +48,26 @@ def pytest_addoption(parser):
     )
 
 
-class Benchmark(object):
+class Benchmark(RunningStats):
     def __init__(self, name, disable_gc, timer, min_iterations, max_iterations, max_time):
-        print((name, disable_gc, timer, min_iterations, max_time))
         self._disable_gc = disable_gc
-        self._name = name
+        self.name = name
         self._timer = timer
-        self._min_iterations = min_iterations
-        self._max_iterations = max_iterations
+        self._min_runs = min_iterations
+        self._max_runs = max_iterations
         self._max_time = max_time
         self._stats = RunningStats()
         self._called = False
         self._start = None
         self._gcenabled = None
+        super(Benchmark, self).__init__()
 
     @property
     def done(self):
-        return not (self._stats.runs < self._min_iterations or self._stats.total < self._max_time) or self._stats.runs >= self._max_iterations
+        return not (self.runs < self._min_runs or self.total < self._max_time) or self.runs >= self._max_runs
 
     #def __call__(self, function):
-    #    use_decorator
+    #    make decorator
 
     def __enter__(self):
         self._gcenabled = gc.isenabled()
@@ -77,37 +80,76 @@ class Benchmark(object):
         end = self._timer()
         if self._gcenabled:
             gc.enable()
-        self._stats.update(end - self._start)
-
+        self.update(end - self._start)
 
 class BenchmarkSession(object):
     def __init__(self, config):
-        self.options = dict(
+        self._options = dict(
             max_time=config.getoption('benchmark_max_time'),
             max_iterations=config.getoption('benchmark_max_iterations'),
             min_iterations=config.getoption('benchmark_min_iterations'),
             timer=config.getoption('benchmark_timer'),
             disable_gc=config.getoption('benchmark_disable_gc'),
         )
-        self.benchmarks = []
+        self._benchmarks = []
 
-    def new(self, name, **kwargs):
-        benchmark = Benchmark(name, **dict(self.options, **kwargs))
-        self.benchmarks.append(benchmark)
+    @pytest.fixture(scope="function")
+    def benchmark(self, request):
+        node = request.node
+        marker = node.get_marker('benchmark')
+        options = marker.kwargs if marker else {}
+        benchmark = Benchmark(node.name, **dict(self._options, **options))
+        self._benchmarks.append(benchmark)
         return benchmark
 
+    def pytest_terminal_summary(self, terminalreporter):
+        tr = terminalreporter
 
-@pytest.fixture(scope="function")
-def benchmark(request, _benchmark_session):
-    benchmark = request.node.keywords.get('benchmark')
-    # TODO: use `node.get_marker`
-    options = benchmark.kwargs if benchmark else {}
-    return _benchmark_session.new(request.node.name, **options)
+        tr.write_sep('=', 'benchmarked %s tests' % len(self._benchmarks), yellow=True)
+        worst = {}
+        best = {}
+        for prop in ('min', 'max', 'avg', 'mean', 'stddev'):
+            worst[prop] = max(getattr(benchmark, prop) for benchmark in self._benchmarks)
+            best[prop] = min(getattr(benchmark, prop) for benchmark in self._benchmarks)
+        widths = {
+            'name': max(20, max(len(benchmark.name) for benchmark in self._benchmarks))
+        }
 
+        overall_min = max(best.values())
+        if overall_min < 0.000001:
+            unit, adjustment = 'n', 1000000000
+        if overall_min < 0.001:
+            unit, adjustment = 'u', 1000000
+        elif overall_min < 1:
+            unit, adjustment = 'm', 1000
+        else:
+            unit, adjustment = 's', 1
 
-@pytest.fixture(scope="session")
-def _benchmark_session(request):
-    return BenchmarkSession(request.config)
+        for prop in ('min', 'max', 'avg', 'mean', 'stddev'):
+            widths[prop] = min(6, max(
+                len("{:.3f}".format(getattr(benchmark, prop) * adjustment))
+                for benchmark in self._benchmarks
+            ))
+        tr.write_line("{:<{}}  {:>{}} {:>{}} {:>{}} {:>{}} {:>{}}".format(
+            "Name (time in %ss)" % unit, widths['name'],
+            'min', widths['min'] + 3,
+            'max', widths['max'] + 3,
+            'avg', widths['avg'] + 3,
+            'mean', widths['mean'] + 3,
+            'stddev', widths['stddev'] + 3,
+        ))
+        tr.write_line("-" * sum(widths.values(), 6 + 5 * 3))
+
+        for benchmark in self._benchmarks:
+            tr.write("{:<{}} ".format(benchmark.name, widths['name']))
+            for prop in ('min', 'max', 'avg', 'mean', 'stddev'):
+                value = getattr(benchmark, prop)
+                tr.write(
+                    " {:>{}.3f}".format(value * adjustment, widths[prop] + 3),
+                    green=value == best[prop],
+                    red=value == worst[prop],
+                )
+            tr.write('\n')
 
 
 def pytest_runtest_call(item):
@@ -115,44 +157,8 @@ def pytest_runtest_call(item):
     if isinstance(benchmark, Benchmark):
         while not benchmark.done:
             item.runtest()
-
-        print(benchmark._stats)
     else:
         item.runtest()
-
-def pytest_report_teststatus(report):
-    """ adapted from
-    https://bitbucket.org/hpk42/pytest/src/a5e7a5fa3c7e/_pytest/skipping.py#cl-170
-    """
-    if report.when in ("call"):
-        if hasattr(report, "rerun") and report.rerun > 0:
-            if report.outcome == "failed":
-                return "failed", "F", "FAILED"
-            if report.outcome == "passed":
-                return "rerun", "R", "RERUN"
-
-
-def pytest_terminal_summary(terminalreporter):
-    """ adapted from
-    https://bitbucket.org/hpk42/pytest/src/a5e7a5fa3c7e/_pytest/skipping.py#cl-179
-    """
-    tr = terminalreporter
-    if not tr.reportchars:
-        return
-
-    lines = []
-    for char in tr.reportchars:
-        if char in "rR":
-            show_rerun(terminalreporter, lines)
-
-    if lines:
-        tr._tw.sep("=", "rerun test summary info")
-        for line in lines:
-            tr._tw.line(line)
-
-
-def pytest_configure(config):
-    config.addinivalue_line("markers", "benchmark: mark a test with custom benchmark settings.")
 
 
 def pytest_runtest_setup(item):
@@ -163,3 +169,9 @@ def pytest_runtest_setup(item):
         for name in benchmark.kwargs:
             if name not in ('max_time', 'min_iterations', 'timer'):
                 raise ValueError("benchmark mark can't have %r keyword argument." % name)
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "benchmark: mark a test with custom benchmark settings.")
+    config.pluginmanager.register(BenchmarkSession(config), 'pytest-benchmark')
+
