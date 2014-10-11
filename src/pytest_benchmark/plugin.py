@@ -158,7 +158,7 @@ class BenchmarkSession(object):
 
 
 def pytest_runtest_call(item):
-    benchmark = item.funcargs.get('benchmark')
+    benchmark = hasattr(item, 'funcargs') and item.funcargs.get('benchmark')
     if isinstance(benchmark, Benchmark):
         while not benchmark.done:
             item.runtest()

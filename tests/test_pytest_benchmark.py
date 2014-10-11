@@ -1,3 +1,10 @@
+"""
+Just to make sure the plugin doesn't choke on doctests::
+
+    >>> print('Yay, doctests!')
+    Yay, doctests!
+
+"""
 import time
 
 def test_fast(benchmark):
