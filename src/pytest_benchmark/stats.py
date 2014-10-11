@@ -1,5 +1,6 @@
 import math
 
+
 class RunningStats(object):
     # implementation of http://www.johndcook.com/standard_deviation.html
 
@@ -46,4 +47,3 @@ class RunningStats(object):
         return "Stats[%s runs in %.4fsec, min=%.4fsec, max=%.4fsec, avg=%.4fsec, mean=%.4fsec, stddev=%.4fsec]" % (
             self.runs, self.total, self.min, self.max, self.avg, self.mean, self.stddev
         )
-

@@ -1,14 +1,13 @@
 from __future__ import division
 
-import collections
 import gc
 import sys
 import timeit
-from itertools import chain
 
 import pytest
 
 from .stats import RunningStats
+
 
 def loadtimer(string):
     if '.' not in string:
@@ -66,8 +65,9 @@ class Benchmark(RunningStats):
     def done(self):
         return not (self.runs < self._min_runs or self.total < self._max_time) or self.runs >= self._max_runs
 
-    #def __call__(self, function):
-    #    make decorator
+    def __call__(self, function):
+        # TODO: make decorator
+        pass
 
     def __enter__(self):
         self._gcenabled = gc.isenabled()
@@ -81,6 +81,7 @@ class Benchmark(RunningStats):
         if self._gcenabled:
             gc.enable()
         self.update(end - self._start)
+
 
 class BenchmarkSession(object):
     def __init__(self, config):
@@ -106,10 +107,10 @@ class BenchmarkSession(object):
         if not self._benchmarks:
             return
         tr = terminalreporter
-        tr.write_sep('-', 'benchmark: {0} tests, {1.min_iterations} min interations, {1.max_iterations} max iterations, {1.max_time} max time'.format(
-            len(self._benchmarks),
-            type('', (), self._options)
-        ), yellow=True)
+        tr.write_sep('-',
+                     'benchmark: {0} tests, {1.min_iterations} min interations, {1.max_iterations} max iterations,'
+                     ' {1.max_time} max time'.format(len(self._benchmarks), type('', (), self._options)),
+                     yellow=True)
         worst = {}
         best = {}
         for prop in ('min', 'max', 'avg', 'mean', 'stddev'):
