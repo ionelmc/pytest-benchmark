@@ -27,7 +27,7 @@ def pytest_addoption(parser):
     )
     group.addoption(
         '--benchmark-max-iterations',
-        action="store", type=int, default=10000,
+        action="store", type=int, default=5000,
         help="Maximum iterations to do."
     )
     group.addoption(
@@ -53,7 +53,10 @@ class Benchmark(RunningStats):
         self.name = name
         self._timer = timer
         self._min_runs = min_iterations
-        self._max_runs = max_iterations
+        self._max_runs = max(max_iterations, max_iterations)
+        #assert min_iterations <= max_iterations, (
+        #    "Invalid configuration, min iterations need to be less than max "
+        #    "iterations. You have %s min, %s max" % (min_iterations, max_iterations))
         self._max_time = max_time
         self._stats = RunningStats()
         self._called = False
@@ -108,16 +111,18 @@ class BenchmarkSession(object):
             return
         tr = terminalreporter
         tr.write_sep('-',
-                     'benchmark: {0} tests, {1.min_iterations} min interations, {1.max_iterations} max iterations,'
+                     'benchmark: {0} tests, {1.min_iterations} to {1.max_iterations} iterations,'
                      ' {1.max_time}s max time'.format(len(self._benchmarks), type('', (), self._options)),
                      yellow=True)
         worst = {}
         best = {}
-        for prop in ('min', 'max', 'avg', 'mean', 'stddev'):
+        for prop in ('min', 'max', 'avg', 'mean', 'stddev', 'runs'):
             worst[prop] = max(getattr(benchmark, prop) for benchmark in self._benchmarks)
+        for prop in ('min', 'max', 'avg', 'mean', 'stddev'):
             best[prop] = min(getattr(benchmark, prop) for benchmark in self._benchmarks)
         widths = {
-            'name': max(20, max(len(benchmark.name) for benchmark in self._benchmarks))
+            'name': max(20, max(len(benchmark.name) for benchmark in self._benchmarks)),
+            'runs': len(str(worst['runs'])),
         }
 
         overall_min = max(best.values())
@@ -135,25 +140,30 @@ class BenchmarkSession(object):
                 len("{0:.3f}".format(getattr(benchmark, prop) * adjustment))
                 for benchmark in self._benchmarks
             ))
-        tr.write_line("{0:<{1}}  {2:>{3}} {4:>{5}} {6:>{7}} {8:>{9}} {10:>{11}}".format(
+        tr.write_line("{0:<{1}}   {2:>{3}}  {4:>{5}}  {6:>{7}}  {8:>{9}}  {10:>{11}}  {12:>{13}}".format(
             "Name (time in %ss)" % unit, widths['name'],
-            'min', widths['min'] + 3,
-            'max', widths['max'] + 3,
-            'avg', widths['avg'] + 3,
-            'mean', widths['mean'] + 3,
-            'stddev', widths['stddev'] + 3,
+            'Min', widths['min'] + 3,
+            'Max', widths['max'] + 3,
+            'Avg', widths['avg'] + 3,
+            'Mean', widths['mean'] + 3,
+            'StdDev', widths['stddev'] + 3,
+            'Iterations', widths['runs'] + 3,
         ))
-        tr.write_line("-" * sum(widths.values(), 6 + 5 * 3))
+        tr.write_line("-" * sum(widths.values(), 5 + len(widths) * 4))
 
         for benchmark in self._benchmarks:
             tr.write("{0:<{1}} ".format(benchmark.name, widths['name']))
             for prop in ('min', 'max', 'avg', 'mean', 'stddev'):
                 value = getattr(benchmark, prop)
                 tr.write(
-                    " {0:>{1}.3f}".format(value * adjustment, widths[prop] + 3),
+                    "  {0:>{1}.3f}".format(value * adjustment, widths[prop] + 3),
                     green=value == best[prop],
                     red=value == worst[prop],
+                    bold=True,
                 )
+            tr.write(
+                "  {0:>{1}}".format(benchmark.runs, widths['runs'] + 5),
+            )
             tr.write('\n')
 
 
@@ -172,7 +182,7 @@ def pytest_runtest_setup(item):
         if benchmark.args:
             raise ValueError("benchmark mark can't have positional arguments.")
         for name in benchmark.kwargs:
-            if name not in ('max_time', 'min_iterations', 'timer'):
+            if name not in ('max_time', 'min_iterations', 'max_iterations', 'timer'):
                 raise ValueError("benchmark mark can't have %r keyword argument." % name)
 
 
