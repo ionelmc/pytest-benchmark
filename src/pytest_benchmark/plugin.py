@@ -103,9 +103,13 @@ class BenchmarkSession(object):
         return benchmark
 
     def pytest_terminal_summary(self, terminalreporter):
+        if not self._benchmarks:
+            return
         tr = terminalreporter
-
-        tr.write_sep('=', 'benchmarked %s tests' % len(self._benchmarks), yellow=True)
+        tr.write_sep('-', 'benchmark: {0} tests, {1.min_iterations} min interations, {1.max_iterations} max iterations, {1.max_time} max time'.format(
+            len(self._benchmarks),
+            type('', (), self._options)
+        ), yellow=True)
         worst = {}
         best = {}
         for prop in ('min', 'max', 'avg', 'mean', 'stddev'):
@@ -123,14 +127,14 @@ class BenchmarkSession(object):
         elif overall_min < 1:
             unit, adjustment = 'm', 1000
         else:
-            unit, adjustment = 's', 1
+            unit, adjustment = '', 1
 
         for prop in ('min', 'max', 'avg', 'mean', 'stddev'):
             widths[prop] = min(6, max(
-                len("{:.3f}".format(getattr(benchmark, prop) * adjustment))
+                len("{0:.3f}".format(getattr(benchmark, prop) * adjustment))
                 for benchmark in self._benchmarks
             ))
-        tr.write_line("{:<{}}  {:>{}} {:>{}} {:>{}} {:>{}} {:>{}}".format(
+        tr.write_line("{0:<{1}}  {2:>{3}} {4:>{5}} {6:>{7}} {8:>{9}} {10:>{11}}".format(
             "Name (time in %ss)" % unit, widths['name'],
             'min', widths['min'] + 3,
             'max', widths['max'] + 3,
@@ -141,11 +145,11 @@ class BenchmarkSession(object):
         tr.write_line("-" * sum(widths.values(), 6 + 5 * 3))
 
         for benchmark in self._benchmarks:
-            tr.write("{:<{}} ".format(benchmark.name, widths['name']))
+            tr.write("{0:<{1}} ".format(benchmark.name, widths['name']))
             for prop in ('min', 'max', 'avg', 'mean', 'stddev'):
                 value = getattr(benchmark, prop)
                 tr.write(
-                    " {:>{}.3f}".format(value * adjustment, widths[prop] + 3),
+                    " {0:>{1}.3f}".format(value * adjustment, widths[prop] + 3),
                     green=value == best[prop],
                     red=value == worst[prop],
                 )
@@ -174,4 +178,3 @@ def pytest_runtest_setup(item):
 def pytest_configure(config):
     config.addinivalue_line("markers", "benchmark: mark a test with custom benchmark settings.")
     config.pluginmanager.register(BenchmarkSession(config), 'pytest-benchmark')
-
