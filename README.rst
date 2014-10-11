@@ -6,9 +6,7 @@ pytest-benchmark
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/ionelmc/pytest-benchmark
 
-.. See: http://www.appveyor.com/docs/status-badges
-
-.. image:: https://ci.appveyor.com/api/projects/status/<security-token>/branch/master
+.. image:: https://ci.appveyor.com/api/projects/status/ojmf55r6usb1ih5e/branch/master
     :alt: AppVeyor Build Status
     :target: https://ci.appveyor.com/project/ionelmc/pytest-benchmark
 
@@ -34,6 +32,21 @@ Installation
 ::
 
     pip install pytest-benchmark
+
+Usage
+=====
+
+.. sourcecode:: python
+
+    def test_my_stuff(benchmark):
+        with benchmark:
+            # Code to be measured
+            result = time.sleep(0.000001)
+
+        # Extra code, to verify that the run completed correctly.
+        # Note: this code is not measured.
+        assert result is None
+
 
 Documentation
 =============
