@@ -47,11 +47,16 @@ Usage
         # Note: this code is not measured.
         assert result is None
 
-
 Documentation
 =============
 
 https://pytest-benchmark.readthedocs.org/
+
+Obligatory screenshot
+=====================
+
+.. image:: https://github.com/ionelmc/pytest-benchmark/raw/master/docs/screenshot.png
+    :alt: Screenshot of py.test summary
 
 Development
 ===========
