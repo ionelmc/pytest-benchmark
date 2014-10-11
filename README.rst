@@ -36,7 +36,7 @@ Installation
 Usage
 =====
 
-.. sourcecode:: python
+::
 
     def test_my_stuff(benchmark):
         with benchmark:
