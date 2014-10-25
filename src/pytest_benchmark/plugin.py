@@ -54,7 +54,7 @@ class Benchmark(RunningStats):
         self._timer = timer
         self._min_runs = min_iterations
         self._max_runs = max(max_iterations, max_iterations)
-        #assert min_iterations <= max_iterations, (
+        # assert min_iterations <= max_iterations, (
         #    "Invalid configuration, min iterations need to be less than max "
         #    "iterations. You have %s min, %s max" % (min_iterations, max_iterations))
         self._max_time = max_time
