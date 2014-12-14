@@ -124,7 +124,7 @@ class BenchmarkSession(object):
         self._skip = config.getoption('benchmark_skip')
         self._only = config.getoption('benchmark_only')
         if self._skip and self._only:
-            raise RuntimeError("Can't have both --benchmark-only and --benchmark-skip options.")
+            raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
         self._benchmarks = []
 
     @pytest.fixture(scope="function")
