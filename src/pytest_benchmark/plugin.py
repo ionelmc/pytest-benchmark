@@ -1,5 +1,6 @@
 from __future__ import division
 from collections import defaultdict
+from decimal import Decimal
 
 import gc
 from itertools import groupby
@@ -26,7 +27,7 @@ def pytest_addoption(parser):
     group = parser.getgroup("benchmark")
     group.addoption(
         '--benchmark-max-time',
-        action="store", type=float, default=0.5,
+        action="store", type=Decimal, default=Decimal("0.5"),
         help="Maximum time to spend in a benchmark (including overhead)."
     )
     group.addoption(
@@ -85,17 +86,13 @@ class Benchmark(RunningStats):
         if self._overall_start is None:
             self._overall_start = time.time()
         return not (
-            self.runs < self._min_runs or
+            self.runs < self._min_runs - 1 or
             (time.time() - self._overall_start) < self._max_time
         ) or self.runs >= self._max_runs - 1
 
-    # def __call__(self, group=None):
-    #     if group is not None:
-    #         if self.group is None:
-    #             self.group = group
-    #         else:
-    #             raise ValueError("Group is already set (to %r)" % self.group)
-    #     return self
+    # TODO: implement benchmark function wrapper (that adds the timers), as alternative to context manager
+    # def __call__(self, function):
+    #     pass
 
 
     def __enter__(self):
@@ -165,7 +162,7 @@ class BenchmarkSession(object):
             tr.write_sep(
                 '-',
                 'benchmark{2}: {0} tests, {1.min_iterations} to {1.max_iterations} iterations,'
-                ' {1.max_time}s max time'.format(
+                ' {1.max_time:f}s max time'.format(
                     len(benchmarks),
                     type('', (), self._options),
                     "" if group is None else " %r" % group
