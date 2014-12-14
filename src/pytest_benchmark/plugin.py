@@ -24,7 +24,7 @@ def pytest_addoption(parser):
     group.addoption(
         '--benchmark-max-time',
         action="store", type=float, default=0.5,
-        help="Maximum time to spend in a benchmark."
+        help="Maximum time to spend in a benchmark (including overhead)."
     )
     group.addoption(
         '--benchmark-max-iterations',
