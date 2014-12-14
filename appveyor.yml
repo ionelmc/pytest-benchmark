@@ -3,9 +3,8 @@ environment:
   matrix:
     - TOXENV: check
     - TOXENV: "py2.7"
-    - TOXENV: "py2.7-nocover"
+    - TOXENV: "py3.3"
     - TOXENV: "py3.4"
-    - TOXENV: "py3.4-nocover"
 init:
   - "ECHO %TOXENV%"
   - ps: "ls C:\\Python*"
@@ -19,4 +18,4 @@ test_script:
   - "c:\\python27\\Scripts\\tox --version"
   - "c:\\python27\\Scripts\\virtualenv --version"
   - "c:\\python27\\Scripts\\pip --version"
-  - "c:\\python27\\Scripts\\tox"
+  - "c:\\python27\\Scripts\\tox -- py.test -vv tests/test_normal.py"
