@@ -2,10 +2,10 @@ build: false
 environment:
   matrix:
     - TOXENV: check
-    - TOXENV: "2.7"
-    - TOXENV: "2.7-nocover"
-    - TOXENV: "3.4"
-    - TOXENV: "3.4-nocover"
+    - TOXENV: "py2.7"
+    - TOXENV: "py2.7-nocover"
+    - TOXENV: "py3.4"
+    - TOXENV: "py3.4-nocover"
 init:
   - "ECHO %TOXENV%"
   - ps: "ls C:\\Python*"

@@ -2,25 +2,52 @@
 pytest-benchmark
 ===============================
 
-.. image:: http://img.shields.io/travis/ionelmc/pytest-benchmark/master.png
+| |docs| |travis| |appveyor| |coveralls| |landscape| |scrutinizer|
+| |version| |downloads| |wheel| |supported-versions| |supported-implementations|
+
+.. |docs| image:: https://readthedocs.org/projects/pytest-benchmark/badge/?style=flat
+    :target: https://readthedocs.org/projects/pytest-benchmark
+    :alt: Documentation Status
+
+.. |travis| image:: http://img.shields.io/travis/ionelmc/pytest-benchmark/master.png?style=flat
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/ionelmc/pytest-benchmark
 
-.. image:: https://ci.appveyor.com/api/projects/status/ojmf55r6usb1ih5e/branch/master
+.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/ionelmc/pytest-benchmark?branch=master
     :alt: AppVeyor Build Status
     :target: https://ci.appveyor.com/project/ionelmc/pytest-benchmark
 
-.. image:: http://img.shields.io/coveralls/ionelmc/pytest-benchmark/master.png
+.. |coveralls| image:: http://img.shields.io/coveralls/ionelmc/pytest-benchmark/master.png?style=flat
     :alt: Coverage Status
     :target: https://coveralls.io/r/ionelmc/pytest-benchmark
 
-.. image:: http://img.shields.io/pypi/v/pytest-benchmark.png
-    :alt: PYPI Package
+.. |landscape| image:: https://landscape.io/github/ionelmc/pytest-benchmark/master/landscape.svg?style=flat
+    :target: https://landscape.io/github/ionelmc/pytest-benchmark/master
+    :alt: Code Quality Status
+
+.. |version| image:: http://img.shields.io/pypi/v/pytest-benchmark.png?style=flat
+    :alt: PyPI Package latest release
     :target: https://pypi.python.org/pypi/pytest-benchmark
 
-.. image:: http://img.shields.io/pypi/dm/pytest-benchmark.png
-    :alt: PYPI Package
+.. |downloads| image:: http://img.shields.io/pypi/dm/pytest-benchmark.png?style=flat
+    :alt: PyPI Package monthly downloads
     :target: https://pypi.python.org/pypi/pytest-benchmark
+
+.. |wheel| image:: https://pypip.in/wheel/pytest-benchmark/badge.png?style=flat
+    :alt: PyPI Wheel
+    :target: https://pypi.python.org/pypi/pytest-benchmark
+
+.. |supported-versions| image:: https://pypip.in/py_versions/pytest-benchmark/badge.png?style=flat
+    :alt: Supported versions
+    :target: https://pypi.python.org/pypi/pytest-benchmark
+
+.. |supported-implementations| image:: https://pypip.in/implementation/pytest-benchmark/badge.png?style=flat
+    :alt: Supported imlementations
+    :target: https://pypi.python.org/pypi/pytest-benchmark
+
+.. |scrutinizer| image:: https://img.shields.io/scrutinizer/g/ionelmc/pytest-benchmark/master.png?style=flat
+    :alt: Scrtinizer Status
+    :target: https://scrutinizer-ci.com/g/ionelmc/pytest-benchmark/
 
 py.test fixture for benchmarking code
 

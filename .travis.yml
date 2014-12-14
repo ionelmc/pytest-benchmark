@@ -4,21 +4,18 @@ env:
   global:
     LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
   matrix:
-    - TOXENV=check
-    - TOXENV=2.6,coveralls
-    - TOXENV=2.6-nocover
-    - TOXENV=2.7,coveralls
-    - TOXENV=2.7-nocover
-    - TOXENV=3.3,coveralls
-    - TOXENV=3.3-nocover
-    - TOXENV=3.4,coveralls
-    - TOXENV=3.4-nocover
+    - TOXENV=py26,coveralls
+    - TOXENV=py27,coveralls
+    - TOXENV=py33,coveralls
+    - TOXENV=py34,coveralls
     - TOXENV=pypy,coveralls
+    - TOXENV=py26-nocover
+    - TOXENV=py27-nocover
+    - TOXENV=py33-nocover
+    - TOXENV=py34-nocover
     - TOXENV=pypy-nocover
 before_install:
   - python --version
-  - virtualenv --version
-  - pip --version
   - uname -a
   - lsb_release -a
 install:

@@ -1,6 +1,5 @@
 graft docs
 graft examples
-graft conf
 graft src
 graft tests
 
@@ -16,7 +15,6 @@ include CONTRIBUTING.rst
 include LICENSE
 include README.rst
 
-include bootstrap.py
 include tox.ini .travis.yml appveyor.yml
 
 global-exclude *.py[co] __pycache__
