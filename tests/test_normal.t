@@ -1,4 +1,5 @@
 Simple::
+
   $ cat <<EOF > tests.py
   > """
   >     >>> print('Yay, doctests!')
@@ -26,7 +27,7 @@ Simple::
   > EOF
 
   $ py.test -vv --doctest-modules tests.py
-  ============================= test session starts ==============================
+  =====================* test session starts ======================* (re)
   platform .* (re)
   plugins: .* (re)
   collecting ... collected 5 items
@@ -37,19 +38,21 @@ Simple::
   tests.py::test_slower PASSED
   tests.py::test_xfast PASSED
   \s* (re)
-  ----------- benchmark: 4 tests, 5 to 5000 iterations, 0.5s max time ------------
-  Name \(time in us\) * Min * Max * Avg * Mean * StdDev * Iterations (re)
+  ---* benchmark: 4 tests, 5 to 5000 iterations, 0.5s max time ----* (re)
+  Name \(time in .s\) * Min * Max * Avg * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast              .* (re)
   test_slow              .* (re)
   test_slower            .* (re)
   test_xfast             .* (re)
-  ========================* 5 passed in .* seconds ========================* (re)
+  -----------------------------------------------------------------* (re)
+  \s* (re)
+  ====================* 5 passed in .* seconds ====================* (re)
 
 Disabling benchmarks::
 
   $ py.test -vv --doctest-modules --benchmark-skip tests.py
-  ============================= test session starts ==============================
+  =====================* test session starts ======================* (re)
   platform .* (re)
   plugins: .* (re)
   collecting ... collected 5 items
@@ -60,21 +63,48 @@ Disabling benchmarks::
   tests.py::test_slower SKIPPED
   tests.py::test_xfast SKIPPED
   \s* (re)
-  ===================== 1 passed, 4 skipped in .* seconds ==================* (re)
+  ==============* 1 passed, 4 skipped in .* seconds ===============* (re)
 
 Mark selection::
 
   $ py.test -vv --doctest-modules -m benchmark tests.py
-  ============================= test session starts ==============================
+  =====================* test session starts ======================* (re)
   platform .* (re)
   plugins: .* (re)
   collecting ... collected 5 items
   \s* (re)
   tests.py::test_xfast PASSED
   \s* (re)
-  ----------- benchmark: 1 tests, 5 to 5000 iterations, 0.5s max time ------------
-  Name \(time in us\) * Min * Max * Avg * Mean * StdDev * Iterations (re)
+  ---* benchmark: 1 tests, 5 to 5000 iterations, 0.5s max time ----* (re)
+  Name \(time in .s\) * Min * Max * Avg * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_xfast             .* (re)
-  ==================== 4 tests deselected by "-m 'benchmark'" ====================
-  ==================* 1 passed, 4 deselected in .* seconds ==================* (re)
+  -----------------------------------------------------------------* (re)
+  \s* (re)
+  ===========* 4 tests deselected by "-m 'benchmark'" =============* (re)
+  ============* 1 passed, 4 deselected in .* seconds ==============* (re)
+
+Only run benchmarks::
+
+  $ py.test -vv --doctest-modules --benchmark-only tests.py
+  =====================* test session starts ======================* (re)
+  platform .* (re)
+  plugins: .* (re)
+  collecting ... collected 5 items
+  \s* (re)
+  tests.py::[doctest] tests SKIPPED
+  tests.py::test_fast PASSED
+  tests.py::test_slow PASSED
+  tests.py::test_slower PASSED
+  tests.py::test_xfast PASSED
+  \s* (re)
+  ---* benchmark: 4 tests, 5 to 5000 iterations, 0.5s max time ----* (re)
+  Name \(time in .s\) * Min * Max * Avg * Mean * StdDev * Iterations (re)
+  -----------------------------------------------------------------* (re)
+  test_fast              .* (re)
+  test_slow              .* (re)
+  test_slower            .* (re)
+  test_xfast             .* (re)
+  -----------------------------------------------------------------* (re)
+  \s* (re)
+  ==============* 4 passed, 1 skipped in .* seconds ===============* (re)
