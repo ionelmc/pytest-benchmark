@@ -87,7 +87,7 @@ class Benchmark(RunningStats):
         return not (
             self.runs < self._min_runs or
             (time.time() - self._overall_start) < self._max_time
-        ) or self.runs >= self._max_runs
+        ) or self.runs >= self._max_runs - 1
 
     # def __call__(self, group=None):
     #     if group is not None:
@@ -121,6 +121,7 @@ class BenchmarkSession(object):
             timer=config.getoption('benchmark_timer'),
             disable_gc=config.getoption('benchmark_disable_gc'),
         )
+        self._options['min_iterations'] = min(self._options['min_iterations'], self._options['max_iterations'])
         self._skip = config.getoption('benchmark_skip')
         self._only = config.getoption('benchmark_only')
         if self._skip and self._only:
