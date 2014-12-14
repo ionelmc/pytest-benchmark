@@ -49,17 +49,16 @@ Simple::
 Mark selection::
 
   $ py.test -vv --doctest-modules -m benchmark tests.py
-  tests/test_normal.py::[doctest] test_normal PASSED
-  tests/test_normal.py::test_fast PASSED
-  tests/test_normal.py::test_slow PASSED
-  tests/test_normal.py::test_slower PASSED
-  tests/test_normal.py::test_xfast PASSED
-
-  ----------- benchmark: 4 tests, 5 to 5000 iterations, 0.5s max time ------------
-  Name (time in us)            Min        Max        Avg       Mean     StdDev  Iterations
-  ---------------------------------------------------------------------------------------
-  test_fast               3937.960   8955.956   7782.759   7782.759    697.300         66
-  test_slow               3809.929   7987.022   6177.931   6177.931   1976.568         82
-  test_slower            11896.133  18838.882  15613.752  15613.752   1277.672         34
-  test_xfast                 0.000     20.027      1.101      1.101      0.574       6001
-  ========================== 18 passed in 1.86 seconds ===========================
+  ============================= test session starts ==============================
+  platform .* (re)
+  plugins: .* (re)
+  collecting ... collected 5 items
+  \s* (re)
+  tests.py::test_xfast PASSED
+  \s* (re)
+  ----------- benchmark: 1 tests, 5 to 5000 iterations, 0.5s max time ------------
+  Name (time in us)           Min        Max       Avg      Mean    StdDev  Iterations
+  -----------------------------------------------------------------------------------
+  test_xfast             .* (re)
+  ==================== 4 tests deselected by "-m 'benchmark'" ====================
+  ==================* 1 passed, 4 deselected in .* seconds ==================* (re)
