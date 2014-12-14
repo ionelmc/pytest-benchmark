@@ -2,6 +2,7 @@ from __future__ import division
 
 import gc
 import sys
+import time
 import timeit
 
 import pytest
@@ -45,6 +46,11 @@ def pytest_addoption(parser):
         action="store_true", default=False,
         help="Disable GC during benchmarks."
     )
+    group.addoption(
+        '--benchmark-skip',
+        action="store_true", default=False,
+        help="Disable GC during benchmarks."
+    )
 
 
 class Benchmark(RunningStats):
@@ -62,11 +68,17 @@ class Benchmark(RunningStats):
         self._called = False
         self._start = None
         self._gcenabled = None
+        self._overall_start = None
         super(Benchmark, self).__init__()
 
     @property
     def done(self):
-        return not (self.runs < self._min_runs or self.total < self._max_time) or self.runs >= self._max_runs
+        if self._overall_start is None:
+            self._overall_start = time.time()
+        return not (
+            self.runs < self._min_runs or
+            (time.time() - self._overall_start) < self._max_time
+        ) or self.runs >= self._max_runs
 
     def __call__(self, function):
         # TODO: make decorator
@@ -95,16 +107,20 @@ class BenchmarkSession(object):
             timer=config.getoption('benchmark_timer'),
             disable_gc=config.getoption('benchmark_disable_gc'),
         )
+        self._skip = config.getoption('benchmark_skip')
         self._benchmarks = []
 
     @pytest.fixture(scope="function")
     def benchmark(self, request):
-        node = request.node
-        marker = node.get_marker('benchmark')
-        options = marker.kwargs if marker else {}
-        benchmark = Benchmark(node.name, **dict(self._options, **options))
-        self._benchmarks.append(benchmark)
-        return benchmark
+        if self._skip:
+            pytest.skip("Benchmarks are disabled.")
+        else:
+            node = request.node
+            marker = node.get_marker('benchmark')
+            options = marker.kwargs if marker else {}
+            benchmark = Benchmark(node.name, **dict(self._options, **options))
+            self._benchmarks.append(benchmark)
+            return benchmark
 
     def pytest_terminal_summary(self, terminalreporter):
         if not self._benchmarks:
