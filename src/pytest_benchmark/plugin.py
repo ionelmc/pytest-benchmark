@@ -231,7 +231,7 @@ def pytest_runtest_setup(item):
         if benchmark.args:
             raise ValueError("benchmark mark can't have positional arguments.")
         for name in benchmark.kwargs:
-            if name not in ('max_time', 'min_iterations', 'max_iterations', 'timer', 'group'):
+            if name not in ('max_time', 'min_iterations', 'max_iterations', 'timer', 'group', 'disable_gc'):
                 raise ValueError("benchmark mark can't have %r keyword argument." % name)
 
 
