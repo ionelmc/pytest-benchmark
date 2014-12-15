@@ -4,7 +4,15 @@ import argparse
 import gc
 import sys
 import time
-import timeit
+try:
+    from __pypy__.time import clock_gettime
+    try:
+        from __pypy__.time import CLOCK_MONOTONIC_RAW as CLOCK_MONOTONIC
+    except ImportError:
+        from __pypy__.time import CLOCK_MONOTONIC
+    default_timer = lambda: clock_gettime(CLOCK_MONOTONIC)
+except ImportError:
+    from timeit import default_timer
 from collections import defaultdict
 from decimal import Decimal
 
@@ -52,7 +60,7 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-timer",
-        action="store", type=loadtimer, default=timeit.default_timer,
+        action="store", type=loadtimer, default=default_timer,
         help="Timer to use when measuring time."
     )
     group.addoption(
