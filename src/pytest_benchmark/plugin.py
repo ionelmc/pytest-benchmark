@@ -92,7 +92,6 @@ class Benchmark(RunningStats):
     # def __call__(self, function):
     #     pass
 
-
     def __enter__(self):
         self._gcenabled = gc.isenabled()
         if self._disable_gc:
@@ -134,7 +133,6 @@ class BenchmarkSession(object):
             benchmark = Benchmark(node.name, **dict(self._options, **options))
             self._benchmarks.append(benchmark)
             return benchmark
-
 
     def pytest_runtest_call(self, item):
         benchmark = hasattr(item, 'funcargs') and item.funcargs.get('benchmark')
