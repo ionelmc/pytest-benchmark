@@ -57,12 +57,12 @@ Bogus args::
   item = <Function 'test_fast'>
   \s* (re)
       def pytest_runtest_setup(item):
-          benchmark = item.get_marker('benchmark')
+          benchmark = item.get_marker("benchmark")
           if benchmark:
               if benchmark.args:
                   raise ValueError("benchmark mark can't have positional arguments.")
               for name in benchmark.kwargs:
-                  if name not in ('max_time', 'min_iterations', 'max_iterations', 'timer', 'group', 'disable_gc'):
+                  if name not in ("max_time", "min_iterations", "max_iterations", "timer", "group", "disable_gc"):
   (>) *               raise ValueError\("benchmark mark can't have %r keyword argument." % name\) (re)
   E                   ValueError: benchmark mark can't have 'only' keyword argument.
   \s* (re)
