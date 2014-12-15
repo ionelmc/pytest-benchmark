@@ -1,13 +1,11 @@
 from __future__ import division
-from collections import defaultdict
-from decimal import Decimal
 
 import gc
-from itertools import groupby
-import operator
 import sys
 import time
 import timeit
+from collections import defaultdict
+from decimal import Decimal
 
 import pytest
 
