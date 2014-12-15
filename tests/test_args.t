@@ -107,5 +107,37 @@ With ``--benchmark-timer=time.time``::
   \s* (re)
   =====================* 3 passed in .* seconds ===================* (re)
 
+With ``--benchmark-timer=bogus``::
 
+  $ py.test -vv --doctest-modules --benchmark-timer=bogus tests.py
+  usage: py.test [options] [file_or_dir] [file_or_dir] [...]
+  py.test: error: argument --benchmark-timer: Value for --benchmark-timer must be in dotted form. Eg: 'module.attr'.
+  [2]
 
+With ``--benchmark-scale=avg``::
+
+  $ py.test -vv --doctest-modules --benchmark-scale=avg tests.py
+  =====================* test session starts ======================* (re)
+  platform .* (re)
+  plugins: .* (re)
+  collecting ... collected 3 items
+  \s* (re)
+  tests.py::[doctest] tests PASSED
+  tests.py::test_fast PASSED
+  tests.py::test_slow PASSED
+  \s* (re)
+  ---* benchmark: 2 tests, 5 to 5000 iterations, 0.5s max time ----* (re)
+  Name \(time in .s\) * Min * Max * Avg * Mean * StdDev * Iterations (re)
+  -----------------------------------------------------------------* (re)
+  test_fast              .* (re)
+  test_slow              .* (re)
+  -----------------------------------------------------------------* (re)
+  \s* (re)
+  =====================* 3 passed in .* seconds ===================* (re)
+
+With ``--benchmark-scale=bogus``::
+
+  $ py.test -vv --doctest-modules --benchmark-scale=bogus tests.py
+  usage: py.test [options] [file_or_dir] [file_or_dir] [...]
+  py.test: error: argument --benchmark-scale: Value for --benchmark-scale must be one of: 'min', 'max', 'avg', 'mean' or 'stddev'.
+  [2]

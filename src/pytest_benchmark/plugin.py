@@ -1,5 +1,6 @@
 from __future__ import division
 
+import argparse
 import gc
 import sys
 import time
@@ -14,11 +15,17 @@ from .stats import RunningStats
 
 def loadtimer(string):
     if '.' not in string:
-        raise ValueError("Value for benchmark-timer must be in dotted form. Eg: 'module.attr'.")
+        raise argparse.ArgumentTypeError("Value for --benchmark-timer must be in dotted form. Eg: 'module.attr'.")
     mod, attr = string.rsplit('.', 1)
     __import__(mod)
     mod = sys.modules[mod]
     return getattr(mod, attr)
+
+
+def loadscale(string):
+    if string not in ('min', 'max', 'avg', 'mean', 'stddev'):
+        raise argparse.ArgumentTypeError("Value for --benchmark-scale must be one of: 'min', 'max', 'avg', 'mean' or 'stddev'.")
+    return string
 
 
 def pytest_addoption(parser):
@@ -36,6 +43,11 @@ def pytest_addoption(parser):
     group.addoption(
         '--benchmark-min-iterations',
         action="store", type=int, default=5,
+        help="Minium iterations, even if total time would exceed `max-time`."
+    )
+    group.addoption(
+        '--benchmark-scale',
+        action="store", type=loadscale, default="min",
         help="Minium iterations, even if total time would exceed `max-time`."
     )
     group.addoption(
@@ -118,6 +130,7 @@ class BenchmarkSession(object):
         self._options['min_iterations'] = min(self._options['min_iterations'], self._options['max_iterations'])
         self._skip = config.getoption('benchmark_skip')
         self._only = config.getoption('benchmark_only')
+        self._scale = config.getoption('benchmark_scale')
         if self._skip and self._only:
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
         self._benchmarks = []
@@ -176,7 +189,7 @@ class BenchmarkSession(object):
                 'runs': len(str(worst['runs'])),
             }
 
-            overall_min = max(best.values())
+            overall_min = best[self._scale]
             if overall_min < 0.000001:
                 unit, adjustment = 'n', 1000000000
             if overall_min < 0.001:
