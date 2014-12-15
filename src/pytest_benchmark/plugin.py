@@ -23,8 +23,8 @@ def loadtimer(string):
 
 
 def loadscale(string):
-    if string not in ('min', 'max', 'avg', 'mean', 'stddev'):
-        raise argparse.ArgumentTypeError("Value for --benchmark-scale must be one of: 'min', 'max', 'avg', 'mean' or 'stddev'.")
+    if string not in ('min', 'max', 'mean', 'stddev'):
+        raise argparse.ArgumentTypeError("Value for --benchmark-scale must be one of: 'min', 'max', 'mean' or 'stddev'.")
     return string
 
 
@@ -95,14 +95,9 @@ class Benchmark(RunningStats):
     def done(self):
         if self._overall_start is None:
             self._overall_start = time.time()
-        print(
-            self.runs < self._min_runs,
-            time.time() - self._overall_start, self._max_time,
-            self.runs >= self._max_runs - 1
-        )
-        if self.runs < self._min_runs:
+        if self.runs < self._min_runs - 1:
             return False
-        return time.time() - self._overall_start > self._max_time or self.runs >= self._max_runs - 1
+        return time.time() - self._overall_start >= self._max_time or self.runs >= self._max_runs - 1
 
     # TODO: implement benchmark function wrapper (that adds the timers), as alternative to context manager
     # def __call__(self, function):
@@ -184,9 +179,9 @@ class BenchmarkSession(object):
             )
             worst = {}
             best = {}
-            for prop in ('min', 'max', 'avg', 'mean', 'stddev', 'runs'):
+            for prop in ('min', 'max', 'mean', 'stddev', 'runs'):
                 worst[prop] = max(getattr(benchmark, prop) for benchmark in benchmarks)
-            for prop in ('min', 'max', 'avg', 'mean', 'stddev'):
+            for prop in ('min', 'max', 'mean', 'stddev'):
                 best[prop] = min(getattr(benchmark, prop) for benchmark in benchmarks)
             widths = {
                 'name': max(20, max(len(benchmark.name) for benchmark in benchmarks)),
@@ -203,16 +198,15 @@ class BenchmarkSession(object):
             else:
                 unit, adjustment = '', 1
 
-            for prop in ('min', 'max', 'avg', 'mean', 'stddev'):
+            for prop in ('min', 'max', 'mean', 'stddev'):
                 widths[prop] = min(6, max(
                     len("{0:.3f}".format(getattr(benchmark, prop) * adjustment))
                     for benchmark in benchmarks
                 ))
-            tr.write_line("{0:<{1}}   {2:>{3}}  {4:>{5}}  {6:>{7}}  {8:>{9}}  {10:>{11}}  {12:>{13}}".format(
+            tr.write_line("{0:<{1}}   {2:>{3}}  {4:>{5}}  {6:>{7}}  {8:>{9}}  {10:>{11}}".format(
                 "Name (time in %ss)" % unit, widths['name'],
                 'Min', widths['min'] + 3,
                 'Max', widths['max'] + 3,
-                'Avg', widths['avg'] + 3,
                 'Mean', widths['mean'] + 3,
                 'StdDev', widths['stddev'] + 3,
                 'Iterations', widths['runs'] + 3,
@@ -221,7 +215,7 @@ class BenchmarkSession(object):
 
             for benchmark in benchmarks:
                 tr.write("{0:<{1}} ".format(benchmark.name, widths['name']))
-                for prop in ('min', 'max', 'avg', 'mean', 'stddev'):
+                for prop in ('min', 'max', 'mean', 'stddev'):
                     value = getattr(benchmark, prop)
                     tr.write(
                         "  {0:>{1}.3f}".format(value * adjustment, widths[prop] + 3),

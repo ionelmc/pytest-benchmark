@@ -28,10 +28,6 @@ class RunningStats(object):
             self.__old_exp = self.__new_exp
 
     @property
-    def avg(self):
-        return self.total / self.runs if self.runs else 0.0
-
-    @property
     def mean(self):
         return self.__new_mean if self.runs else 0.0
 

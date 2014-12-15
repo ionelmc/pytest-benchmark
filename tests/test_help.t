@@ -9,6 +9,9 @@
     --benchmark-min-iterations=BENCHMARK_MIN_ITERATIONS
                           Minium iterations, even if total time would exceed
                           `max-time`.
+    --benchmark-scale=BENCHMARK_SCALE
+                          Minium iterations, even if total time would exceed
+                          `max-time`.
     --benchmark-timer=BENCHMARK_TIMER
                           Timer to use when measuring time.
     --benchmark-disable-gc

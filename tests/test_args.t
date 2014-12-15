@@ -36,7 +36,7 @@ With ``--benchmark-max-iterations``:
   tests.py::test_slow PASSED
   \s* (re)
   ------* benchmark: 2 tests, 1 to 1 iterations, 0.5s max time ----* (re)
-  Name \(time in .s\) * Min * Max * Avg * Mean * StdDev * Iterations (re)
+  Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast              .* 1 (re)
   test_slow              .* 1 (re)
@@ -57,7 +57,7 @@ With ``--benchmark-max-time``::
   tests.py::test_slow PASSED
   \s* (re)
   -* benchmark: 2 tests, 5 to 5000 iterations, 0.000001s max time -* (re)
-  Name \(time in .s\) * Min * Max * Avg * Mean * StdDev * Iterations (re)
+  Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast              .* 5 (re)
   test_slow              .* 5 (re)
@@ -78,7 +78,7 @@ With ``--benchmark-disable-gc``::
   tests.py::test_slow PASSED
   \s* (re)
   ---* benchmark: 2 tests, 5 to 5000 iterations, 0.5s max time ----* (re)
-  Name \(time in .s\) * Min * Max * Avg * Mean * StdDev * Iterations (re)
+  Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast              .* (re)
   test_slow              .* (re)
@@ -99,7 +99,7 @@ With ``--benchmark-timer=time.time``::
   tests.py::test_slow PASSED
   \s* (re)
   ---* benchmark: 2 tests, 5 to 5000 iterations, 0.5s max time ----* (re)
-  Name \(time in .s\) * Min * Max * Avg * Mean * StdDev * Iterations (re)
+  Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast              .* (re)
   test_slow              .* (re)
@@ -114,9 +114,9 @@ With ``--benchmark-timer=bogus``::
   py.test: error: argument --benchmark-timer: Value for --benchmark-timer must be in dotted form. Eg: 'module.attr'.
   [2]
 
-With ``--benchmark-scale=avg``::
+With ``--benchmark-scale=mean``::
 
-  $ py.test -vv --doctest-modules --benchmark-scale=avg tests.py
+  $ py.test -vv --doctest-modules --benchmark-scale=mean tests.py
   =====================* test session starts ======================* (re)
   platform .* (re)
   plugins: .* (re)
@@ -127,7 +127,7 @@ With ``--benchmark-scale=avg``::
   tests.py::test_slow PASSED
   \s* (re)
   ---* benchmark: 2 tests, 5 to 5000 iterations, 0.5s max time ----* (re)
-  Name \(time in .s\) * Min * Max * Avg * Mean * StdDev * Iterations (re)
+  Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast              .* (re)
   test_slow              .* (re)
@@ -139,5 +139,5 @@ With ``--benchmark-scale=bogus``::
 
   $ py.test -vv --doctest-modules --benchmark-scale=bogus tests.py
   usage: py.test [options] [file_or_dir] [file_or_dir] [...]
-  py.test: error: argument --benchmark-scale: Value for --benchmark-scale must be one of: 'min', 'max', 'avg', 'mean' or 'stddev'.
+  py.test: error: argument --benchmark-scale: Value for --benchmark-scale must be one of: 'min', 'max', 'mean' or 'stddev'.
   [2]
