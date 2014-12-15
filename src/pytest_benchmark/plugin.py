@@ -186,13 +186,13 @@ class BenchmarkSession(object):
 
             overall_min = best[self._scale]
             if overall_min < 0.000001:
-                unit, adjustment = "n", 1000000000
-            if overall_min < 0.001:
-                unit, adjustment = "u", 1000000
+                unit, adjustment = "n", 1e9
+            elif overall_min < 0.001:
+                unit, adjustment = "u", 1e6
             elif overall_min < 1:
-                unit, adjustment = "m", 1000
+                unit, adjustment = "m", 1e3
             else:
-                unit, adjustment = "", 1
+                unit, adjustment = "", 1.
             labels = {
                 "name": "Name (time in %ss)" % unit,
                 "min": "Min",
