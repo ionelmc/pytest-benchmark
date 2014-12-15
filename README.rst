@@ -63,7 +63,7 @@ Installation
 Usage
 =====
 
-::
+.. code-block:: python
 
     def test_my_stuff(benchmark):
         with benchmark:
@@ -94,7 +94,9 @@ Usage
     --benchmark-skip      Skip running any benchmarks.
     --benchmark-only      Only run benchmarks.
 
-Setting per-test options::
+Setting per-test options:
+
+.. code-block:: python
 
     @pytest.mark.benchmark(
         group="group-name", max_time=0.5,
