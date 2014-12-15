@@ -95,13 +95,17 @@ Setting per-test options:
 
 .. code-block:: python
 
-    @pytest.mark.benchmark(group="group-name", max_time=0.5, max_iterations=5000, min_iterations=5, timer=time.time, disable_gc=True)
+    @pytest.mark.benchmark(
+        group="group-name", max_time=0.5,
+        max_iterations=5000, min_iterations=5,
+        timer=time.time, disable_gc=True)
     def test_my_stuff(benchmark):
         with benchmark:
             # Code to be measured
             result = time.sleep(0.000001)
 
-        # Extra code, to verify that the run completed correctly.
+        # Extra code, to verify that the run
+        # completed correctly.
         # Note: this code is not measured.
         assert result is None
 
