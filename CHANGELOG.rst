@@ -2,7 +2,14 @@
 Changelog
 =========
 
-0.1.0 (2014-10-10)
------------------------------------------
+1.0.0 (2014-12-15)
+------------------
 
-* First release on PyPI.
+* Use a precise default timer for PyPy.
+
+? (?)
+-----
+
+* Readme and styling fixes (contributed by Marc Abramowitz)
+* Lots of wild changes.
+
