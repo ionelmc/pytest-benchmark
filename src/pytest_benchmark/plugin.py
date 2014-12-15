@@ -14,16 +14,16 @@ from .stats import RunningStats
 
 
 def loadtimer(string):
-    if '.' not in string:
+    if "." not in string:
         raise argparse.ArgumentTypeError("Value for --benchmark-timer must be in dotted form. Eg: 'module.attr'.")
-    mod, attr = string.rsplit('.', 1)
+    mod, attr = string.rsplit(".", 1)
     __import__(mod)
     mod = sys.modules[mod]
     return getattr(mod, attr)
 
 
 def loadscale(string):
-    if string not in ('min', 'max', 'mean', 'stddev'):
+    if string not in ("min", "max", "mean", "stddev"):
         raise argparse.ArgumentTypeError("Value for --benchmark-scale must be one of: 'min', 'max', 'mean' or 'stddev'.")
     return string
 
@@ -31,42 +31,42 @@ def loadscale(string):
 def pytest_addoption(parser):
     group = parser.getgroup("benchmark")
     group.addoption(
-        '--benchmark-max-time',
+        "--benchmark-max-time",
         action="store", type=Decimal, default=Decimal("0.5"),
         help="Maximum time to spend in a benchmark (including overhead)."
     )
     group.addoption(
-        '--benchmark-max-iterations',
+        "--benchmark-max-iterations",
         action="store", type=int, default=5000,
         help="Maximum iterations to do."
     )
     group.addoption(
-        '--benchmark-min-iterations',
+        "--benchmark-min-iterations",
         action="store", type=int, default=5,
         help="Minium iterations, even if total time would exceed `max-time`."
     )
     group.addoption(
-        '--benchmark-scale',
+        "--benchmark-scale",
         action="store", type=loadscale, default="min",
         help="Minium iterations, even if total time would exceed `max-time`."
     )
     group.addoption(
-        '--benchmark-timer',
+        "--benchmark-timer",
         action="store", type=loadtimer, default=timeit.default_timer,
         help="Timer to use when measuring time."
     )
     group.addoption(
-        '--benchmark-disable-gc',
+        "--benchmark-disable-gc",
         action="store_true", default=False,
         help="Disable GC during benchmarks."
     )
     group.addoption(
-        '--benchmark-skip',
+        "--benchmark-skip",
         action="store_true", default=False,
         help="Skip running any benchmarks."
     )
     group.addoption(
-        '--benchmark-only',
+        "--benchmark-only",
         action="store_true", default=False,
         help="Only run benchmarks."
     )
@@ -120,16 +120,16 @@ class Benchmark(RunningStats):
 class BenchmarkSession(object):
     def __init__(self, config):
         self._options = dict(
-            max_time=config.getoption('benchmark_max_time'),
-            max_iterations=config.getoption('benchmark_max_iterations'),
-            min_iterations=config.getoption('benchmark_min_iterations'),
-            timer=config.getoption('benchmark_timer'),
-            disable_gc=config.getoption('benchmark_disable_gc'),
+            max_time=config.getoption("benchmark_max_time"),
+            max_iterations=config.getoption("benchmark_max_iterations"),
+            min_iterations=config.getoption("benchmark_min_iterations"),
+            timer=config.getoption("benchmark_timer"),
+            disable_gc=config.getoption("benchmark_disable_gc"),
         )
-        self._options['min_iterations'] = min(self._options['min_iterations'], self._options['max_iterations'])
-        self._skip = config.getoption('benchmark_skip')
-        self._only = config.getoption('benchmark_only')
-        self._scale = config.getoption('benchmark_scale')
+        self._options["min_iterations"] = min(self._options["min_iterations"], self._options["max_iterations"])
+        self._skip = config.getoption("benchmark_skip")
+        self._only = config.getoption("benchmark_only")
+        self._scale = config.getoption("benchmark_scale")
         if self._skip and self._only:
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
         self._benchmarks = []
@@ -140,14 +140,14 @@ class BenchmarkSession(object):
             pytest.skip("Benchmarks are disabled.")
         else:
             node = request.node
-            marker = node.get_marker('benchmark')
+            marker = node.get_marker("benchmark")
             options = marker.kwargs if marker else {}
             benchmark = Benchmark(node.name, **dict(self._options, **options))
             self._benchmarks.append(benchmark)
             return benchmark
 
     def pytest_runtest_call(self, item):
-        benchmark = hasattr(item, 'funcargs') and item.funcargs.get('benchmark')
+        benchmark = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
         if isinstance(benchmark, Benchmark):
             while not benchmark.done:
                 item.runtest()
@@ -233,15 +233,15 @@ class BenchmarkSession(object):
 
 
 def pytest_runtest_setup(item):
-    benchmark = item.get_marker('benchmark')
+    benchmark = item.get_marker("benchmark")
     if benchmark:
         if benchmark.args:
             raise ValueError("benchmark mark can't have positional arguments.")
         for name in benchmark.kwargs:
-            if name not in ('max_time', 'min_iterations', 'max_iterations', 'timer', 'group', 'disable_gc'):
+            if name not in ("max_time", "min_iterations", "max_iterations", "timer", "group", "disable_gc"):
                 raise ValueError("benchmark mark can't have %r keyword argument." % name)
 
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "benchmark: mark a test with custom benchmark settings.")
-    config.pluginmanager.register(BenchmarkSession(config), 'pytest-benchmark')
+    config.pluginmanager.register(BenchmarkSession(config), "pytest-benchmark")
