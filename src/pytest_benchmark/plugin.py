@@ -166,69 +166,70 @@ class BenchmarkSession(object):
         groups = defaultdict(list)
         for bench in self._benchmarks:
             groups[bench.group].append(bench)
-        for group, benchmarks in sorted(groups.items(), key=lambda pair: pair[0] or ''):
+        for group, benchmarks in sorted(groups.items(), key=lambda pair: pair[0] or ""):
             tr.write_sep(
-                '-',
-                'benchmark{2}: {0} tests, {1.min_iterations} to {1.max_iterations} iterations,'
-                ' {1.max_time:f}s max time'.format(
+                "-",
+                "benchmark{2}: {0} tests, {1.min_iterations} to {1.max_iterations} iterations,"
+                " {1.max_time:f}s max time".format(
                     len(benchmarks),
-                    type('', (), self._options),
+                    type("", (), self._options),
                     "" if group is None else " %r" % group
                 ),
                 yellow=True
             )
             worst = {}
             best = {}
-            for prop in ('min', 'max', 'mean', 'stddev', 'runs'):
+            for prop in ("min", "max", "mean", "stddev", "runs"):
                 worst[prop] = max(getattr(benchmark, prop) for benchmark in benchmarks)
-            for prop in ('min', 'max', 'mean', 'stddev'):
+            for prop in ("min", "max", "mean", "stddev"):
                 best[prop] = min(getattr(benchmark, prop) for benchmark in benchmarks)
-            widths = {
-                'name': max(20, max(len(benchmark.name) for benchmark in benchmarks)),
-                'runs': len(str(worst['runs'])),
-            }
 
             overall_min = best[self._scale]
             if overall_min < 0.000001:
-                unit, adjustment = 'n', 1000000000
+                unit, adjustment = "n", 1000000000
             if overall_min < 0.001:
-                unit, adjustment = 'u', 1000000
+                unit, adjustment = "u", 1000000
             elif overall_min < 1:
-                unit, adjustment = 'm', 1000
+                unit, adjustment = "m", 1000
             else:
-                unit, adjustment = '', 1
-
-            for prop in ('min', 'max', 'mean', 'stddev'):
-                widths[prop] = min(6, max(
-                    len("{0:.3f}".format(getattr(benchmark, prop) * adjustment))
+                unit, adjustment = "", 1
+            labels = {
+                "name": "Name (time in %ss)" % unit,
+                "min": "Min",
+                "max": "Max",
+                "mean": "Mean",
+                "stddev": "StdDev",
+                "runs": "Iterations",
+            }
+            widths = {
+                "name": 3 + max(len(labels["name"]), max(len(benchmark.name) for benchmark in benchmarks)),
+                "runs": 2 + max(len(labels["runs"]), len(str(worst["runs"]))),
+            }
+            for prop in ("min", "max", "mean", "stddev"):
+                widths[prop] = 2 + max(len(labels[prop]), max(
+                    len("{0:.4f}".format(getattr(benchmark, prop) * adjustment))
                     for benchmark in benchmarks
                 ))
-            tr.write_line("{0:<{1}}   {2:>{3}}  {4:>{5}}  {6:>{7}}  {8:>{9}}  {10:>{11}}".format(
-                "Name (time in %ss)" % unit, widths['name'],
-                'Min', widths['min'] + 3,
-                'Max', widths['max'] + 3,
-                'Mean', widths['mean'] + 3,
-                'StdDev', widths['stddev'] + 3,
-                'Iterations', widths['runs'] + 3,
+            tr.write_line(labels["name"].ljust(widths["name"]) + "".join(
+                labels[prop].rjust(widths[prop])
+                for prop in ("min", "max", "mean", "stddev", "runs")
             ))
-            tr.write_line("-" * sum(widths.values(), 5 + len(widths) * 4))
+            tr.write_line("-" * sum(widths.values()))
 
             for benchmark in benchmarks:
-                tr.write("{0:<{1}} ".format(benchmark.name, widths['name']))
-                for prop in ('min', 'max', 'mean', 'stddev'):
+                tr.write(benchmark.name.ljust(widths["name"]))
+                for prop in ("min", "max", "mean", "stddev"):
                     value = getattr(benchmark, prop)
                     tr.write(
-                        "  {0:>{1}.3f}".format(value * adjustment, widths[prop] + 3),
+                        "{0:>{1}.4f}".format(value * adjustment, widths[prop]),
                         green=value == best[prop],
                         red=value == worst[prop],
                         bold=True,
                     )
-                tr.write(
-                    "  {0:>{1}}".format(benchmark.runs, widths['runs'] + 5),
-                )
-                tr.write('\n')
+                tr.write("{0:>{1}}".format(benchmark.runs, widths["runs"]))
+                tr.write("\n")
 
-            tr.write_line("-" * sum(widths.values(), 5 + len(widths) * 4))
+            tr.write_line("-" * sum(widths.values()))
             tr.write_line("")
 
 
