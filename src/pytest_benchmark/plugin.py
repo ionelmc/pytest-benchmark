@@ -83,7 +83,7 @@ class Benchmark(RunningStats):
         # assert min_iterations <= max_iterations, (
         #    "Invalid configuration, min iterations need to be less than max "
         #    "iterations. You have %s min, %s max" % (min_iterations, max_iterations))
-        self._max_time = max_time
+        self._max_time = float(max_time)
         self._stats = RunningStats()
         self._called = False
         self._start = None
@@ -95,10 +95,14 @@ class Benchmark(RunningStats):
     def done(self):
         if self._overall_start is None:
             self._overall_start = time.time()
-        return not (
-            self.runs < self._min_runs - 1 or
-            (time.time() - self._overall_start) < self._max_time
-        ) or self.runs >= self._max_runs - 1
+        print(
+            self.runs < self._min_runs,
+            time.time() - self._overall_start, self._max_time,
+            self.runs >= self._max_runs - 1
+        )
+        if self.runs < self._min_runs:
+            return False
+        return time.time() - self._overall_start > self._max_time or self.runs >= self._max_runs - 1
 
     # TODO: implement benchmark function wrapper (that adds the timers), as alternative to context manager
     # def __call__(self, function):
