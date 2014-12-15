@@ -29,6 +29,9 @@ class RunningStats(object):
 
     @property
     def mean(self):
+        # see:
+        #  http://stackoverflow.com/questions/1174984/how-to-efficiently-calculate-a-running-standard-deviation
+        #  http://www.johndcook.com/blog/standard_deviation/
         return self.__new_mean if self.runs else 0.0
 
     @property
