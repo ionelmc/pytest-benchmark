@@ -38,7 +38,7 @@ Simple::
   tests.py::test_slower PASSED
   tests.py::test_xfast PASSED
   \s* (re)
-  ---* benchmark: 4 tests, 5 to 5000 iterations, 0.5s max time ----* (re)
+  -* benchmark: 4 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast            .* (re)
@@ -75,7 +75,7 @@ Mark selection::
   \s* (re)
   tests.py::test_xfast PASSED
   \s* (re)
-  ---* benchmark: 1 tests, 5 to 5000 iterations, 0.5s max time ----* (re)
+  -* benchmark: 1 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_xfast        .* (re)
@@ -98,7 +98,7 @@ Only run benchmarks::
   tests.py::test_slower PASSED
   tests.py::test_xfast PASSED
   \s* (re)
-  ---* benchmark: 4 tests, 5 to 5000 iterations, 0.5s max time ----* (re)
+  -* benchmark: 4 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast         .* (re)

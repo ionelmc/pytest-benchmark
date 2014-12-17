@@ -35,7 +35,7 @@ With ``--benchmark-max-iterations``:
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   \s* (re)
-  ------* benchmark: 2 tests, 1 to 1 iterations, 0.5s max time ----* (re)
+  -* benchmark: 2 tests, 1 to 1 iterations, 0.5s max time, timer: .*-* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast          .* 1 (re)
@@ -56,7 +56,7 @@ With ``--benchmark-max-time``::
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   \s* (re)
-  -* benchmark: 2 tests, 5 to 5000 iterations, 0.000001s max time -* (re)
+  -* benchmark: 2 tests, 5 to 5000 iterations, 0.000001s max time, timer: .*-* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast          .* 5 (re)
@@ -77,7 +77,7 @@ With ``--benchmark-disable-gc``::
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   \s* (re)
-  ---* benchmark: 2 tests, 5 to 5000 iterations, 0.5s max time ----* (re)
+  -* benchmark: 2 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast          .* (re)
@@ -98,7 +98,7 @@ With ``--benchmark-timer=time.time``::
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   \s* (re)
-  ---* benchmark: 2 tests, 5 to 5000 iterations, 0.5s max time ----* (re)
+  -* benchmark: 2 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast          .* (re)
@@ -126,7 +126,7 @@ With ``--benchmark-scale=mean``::
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   \s* (re)
-  ---* benchmark: 2 tests, 5 to 5000 iterations, 0.5s max time ----* (re)
+  -* benchmark: 2 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast          .* (re)

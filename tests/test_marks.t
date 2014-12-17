@@ -18,7 +18,7 @@ Ok::
   \s* (re)
   tests.py::test_fast PASSED
   \s* (re)
-  -* benchmark 'group-name': 1 tests, 5 to 5000 iterations, 0.5s max time -* (re)
+  -* benchmark 'group-name': 1 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast             .* (re)
