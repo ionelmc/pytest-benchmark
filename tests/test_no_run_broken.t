@@ -89,7 +89,7 @@ Test that we don't benchmark code that raises exceptions:
   E       assert 1 == 0
   \s* (re)
   tests.py:14: AssertionError
-  - benchmark: 5 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
+  -* benchmark: 5 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
   Name \(time in us\) * Min * Max * Mean * StdDev * Iterations (re)
   -------------------------------------------------------------------------------
   test_bad            .* (re)
