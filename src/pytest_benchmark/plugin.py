@@ -6,10 +6,7 @@ import sys
 import time
 try:
     from __pypy__.time import clock_gettime
-    try:
-        from __pypy__.time import CLOCK_MONOTONIC_RAW as CLOCK_MONOTONIC
-    except ImportError:
-        from __pypy__.time import CLOCK_MONOTONIC
+    from __pypy__.time import CLOCK_MONOTONIC
     default_timer = lambda: clock_gettime(CLOCK_MONOTONIC)
 except ImportError:
     from timeit import default_timer
@@ -171,6 +168,9 @@ class BenchmarkSession(object):
         if not self._benchmarks:
             return
 
+        timer = self._options.get('timer') or 'default'
+        timer = timer.__name__ if hasattr(timer, '__name__') else repr(timer)
+
         groups = defaultdict(list)
         for bench in self._benchmarks:
             groups[bench.group].append(bench)
@@ -178,10 +178,11 @@ class BenchmarkSession(object):
             tr.write_sep(
                 "-",
                 "benchmark{2}: {0} tests, {1.min_iterations} to {1.max_iterations} iterations,"
-                " {1.max_time:f}s max time".format(
+                " {1.max_time:f}s max time, timer: {3}".format(
                     len(benchmarks),
                     type("", (), self._options),
-                    "" if group is None else " %r" % group
+                    "" if group is None else " %r" % group,
+                    timer,
                 ),
                 yellow=True
             )

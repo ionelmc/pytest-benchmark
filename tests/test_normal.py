@@ -30,3 +30,8 @@ def test_xfast(benchmark):
     with benchmark:
         pass
     assert 1 == 1
+
+
+def test_fast(benchmark):
+    with benchmark:
+        pass
