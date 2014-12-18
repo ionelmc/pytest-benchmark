@@ -10,7 +10,7 @@ try:
     default_timer = lambda: clock_gettime(CLOCK_MONOTONIC)
 except ImportError:
     from timeit import default_timer
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from decimal import Decimal
 
 import pytest
@@ -42,12 +42,12 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-max-iterations",
-        action="store", type=int, default=5000,
+        action="store", type=int, default=Default(5000),
         help="Maximum iterations to do."
     )
     group.addoption(
         "--benchmark-min-iterations",
-        action="store", type=int, default=5,
+        action="store", type=int, default=Default(5),
         help="Minium iterations, even if total time would exceed `max-time`."
     )
     group.addoption(
@@ -77,6 +77,17 @@ def pytest_addoption(parser):
     )
 
 
+class Default(namedtuple("Default", ["value"])):
+    def __str__(self):
+        return str(self.value)
+
+    def __repr__(self):
+        return repr(self.value)
+
+    def __int__(self):
+        return self.value
+
+
 class Benchmark(RunningStats):
     def __init__(self, name, disable_gc, timer, min_iterations, max_iterations, max_time, group=None):
         self._disable_gc = disable_gc
@@ -84,10 +95,10 @@ class Benchmark(RunningStats):
         self.group = group
         self._timer = timer
         self._min_runs = min_iterations
-        self._max_runs = max(max_iterations, max_iterations)
-        # assert min_iterations <= max_iterations, (
-        #    "Invalid configuration, min iterations need to be less than max "
-        #    "iterations. You have %s min, %s max" % (min_iterations, max_iterations))
+        self._max_runs = max_iterations
+        assert min_iterations <= max_iterations, (
+           "Invalid configuration, min iterations need to be less than max "
+           "iterations. You have %s min, %s max" % (min_iterations, max_iterations))
         self._max_time = float(max_time)
         self._stats = RunningStats()
         self._called = False
@@ -124,14 +135,21 @@ class Benchmark(RunningStats):
 
 class BenchmarkSession(object):
     def __init__(self, config):
+        max_iterations = config.getoption("benchmark_max_iterations")
+        min_iterations = config.getoption("benchmark_min_iterations")
+        if isinstance(max_iterations, Default):
+            max_iterations = max(max_iterations.value, int(min_iterations))
+        if isinstance(min_iterations, Default):
+            min_iterations = min(min_iterations.value, int(max_iterations))
+        if min_iterations > max_iterations:
+            raise pytest.UsageError("Invalid arguments: --benchmark-min-iterations=%s cannot be greater than --benchmark-max-iterations=%s" % (min_iterations, max_iterations))
         self._options = dict(
             max_time=config.getoption("benchmark_max_time"),
-            max_iterations=config.getoption("benchmark_max_iterations"),
-            min_iterations=config.getoption("benchmark_min_iterations"),
             timer=config.getoption("benchmark_timer"),
             disable_gc=config.getoption("benchmark_disable_gc"),
+            max_iterations=max_iterations,
+            min_iterations=min_iterations,
         )
-        self._options["min_iterations"] = min(self._options["min_iterations"], self._options["max_iterations"])
         self._skip = config.getoption("benchmark_skip")
         self._only = config.getoption("benchmark_only")
         self._scale = config.getoption("benchmark_scale")
