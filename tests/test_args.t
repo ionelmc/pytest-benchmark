@@ -23,6 +23,12 @@ Conflict between ``--benchmark-only`` and ``--benchmark-skip``::
   ERROR: Can't have both --benchmark-only and --benchmark-skip options.
   [4]
 
+Conflict between ``--benchmark-min-iterations`` and ``--benchmark-max-iterations``::
+
+  $ py.test --benchmark-min-iterations=100 --benchmark-max-iterations=99
+  ERROR: Invalid arguments: --benchmark-min-iterations=100 cannot be greater than --benchmark-max-iterations=99
+  [4]
+
 With ``--benchmark-max-iterations``:
 
   $ py.test -vv --doctest-modules --benchmark-max-iterations=1 tests.py
