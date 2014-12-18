@@ -15,15 +15,18 @@ def test_fast(benchmark):
         time.sleep(0.000001)
     assert 1 == 1
 
+
 def test_slow(benchmark):
     with benchmark:
         time.sleep(0.001)
     assert 1 == 1
 
+
 def test_slower(benchmark):
     with benchmark:
         time.sleep(0.01)
     assert 1 == 1
+
 
 @pytest.mark.benchmark(max_iterations=6000)
 def test_xfast(benchmark):
