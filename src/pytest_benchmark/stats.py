@@ -5,6 +5,9 @@ class RunningStats(object):
     # implementation of http://www.johndcook.com/standard_deviation.html
 
     def __init__(self):
+        self.reset()
+
+    def reset(self):
         self.runs = 0
         self.total = 0
         self.min = float('inf')

@@ -71,6 +71,11 @@ def pytest_addoption(parser):
         help="Timer to use when measuring time."
     )
     group.addoption(
+        "--benchmark-warmup",
+        action="store_true", default=False,
+        help="Runs the benchmarks two times. Discards data from the first run."
+    )
+    group.addoption(
         "--benchmark-disable-gc",
         action="store_true", default=False,
         help="Disable GC during benchmarks."
@@ -117,6 +122,12 @@ class Benchmark(RunningStats):
         self._overall_start = None
         super(Benchmark, self).__init__()
 
+    def reset(self):
+        super(Benchmark, self).reset()
+        self._start = None
+        self._gcenabled = None
+        self._overall_start = None
+
     @property
     def done(self):
         if self._overall_start is None:
@@ -160,6 +171,7 @@ class BenchmarkSession(object):
             max_iterations=max_iterations,
             min_iterations=min_iterations,
         )
+        self._warmup = config.getoption("benchmark_warmup")
         self._skip = config.getoption("benchmark_skip")
         self._only = config.getoption("benchmark_only")
         self._scale = config.getoption("benchmark_scale")
@@ -182,6 +194,10 @@ class BenchmarkSession(object):
     def pytest_runtest_call(self, item):
         benchmark = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
         if isinstance(benchmark, Benchmark):
+            if self._warmup:
+                while not benchmark.done:
+                    item.runtest()
+                benchmark.reset()
             while not benchmark.done:
                 item.runtest()
         else:
