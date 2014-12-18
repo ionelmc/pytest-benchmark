@@ -17,14 +17,24 @@ import pytest
 
 from .stats import RunningStats
 
+PY3 = sys.version_info[0] == 3
+
 
 def loadtimer(string):
     if "." not in string:
         raise argparse.ArgumentTypeError("Value for --benchmark-timer must be in dotted form. Eg: 'module.attr'.")
     mod, attr = string.rsplit(".", 1)
-    __import__(mod)
-    mod = sys.modules[mod]
-    return getattr(mod, attr)
+    if mod == 'pep418':
+        if PY3:
+            import time
+            return getattr(time, attr)
+        else:
+            from . import pep418
+            return getattr(pep418, attr)
+    else:
+        __import__(mod)
+        mod = sys.modules[mod]
+        return getattr(mod, attr)
 
 
 def loadscale(string):
