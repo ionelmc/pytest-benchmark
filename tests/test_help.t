@@ -14,6 +14,8 @@
                           `max-time`.
     --benchmark-timer=BENCHMARK_TIMER
                           Timer to use when measuring time.
+    --benchmark-warmup    Runs the benchmarks two times. Discards data from the
+                          first run.
     --benchmark-disable-gc
                           Disable GC during benchmarks.
     --benchmark-skip      Skip running any benchmarks.
