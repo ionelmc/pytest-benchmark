@@ -148,7 +148,10 @@ class Benchmark(RunningStats):
         return self
 
     def __exit__(self, *exc):
-        end = self._timer()
+        while True:
+            end = self._timer()
+            if end > self._start:
+                break
         if self._gcenabled:
             gc.enable()
         self.update(end - self._start)
@@ -239,9 +242,9 @@ class BenchmarkSession(object):
                 best[prop] = min(getattr(benchmark, prop) for benchmark in benchmarks)
 
             overall_min = best[self._scale]
-            if overall_min < 0.000001:
+            if overall_min < 1e-6:
                 unit, adjustment = "n", 1e9
-            elif overall_min < 0.001:
+            elif overall_min < 1e-3:
                 unit, adjustment = "u", 1e6
             elif overall_min < 1:
                 unit, adjustment = "m", 1e3
