@@ -197,7 +197,8 @@ class BenchmarkSession(object):
             return
 
         timer = self._options.get('timer') or 'default'
-        timer = timer.__name__ if hasattr(timer, '__name__') else repr(timer)
+        timer_name = timer.__module__ + "." if hasattr(timer, '__module__') else ""
+        timer_name += timer.__name__ if hasattr(timer, '__name__') else repr(timer)
 
         groups = defaultdict(list)
         for bench in self._benchmarks:
@@ -210,7 +211,7 @@ class BenchmarkSession(object):
                     len(benchmarks),
                     type("", (), self._options),
                     "" if group is None else " %r" % group,
-                    timer,
+                    timer_name,
                 ),
                 yellow=True
             )
