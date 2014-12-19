@@ -33,9 +33,9 @@ def loadtimer(string):
         return getattr(mod, attr)
 
 
-def loadscale(string):
+def loadsort(string):
     if string not in ("min", "max", "mean", "stddev"):
-        raise argparse.ArgumentTypeError("Value for --benchmark-scale must be one of: 'min', 'max', 'mean' or 'stddev'.")
+        raise argparse.ArgumentTypeError("Value for --benchmark-sort must be one of: 'min', 'max', 'mean' or 'stddev'.")
     return string
 
 
@@ -55,21 +55,21 @@ def pytest_addoption(parser):
     group.addoption(
         "--benchmark-min-time",
         action="store", type=Decimal, default=Decimal("0.1"),
-        help="Minimum time per round, if calibration is active."
+        help="Minimum time per round."
     )
     group.addoption(
         "--benchmark-max-time",
         action="store", type=Decimal, default=Decimal("1.0"),
-        help="Maximum time to spend in a benchmark (including overhead)."
+        help="Maximum time to spend in a benchmark."
     )
     group.addoption(
         "--benchmark-min-rounds",
         action="store", type=loadrounds, default=5,
-        help="Minium rounds, even if total time would exceed `max-time`."
+        help="Minimum rounds, even if total time would exceed `--max-time`."
     )
     group.addoption(
         "--benchmark-sort",
-        action="store", type=loadscale, default="min",
+        action="store", type=loadsort, default="min",
         help="Column to sort on. Can be one of: 'min', 'max', 'mean' or 'stddev' ."
     )
     group.addoption(
@@ -289,7 +289,7 @@ class BenchmarkSession(object):
                     for benchmark in benchmarks
                 ))
             tr.write_line(
-                " benchmark{2}: {0} tests, {1.min_rounds} min rounds, {1.min_time:f}s min time,"
+                " benchmark{2}: {0} tests, min {1.min_rounds} rounds (of min {1.min_time:f}s),"
                 " {1.max_time:f}s max time, timer: {3} ".format(
                     len(benchmarks),
                     type("", (), self._options),
@@ -327,7 +327,7 @@ def pytest_runtest_setup(item):
         if benchmark.args:
             raise ValueError("benchmark mark can't have positional arguments.")
         for name in benchmark.kwargs:
-            if name not in ("max_time", "min_iterations", "max_iterations", "timer", "group", "disable_gc"):
+            if name not in ("max_time", "min_rounds", "min_time", "timer", "group", "disable_gc", "warmup"):
                 raise ValueError("benchmark mark can't have %r keyword argument." % name)
 
 

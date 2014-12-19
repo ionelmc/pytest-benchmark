@@ -8,22 +8,18 @@ With groups::
   > import time
   > import pytest
   > def test_fast(benchmark):
-  >     with benchmark:
-  >         time.sleep(0.000001)
+  >     benchmark(lambda: time.sleep(0.000001))
   >     assert 1 == 1
   > def test_slow(benchmark):
-  >     with benchmark:
-  >         time.sleep(0.001)
+  >     benchmark(lambda: time.sleep(0.001))
   >     assert 1 == 1
   > @pytest.mark.benchmark(group="A")
   > def test_slower(benchmark):
-  >     with benchmark:
-  >         time.sleep(0.01)
+  >     benchmark(lambda: time.sleep(0.01))
   >     assert 1 == 1
-  > @pytest.mark.benchmark(group="A", max_iterations=6000)
+  > @pytest.mark.benchmark(group="A", warmup=True)
   > def test_xfast(benchmark):
-  >     with benchmark:
-  >         pass
+  >     benchmark(lambda: None)
   >     assert 1 == 1
   > EOF
 
@@ -39,15 +35,15 @@ With groups::
   tests.py::test_slower PASSED
   tests.py::test_xfast PASSED
   \s* (re)
-  -* benchmark: 2 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
-  Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
+  -* benchmark: 2 tests, min 5 rounds (of min 0.1s), 1.0s max time, timer: .*-* (re)
+  Name \(time in .s\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast          .* (re)
   test_slow          .* (re)
   -----------------------------------------------------------------* (re)
   \s* (re)
-  -* benchmark 'A': 2 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
-  Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
+  -* benchmark 'A': 2 tests, min 5 rounds (of min 0.1s), 1.0s max time, timer: .* (re)
+  Name \(time in .s\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_slower        .* (re)
   test_xfast         .* (re)

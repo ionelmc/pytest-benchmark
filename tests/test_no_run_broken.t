@@ -8,18 +8,21 @@ Test that we don't benchmark code that raises exceptions:
   > import time
   > import pytest
   > def test_bad(benchmark):
-  >     with benchmark:
+  >     @benchmark
+  >     def result():
   >         raise Exception()
   >     assert 1 == 1
   > def test_bad2(benchmark):
-  >     with benchmark:
+  >     @benchmark
+  >     def result():
   >         time.sleep(0.1)
   >     assert 1 == 0
   > @pytest.fixture(params=['a', 'b', 'c'])
   > def bad_fixture(request):
   >     raise ImportError()
   > def test_ok(benchmark, bad_fixture):
-  >     with benchmark:
+  >     @benchmark
+  >     def result():
   >         time.sleep(0.1)
   >     assert 1 == 0
   > EOF
@@ -73,7 +76,8 @@ Test that we don't benchmark code that raises exceptions:
   benchmark = <pytest_benchmark.plugin.Benchmark object at .*> (re)
   \s* (re)
       def test_bad(benchmark):
-          with benchmark:
+            @benchmark
+            def result():
   (>)           raise Exception\(\) (re)
   E           Exception
   \s* (re)
@@ -83,20 +87,17 @@ Test that we don't benchmark code that raises exceptions:
   benchmark = <pytest_benchmark.plugin.Benchmark object at .*> (re)
   \s* (re)
       def test_bad2(benchmark):
-          with benchmark:
+          @benchmark
+          def result():
               time.sleep(0.1)
   (>)       assert 1 == 0 (re)
   E       assert 1 == 0
   \s* (re)
   tests.py:14: AssertionError
-  -* benchmark: 5 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
-  Name \(time in us\) * Min * Max * Mean * StdDev * Iterations (re)
+  -* benchmark: 1 tests, min 5 rounds (of min 0.1s), 1.0s max time, timer: .*-* (re)
+  Name \(time in us\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
   -------------------------------------------------------------------------------
-  test_bad            .* (re)
   test_bad2           .* (re)
-  test_ok\[.\]          .* (re)
-  test_ok\[.\]          .* (re)
-  test_ok\[.\]          .* (re)
   -------------------------------------------------------------------------------
   \s* (re)
   ==================* 2 failed, 3 error in .* seconds ====================* (re)

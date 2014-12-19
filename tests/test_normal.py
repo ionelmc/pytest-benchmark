@@ -6,35 +6,30 @@ Just to make sure the plugin doesn't choke on doctests::
 
 """
 import time
+from functools import partial
 
 import pytest
 
 
 def test_fast(benchmark):
-    with benchmark:
-        time.sleep(0.000001)
-    assert 1 == 1
+    @benchmark
+    def result():
+        return time.sleep(0.000001)
+    assert result is None
 
 
 def test_slow(benchmark):
-    with benchmark:
-        time.sleep(0.001)
-    assert 1 == 1
+    assert benchmark(partial(time.sleep, 0.001)) is None
 
 
 def test_slower(benchmark):
-    with benchmark:
-        time.sleep(0.01)
-    assert 1 == 1
+    benchmark(lambda: time.sleep(0.01))
 
 
-@pytest.mark.benchmark(max_iterations=6000)
+@pytest.mark.benchmark(min_rounds=2)
 def test_xfast(benchmark):
-    with benchmark:
-        pass
-    assert 1 == 1
+    benchmark(str)
 
 
 def test_fast(benchmark):
-    with benchmark:
-        pass
+    benchmark(int)

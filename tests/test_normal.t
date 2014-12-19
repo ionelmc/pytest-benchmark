@@ -2,28 +2,35 @@ Simple::
 
   $ cat <<EOF > tests.py
   > """
+  > Just to make sure the plugin doesn't choke on doctests::
+  >
   >     >>> print('Yay, doctests!')
   >     Yay, doctests!
+  >
   > """
   > import time
+  > from functools import partial
+  >
   > import pytest
+  >
   > def test_fast(benchmark):
-  >     with benchmark:
-  >         time.sleep(0.000001)
-  >     assert 1 == 1
+  >     @benchmark
+  >     def result():
+  >         return time.sleep(0.000001)
+  >     assert result is None
+  >
   > def test_slow(benchmark):
-  >     with benchmark:
-  >         time.sleep(0.001)
-  >     assert 1 == 1
+  >     assert benchmark(partial(time.sleep, 0.001)) is None
+  >
   > def test_slower(benchmark):
-  >     with benchmark:
-  >         time.sleep(0.01)
-  >     assert 1 == 1
-  > @pytest.mark.benchmark(max_iterations=6000)
+  >     benchmark(lambda: time.sleep(0.01))
+  >
+  > @pytest.mark.benchmark(min_rounds=2)
   > def test_xfast(benchmark):
-  >     with benchmark:
-  >         pass
-  >     assert 1 == 1
+  >     benchmark(str)
+  >
+  > def test_fast(benchmark):
+  >     benchmark(int)
   > EOF
 
   $ py.test -vv --doctest-modules tests.py
@@ -38,8 +45,8 @@ Simple::
   tests.py::test_slower PASSED
   tests.py::test_xfast PASSED
   \s* (re)
-  -* benchmark: 4 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
-  Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
+  -* benchmark: 4 tests, min 5 rounds (of min 0.1s), 1.0s max time, timer: .*-* (re)
+  Name \(time in .s\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast            .* (re)
   test_slow            .* (re)
@@ -75,8 +82,8 @@ Mark selection::
   \s* (re)
   tests.py::test_xfast PASSED
   \s* (re)
-  -* benchmark: 1 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
-  Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
+  -* benchmark: 1 tests, min 5 rounds (of min 0.1s), 1.0s max time, timer: .*-* (re)
+  Name \(time in .s\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_xfast        .* (re)
   -----------------------------------------------------------------* (re)
@@ -98,8 +105,8 @@ Only run benchmarks::
   tests.py::test_slower PASSED
   tests.py::test_xfast PASSED
   \s* (re)
-  -* benchmark: 4 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
-  Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
+  -* benchmark: 4 tests, min 5 rounds (of min 0.1s), 1.0s max time, timer: .*-* (re)
+  Name \(time in .s\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast         .* (re)
   test_slow         .* (re)

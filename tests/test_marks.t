@@ -3,10 +3,17 @@ Ok::
   $ cat <<EOF > tests.py
   > import time
   > import pytest
-  > @pytest.mark.benchmark(group="group-name", max_time=0.5, max_iterations=5000, min_iterations=5, timer=time.time, disable_gc=True)
+  > @pytest.mark.benchmark(
+  >     group="group-name",
+  >     min_time=0.1,
+  >     max_time=0.5,
+  >     min_rounds=5,
+  >     timer=time.time,
+  >     disable_gc=True,
+  >     warmup=False
+  > )
   > def test_fast(benchmark):
-  >     with benchmark:
-  >         time.sleep(0.000001)
+  >     benchmark(lambda: time.sleep(0.000001))
   >     assert 1 == 1
   > EOF
 
@@ -18,8 +25,8 @@ Ok::
   \s* (re)
   tests.py::test_fast PASSED
   \s* (re)
-  -* benchmark 'group-name': 1 tests, 5 to 5000 iterations, 0.5s max time, timer: .*-* (re)
-  Name \(time in .s\) * Min * Max * Mean * StdDev * Iterations (re)
+  -* benchmark 'group-name': 1 tests, min 5 rounds (of min 0.1s), 1.0s max time, timer: .*-* (re)
+  Name \(time in .s\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast             .* (re)
   -----------------------------------------------------------------* (re)
@@ -31,14 +38,19 @@ Bogus args::
   $ cat <<EOF > testsborken.py
   > import time
   > import pytest
+  > import functools
   > @pytest.mark.benchmark(
-  >     group="group-name", max_time=0.5, max_iterations=5000,
-  >     min_iterations=5, timer=time.time, disable_gc=True,
-  >     only=True
+  >     group="group-name",
+  >     min_time=0.1,
+  >     max_time=0.5,
+  >     min_rounds=5,
+  >     timer=time.time,
+  >     disable_gc=True,
+  >     warmup=False,
+  >     only=True,
   > )
   > def test_fast(benchmark):
-  >     with benchmark:
-  >         time.sleep(0.000001)
+  >     benchmark(functools.partial(time.sleep, 0.000001))
   >     assert 1 == 1
   > EOF
 
