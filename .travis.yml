@@ -5,11 +5,16 @@ env:
     LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
   matrix:
     - TOXENV=check
-    - TOXENV=py26
-    - TOXENV=py27
-    - TOXENV=py33
-    - TOXENV=py34
-    - TOXENV=pypy
+    - TOXENV=py26-pytest25
+    - TOXENV=py27-pytest25
+    - TOXENV=py33-pytest25
+    - TOXENV=py34-pytest25
+    - TOXENV=pypy-pytest25
+    - TOXENV=py26-pytest26
+    - TOXENV=py27-pytest26
+    - TOXENV=py33-pytest26
+    - TOXENV=py34-pytest26
+    - TOXENV=pypy-pytest26
 before_install:
   - python --version
   - uname -a
