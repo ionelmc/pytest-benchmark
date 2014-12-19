@@ -1,10 +1,13 @@
 build: false
 environment:
   matrix:
-    - TOXENV: check
-    - TOXENV: "py2.7"
-    - TOXENV: "py3.3"
-    - TOXENV: "py3.4"
+    - TOXENV: "check"
+    - TOXENV: "py27-pytest25"
+    - TOXENV: "py33-pytest25"
+    - TOXENV: "py34-pytest25"
+    - TOXENV: "py27-pytest26"
+    - TOXENV: "py33-pytest26"
+    - TOXENV: "py34-pytest26"
 init:
   - "ECHO %TOXENV%"
   - ps: "ls C:\\Python*"
