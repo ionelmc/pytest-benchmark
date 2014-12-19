@@ -80,15 +80,15 @@ Test that we don't benchmark code that raises exceptions:
           def result():
               raise Exception()
   \s* (re)
-  tests.py:8: 
-  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-  .*pytest_benchmark/plugin.py:151: in __call__ (re)
+  tests.py:8:
+  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+  .*pytest_benchmark/plugin.py:.*: in __call__ (re)
       duration, scale = self._calibrate_timer(runner)
-  .*pytest_benchmark/plugin.py:184: in _calibrate_timer (re)
+  .*pytest_benchmark/plugin.py:.*: in _calibrate_timer (re)
       duration = runner(loops)
-  .*pytest_benchmark/plugin.py:145: in runner (re)
+  .*pytest_benchmark/plugin.py:.*: in runner (re)
       function_to_benchmark()
-  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
   \s* (re)
       @benchmark
       def result():
