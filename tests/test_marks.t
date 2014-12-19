@@ -25,7 +25,7 @@ Ok::
   \s* (re)
   tests.py::test_fast PASSED
   \s* (re)
-  -* benchmark 'group-name': 1 tests, min 5 rounds (of min 0.1s), 1.0s max time, timer: .*-* (re)
+  -* benchmark 'group-name': 1 tests, min 5 rounds \(of min 0.1s\), 1.0s max time, timer: .* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast             .* (re)
@@ -74,7 +74,7 @@ Bogus args::
               if benchmark.args:
                   raise ValueError("benchmark mark can't have positional arguments.")
               for name in benchmark.kwargs:
-                  if name not in ("max_time", "min_iterations", "max_iterations", "timer", "group", "disable_gc"):
+                  if name not in ("max_time", "min_rounds", "min_time", "timer", "group", "disable_gc", "warmup"):
   (>) *               raise ValueError\("benchmark mark can't have %r keyword argument." % name\) (re)
   E                   ValueError: benchmark mark can't have 'only' keyword argument.
   \s* (re)

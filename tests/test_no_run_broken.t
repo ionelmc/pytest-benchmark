@@ -49,7 +49,7 @@ Test that we don't benchmark code that raises exceptions:
   (>)       raise ImportError\(\) (re)
   E       ImportError
   \s* (re)
-  tests.py:17: ImportError
+  tests.py:19: ImportError
   _________________________ ERROR at setup of test_ok[b] _________________________
   \s* (re)
   request = <SubRequest 'bad_fixture' for <Function 'test_ok[b]'>>
@@ -59,7 +59,7 @@ Test that we don't benchmark code that raises exceptions:
   (>)       raise ImportError\(\) (re)
   E       ImportError
   \s* (re)
-  tests.py:17: ImportError
+  tests.py:19: ImportError
   _________________________ ERROR at setup of test_ok[c] _________________________
   \s* (re)
   request = <SubRequest 'bad_fixture' for <Function 'test_ok[c]'>>
@@ -69,22 +69,36 @@ Test that we don't benchmark code that raises exceptions:
   (>)       raise ImportError\(\) (re)
   E       ImportError
   \s* (re)
-  tests.py:17: ImportError
+  tests.py:19: ImportError
   =================================== FAILURES ===================================
   ___________________________________ test_bad ___________________________________
   \s* (re)
-  benchmark = <pytest_benchmark.plugin.Benchmark object at .*> (re)
+  benchmark = <pytest_benchmark.plugin.BenchmarkFixture object at .*> (re)
   \s* (re)
       def test_bad(benchmark):
-            @benchmark
-            def result():
-  (>)           raise Exception\(\) (re)
-  E           Exception
+  (>)       @benchmark (re)
+          def result():
+              raise Exception()
   \s* (re)
-  tests.py:9: Exception
+  tests.py:8: 
+  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+  .*pytest_benchmark/plugin.py:151: in __call__ (re)
+      duration, scale = self._calibrate_timer(runner)
+  .*pytest_benchmark/plugin.py:184: in _calibrate_timer (re)
+      duration = runner(loops)
+  .*pytest_benchmark/plugin.py:145: in runner (re)
+      function_to_benchmark()
+  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+  \s* (re)
+      @benchmark
+      def result():
+  (>)       raise Exception\(\) (re)
+  E       Exception
+  \s* (re)
+  tests.py:10: Exception
   __________________________________ test_bad2 ___________________________________
   \s* (re)
-  benchmark = <pytest_benchmark.plugin.Benchmark object at .*> (re)
+  benchmark = <pytest_benchmark.plugin.BenchmarkFixture object at .*> (re)
   \s* (re)
       def test_bad2(benchmark):
           @benchmark
@@ -93,12 +107,12 @@ Test that we don't benchmark code that raises exceptions:
   (>)       assert 1 == 0 (re)
   E       assert 1 == 0
   \s* (re)
-  tests.py:14: AssertionError
-  -* benchmark: 1 tests, min 5 rounds (of min 0.1s), 1.0s max time, timer: .*-* (re)
-  Name \(time in us\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
-  -------------------------------------------------------------------------------
+  tests.py:16: AssertionError
+  -* benchmark: 1 tests, min 5 rounds \(of min 0.1s\), 1.0s max time, timer: .* (re)
+  Name \(time in .s\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
+  -----------------------------------------------------------------* (re)
   test_bad2           .* (re)
-  -------------------------------------------------------------------------------
+  -----------------------------------------------------------------* (re)
   \s* (re)
   ==================* 2 failed, 3 error in .* seconds ====================* (re)
   [1]
