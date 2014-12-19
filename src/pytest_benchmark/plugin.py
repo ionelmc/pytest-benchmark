@@ -5,7 +5,6 @@ import gc
 import sys
 import math
 from collections import defaultdict
-from collections import namedtuple
 from decimal import Decimal
 
 import pytest
@@ -175,14 +174,14 @@ class BenchmarkFixture(object):
         else:
             min_time = self._min_time
             min_time_estimate = self._min_time / 100
-        #print("")
-        #print("Calibrate to %.12f seconds:" % min_time)
+        # print("")
+        # print("Calibrate to %.12f seconds:" % min_time)
 
         loops = 1
         min_progress = 1.0
         while True:
             duration = runner(loops)
-            #print("Calibrate scale: %.24f seconds for %s loops" % (duration, loops))
+            # print("Calibrate scale: %.24f seconds for %s loops" % (duration, loops))
 
             if duration / min_time >= min_progress:
                 break
@@ -190,7 +189,7 @@ class BenchmarkFixture(object):
             if duration >= min_time_estimate:
                 # coarse estimation of the number of loops
                 loops = max(int(min_time * loops / duration), loops * 2)
-                #print("Calibrate scale: estimate %s loops" % loops)
+                # print("Calibrate scale: estimate %s loops" % loops)
                 min_progress = 0.75
             else:
                 loops *= 10

@@ -1,5 +1,4 @@
 """
-
 from: https://bitbucket.org/haypo/misc/src/tip/python/pep418.py
 
 Implementation of the PEP 418 in pure Python using ctypes.
@@ -18,23 +17,7 @@ Constants:
 
  - has_monotonic (bool): True if time.monotonic() is available
 """
-"""
-Implementation of the PEP 418 in pure Python using ctypes.
-
-Functions:
-
- - clock()
- - get_clock_info(name)
- - monotonic(): not always available
- - perf_frequency()
- - process_time()
- - sleep()
- - time()
-
-Constants:
-
- - has_monotonic (bool): True if time.monotonic() is available
-"""
+# flake8: noqa
 # TODO: gethrtime() for Solaris/OpenIndiana
 # TODO: call GetSystemTimeAdjustment() to get the resolution
 # TODO: other FIXME
