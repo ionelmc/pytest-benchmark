@@ -1,3 +1,5 @@
+from functools import partial
+
 import pytest
 
 
@@ -67,6 +69,5 @@ def impl(request):
 def test_proto(benchmark, impl):
     obj = "foobar"
     proxied = impl(lambda: obj)
-    with benchmark:
-        result = str(proxied)
+    result = benchmark(partial(str, proxied))
     assert result == obj

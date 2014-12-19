@@ -3,21 +3,17 @@ from __future__ import division
 import argparse
 import gc
 import sys
-import time
-try:
-    from __pypy__.time import clock_gettime
-    from __pypy__.time import CLOCK_MONOTONIC
-    default_timer = lambda: clock_gettime(CLOCK_MONOTONIC)
-except ImportError:
-    from timeit import default_timer
-from collections import defaultdict, namedtuple
+import math
+from collections import defaultdict
+from collections import namedtuple
 from decimal import Decimal
 
 import pytest
 
 from .stats import RunningStats
-
-PY3 = sys.version_info[0] == 3
+from .timers import compute_timer_precision
+from .timers import default_timer
+from .compat import XRANGE, PY3
 
 
 def loadtimer(string):
@@ -43,27 +39,38 @@ def loadscale(string):
     return string
 
 
+def loadrounds(string):
+    try:
+        value = int(string)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(exc)
+    else:
+        if value < 1:
+            raise argparse.ArgumentTypeError("Value for --benchmark-rounds must be at least 1.")
+        return value
+
+
 def pytest_addoption(parser):
     group = parser.getgroup("benchmark")
     group.addoption(
+        "--benchmark-min-time",
+        action="store", type=Decimal, default=Decimal("0.1"),
+        help="Minimum time per round, if calibration is active."
+    )
+    group.addoption(
         "--benchmark-max-time",
-        action="store", type=Decimal, default=Decimal("0.5"),
+        action="store", type=Decimal, default=Decimal("1.0"),
         help="Maximum time to spend in a benchmark (including overhead)."
     )
     group.addoption(
-        "--benchmark-max-iterations",
-        action="store", type=int, default=Default(5000),
-        help="Maximum iterations to do."
+        "--benchmark-min-rounds",
+        action="store", type=loadrounds, default=5,
+        help="Minium rounds, even if total time would exceed `max-time`."
     )
     group.addoption(
-        "--benchmark-min-iterations",
-        action="store", type=int, default=Default(5),
-        help="Minium iterations, even if total time would exceed `max-time`."
-    )
-    group.addoption(
-        "--benchmark-scale",
+        "--benchmark-sort",
         action="store", type=loadscale, default="min",
-        help="Minium iterations, even if total time would exceed `max-time`."
+        help="Column to sort on. Can be one of: 'min', 'max', 'mean' or 'stddev' ."
     )
     group.addoption(
         "--benchmark-timer",
@@ -92,92 +99,118 @@ def pytest_addoption(parser):
     )
 
 
-class Default(namedtuple("Default", ["value"])):
-    def __str__(self):
-        return str(self.value)
-
-    def __repr__(self):
-        return repr(self.value)
-
-    def __int__(self):
-        return self.value
-
-
-class Benchmark(RunningStats):
-    def __init__(self, name, disable_gc, timer, min_iterations, max_iterations, max_time, group=None):
-        self._disable_gc = disable_gc
+class BenchmarkStats(RunningStats):
+    def __init__(self, name, group, scale):
         self.name = name
         self.group = group
+        self.scale = scale
+        super(BenchmarkStats, self).__init__()
+
+    def __getitem__(self, key):
+        return getattr(self, key)
+
+    def update(self, duration):
+        super(BenchmarkStats, self).update(duration / self.scale)
+
+
+class BenchmarkFixture(object):
+    _precisions = {}
+
+    @classmethod
+    def _get_precision(cls, timer):
+        if timer in cls._precisions:
+            return cls._precisions[timer]
+        else:
+            return cls._precisions.setdefault(timer, compute_timer_precision(timer))
+
+    def __init__(self, name, disable_gc, timer, min_rounds, min_time, max_time, warmup, add_stats, group=None):
+        self._disable_gc = disable_gc
+        self._name = name
+        self._group = group
         self._timer = timer
-        self._min_runs = min_iterations
-        self._max_runs = max_iterations
-        assert min_iterations <= max_iterations, (
-           "Invalid configuration, min iterations need to be less than max "
-           "iterations. You have %s min, %s max" % (min_iterations, max_iterations))
+        self._min_rounds = min_rounds
         self._max_time = float(max_time)
-        self._stats = RunningStats()
-        self._called = False
-        self._start = None
-        self._gcenabled = None
-        self._overall_start = None
-        super(Benchmark, self).__init__()
+        self._min_time = float(min_time)
+        self._add_stats = add_stats
+        self._warmup = warmup
 
-    def reset(self):
-        super(Benchmark, self).reset()
-        self._start = None
-        self._gcenabled = None
-        self._overall_start = None
+    def __call__(self, function_to_benchmark):
+        def runner(loops, timer=self._timer):
+            loops_range = XRANGE(loops)
+            gcenabled = gc.isenabled()
+            if self._disable_gc:
+                gc.disable()
+            start = timer()
+            for index in loops_range:
+                function_to_benchmark()
+            end = timer()
+            if gcenabled:
+                gc.enable()
+            return end - start
 
-    @property
-    def done(self):
-        if self._overall_start is None:
-            self._overall_start = time.time()
-        if self.runs < self._min_runs - 1:
-            return False
-        return time.time() - self._overall_start >= self._max_time or self.runs >= self._max_runs - 1
+        duration, scale = self._calibrate_timer(runner)
 
-    # TODO: implement benchmark function wrapper (that adds the timers), as alternative to context manager
-    # def __call__(self, function):
-    #     pass
+        # Choose how many time we must repeat the test
+        rounds = int(math.ceil(self._max_time / duration))
+        rounds = max(rounds, self._min_rounds)
 
-    def __enter__(self):
-        self._gcenabled = gc.isenabled()
-        if self._disable_gc:
-            gc.disable()
-        self._start = self._timer()
-        return self
+        stats = BenchmarkStats(self._name, group=self._group, scale=scale)
+        self._add_stats(stats)
 
-    def __exit__(self, *exc):
+        if self._warmup:
+            for _ in XRANGE(rounds):
+                runner(scale)
+
+        for _ in XRANGE(rounds):
+            stats.update(runner(scale))
+
+        return function_to_benchmark()
+
+    def _calibrate_timer(self, runner):
+        # Calibrate the number of loops
+        if self._min_time < 1.0:
+            timer_precision = self._get_precision(self._timer)
+            min_time = max(self._min_time, timer_precision * 100)
+            min_time_estimate = timer_precision * 10
+        else:
+            min_time = self._min_time
+            min_time_estimate = self._min_time / 100
+        #print("")
+        #print("Calibrate to %.12f seconds:" % min_time)
+
+        loops = 1
+        min_progress = 1.0
         while True:
-            end = self._timer()
-            if end > self._start:
+            duration = runner(loops)
+            #print("Calibrate scale: %.24f seconds for %s loops" % (duration, loops))
+
+            if duration / min_time >= min_progress:
                 break
-        if self._gcenabled:
-            gc.enable()
-        self.update(end - self._start)
+
+            if duration >= min_time_estimate:
+                # coarse estimation of the number of loops
+                loops = max(int(min_time * loops / duration), loops * 2)
+                #print("Calibrate scale: estimate %s loops" % loops)
+                min_progress = 0.75
+            else:
+                loops *= 10
+        return duration, loops
 
 
 class BenchmarkSession(object):
     def __init__(self, config):
-        max_iterations = config.getoption("benchmark_max_iterations")
-        min_iterations = config.getoption("benchmark_min_iterations")
-        if isinstance(max_iterations, Default):
-            max_iterations = max(max_iterations.value, int(min_iterations))
-        if isinstance(min_iterations, Default):
-            min_iterations = min(min_iterations.value, int(max_iterations))
-        if min_iterations > max_iterations:
-            raise pytest.UsageError("Invalid arguments: --benchmark-min-iterations=%s cannot be greater than --benchmark-max-iterations=%s" % (min_iterations, max_iterations))
+        timer = config.getoption("benchmark_timer")
         self._options = dict(
+            min_time=config.getoption("benchmark_min_time"),
+            min_rounds=config.getoption("benchmark_min_rounds"),
             max_time=config.getoption("benchmark_max_time"),
-            timer=config.getoption("benchmark_timer"),
+            timer=timer,
             disable_gc=config.getoption("benchmark_disable_gc"),
-            max_iterations=max_iterations,
-            min_iterations=min_iterations,
+            warmup=config.getoption("benchmark_warmup")
         )
-        self._warmup = config.getoption("benchmark_warmup")
         self._skip = config.getoption("benchmark_skip")
         self._only = config.getoption("benchmark_only")
-        self._scale = config.getoption("benchmark_scale")
+        self._sort = config.getoption("benchmark_sort")
         if self._skip and self._only:
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
         self._benchmarks = []
@@ -190,24 +223,21 @@ class BenchmarkSession(object):
             node = request.node
             marker = node.get_marker("benchmark")
             options = marker.kwargs if marker else {}
-            benchmark = Benchmark(node.name, **dict(self._options, **options))
-            self._benchmarks.append(benchmark)
+            benchmark = BenchmarkFixture(node.name, add_stats=self._benchmarks.append, **dict(self._options, **options))
             return benchmark
 
-    def pytest_runtest_call(self, item):
+    def pytest_runtest_call(self, item, __multicall__):
         benchmark = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
-        if isinstance(benchmark, Benchmark):
-            if self._warmup:
-                while not benchmark.done:
-                    item.runtest()
-                benchmark.reset()
-            while not benchmark.done:
-                item.runtest()
+        if isinstance(benchmark, BenchmarkFixture):
+            if self._skip:
+                pytest.skip("Skipping benchmark (--benchmark-skip active).")
+            else:
+                __multicall__.execute()
         else:
             if self._only:
                 pytest.skip("Skipping non-benchmark (--benchmark-only active).")
             else:
-                item.runtest()
+                __multicall__.execute()
 
     def pytest_terminal_summary(self, terminalreporter):
         tr = terminalreporter
@@ -223,25 +253,14 @@ class BenchmarkSession(object):
         for bench in self._benchmarks:
             groups[bench.group].append(bench)
         for group, benchmarks in sorted(groups.items(), key=lambda pair: pair[0] or ""):
-            tr.write_sep(
-                "-",
-                "benchmark{2}: {0} tests, {1.min_iterations} to {1.max_iterations} iterations,"
-                " {1.max_time:f}s max time, timer: {3}".format(
-                    len(benchmarks),
-                    type("", (), self._options),
-                    "" if group is None else " %r" % group,
-                    timer_name,
-                ),
-                yellow=True
-            )
             worst = {}
             best = {}
-            for prop in ("min", "max", "mean", "stddev", "runs"):
-                worst[prop] = max(getattr(benchmark, prop) for benchmark in benchmarks)
-            for prop in ("min", "max", "mean", "stddev"):
-                best[prop] = min(getattr(benchmark, prop) for benchmark in benchmarks)
+            for prop in "min", "max", "mean", "stddev", "runs", "scale":
+                worst[prop] = max(benchmark[prop] for benchmark in benchmarks)
+            for prop in "min", "max", "mean", "stddev":
+                best[prop] = min(benchmark[prop] for benchmark in benchmarks)
 
-            overall_min = best[self._scale]
+            overall_min = best[self._sort]
             if overall_min < 1e-6:
                 unit, adjustment = "n", 1e9
             elif overall_min < 1e-3:
@@ -256,37 +275,49 @@ class BenchmarkSession(object):
                 "max": "Max",
                 "mean": "Mean",
                 "stddev": "StdDev",
-                "runs": "Iterations",
+                "runs": "Rounds",
+                "scale": "Iterations",
             }
             widths = {
                 "name": 3 + max(len(labels["name"]), max(len(benchmark.name) for benchmark in benchmarks)),
                 "runs": 2 + max(len(labels["runs"]), len(str(worst["runs"]))),
+                "scale": 2 + max(len(labels["scale"]), len(str(worst["scale"]))),
             }
-            for prop in ("min", "max", "mean", "stddev"):
+            for prop in "min", "max", "mean", "stddev":
                 widths[prop] = 2 + max(len(labels[prop]), max(
-                    len("{0:.4f}".format(getattr(benchmark, prop) * adjustment))
+                    len("{0:.4f}".format(benchmark[prop] * adjustment))
                     for benchmark in benchmarks
                 ))
+            tr.write_line(
+                " benchmark{2}: {0} tests, {1.min_rounds} min rounds, {1.min_time:f}s min time,"
+                " {1.max_time:f}s max time, timer: {3} ".format(
+                    len(benchmarks),
+                    type("", (), self._options),
+                    "" if group is None else " %r" % group,
+                    timer_name,
+                ).center(sum(widths.values()), '-'),
+                yellow=True,
+            )
             tr.write_line(labels["name"].ljust(widths["name"]) + "".join(
                 labels[prop].rjust(widths[prop])
-                for prop in ("min", "max", "mean", "stddev", "runs")
+                for prop in ("min", "max", "mean", "stddev", "runs", "scale")
             ))
-            tr.write_line("-" * sum(widths.values()))
+            tr.write_line("-" * sum(widths.values()), yellow=True)
 
             for benchmark in benchmarks:
                 tr.write(benchmark.name.ljust(widths["name"]))
-                for prop in ("min", "max", "mean", "stddev"):
-                    value = getattr(benchmark, prop)
+                for prop in "min", "max", "mean", "stddev":
                     tr.write(
-                        "{0:>{1}.4f}".format(value * adjustment, widths[prop]),
-                        green=value == best[prop],
-                        red=value == worst[prop],
+                        "{0:>{1}.4f}".format(benchmark[prop] * adjustment, widths[prop]),
+                        green=benchmark[prop] == best[prop],
+                        red=benchmark[prop] == worst[prop],
                         bold=True,
                     )
-                tr.write("{0:>{1}}".format(benchmark.runs, widths["runs"]))
+                for prop in "runs", "scale":
+                    tr.write("{0:>{1}}".format(benchmark[prop], widths[prop]))
                 tr.write("\n")
 
-            tr.write_line("-" * sum(widths.values()))
+            tr.write_line("-" * sum(widths.values()), yellow=True)
             tr.write_line("")
 
 
