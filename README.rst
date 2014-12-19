@@ -138,3 +138,8 @@ Development
 To run the all tests run::
 
     tox
+
+Credits
+=======
+
+* Timing code and ideas taken from: https://bitbucket.org/haypo/misc/src/tip/python/benchmark.py
