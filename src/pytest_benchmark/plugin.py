@@ -8,6 +8,7 @@ from collections import defaultdict
 from decimal import Decimal
 
 import pytest
+import py
 
 from .stats import RunningStats
 from .timers import compute_timer_precision
@@ -82,6 +83,11 @@ def pytest_addoption(parser):
         help="Runs the benchmarks two times. Discards data from the first run."
     )
     group.addoption(
+        "--benchmark-verbose",
+        action="store_true", default=False,
+        help="Dump diagnostic and progress information."
+    )
+    group.addoption(
         "--benchmark-disable-gc",
         action="store_true", default=False,
         help="Disable GC during benchmarks."
@@ -122,7 +128,7 @@ class BenchmarkFixture(object):
         else:
             return cls._precisions.setdefault(timer, compute_timer_precision(timer))
 
-    def __init__(self, name, disable_gc, timer, min_rounds, min_time, max_time, warmup, add_stats, group=None):
+    def __init__(self, name, disable_gc, timer, min_rounds, min_time, max_time, warmup, add_stats, logger, group=None):
         self._disable_gc = disable_gc
         self._name = name
         self._group = group
@@ -132,6 +138,7 @@ class BenchmarkFixture(object):
         self._min_time = float(min_time)
         self._add_stats = add_stats
         self._warmup = warmup
+        self._logger = logger
 
     def __call__(self, function_to_benchmark):
         def runner(loops, timer=self._timer):
@@ -166,34 +173,61 @@ class BenchmarkFixture(object):
         return function_to_benchmark()
 
     def _calibrate_timer(self, runner):
-        # Calibrate the number of loops
-        if self._min_time < 1.0:
-            timer_precision = self._get_precision(self._timer)
-            min_time = max(self._min_time, timer_precision * 100)
-            min_time_estimate = timer_precision * 10
-        else:
-            min_time = self._min_time
-            min_time_estimate = self._min_time / 100
-        # print("")
-        # print("Calibrate to %.12f seconds:" % min_time)
+        timer_precision = self._get_precision(self._timer)
+        min_time = max(self._min_time, timer_precision * 100)
+        min_time_estimate = min_time / 10
+        self._logger.write("")
+        self._logger.write("  Timer precision: %ss" % time_format(timer_precision))
+        self._logger.write("  Calibrating to target round %ss; will estimate when reaching %ss." % (
+            time_format(min_time), time_format(min_time_estimate)))
 
         loops = 1
-        min_progress = 1.0
         while True:
             duration = runner(loops)
-            # print("Calibrate scale: %.24f seconds for %s loops" % (duration, loops))
+            self._logger.write("  Calibrate: %ss for %s iterations." % (time_format(duration), loops))
 
-            if duration / min_time >= min_progress:
+            if duration / min_time >= 0.75:
                 break
 
             if duration >= min_time_estimate:
                 # coarse estimation of the number of loops
-                loops = max(int(min_time * loops / duration), loops * 2)
-                # print("Calibrate scale: estimate %s loops" % loops)
-                min_progress = 0.75
+                loops = int(min_time * loops / duration)
+                self._logger.write("  Calibrate estimate: %s iterations." % loops)
             else:
                 loops *= 10
         return duration, loops
+
+
+def time_unit(value):
+    if value < 1e-6:
+        return "n", 1e9
+    elif value < 1e-3:
+        return "u", 1e6
+    elif value < 1:
+        return "m", 1e3
+    else:
+        return "", 1.
+
+
+def time_format(value):
+    unit, adjustment = time_unit(value)
+    return "{0:.2f}{1:s}".format(value * adjustment, unit)
+
+
+class DiagnosticLogger(object):
+    def __init__(self, verbose
+                 # , capman
+                 ):
+        self.term = verbose and py.io.TerminalWriter()
+        # self.capman = capman
+
+    def write(self, text):
+        if self.term:
+            # if self.capman:
+            #     self.capman.suspendcapture(in_=True)
+            self.term.line(text, yellow=True)
+            # if self.capman:
+            #     self.capman.resumecapture()
 
 
 class BenchmarkSession(object):
@@ -210,6 +244,7 @@ class BenchmarkSession(object):
         self._skip = config.getoption("benchmark_skip")
         self._only = config.getoption("benchmark_only")
         self._sort = config.getoption("benchmark_sort")
+        self._verbose = config.getoption("benchmark_verbose")
         if self._skip and self._only:
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
         self._benchmarks = []
@@ -222,7 +257,15 @@ class BenchmarkSession(object):
             node = request.node
             marker = node.get_marker("benchmark")
             options = marker.kwargs if marker else {}
-            benchmark = BenchmarkFixture(node.name, add_stats=self._benchmarks.append, **dict(self._options, **options))
+            benchmark = BenchmarkFixture(
+                node.name,
+                add_stats=self._benchmarks.append,
+                logger=DiagnosticLogger(
+                    self._verbose,
+                    # node.config.pluginmanager.getplugin("capturemanager")
+                ),
+                **dict(self._options, **options)
+            )
             return benchmark
 
     def pytest_runtest_call(self, item, __multicall__):
@@ -259,15 +302,7 @@ class BenchmarkSession(object):
             for prop in "min", "max", "mean", "stddev":
                 best[prop] = min(benchmark[prop] for benchmark in benchmarks)
 
-            overall_min = best[self._sort]
-            if overall_min < 1e-6:
-                unit, adjustment = "n", 1e9
-            elif overall_min < 1e-3:
-                unit, adjustment = "u", 1e6
-            elif overall_min < 1:
-                unit, adjustment = "m", 1e3
-            else:
-                unit, adjustment = "", 1.
+            unit, adjustment = time_unit(best[self._sort])
             labels = {
                 "name": "Name (time in %ss)" % unit,
                 "min": "Min",
