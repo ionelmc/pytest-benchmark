@@ -2,6 +2,12 @@
 Changelog
 =========
 
+2.1.0 (2014-12-20)
+------------------
+
+* Simplify the calibration code so that the round is smaller.
+* Add diagnostic output for calibration code (``--benchmark-verbose``).
+
 2.0.0 (2014-12-19)
 ------------------
 

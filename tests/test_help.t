@@ -15,6 +15,7 @@
                           Timer to use when measuring time.
     --benchmark-warmup    Runs the benchmarks two times. Discards data from the
                           first run.
+    --benchmark-verbose   Dump diagnostic and progress information.
     --benchmark-disable-gc
                           Disable GC during benchmarks.
     --benchmark-skip      Skip running any benchmarks.
