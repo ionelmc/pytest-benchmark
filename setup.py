@@ -19,7 +19,7 @@ def read(*names, **kwargs):
 
 setup(
     name="pytest-benchmark",
-    version="2.0.0",
+    version="2.1.0",
     license="BSD",
     description="py.test fixture for benchmarking code",
     long_description="%s\n%s" % (read("README.rst"), re.sub(":obj:`~?(.*?)`", r"``\1``", read("CHANGELOG.rst"))),
