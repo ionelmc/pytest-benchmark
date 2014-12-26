@@ -216,8 +216,11 @@ def time_format(value):
 
 class SecondsDecimal(Decimal):
 
+    def __float__(self):
+        return float(super(SecondsDecimal, self).__str__())
+
     def __str__(self):
-        return "{0}s".format(time_format(float(self)))
+        return "{0}s".format(time_format(float(super(SecondsDecimal, self).__str__())))
 
 
 class DiagnosticLogger(object):
