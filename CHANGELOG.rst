@@ -2,7 +2,7 @@
 Changelog
 =========
 
-2.2.0 (2014-12-20)
+2.2.0 (2014-12-26)
 ------------------
 
 * Make the default rounds smaller (so that variance is more accurate).
