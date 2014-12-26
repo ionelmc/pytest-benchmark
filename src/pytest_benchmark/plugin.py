@@ -16,6 +16,20 @@ from .timers import default_timer
 from .compat import XRANGE, PY3
 
 
+class NameWrapper(object):
+
+    def __init__(self, target):
+        self.target = target
+
+    def __str__(self):
+        name = self.target.__module__ + "." if hasattr(self.target, '__module__') else ""
+        name += self.target.__name__ if hasattr(self.target, '__name__') else repr(self.target)
+        return name
+
+    def __repr__(self):
+        return "NameWrapper(%s)" % repr(self.target)
+
+
 def loadtimer(string):
     if "." not in string:
         raise argparse.ArgumentTypeError("Value for --benchmark-timer must be in dotted form. Eg: 'module.attr'.")
@@ -23,14 +37,14 @@ def loadtimer(string):
     if mod == 'pep418':
         if PY3:
             import time
-            return getattr(time, attr)
+            return NameWrapper(getattr(time, attr))
         else:
             from . import pep418
-            return getattr(pep418, attr)
+            return NameWrapper(getattr(pep418, attr))
     else:
         __import__(mod)
         mod = sys.modules[mod]
-        return getattr(mod, attr)
+        return NameWrapper(getattr(mod, attr))
 
 
 def loadsort(string):
@@ -74,7 +88,7 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-timer",
-        action="store", type=loadtimer, default=default_timer,
+        action="store", type=loadtimer, default=NameWrapper(default_timer),
         help="Timer to use when measuring time. Default: %(default)s"
     )
     group.addoption(
@@ -132,7 +146,7 @@ class BenchmarkFixture(object):
         self._disable_gc = disable_gc
         self._name = name
         self._group = group
-        self._timer = timer
+        self._timer = timer.target
         self._min_rounds = min_rounds
         self._max_time = float(max_time)
         self._min_time = float(min_time)
@@ -296,9 +310,7 @@ class BenchmarkSession(object):
         if not self._benchmarks:
             return
 
-        timer = self._options.get('timer') or 'default'
-        timer_name = timer.__module__ + "." if hasattr(timer, '__module__') else ""
-        timer_name += timer.__name__ if hasattr(timer, '__name__') else repr(timer)
+        timer = self._options.get('timer')
 
         groups = defaultdict(list)
         for bench in self._benchmarks:
@@ -338,7 +350,7 @@ class BenchmarkSession(object):
                      self._options,
                      count=len(benchmarks),
                      name="" if group is None else " %r" % group,
-                     timer=timer_name,
+                     timer=timer,
                  )).center(sum(widths.values()), '-'),
                 yellow=True,
             )
