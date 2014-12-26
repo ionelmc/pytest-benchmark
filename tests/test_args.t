@@ -35,7 +35,7 @@ With ``--benchmark-max-time``:
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   \s* (re)
-  -* benchmark: 2 tests, min 1 rounds \(of min 0.1s\), 0.000001s max time, timer: .* (re)
+  -* benchmark: 2 tests, min 1 rounds \(of min 25.00us\), 1.00us max time, timer: .* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast          .* 1  * \S+ (re)
@@ -56,7 +56,7 @@ With ``--benchmark-max-time``::
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   \s* (re)
-  -* benchmark: 2 tests, min 5 rounds \(of min 0.1s\), 0.000001s max time, timer: .* (re)
+  -* benchmark: 2 tests, min 5 rounds \(of min 25.00us\), 1.00us max time, timer: .* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast          .* 5  * \S+ (re)
@@ -77,7 +77,7 @@ With ``--benchmark-disable-gc``::
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   \s* (re)
-  -* benchmark: 2 tests, min 5 rounds \(of min 0.1s\), 1.0s max time, timer: .* (re)
+  -* benchmark: 2 tests, min 5 rounds \(of min 25.00us\), 1.00s max time, timer: .* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast          .* (re)
@@ -98,7 +98,7 @@ With ``--benchmark-timer=time.time``::
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   \s* (re)
-  -* benchmark: 2 tests, min 5 rounds \(of min 0.1s\), 1.0s max time, timer: .* (re)
+  -* benchmark: 2 tests, min 5 rounds \(of min 25.00us\), 1.00s max time, timer: .* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast          .* (re)
@@ -126,7 +126,7 @@ With ``--benchmark-sort=mean``::
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   \s* (re)
-  -* benchmark: 2 tests, min 5 rounds \(of min 0.1s\), 1.0s max time, timer: .* (re)
+  -* benchmark: 2 tests, min 5 rounds \(of min 25.00us\), 1.00s max time, timer: .* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast          .* (re)

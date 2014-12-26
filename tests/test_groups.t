@@ -35,14 +35,14 @@ With groups::
   tests.py::test_slower PASSED
   tests.py::test_xfast PASSED
   \s* (re)
-  -* benchmark: 2 tests, min 5 rounds \(of min 0.1s\), 1.0s max time, timer: .* (re)
+  -* benchmark: 2 tests, min 5 rounds \(of min 25.00us\), 1.00s max time, timer: .* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_fast          .* (re)
   test_slow          .* (re)
   -----------------------------------------------------------------* (re)
   \s* (re)
-  -* benchmark 'A': 2 tests, min 5 rounds \(of min 0.1s\), 1.0s max time, timer: .* (re)
+  -* benchmark 'A': 2 tests, min 5 rounds \(of min 25.00us\), 1.00s max time, timer: .* (re)
   Name \(time in .s\) * Min * Max * Mean * StdDev * Rounds * Iterations (re)
   -----------------------------------------------------------------* (re)
   test_slower        .* (re)

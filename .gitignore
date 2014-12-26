@@ -52,3 +52,4 @@ docs/_build
 .ve
 .bootstrap
 *.bak
+*.t.err
