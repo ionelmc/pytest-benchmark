@@ -54,28 +54,28 @@ def pytest_addoption(parser):
     group = parser.getgroup("benchmark")
     group.addoption(
         "--benchmark-min-time",
-        action="store", type=Decimal, default=Decimal("0.1"),
-        help="Minimum time per round."
+        action="store", type=Decimal, default=Decimal("0.0001"),
+        help="Minimum time per round. Default: %(default)s"
     )
     group.addoption(
         "--benchmark-max-time",
         action="store", type=Decimal, default=Decimal("1.0"),
-        help="Maximum time to spend in a benchmark."
+        help="Maximum time to spend in a benchmark. Default: %(default)s"
     )
     group.addoption(
         "--benchmark-min-rounds",
         action="store", type=loadrounds, default=5,
-        help="Minimum rounds, even if total time would exceed `--max-time`."
+        help="Minimum rounds, even if total time would exceed `--max-time`. Default: %(default)s"
     )
     group.addoption(
         "--benchmark-sort",
         action="store", type=loadsort, default="min",
-        help="Column to sort on. Can be one of: 'min', 'max', 'mean' or 'stddev' ."
+        help="Column to sort on. Can be one of: 'min', 'max', 'mean' or 'stddev'. Default: %(default)s"
     )
     group.addoption(
         "--benchmark-timer",
         action="store", type=loadtimer, default=default_timer,
-        help="Timer to use when measuring time."
+        help="Timer to use when measuring time. Default: %(default)s"
     )
     group.addoption(
         "--benchmark-warmup",
