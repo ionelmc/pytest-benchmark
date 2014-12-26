@@ -54,12 +54,12 @@ def pytest_addoption(parser):
     group = parser.getgroup("benchmark")
     group.addoption(
         "--benchmark-min-time",
-        action="store", type=Decimal, default=Decimal("0.0001"),
+        action="store", type=SecondsDecimal, default=SecondsDecimal("0.000025"),
         help="Minimum time per round. Default: %(default)s"
     )
     group.addoption(
         "--benchmark-max-time",
-        action="store", type=Decimal, default=Decimal("1.0"),
+        action="store", type=SecondsDecimal, default=SecondsDecimal("1.0"),
         help="Maximum time to spend in a benchmark. Default: %(default)s"
     )
     group.addoption(
@@ -214,6 +214,12 @@ def time_format(value):
     return "{0:.2f}{1:s}".format(value * adjustment, unit)
 
 
+class SecondsDecimal(Decimal):
+
+    def __str__(self):
+        return "{0}s".format(time_format(float(self)))
+
+
 class DiagnosticLogger(object):
     def __init__(self, verbose
                  # , capman
@@ -322,14 +328,15 @@ class BenchmarkSession(object):
                     len("{0:.4f}".format(benchmark[prop] * adjustment))
                     for benchmark in benchmarks
                 ))
+
             tr.write_line(
-                " benchmark{2}: {0} tests, min {1.min_rounds} rounds (of min {1.min_time:f}s),"
-                " {1.max_time:f}s max time, timer: {3} ".format(
-                    len(benchmarks),
-                    type("", (), self._options),
-                    "" if group is None else " %r" % group,
-                    timer_name,
-                ).center(sum(widths.values()), '-'),
+                (" benchmark%(name)s: %(count)s tests, min %(min_rounds)s rounds (of min %(min_time)s),"
+                 " %(max_time)s max time, timer: %(timer)s " % dict(
+                     self._options,
+                     count=len(benchmarks),
+                     name="" if group is None else " %r" % group,
+                     timer=timer_name,
+                 )).center(sum(widths.values()), '-'),
                 yellow=True,
             )
             tr.write_line(labels["name"].ljust(widths["name"]) + "".join(
