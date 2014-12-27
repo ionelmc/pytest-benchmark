@@ -4,6 +4,7 @@ import argparse
 import gc
 import sys
 import math
+import time
 from collections import defaultdict
 from decimal import Decimal
 
@@ -155,8 +156,7 @@ class BenchmarkFixture(object):
         self._logger = logger
 
     def __call__(self, function_to_benchmark):
-        def runner(loops, timer=self._timer):
-            loops_range = XRANGE(loops)
+        def runner(loops_range, timer=self._timer):
             gcenabled = gc.isenabled()
             if self._disable_gc:
                 gc.disable()
@@ -168,6 +168,15 @@ class BenchmarkFixture(object):
                 gc.enable()
             return end - start
 
+        if self._warmup:
+            self._logger.write("")
+            self._logger.write("  Warming up for %s ..." % self._max_time)
+            warmup_start = time.time()
+            loops = XRANGE(1)
+
+            while time.time() - warmup_start < self._max_time:
+                runner(loops)
+
         duration, scale = self._calibrate_timer(runner)
 
         # Choose how many time we must repeat the test
@@ -177,12 +186,12 @@ class BenchmarkFixture(object):
         stats = BenchmarkStats(self._name, group=self._group, scale=scale)
         self._add_stats(stats)
 
-        if self._warmup:
-            for _ in XRANGE(rounds):
-                runner(scale)
-
+        self._logger.write("")
+        self._logger.write("  Running %s rounds ..." % rounds)
+        run_start = time.time()
         for _ in XRANGE(rounds):
-            stats.update(runner(scale))
+            stats.update(runner(XRANGE(scale)))
+        self._logger.write("  Ran for %ss." % time_format(time.time() - run_start), bold=True)
 
         return function_to_benchmark()
 
@@ -197,7 +206,7 @@ class BenchmarkFixture(object):
 
         loops = 1
         while True:
-            duration = runner(loops)
+            duration = runner(XRANGE(loops))
             self._logger.write("  Calibrate: %ss for %s iterations." % (time_format(duration), loops))
 
             if duration / min_time >= 0.75:
@@ -244,11 +253,11 @@ class DiagnosticLogger(object):
         self.term = verbose and py.io.TerminalWriter()
         # self.capman = capman
 
-    def write(self, text):
+    def write(self, text, **kwargs):
         if self.term:
             # if self.capman:
             #     self.capman.suspendcapture(in_=True)
-            self.term.line(text, yellow=True)
+            self.term.line(text, yellow=True, **kwargs)
             # if self.capman:
             #     self.capman.resumecapture()
 
