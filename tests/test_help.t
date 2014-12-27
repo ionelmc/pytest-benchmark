@@ -12,6 +12,8 @@
     --benchmark-timer=BENCHMARK_TIMER
                           Timer to use when measuring time. Default: .* (re)
     --benchmark-warmup    Runs the benchmarks two times. Discards data from the first run.
+    --benchmark-warmup-iterations=BENCHMARK_WARMUP_ITERATIONS
+                          Max number of iterations to run in the warmup phase. Default: 100000
     --benchmark-verbose   Dump diagnostic and progress information.
     --benchmark-disable-gc
                           Disable GC during benchmarks.

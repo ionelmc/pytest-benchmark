@@ -95,7 +95,13 @@ def pytest_addoption(parser):
     group.addoption(
         "--benchmark-warmup",
         action="store_true", default=False,
-        help="Runs the benchmarks two times. Discards data from the first run."
+        help="Activates warmup. Will run the test function up to number of times in the calibration phase. "
+             "See `--benchmark-warmup-iterations`."
+    )
+    group.addoption(
+        "--benchmark-warmup-iterations",
+        action="store", type=int, default=100000,
+        help="Max number of iterations to run in the warmup phase. Default: %(default)s"
     )
     group.addoption(
         "--benchmark-verbose",
@@ -143,7 +149,8 @@ class BenchmarkFixture(object):
         else:
             return cls._precisions.setdefault(timer, compute_timer_precision(timer))
 
-    def __init__(self, name, disable_gc, timer, min_rounds, min_time, max_time, warmup, add_stats, logger, group=None):
+    def __init__(self, name, disable_gc, timer, min_rounds, min_time, max_time, warmup, warmup_iterations,
+                 add_stats, logger, group=None):
         self._disable_gc = disable_gc
         self._name = name
         self._group = group
@@ -152,7 +159,7 @@ class BenchmarkFixture(object):
         self._max_time = float(max_time)
         self._min_time = float(min_time)
         self._add_stats = add_stats
-        self._warmup = warmup
+        self._warmup = warmup and warmup_iterations
         self._logger = logger
 
     def __call__(self, function_to_benchmark):
@@ -167,15 +174,6 @@ class BenchmarkFixture(object):
             if gcenabled:
                 gc.enable()
             return end - start
-
-        if self._warmup:
-            self._logger.write("")
-            self._logger.write("  Warming up for %s ..." % self._max_time)
-            warmup_start = time.time()
-            loops = XRANGE(1)
-
-            while time.time() - warmup_start < self._max_time:
-                runner(loops)
 
         duration, scale = self._calibrate_timer(runner)
 
@@ -206,8 +204,19 @@ class BenchmarkFixture(object):
 
         loops = 1
         while True:
-            duration = runner(XRANGE(loops))
-            self._logger.write("  Calibrate: %ss for %s iterations." % (time_format(duration), loops))
+            loops_range = XRANGE(loops)
+            duration = runner(loops_range)
+            if self._warmup:
+                warmup_start = time.time()
+                warmup_iterations = 0
+                while time.time() - warmup_start < self._max_time and warmup_iterations < self._warmup:
+                    duration = min(duration, runner(loops_range))
+                    warmup_iterations += 1
+                self._logger.write("    warmed up for %ss (%s iterations)." % (
+                    time_format(time.time() - warmup_start),
+                    warmup_iterations
+                ))
+            self._logger.write("  - measured %s iterations: %ss." % (loops, time_format(duration)))
 
             if duration / min_time >= 0.75:
                 break
@@ -215,9 +224,10 @@ class BenchmarkFixture(object):
             if duration >= min_time_estimate:
                 # coarse estimation of the number of loops
                 loops = int(min_time * loops / duration)
-                self._logger.write("  Calibrate estimate: %s iterations." % loops)
+                self._logger.write("  = estimating %s iterations." % loops)
             else:
                 loops *= 10
+        self._logger.write("  # calibrated to %s iterations for a total of %ss." % (loops, time_format(duration)))
         return duration, loops
 
 
@@ -271,7 +281,8 @@ class BenchmarkSession(object):
             max_time=config.getoption("benchmark_max_time"),
             timer=timer,
             disable_gc=config.getoption("benchmark_disable_gc"),
-            warmup=config.getoption("benchmark_warmup")
+            warmup=config.getoption("benchmark_warmup"),
+            warmup_iterations=config.getoption("benchmark_warmup_iterations"),
         )
         self._skip = config.getoption("benchmark_skip")
         self._only = config.getoption("benchmark_only")

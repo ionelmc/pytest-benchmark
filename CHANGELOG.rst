@@ -2,6 +2,13 @@
 Changelog
 =========
 
+2.3.0 (2014-12-27)
+------------------
+
+* Moved the warmup in the calibration phase. Solves issues with benchmarking on PyPy.
+
+  Added a ``--benchmark-warmup-iterations`` option to fine-tune that.
+
 2.2.0 (2014-12-26)
 ------------------
 
