@@ -168,14 +168,14 @@ class BenchmarkFixture(object):
             if self._disable_gc:
                 gc.disable()
             start = timer()
-            for index in loops_range:
+            for _ in loops_range:
                 function_to_benchmark()
             end = timer()
             if gcenabled:
                 gc.enable()
             return end - start
 
-        duration, scale = self._calibrate_timer(runner)
+        duration, scale, loops_range = self._calibrate_timer(runner)
 
         # Choose how many time we must repeat the test
         rounds = int(math.ceil(self._max_time / duration))
@@ -188,7 +188,7 @@ class BenchmarkFixture(object):
         self._logger.write("  Running %s rounds ..." % rounds)
         run_start = time.time()
         for _ in XRANGE(rounds):
-            stats.update(runner(XRANGE(scale)))
+            stats.update(runner(loops_range))
         self._logger.write("  Ran for %ss." % time_format(time.time() - run_start), bold=True)
 
         return function_to_benchmark()
@@ -224,11 +224,10 @@ class BenchmarkFixture(object):
             if duration >= min_time_estimate:
                 # coarse estimation of the number of loops
                 loops = int(min_time * loops / duration)
-                self._logger.write("  = estimating %s iterations." % loops)
+                self._logger.write("  * estimating %s iterations." % loops)
             else:
                 loops *= 10
-        self._logger.write("  # calibrated to %s iterations for a total of %ss." % (loops, time_format(duration)))
-        return duration, loops
+        return duration, loops, loops_range
 
 
 def time_unit(value):
