@@ -146,7 +146,7 @@ Setting per-test options:
 Extras
 ======
 
-Suppose you want to test an ``internal`` function from a class:
+Suppose you want to benchmark an ``internal`` function from a class:
 
 .. sourcecode:: python
 
@@ -159,6 +159,9 @@ Suppose you want to test an ``internal`` function from a class:
 
         def internal(self, duration):
             time.sleep(duration)
+
+With the ``benchmark`` fixture this is quite hard to test if you don't control the ``Foo`` code or it has very
+complicated construction.
 
 For this there's an experimental ``benchmark_weave`` fixture that can patch stuff using `aspectlib
 <https://github.com/ionelmc/python-aspectlib>`_ (make sure you `pip install apectlib` or `pip install
