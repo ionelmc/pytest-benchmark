@@ -162,14 +162,14 @@ class BenchmarkFixture(object):
         self._warmup = warmup and warmup_iterations
         self._logger = logger
 
-    def __call__(self, function_to_benchmark):
+    def __call__(self, function_to_benchmark, *args, **kwargs):
         def runner(loops_range, timer=self._timer):
             gcenabled = gc.isenabled()
             if self._disable_gc:
                 gc.disable()
             start = timer()
             for _ in loops_range:
-                function_to_benchmark()
+                function_to_benchmark(*args, **kwargs)
             end = timer()
             if gcenabled:
                 gc.enable()
@@ -191,7 +191,7 @@ class BenchmarkFixture(object):
             stats.update(runner(loops_range))
         self._logger.write("  Ran for %ss." % time_format(time.time() - run_start), bold=True)
 
-        return function_to_benchmark()
+        return function_to_benchmark(*args, **kwargs)
 
     def _calibrate_timer(self, runner):
         timer_precision = self._get_precision(self._timer)
@@ -311,6 +311,24 @@ class BenchmarkSession(object):
                 **dict(self._options, **options)
             )
             return benchmark
+
+    @pytest.fixture(scope="function")
+    def benchmark_weave(self, request, benchmark):
+        try:
+            import aspectlib
+        except ImportError as exc:
+            raise ImportError(exc.args, "Please install aspectlib or pytest-benchmark[aspect]")
+
+        def aspect(function):
+            def wrapper(*args, **kwargs):
+                return benchmark(function, *args, **kwargs)
+
+            return wrapper
+
+        def weave(target, **kwargs):
+            return aspectlib.weave(target, aspect, **kwargs)
+
+        return weave
 
     def pytest_runtest_call(self, item, __multicall__):
         benchmark = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
