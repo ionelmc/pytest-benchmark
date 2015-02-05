@@ -64,7 +64,7 @@ Usage
 =====
 
 This plugin provides a `benchmark` fixture. This fixture is a callable object that will benchmark
-any function pass to it.
+any function passed to it.
 
 Example:
 
@@ -82,7 +82,15 @@ Example:
         # Note: this code is not measured.
         assert result is None
 
-If you need to do some wrapping (like passing extra args), you can use it as a decorator around a wrapper function:
+You can also pass extra arguments:
+
+.. code-block:: python
+
+    def test_my_stuff(benchmark):
+        # benchmark something
+        result = benchmark(something, 0.02)
+
+If you need to do some wrapping (like special setup), you can use it as a decorator around a wrapper function:
 
 .. code-block:: python
 
@@ -143,8 +151,23 @@ Setting per-test options:
         # Note: this code is not measured.
         assert result is None
 
-Extras
-======
+Features
+========
+
+Calibration
+-----------
+
+``pytest-benchmark`` will run your function multiple times between measurements. This is quite similar to the builtin
+``timeit`` module but it's more robust.
+
+The problem with measuring single runs apears when you have very fast code. To illustrate:
+
+.. image:: https://github.com/ionelmc/pytest-benchmark/raw/master/docs/measurement-issues.png
+    :alt: Diagram ilustrating issues with measuring very fast code
+
+Patch utilities
+---------------
+
 
 Suppose you want to benchmark an ``internal`` function from a class:
 
