@@ -87,7 +87,7 @@ Test that we don't benchmark code that raises exceptions:
   .*pytest_benchmark/plugin.py:.*: in _calibrate_timer (re)
       duration = runner(loops_range)
   .*pytest_benchmark/plugin.py:.*: in runner (re)
-      function_to_benchmark()
+      function_to_benchmark(*args, **kwargs)
   (_ )+ (re)
   \s* (re)
       @benchmark
