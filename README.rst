@@ -143,6 +143,33 @@ Setting per-test options:
         # Note: this code is not measured.
         assert result is None
 
+Extras
+======
+
+Suppose you want to test an ``internal`` function from a class:
+
+.. sourcecode:: python
+
+    class Foo(object):
+        def __init__(self, arg=0.01):
+            self.arg = arg
+
+        def run(self):
+            self.internal(self.arg)
+
+        def internal(self, duration):
+            time.sleep(duration)
+
+For this there's an experimental ``benchmark_weave`` fixture that can patch stuff using `aspectlib
+<https://github.com/ionelmc/python-aspectlib>`_ (make sure you `pip install apectlib` or `pip install
+pytest-benchmark[aspect]`):
+
+.. sourcecode:: python
+
+    def test_foo(benchmark_weave):
+        with benchmark_weave(Foo.internal, lazy=True):
+            f = Foo()
+            f.run()
 
 Documentation
 =============
