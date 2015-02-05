@@ -15,7 +15,7 @@ class Foo(object):
         time.sleep(duration)
 
 
-def test_foo(benchmark_aspect):
+def test_foo(benchmark_weave):
     with benchmark_weave(Foo.internal, lazy=True):
         f = Foo()
         f.run()
