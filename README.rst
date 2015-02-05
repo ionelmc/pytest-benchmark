@@ -63,13 +63,34 @@ Installation
 Usage
 =====
 
+This plugin provides a `benchmark` fixture. This fixture is a callable object that will benchmark
+any function pass to it.
+
+Example:
+
+.. code-block:: python
+
+    def something(duration=0.000001):
+        # Code to be measured
+        return time.sleep(duration)
+
+    def test_my_stuff(benchmark):
+        # benchmark something
+        result = benchmark(something)
+
+        # Extra code, to verify that the run completed correctly.
+        # Note: this code is not measured.
+        assert result is None
+
+If you need to do some wrapping (like passing extra args), you can use it as a decorator around a wrapper function:
+
 .. code-block:: python
 
     def test_my_stuff(benchmark):
         @benchmark
         def result():
             # Code to be measured
-            return time.sleep(0.000001)
+            return something(0.0002)
 
         # Extra code, to verify that the run completed correctly.
         # Note: this code is not measured.
