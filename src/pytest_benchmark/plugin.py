@@ -291,45 +291,6 @@ class BenchmarkSession(object):
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
         self._benchmarks = []
 
-    @pytest.fixture(scope="function")
-    def benchmark(self, request):
-        if self._skip:
-            pytest.skip("Benchmarks are disabled.")
-        else:
-            node = request.node
-            marker = node.get_marker("benchmark")
-            options = marker.kwargs if marker else {}
-            if 'timer' in options:
-                options['timer'] = NameWrapper(options['timer'])
-            benchmark = BenchmarkFixture(
-                node.name,
-                add_stats=self._benchmarks.append,
-                logger=DiagnosticLogger(
-                    self._verbose,
-                    # node.config.pluginmanager.getplugin("capturemanager")
-                ),
-                **dict(self._options, **options)
-            )
-            return benchmark
-
-    @pytest.fixture(scope="function")
-    def benchmark_weave(self, request, benchmark):
-        try:
-            import aspectlib
-        except ImportError as exc:
-            raise ImportError(exc.args, "Please install aspectlib or pytest-benchmark[aspect]")
-
-        def aspect(function):
-            def wrapper(*args, **kwargs):
-                return benchmark(function, *args, **kwargs)
-
-            return wrapper
-
-        def weave(target, **kwargs):
-            return aspectlib.weave(target, aspect, **kwargs)
-
-        return weave
-
     def pytest_runtest_call(self, item, __multicall__):
         benchmark = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
         if isinstance(benchmark, BenchmarkFixture):
@@ -416,6 +377,49 @@ class BenchmarkSession(object):
             tr.write_line("")
 
 
+@pytest.fixture(scope="function")
+def benchmark(request):
+    benchmarksession = request.config._benchmarksession
+
+    if benchmarksession._skip:
+        pytest.skip("Benchmarks are disabled.")
+    else:
+        node = request.node
+        marker = node.get_marker("benchmark")
+        options = marker.kwargs if marker else {}
+        if 'timer' in options:
+            options['timer'] = NameWrapper(options['timer'])
+        benchmark = BenchmarkFixture(
+            node.name,
+            add_stats=benchmarksession._benchmarks.append,
+            logger=DiagnosticLogger(
+                benchmarksession._verbose,
+                # node.config.pluginmanager.getplugin("capturemanager")
+            ),
+            **dict(benchmarksession._options, **options)
+        )
+
+        return benchmark
+
+@pytest.fixture(scope="function")
+def benchmark_weave(benchmark):
+    try:
+        import aspectlib
+    except ImportError as exc:
+        raise ImportError(exc.args, "Please install aspectlib or pytest-benchmark[aspect]")
+
+    def aspect(function):
+        def wrapper(*args, **kwargs):
+            return benchmark(function, *args, **kwargs)
+
+        return wrapper
+
+    def weave(target, **kwargs):
+        return aspectlib.weave(target, aspect, **kwargs)
+
+    return weave
+
+
 def pytest_runtest_setup(item):
     benchmark = item.get_marker("benchmark")
     if benchmark:
@@ -428,4 +432,5 @@ def pytest_runtest_setup(item):
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "benchmark: mark a test with custom benchmark settings.")
-    config.pluginmanager.register(BenchmarkSession(config), "pytest-benchmark")
+    config._benchmarksession = BenchmarkSession(config)
+    config.pluginmanager.register(config._benchmarksession, "pytest-benchmark")
