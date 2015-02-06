@@ -401,6 +401,7 @@ def benchmark(request):
 
         return benchmark
 
+
 @pytest.fixture(scope="function")
 def benchmark_weave(benchmark):
     try:
