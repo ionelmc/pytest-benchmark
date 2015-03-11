@@ -1,20 +1,20 @@
 from __future__ import division
 
-import argparse
-import gc
-import sys
-import math
-import time
 from collections import defaultdict
 from decimal import Decimal
-
-import pytest
+import argparse
+import gc
+import math
 import py
+import pytest
+import sys
+import time
+import warnings
 
+from .compat import XRANGE, PY3
 from .stats import RunningStats
 from .timers import compute_timer_precision
 from .timers import default_timer
-from .compat import XRANGE, PY3
 
 
 class NameWrapper(object):
@@ -31,7 +31,7 @@ class NameWrapper(object):
         return "NameWrapper(%s)" % repr(self.target)
 
 
-def loadtimer(string):
+def load_timer(string):
     if "." not in string:
         raise argparse.ArgumentTypeError("Value for --benchmark-timer must be in dotted form. Eg: 'module.attr'.")
     mod, attr = string.rsplit(".", 1)
@@ -47,14 +47,17 @@ def loadtimer(string):
         mod = sys.modules[mod]
         return NameWrapper(getattr(mod, attr))
 
+def parse_timer(string):
+    return str(load_timer(string))
 
-def loadsort(string):
+
+def parse_sort(string):
     if string not in ("min", "max", "mean", "stddev"):
         raise argparse.ArgumentTypeError("Value for --benchmark-sort must be one of: 'min', 'max', 'mean' or 'stddev'.")
     return string
 
 
-def loadrounds(string):
+def parse_rounds(string):
     try:
         value = int(string)
     except ValueError as exc:
@@ -64,31 +67,39 @@ def loadrounds(string):
             raise argparse.ArgumentTypeError("Value for --benchmark-rounds must be at least 1.")
         return value
 
+
+def parse_seconds(string):
+    try:
+        return SecondsDecimal(string).as_string
+    except Exception as exc:
+        raise argparse.ArgumentTypeError("Invalid decimal value %r: %r" % (string, exc))
+
+
 def pytest_addoption(parser):
     group = parser.getgroup("benchmark")
     group.addoption(
         "--benchmark-min-time",
-        action="store", type=str, default="0.000025",
+        action="store", type=parse_seconds, default="0.000025",
         help="Minimum time per round. Default: %(default)s"
     )
     group.addoption(
         "--benchmark-max-time",
-        action="store", type=str, default="1.0",
+        action="store", type=parse_seconds, default="1.0",
         help="Maximum time to spend in a benchmark. Default: %(default)s"
     )
     group.addoption(
         "--benchmark-min-rounds",
-        action="store", type=loadrounds, default=5,
+        action="store", type=parse_rounds, default=5,
         help="Minimum rounds, even if total time would exceed `--max-time`. Default: %(default)s"
     )
     group.addoption(
         "--benchmark-sort",
-        action="store", type=loadsort, default="min",
+        action="store", type=parse_sort, default="min",
         help="Column to sort on. Can be one of: 'min', 'max', 'mean' or 'stddev'. Default: %(default)s"
     )
     group.addoption(
         "--benchmark-timer",
-        action="store", type=lambda val: str(loadtimer(val)), default=str(NameWrapper(default_timer)),
+        action="store", type=parse_timer, default=str(NameWrapper(default_timer)),
         help="Timer to use when measuring time. Default: %(default)s"
     )
     group.addoption(
@@ -153,7 +164,7 @@ class BenchmarkFixture(object):
         self._disable_gc = disable_gc
         self._name = name
         self._group = group
-        self._timer = loadtimer(timer).target
+        self._timer = load_timer(timer).target
         self._min_rounds = min_rounds
         self._max_time = float(max_time)
         self._min_time = float(min_time)
@@ -246,7 +257,6 @@ def time_format(value):
 
 
 class SecondsDecimal(Decimal):
-
     def __float__(self):
         return float(super(SecondsDecimal, self).__str__())
 
@@ -278,21 +288,35 @@ class BenchmarkSession(object):
     def __init__(self, config):
         timer = config.getoption("benchmark_timer")
         self._options = dict(
-            min_time=config.getoption("benchmark_min_time"),
+            min_time=SecondsDecimal(config.getoption("benchmark_min_time")),
             min_rounds=config.getoption("benchmark_min_rounds"),
-            max_time=config.getoption("benchmark_max_time"),
+            max_time=SecondsDecimal(config.getoption("benchmark_max_time")),
             timer=timer,
             disable_gc=config.getoption("benchmark_disable_gc"),
             warmup=config.getoption("benchmark_warmup"),
             warmup_iterations=config.getoption("benchmark_warmup_iterations"),
         )
         self._skip = config.getoption("benchmark_skip")
+        if config.getoption("dist") != "no" and not self._skip:
+            tr = config.pluginmanager.getplugin('terminalreporter')
+            tr.write_sep("-", red=True, bold=True)
+            tr.write_line(
+                "WARNING: Benchmarks are automatically skipped because xdist plugin is active."
+                "Benchmarks cannot be performed reliably in a parallelized environment.",
+                red=True
+            )
+            tr.write_sep("-", red=True, bold=True)
+            self._skip = True
+        if hasattr(config, "slaveinput"):
+            self._skip = True
+
         self._only = config.getoption("benchmark_only")
         self._sort = config.getoption("benchmark_sort")
         self._verbose = config.getoption("benchmark_verbose")
         if self._skip and self._only:
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
         self._benchmarks = []
+
 
 def pytest_runtest_call(item, __multicall__):
     benchmarksession = item.config._benchmarksession
@@ -308,6 +332,7 @@ def pytest_runtest_call(item, __multicall__):
             pytest.skip("Skipping non-benchmark (--benchmark-only active).")
         else:
             __multicall__.execute()
+
 
 def pytest_terminal_summary(terminalreporter):
     tr = terminalreporter
@@ -394,7 +419,7 @@ def benchmark(request):
         marker = node.get_marker("benchmark")
         options = marker.kwargs if marker else {}
         if 'timer' in options:
-            options['timer'] = NameWrapper(loadtimer(options['timer']))
+            options['timer'] = NameWrapper(load_timer(options['timer']))
         benchmark = BenchmarkFixture(
             node.name,
             add_stats=benchmarksession._benchmarks.append,
@@ -437,7 +462,8 @@ def pytest_runtest_setup(item):
                 raise ValueError("benchmark mark can't have %r keyword argument." % name)
 
 
-def pytest_configure(config):
+def pytest_configure(config, __multicall__):
+    __multicall__.execute()  # force the other plugins to initialise
     config.addinivalue_line("markers", "benchmark: mark a test with custom benchmark settings.")
     config._benchmarksession = BenchmarkSession(config)
     config.pluginmanager.register(config._benchmarksession, "pytest-benchmark")
