@@ -419,6 +419,8 @@ def benchmark(request):
         node = request.node
         marker = node.get_marker("benchmark")
         options = marker.kwargs if marker else {}
+        if 'timer' in options:
+            options['timer'] = NameWrapper(options['timer'])
         benchmark = BenchmarkFixture(
             node.name,
             add_stats=benchmarksession._benchmarks.append,

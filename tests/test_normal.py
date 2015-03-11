@@ -26,7 +26,7 @@ def test_slower(benchmark):
     benchmark(lambda: time.sleep(0.01))
 
 
-@pytest.mark.benchmark(min_rounds=2)
+@pytest.mark.benchmark(min_rounds=2, timer=time.time)
 def test_xfast(benchmark):
     benchmark(str)
 
