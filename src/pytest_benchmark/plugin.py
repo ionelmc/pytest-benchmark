@@ -9,7 +9,6 @@ import py
 import pytest
 import sys
 import time
-import warnings
 
 from .compat import XRANGE, PY3
 from .stats import RunningStats
