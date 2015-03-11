@@ -6,6 +6,8 @@ Changelog
 ------------------
 
 * Add a ``benchmark_weave`` experimental fixture.
+* Fix internal failures when `xdist` plugin is active.
+* Automatically disable benchmarks if `xdist` is active.
 
 2.3.0 (2014-12-27)
 ------------------
