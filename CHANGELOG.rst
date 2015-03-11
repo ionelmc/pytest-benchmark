@@ -2,7 +2,7 @@
 Changelog
 =========
 
-2.4.0 (unreleased)
+2.4.0 (2015-03-12)
 ------------------
 
 * Add a ``benchmark_weave`` experimental fixture.
