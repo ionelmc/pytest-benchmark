@@ -156,3 +156,19 @@ With ``--benchmark-sort=bogus``::
   usage: py.test [options] [file_or_dir] [file_or_dir] [...]
   py.test: error: argument --benchmark-sort: Value for --benchmark-sort must be one of: 'min', 'max', 'mean' or 'stddev'.
   [2]
+
+With xdist::
+
+  $ py.test --doctest-modules -n 1 tests.py
+  --------------------------------------------------------------------------------
+  WARNING: Benchmarks are automatically skipped because xdist plugin is active.Benchmarks cannot be performed reliably in a parallelized environment.
+  --------------------------------------------------------------------------------
+  ============================= test session starts ==============================
+  platform linux -- Python 3.4.2 -- py-1.4.26 -- pytest-2.6.4
+  plugins: benchmark, cov, xdist
+  gw0 I
+  gw0 [3]
+  \s* (re)
+  scheduling tests via LoadScheduling
+  .ss
+  ===================== 1 passed, 2 skipped in 0.25 seconds ======================
