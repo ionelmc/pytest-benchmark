@@ -70,14 +70,14 @@ With ``--benchmark-max-time=bogus``::
 
   $ py.test -vv --doctest-modules --benchmark-max-time=bogus tests.py
   usage: py.test [options] [file_or_dir] [file_or_dir] [...]
-  py.test: error: argument --benchmark-max-time: Invalid decimal value 'bogus': InvalidOperation([<class 'decimal.ConversionSyntax'>],)
+  py.test: error: argument --benchmark-max-time: Invalid decimal value 'bogus': InvalidOperation.* (re)
   [2]
 
 With ``--benchmark-min-time=bogus``::
 
   $ py.test -vv --doctest-modules --benchmark-min-time=bogus tests.py
   usage: py.test [options] [file_or_dir] [file_or_dir] [...]
-  py.test: error: argument --benchmark-min-time: Invalid decimal value 'bogus': InvalidOperation([<class 'decimal.ConversionSyntax'>],)
+  py.test: error: argument --benchmark-min-time: Invalid decimal value 'bogus': InvalidOperation.* (re)
   [2]
 
 With ``--benchmark-disable-gc``::
@@ -164,11 +164,11 @@ With xdist::
   WARNING: Benchmarks are automatically skipped because xdist plugin is active.Benchmarks cannot be performed reliably in a parallelized environment.
   --------------------------------------------------------------------------------
   ============================= test session starts ==============================
-  platform linux -- Python 3.4.2 -- py-1.4.26 -- pytest-2.6.4
-  plugins: benchmark, cov, xdist
+  platform .* (re)
+  plugins: .* (re)
   gw0 I
   gw0 [3]
   \s* (re)
   scheduling tests via LoadScheduling
   .ss
-  ===================== 1 passed, 2 skipped in 0.25 seconds ======================
+  =====================* 1 passed, 2 skipped in .* seconds ===================* (re)
