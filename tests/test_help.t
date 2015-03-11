@@ -2,9 +2,9 @@
   \s* (re)
   benchmark:
     --benchmark-min-time=BENCHMARK_MIN_TIME
-                          Minimum time per round. Default: 25.00us
+                          Minimum time per round in seconds. Default: 0.000025
     --benchmark-max-time=BENCHMARK_MAX_TIME
-                          Maximum time to spend in a benchmark. Default: 1.00s
+                          Maximum time to spend in a benchmark in seconds. Default: 1.0
     --benchmark-min-rounds=BENCHMARK_MIN_ROUNDS
                           Minimum rounds, even if total time would exceed `--max-time`. Default: 5
     --benchmark-sort=BENCHMARK_SORT

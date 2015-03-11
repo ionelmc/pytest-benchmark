@@ -65,6 +65,21 @@ With ``--benchmark-max-time``::
   \s* (re)
   =====================* 3 passed in .* seconds ===================* (re)
 
+
+With ``--benchmark-max-time=bogus``::
+
+  $ py.test -vv --doctest-modules --benchmark-max-time=bogus tests.py
+  usage: py.test [options] [file_or_dir] [file_or_dir] [...]
+  py.test: error: argument --benchmark-max-time: Invalid decimal value 'bogus': InvalidOperation([<class 'decimal.ConversionSyntax'>],)
+  [2]
+
+With ``--benchmark-min-time=bogus``::
+
+  $ py.test -vv --doctest-modules --benchmark-min-time=bogus tests.py
+  usage: py.test [options] [file_or_dir] [file_or_dir] [...]
+  py.test: error: argument --benchmark-min-time: Invalid decimal value 'bogus': InvalidOperation([<class 'decimal.ConversionSyntax'>],)
+  [2]
+
 With ``--benchmark-disable-gc``::
 
   $ py.test -vv --doctest-modules --benchmark-disable-gc tests.py

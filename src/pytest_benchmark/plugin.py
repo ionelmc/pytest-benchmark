@@ -47,6 +47,7 @@ def load_timer(string):
         mod = sys.modules[mod]
         return NameWrapper(getattr(mod, attr))
 
+
 def parse_timer(string):
     return str(load_timer(string))
 
@@ -80,12 +81,12 @@ def pytest_addoption(parser):
     group.addoption(
         "--benchmark-min-time",
         action="store", type=parse_seconds, default="0.000025",
-        help="Minimum time per round. Default: %(default)s"
+        help="Minimum time per round in seconds. Default: %(default)s"
     )
     group.addoption(
         "--benchmark-max-time",
         action="store", type=parse_seconds, default="1.0",
-        help="Maximum time to spend in a benchmark. Default: %(default)s"
+        help="Maximum time to spend in a benchmark in seconds. Default: %(default)s"
     )
     group.addoption(
         "--benchmark-min-rounds",
@@ -164,7 +165,7 @@ class BenchmarkFixture(object):
         self._disable_gc = disable_gc
         self._name = name
         self._group = group
-        self._timer = load_timer(timer).target
+        self._timer = timer.target
         self._min_rounds = min_rounds
         self._max_time = float(max_time)
         self._min_time = float(min_time)
@@ -291,7 +292,7 @@ class BenchmarkSession(object):
             min_time=SecondsDecimal(config.getoption("benchmark_min_time")),
             min_rounds=config.getoption("benchmark_min_rounds"),
             max_time=SecondsDecimal(config.getoption("benchmark_max_time")),
-            timer=timer,
+            timer=load_timer(timer),
             disable_gc=config.getoption("benchmark_disable_gc"),
             warmup=config.getoption("benchmark_warmup"),
             warmup_iterations=config.getoption("benchmark_warmup_iterations"),
@@ -418,8 +419,6 @@ def benchmark(request):
         node = request.node
         marker = node.get_marker("benchmark")
         options = marker.kwargs if marker else {}
-        if 'timer' in options:
-            options['timer'] = NameWrapper(load_timer(options['timer']))
         benchmark = BenchmarkFixture(
             node.name,
             add_stats=benchmarksession._benchmarks.append,
