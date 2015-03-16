@@ -2,6 +2,11 @@
 Changelog
 =========
 
+2.4.1 (2015-03-16)
+------------------
+
+* Fix regression, plugin was raising ``ValueError: no option named 'dist'`` when xdist wasn't installed.
+
 2.4.0 (2015-03-12)
 ------------------
 

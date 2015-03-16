@@ -297,7 +297,7 @@ class BenchmarkSession(object):
             warmup_iterations=config.getoption("benchmark_warmup_iterations"),
         )
         self._skip = config.getoption("benchmark_skip")
-        if config.getoption("dist") != "no" and not self._skip:
+        if config.getoption("dist", "no") != "no" and not self._skip:
             tr = config.pluginmanager.getplugin('terminalreporter')
             tr.write_sep("-", red=True, bold=True)
             tr.write_line(
