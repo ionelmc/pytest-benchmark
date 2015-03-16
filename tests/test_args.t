@@ -159,7 +159,22 @@ With ``--benchmark-sort=bogus``::
 
 With xdist::
 
-  $ py.test --doctest-modules -n 1 tests.py
+  $ if [ -n "$(py.test --version 2>&1 | grep xdist)" ]; then
+  >   py.test --doctest-modules -n 1 tests.py
+  > else
+  >   echo "--------------------------------------------------------------------------------
+  > WARNING: Benchmarks are automatically skipped because xdist plugin is active.Benchmarks cannot be performed reliably in a parallelized environment.
+  > --------------------------------------------------------------------------------
+  > ============================= test session starts ==============================
+  > platform .*
+  > plugins: .*
+  > gw0 I
+  > gw0 [3]
+  > _
+  > scheduling tests via LoadScheduling
+  > .ss
+  > ===================== 1 passed, 2 skipped in .* seconds ==================="
+  > fi
   --------------------------------------------------------------------------------
   WARNING: Benchmarks are automatically skipped because xdist plugin is active.Benchmarks cannot be performed reliably in a parallelized environment.
   --------------------------------------------------------------------------------
@@ -168,7 +183,7 @@ With xdist::
   plugins: .* (re)
   gw0 I
   gw0 [3]
-  \s* (re)
+  .* (re)
   scheduling tests via LoadScheduling
   .ss
   =====================* 1 passed, 2 skipped in .* seconds ===================* (re)
