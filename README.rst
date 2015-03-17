@@ -46,7 +46,7 @@ pytest-benchmark
     :target: https://pypi.python.org/pypi/pytest-benchmark
 
 .. |scrutinizer| image:: https://img.shields.io/scrutinizer/g/ionelmc/pytest-benchmark/master.png?style=flat
-    :alt: Scrtinizer Status
+    :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/ionelmc/pytest-benchmark/
 
 A ``py.test`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer. See: calibration_.
