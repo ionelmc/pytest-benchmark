@@ -49,7 +49,7 @@ pytest-benchmark
     :alt: Scrtinizer Status
     :target: https://scrutinizer-ci.com/g/ionelmc/pytest-benchmark/
 
-A ``py.test`` fixture for benchmarking code.
+A ``py.test`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer. See: calibration_.
 
 * Free software: BSD license
 
@@ -154,20 +154,25 @@ Setting per-test options:
 Features
 ========
 
+.. _calibration:
+
 Calibration
 -----------
 
-``pytest-benchmark`` will run your function multiple times between measurements. This is quite similar to the builtin
-``timeit`` module but it's more robust.
+``pytest-benchmark`` will run your function multiple times between measurements. A `round`is that set of runs done between measurements.
+This is quite similar to the builtin ``timeit`` module but it's more robust.
 
 The problem with measuring single runs apears when you have very fast code. To illustrate:
 
 .. image:: https://github.com/ionelmc/pytest-benchmark/raw/master/docs/measurement-issues.png
     :alt: Diagram ilustrating issues with measuring very fast code
 
+In other words, a `round` is a set of runs that are averaged together, those resulting numbers are then used to compute the result tables.
+The default settings will try to keep the round small enough (so that you get to see variance), but not too small, because then you have
+the timer calibration issues illustrated above (your test function is faster than or as fast as the resolution of the timer).
+
 Patch utilities
 ---------------
-
 
 Suppose you want to benchmark an ``internal`` function from a class:
 
