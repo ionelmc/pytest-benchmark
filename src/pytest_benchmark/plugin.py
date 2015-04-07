@@ -133,6 +133,11 @@ def pytest_addoption(parser):
         action="store_true", default=False,
         help="Only run benchmarks."
     )
+    group.addoption(
+        "--benchmark-name-length", choices=['short', 'full'],
+        default='short',
+        help="length of name in report"
+    )
 
 
 class BenchmarkStats(RunningStats):
@@ -416,12 +421,18 @@ def benchmark(request):
         pytest.skip("Benchmarks are disabled.")
     else:
         node = request.node
+        NameLength = request.config.getoption("benchmark_name_length")
+        if NameLength == 'full':
+            name = node._nodeid
+        else:
+            name = node.name
+        
         marker = node.get_marker("benchmark")
         options = marker.kwargs if marker else {}
         if 'timer' in options:
             options['timer'] = NameWrapper(options['timer'])
         benchmark = BenchmarkFixture(
-            node.name,
+            name,
             add_stats=benchmarksession._benchmarks.append,
             logger=DiagnosticLogger(
                 benchmarksession._verbose,
