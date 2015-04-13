@@ -5,10 +5,12 @@ from datetime import datetime
 from decimal import Decimal
 import argparse
 import gc
+import json
 import math
 import os
 import subprocess
 import sys
+import socket
 import time
 
 import py
@@ -18,6 +20,8 @@ from .compat import XRANGE, PY3
 from .stats import RunningStats
 from .timers import compute_timer_precision
 from .timers import default_timer
+
+import newhooks
 
 
 class NameWrapper(object):
@@ -190,6 +194,13 @@ def pytest_addoption(parser):
         metavar="FILENAME-PREFIX", nargs="?", default="benchmark_%s" % get_current_time(),
         help="Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. Default is %(default)r"
     )
+    group.addoption('--benchmark-json-path',  action="store",
+        dest="benchmark_json_path", metavar="path", default=None,
+        help="create json report file at given path.")
+
+
+def pytest_addhooks(pluginmanager):
+    pluginmanager.addhooks(newhooks)
 
 
 class BenchmarkStats(RunningStats):
@@ -411,6 +422,8 @@ def pytest_terminal_summary(terminalreporter):
     if not benchmarksession._benchmarks:
         return
 
+    write_json(terminalreporter)
+
     timer = benchmarksession._options.get('timer')
 
     groups = defaultdict(list)
@@ -478,6 +491,58 @@ def pytest_terminal_summary(terminalreporter):
 
         tr.write_line("-" * sum(widths.values()), yellow=True)
         tr.write_line("")
+
+
+def write_json(terminalreporter):
+    tr = terminalreporter
+    benchmarksession = tr.config._benchmarksession
+
+    if not benchmarksession._benchmarks:
+        return
+    if not tr.config.option.benchmark_json_path:
+        return
+
+    jsonData = {}
+
+    jsonData['header'] = {}
+
+    jsonData['header']['hostname'] = socket.gethostname()
+
+    tr.config.hook.pytest_benchmark_add_extra_info(headerDict=jsonData['header'])
+
+
+    groups = defaultdict(list)
+    for bench in benchmarksession._benchmarks:
+        groups[bench.group].append(bench)
+
+
+    labels = {
+            "name": "Name",
+            "min": "Min",
+            "max": "Max",
+            "mean": "Mean",
+            "stddev": "StdDev",
+            "runs": "Rounds",
+            "scale": "Iterations",
+        }
+    allBenchmarks = {}
+    for group, benchmarks in sorted(groups.items(), key=lambda pair: pair[0] or ""):
+        if group is None:
+            group = 'default'
+        groupData = []
+        for benchmark in benchmarks:
+            tt = { jsonName: benchmark[prop] for prop, jsonName in labels.items() }
+            tt['status'] = 'passed'
+            allBenchmarks[tt['Name']] = tt
+            groupData.append(tt)
+        jsonData[group] = groupData
+
+    for status in ('error', 'failed'):
+        for rep in tr.getreports(status):
+            allBenchmarks[rep.nodeid]['status'] = status
+
+    with open(tr.config.option.benchmark_json_path,'w') as f:
+        f.write(json.dumps(jsonData, indent=4))
 
 
 @pytest.fixture(scope="function")
