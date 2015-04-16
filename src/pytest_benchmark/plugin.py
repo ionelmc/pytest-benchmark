@@ -3,6 +3,7 @@ from __future__ import division
 from collections import defaultdict
 from decimal import Decimal
 import argparse
+import datetime
 import gc
 import json
 import math
@@ -440,6 +441,7 @@ def write_json(terminalreporter):
     jsonData['header'] = {}
 
     jsonData['header']['hostname'] = socket.gethostname()
+    jsonData['header']['report_datetime'] = datetime.datetime.utcnow().isoformat()
 
     tr.config.hook.pytest_benchmark_add_extra_info(headerDict=jsonData['header'])
 
