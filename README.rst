@@ -125,6 +125,10 @@ If you need to do some wrapping (like special setup), you can use it as a decora
                           Disable GC during benchmarks.
     --benchmark-skip      Skip running any benchmarks.
     --benchmark-only      Only run benchmarks.
+    --benchmark-name-length={short,full}
+                          length of name in report
+    --benchmark-json-path=path
+                          create json report file at given path.
 
 
 Setting per-test options:
