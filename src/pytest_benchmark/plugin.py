@@ -18,7 +18,7 @@ from .stats import RunningStats
 from .timers import compute_timer_precision
 from .timers import default_timer
 
-import newhooks
+from . import benchmark_hooks
 
 
 class NameWrapper(object):
@@ -149,7 +149,8 @@ def pytest_addoption(parser):
 
 
 def pytest_addhooks(pluginmanager):
-    pluginmanager.addhooks(newhooks)
+    ''' install hooks so users add add extra info to the json report header'''
+    pluginmanager.addhooks(benchmark_hooks)
 
 
 class BenchmarkStats(RunningStats):
