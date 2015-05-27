@@ -17,7 +17,7 @@ Ok::
   >     assert 1 == 1
   > EOF
 
-  $ py.test -vv --doctest-modules tests.py
+  $ py.test -vv --doctest-modules tests.py | grep -v rootdir:
   =====================* test session starts ======================* (re)
   platform .* (re)
   plugins: .* (re)
@@ -55,7 +55,7 @@ Bogus args::
   > EOF
 
 
-  $ py.test -vv --doctest-modules testsborken.py
+  $ py.test -vv --doctest-modules testsborken.py | grep -v rootdir:
   ============================= test session starts ==============================
   platform .* (re)
   plugins: .* (re)
@@ -80,4 +80,3 @@ Bogus args::
   \s* (re)
   .*pytest_benchmark/plugin.py:.*: ValueError (re)
   ========================* 1 error in .* seconds =========================* (re)
-  [1]

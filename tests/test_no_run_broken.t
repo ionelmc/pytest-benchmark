@@ -27,7 +27,7 @@ Test that we don't benchmark code that raises exceptions:
   >     assert 1 == 0
   > EOF
 
-  $ py.test -vv tests.py
+  $ py.test -vv tests.py | grep -v rootdir:
   ============================= test session starts ==============================
   platform .* (re)
   plugins: .* (re)
@@ -115,4 +115,3 @@ Test that we don't benchmark code that raises exceptions:
   -----------------------------------------------------------------* (re)
   \s* (re)
   ==================* 2 failed, 3 error in .* seconds ====================* (re)
-  [1]

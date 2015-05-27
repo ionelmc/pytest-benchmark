@@ -23,13 +23,13 @@ With groups::
   >     assert 1 == 1
   > EOF
 
-  $ py.test -vv --doctest-modules tests.py
+  $ py.test -vv --doctest-modules tests.py | grep -v rootdir:
   =====================* test session starts ======================* (re)
   platform .* (re)
   plugins: .* (re)
   collecting ... collected 5 items
   \s* (re)
-  tests.py::[doctest] tests PASSED
+  tests.py::.*tests PASSED (re)
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   tests.py::test_slower PASSED

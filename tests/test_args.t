@@ -25,13 +25,13 @@ Conflict between ``--benchmark-only`` and ``--benchmark-skip``::
 
 With ``--benchmark-max-time``:
 
-  $ py.test -vv --doctest-modules --benchmark-max-time=0.000001 --benchmark-min-rounds=1 tests.py
+  $ py.test -vv --doctest-modules --benchmark-max-time=0.000001 --benchmark-min-rounds=1 tests.py | grep -v rootdir:
   =====================* test session starts ======================* (re)
   platform .* (re)
   plugins: .* (re)
   collecting ... collected 3 items
   \s* (re)
-  tests.py::[doctest] tests PASSED
+  tests.py::.*tests PASSED (re)
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   \s* (re)
@@ -46,13 +46,13 @@ With ``--benchmark-max-time``:
 
 With ``--benchmark-max-time``::
 
-  $ py.test -vv --doctest-modules --benchmark-max-time=0.000001 tests.py
+  $ py.test -vv --doctest-modules --benchmark-max-time=0.000001 tests.py | grep -v rootdir:
   =====================* test session starts ======================* (re)
   platform .* (re)
   plugins: .* (re)
   collecting ... collected 3 items
   \s* (re)
-  tests.py::[doctest] tests PASSED
+  tests.py::.*tests PASSED (re)
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   \s* (re)
@@ -82,13 +82,13 @@ With ``--benchmark-min-time=bogus``::
 
 With ``--benchmark-disable-gc``::
 
-  $ py.test -vv --doctest-modules --benchmark-disable-gc tests.py
+  $ py.test -vv --doctest-modules --benchmark-disable-gc tests.py | grep -v rootdir:
   =====================* test session starts ======================* (re)
   platform .* (re)
   plugins: .* (re)
   collecting ... collected 3 items
   \s* (re)
-  tests.py::[doctest] tests PASSED
+  tests.py::.*tests PASSED (re)
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   \s* (re)
@@ -103,13 +103,13 @@ With ``--benchmark-disable-gc``::
 
 With ``--benchmark-timer=time.time``::
 
-  $ py.test -vv --doctest-modules --benchmark-timer=time.time tests.py
+  $ py.test -vv --doctest-modules --benchmark-timer=time.time tests.py | grep -v rootdir:
   =====================* test session starts ======================* (re)
   platform .* (re)
   plugins: .* (re)
   collecting ... collected 3 items
   \s* (re)
-  tests.py::[doctest] tests PASSED
+  tests.py::.*tests PASSED (re)
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   \s* (re)
@@ -131,13 +131,13 @@ With ``--benchmark-timer=bogus``::
 
 With ``--benchmark-sort=mean``::
 
-  $ py.test -vv --doctest-modules --benchmark-sort=mean tests.py
+  $ py.test -vv --doctest-modules --benchmark-sort=mean tests.py | grep -v rootdir:
   =====================* test session starts ======================* (re)
   platform .* (re)
   plugins: .* (re)
   collecting ... collected 3 items
   \s* (re)
-  tests.py::[doctest] tests PASSED
+  tests.py::.*tests PASSED (re)
   tests.py::test_fast PASSED
   tests.py::test_slow PASSED
   \s* (re)
@@ -160,7 +160,7 @@ With ``--benchmark-sort=bogus``::
 With xdist::
 
   $ if [ -n "$(py.test --version 2>&1 | grep xdist)" ]; then
-  >   py.test --doctest-modules -n 1 tests.py
+  >   py.test --doctest-modules -n 1 tests.py | grep -v rootdir:
   > else
   >   echo "--------------------------------------------------------------------------------
   > WARNING: Benchmarks are automatically skipped because xdist plugin is active.Benchmarks cannot be performed reliably in a parallelized environment.

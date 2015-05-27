@@ -25,13 +25,13 @@ Simple::
   >     benchmark(int)
   > EOF
 
-  $ py.test -vv --doctest-modules tests.py
+  $ py.test -vv --doctest-modules tests.py | grep -v rootdir:
   =====================* test session starts ======================* (re)
   platform .* (re)
   plugins: .* (re)
   collecting ... collected 5 items
   \s* (re)
-  tests.py::[doctest] tests PASSED
+  tests.py::.*tests PASSED (re)
   tests.py::test_slow PASSED
   tests.py::test_slower PASSED
   tests.py::test_xfast PASSED
@@ -50,13 +50,13 @@ Simple::
 
 Disabling benchmarks::
 
-  $ py.test -vv --doctest-modules --benchmark-skip tests.py
+  $ py.test -vv --doctest-modules --benchmark-skip tests.py | grep -v rootdir:
   =====================* test session starts ======================* (re)
   platform .* (re)
   plugins: .* (re)
   collecting ... collected 5 items
   \s* (re)
-  tests.py::[doctest] tests PASSED
+  tests.py::.*tests PASSED (re)
   tests.py::test_slow SKIPPED
   tests.py::test_slower SKIPPED
   tests.py::test_xfast SKIPPED
@@ -66,7 +66,7 @@ Disabling benchmarks::
 
 Mark selection::
 
-  $ py.test -vv --doctest-modules -m benchmark tests.py
+  $ py.test -vv --doctest-modules -m benchmark tests.py | grep -v rootdir:
   =====================* test session starts ======================* (re)
   platform .* (re)
   plugins: .* (re)
@@ -85,13 +85,13 @@ Mark selection::
 
 Only run benchmarks::
 
-  $ py.test -vv --doctest-modules --benchmark-only tests.py
+  $ py.test -vv --doctest-modules --benchmark-only tests.py | grep -v rootdir:
   =====================* test session starts ======================* (re)
   platform .* (re)
   plugins: .* (re)
   collecting ... collected 5 items
   \s* (re)
-  tests.py::[doctest] tests SKIPPED
+  tests.py::.*tests SKIPPED (re)
   tests.py::test_slow PASSED
   tests.py::test_slower PASSED
   tests.py::test_xfast PASSED
