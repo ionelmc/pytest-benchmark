@@ -20,4 +20,7 @@
                           Disable GC during benchmarks.
     --benchmark-skip      Skip running any benchmarks.
     --benchmark-only      Only run benchmarks.
-  \s* (re)
+    --benchmark-name-length={short,full}
+                          length of name in report
+    --benchmark-json-path=path
+                          create json report file at given path.

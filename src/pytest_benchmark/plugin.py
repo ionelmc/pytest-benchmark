@@ -3,17 +3,22 @@ from __future__ import division
 from collections import defaultdict
 from decimal import Decimal
 import argparse
+import datetime
 import gc
+import json
 import math
 import py
 import pytest
 import sys
+import socket
 import time
 
 from .compat import XRANGE, PY3
 from .stats import RunningStats
 from .timers import compute_timer_precision
 from .timers import default_timer
+
+from . import benchmark_hooks
 
 
 class NameWrapper(object):
@@ -133,6 +138,19 @@ def pytest_addoption(parser):
         action="store_true", default=False,
         help="Only run benchmarks."
     )
+    group.addoption(
+        "--benchmark-name-length", choices=['short', 'full'],
+        default='short',
+        help="length of name in report"
+    )
+    group.addoption('--benchmark-json-path',  action="store",
+        dest="benchmark_json_path", metavar="path", default=None,
+        help="create json report file at given path.")
+
+
+def pytest_addhooks(pluginmanager):
+    ''' install hooks so users add add extra info to the json report header'''
+    pluginmanager.addhooks(benchmark_hooks)
 
 
 class BenchmarkStats(RunningStats):
@@ -341,6 +359,8 @@ def pytest_terminal_summary(terminalreporter):
     if not benchmarksession._benchmarks:
         return
 
+    write_json(terminalreporter)
+
     timer = benchmarksession._options.get('timer')
 
     groups = defaultdict(list)
@@ -408,6 +428,59 @@ def pytest_terminal_summary(terminalreporter):
         tr.write_line("")
 
 
+def write_json(terminalreporter):
+    tr = terminalreporter
+    benchmarksession = tr.config._benchmarksession
+
+    if not benchmarksession._benchmarks:
+        return
+    if not tr.config.option.benchmark_json_path:
+        return
+
+    jsonData = {}
+
+    jsonData['header'] = {}
+
+    jsonData['header']['hostname'] = socket.gethostname()
+    jsonData['header']['report_datetime'] = datetime.datetime.utcnow().isoformat()
+
+    tr.config.hook.pytest_benchmark_add_extra_info(headerDict=jsonData['header'])
+
+
+    groups = defaultdict(list)
+    for bench in benchmarksession._benchmarks:
+        groups[bench.group].append(bench)
+
+
+    labels = {
+            "name": "Name",
+            "min": "Min",
+            "max": "Max",
+            "mean": "Mean",
+            "stddev": "StdDev",
+            "runs": "Rounds",
+            "scale": "Iterations",
+        }
+    allBenchmarks = {}
+    for group, benchmarks in sorted(groups.items(), key=lambda pair: pair[0] or ""):
+        if group is None:
+            group = 'default'
+        groupData = []
+        for benchmark in benchmarks:
+            tt = { jsonName: benchmark[prop] for prop, jsonName in labels.items() }
+            tt['status'] = 'passed'
+            allBenchmarks[tt['Name']] = tt
+            groupData.append(tt)
+        jsonData[group] = groupData
+
+    for status in ('error', 'failed'):
+        for rep in tr.getreports(status):
+            allBenchmarks[rep.nodeid]['status'] = status
+
+    with open(tr.config.option.benchmark_json_path,'w') as f:
+        f.write(json.dumps(jsonData, indent=4))
+
+
 @pytest.fixture(scope="function")
 def benchmark(request):
     benchmarksession = request.config._benchmarksession
@@ -416,12 +489,18 @@ def benchmark(request):
         pytest.skip("Benchmarks are disabled.")
     else:
         node = request.node
+        NameLength = request.config.getoption("benchmark_name_length")
+        if NameLength == 'full':
+            name = node._nodeid
+        else:
+            name = node.name
+        
         marker = node.get_marker("benchmark")
         options = marker.kwargs if marker else {}
         if 'timer' in options:
             options['timer'] = NameWrapper(options['timer'])
         benchmark = BenchmarkFixture(
-            node.name,
+            name,
             add_stats=benchmarksession._benchmarks.append,
             logger=DiagnosticLogger(
                 benchmarksession._verbose,

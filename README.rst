@@ -125,6 +125,10 @@ If you need to do some wrapping (like special setup), you can use it as a decora
                           Disable GC during benchmarks.
     --benchmark-skip      Skip running any benchmarks.
     --benchmark-only      Only run benchmarks.
+    --benchmark-name-length={short,full}
+                          length of name in report
+    --benchmark-json-path=path
+                          create json report file at given path.
 
 
 Setting per-test options:
@@ -201,6 +205,28 @@ pytest-benchmark[aspect]`):
         with benchmark_weave(Foo.internal, lazy=True):
             f = Foo()
             f.run()
+
+
+JSON report
+===========
+
+pytest-benchmark can produce a report of activity as a JSON file.
+Just specify a location for the report using --benchmark-json-path. It's also recommended that you 
+set --benchmark-name-length=full if you have a large test suite, this will guarantee unique names 
+for all the tests
+
+You can added extra information to the header of the report by adding the 
+pytest_benchmark_add_extra_info hook to your conftest.py.
+
+.. sourcecode:: python
+
+   def pytest_benchmark_add_extra_info(headerDict):
+       headerDict['user'] = getpass.getuser()
+
+       head_sha = subprocess.check_output('git rev-parse HEAD', shell=True)
+
+       headerDict['revision'] = head_sha.strip()
+
 
 Documentation
 =============
