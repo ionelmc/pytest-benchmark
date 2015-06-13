@@ -106,7 +106,7 @@ def pytest_addoption(parser):
         "--benchmark-warmup",
         action="store_true", default=False,
         help="Activates warmup. Will run the test function up to number of times in the calibration phase. "
-             "See `--benchmark-warmup-iterations`."
+             "See `--benchmark-warmup-iterations`. Note: Even the warmup phase obeys --benchmark-max-time."
     )
     group.addoption(
         "--benchmark-warmup-iterations",
