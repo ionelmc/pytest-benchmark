@@ -36,6 +36,7 @@ htmlcov
 .mr.developer.cfg
 .project
 .pydevproject
+*.komodoproject
 .idea
 
 # Complexity
@@ -50,6 +51,8 @@ docs/_build
 .*.sw[po]
 .build
 .ve
+.env
+.cache
 .bootstrap
 *.bak
 *.t.err
