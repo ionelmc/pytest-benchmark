@@ -230,7 +230,6 @@ class BenchmarkFixture(object):
                 ))
 
             self._logger.write("  - measured %s iterations: %ss." % (loops, time_format(duration)))
-
             if duration / min_time >= 0.75:
                 break
 
@@ -238,6 +237,11 @@ class BenchmarkFixture(object):
                 # coarse estimation of the number of loops
                 loops = int(min_time * loops / duration)
                 self._logger.write("  * estimating %s iterations." % loops)
+                if loops == 1:
+                    # If we got a single loop then bail early - nothing to calibrate if the the
+                    # test function is 100 times slower than the timer resolution.
+                    loops_range = XRANGE(loops)
+                    break
             else:
                 loops *= 10
         return duration, loops, loops_range
