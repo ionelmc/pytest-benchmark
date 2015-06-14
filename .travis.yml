@@ -6,26 +6,26 @@ env:
     LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
   matrix:
     - TOXENV=check
-    - TOXENV=py26-pytest27-nodist
-    - TOXENV=py27-pytest27-nodist
-    - TOXENV=py33-pytest27-nodist
-    - TOXENV=py34-pytest27-nodist
-    - TOXENV=pypy-pytest27-nodist
-    - TOXENV=py26-pytest26-nodist
-    - TOXENV=py27-pytest26-nodist
-    - TOXENV=py33-pytest26-nodist
-    - TOXENV=py34-pytest26-nodist
-    - TOXENV=pypy-pytest26-nodist
-    - TOXENV=py26-pytest27-xdist
-    - TOXENV=py27-pytest27-xdist
-    - TOXENV=py33-pytest27-xdist
-    - TOXENV=py34-pytest27-xdist
-    - TOXENV=pypy-pytest27-xdist
-    - TOXENV=py26-pytest26-xdist
-    - TOXENV=py27-pytest26-xdist
-    - TOXENV=py33-pytest26-xdist
-    - TOXENV=py34-pytest26-xdist
-    - TOXENV=pypy-pytest26-xdist
+    - TOXENV=py26-pytest27-nodist,coveralls,codecov
+    - TOXENV=py27-pytest27-nodist,coveralls,codecov
+    - TOXENV=py33-pytest27-nodist,coveralls,codecov
+    - TOXENV=py34-pytest27-nodist,coveralls,codecov
+    - TOXENV=pypy-pytest27-nodist,coveralls,codecov
+    - TOXENV=py26-pytest26-nodist,coveralls,codecov
+    - TOXENV=py27-pytest26-nodist,coveralls,codecov
+    - TOXENV=py33-pytest26-nodist,coveralls,codecov
+    - TOXENV=py34-pytest26-nodist,coveralls,codecov
+    - TOXENV=pypy-pytest26-nodist,coveralls,codecov
+    - TOXENV=py26-pytest27-xdist,coveralls,codecov
+    - TOXENV=py27-pytest27-xdist,coveralls,codecov
+    - TOXENV=py33-pytest27-xdist,coveralls,codecov
+    - TOXENV=py34-pytest27-xdist,coveralls,codecov
+    - TOXENV=pypy-pytest27-xdist,coveralls,codecov
+    - TOXENV=py26-pytest26-xdist,coveralls,codecov
+    - TOXENV=py27-pytest26-xdist,coveralls,codecov
+    - TOXENV=py33-pytest26-xdist,coveralls,codecov
+    - TOXENV=py34-pytest26-xdist,coveralls,codecov
+    - TOXENV=pypy-pytest26-xdist,coveralls,codecov
 before_install:
   - python --version
   - virtualenv --version
