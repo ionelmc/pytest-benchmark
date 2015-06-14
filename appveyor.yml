@@ -1,4 +1,5 @@
-build: false
+version: '{branch}-{build}'
+build: off
 environment:
   matrix:
     - TOXENV: "check"
