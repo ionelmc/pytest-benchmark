@@ -1,5 +1,6 @@
 language: python
 python: 2.7
+sudo: false
 env:
   global:
     LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
@@ -27,6 +28,8 @@ env:
     - TOXENV=pypy-pytest26-xdist
 before_install:
   - python --version
+  - virtualenv --version
+  - pip --version
   - uname -a
   - lsb_release -a
 install:
