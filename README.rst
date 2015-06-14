@@ -2,50 +2,65 @@
 pytest-benchmark
 ===============================
 
-| |docs| |travis| |appveyor| |coveralls| |landscape| |scrutinizer|
-| |version| |downloads| |wheel| |supported-versions| |supported-implementations|
+.. list-table::
+    :stub-columns: 1
+
+    * - docs
+      - |docs|
+    * - tests
+      - | |travis| |appveyor|
+        | |coveralls| |codecov| |landscape| |scrutinizer|
+    * - package
+      - |version| |downloads|
+
+..
+    |wheel| |supported-versions| |supported-implementations|
 
 .. |docs| image:: https://readthedocs.org/projects/pytest-benchmark/badge/?style=flat
     :target: https://readthedocs.org/projects/pytest-benchmark
     :alt: Documentation Status
 
-.. |travis| image:: http://img.shields.io/travis/ionelmc/pytest-benchmark/master.png?style=flat
+.. |travis| image:: http://img.shields.io/travis/ionelmc/pytest-benchmark/master.svg?style=flat&label=Travis
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/ionelmc/pytest-benchmark
 
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/ionelmc/pytest-benchmark?branch=master
+.. |appveyor| image:: https://img.shields.io/appveyor/ci/ionelmc/pytest-benchmark/master.svg?style=flat&label=AppVeyor
     :alt: AppVeyor Build Status
     :target: https://ci.appveyor.com/project/ionelmc/pytest-benchmark
 
-.. |coveralls| image:: http://img.shields.io/coveralls/ionelmc/pytest-benchmark/master.png?style=flat
+.. |coveralls| image:: http://img.shields.io/coveralls/ionelmc/pytest-benchmark/master.svg?style=flat&label=Coveralls
     :alt: Coverage Status
     :target: https://coveralls.io/r/ionelmc/pytest-benchmark
+
+.. |codecov| image:: http://img.shields.io/codecov/c/github/ionelmc/pytest-benchmark/master.svg?style=flat&label=Codecov
+    :alt: Coverage Status
+    :target: https://codecov.io/github/ionelmc/pytest-benchmark
 
 .. |landscape| image:: https://landscape.io/github/ionelmc/pytest-benchmark/master/landscape.svg?style=flat
     :target: https://landscape.io/github/ionelmc/pytest-benchmark/master
     :alt: Code Quality Status
 
-.. |version| image:: http://img.shields.io/pypi/v/pytest-benchmark.png?style=flat
+.. |version| image:: http://img.shields.io/pypi/v/pytest-benchmark.svg?style=flat
     :alt: PyPI Package latest release
     :target: https://pypi.python.org/pypi/pytest-benchmark
 
-.. |downloads| image:: http://img.shields.io/pypi/dm/pytest-benchmark.png?style=flat
+.. |downloads| image:: http://img.shields.io/pypi/dm/pytest-benchmark.svg?style=flat
     :alt: PyPI Package monthly downloads
     :target: https://pypi.python.org/pypi/pytest-benchmark
 
-.. |wheel| image:: https://pypip.in/wheel/pytest-benchmark/badge.png?style=flat
+.. |wheel| image:: https://pypip.in/wheel/pytest-benchmark/badge.svg?style=flat
     :alt: PyPI Wheel
     :target: https://pypi.python.org/pypi/pytest-benchmark
 
-.. |supported-versions| image:: https://pypip.in/py_versions/pytest-benchmark/badge.png?style=flat
+.. |supported-versions| image:: https://pypip.in/py_versions/pytest-benchmark/badge.svg?style=flat
     :alt: Supported versions
     :target: https://pypi.python.org/pypi/pytest-benchmark
 
-.. |supported-implementations| image:: https://pypip.in/implementation/pytest-benchmark/badge.png?style=flat
+.. |supported-implementations| image:: https://pypip.in/implementation/pytest-benchmark/badge.svg?style=flat
     :alt: Supported imlementations
     :target: https://pypi.python.org/pypi/pytest-benchmark
 
-.. |scrutinizer| image:: https://img.shields.io/scrutinizer/g/ionelmc/pytest-benchmark/master.png?style=flat
+.. |scrutinizer| image:: https://img.shields.io/scrutinizer/g/ionelmc/pytest-benchmark/master.svg?style=flat
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/ionelmc/pytest-benchmark/
 
