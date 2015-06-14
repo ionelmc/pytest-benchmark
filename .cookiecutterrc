@@ -1,0 +1,29 @@
+# This file exists so you can easily regenerate your project.
+#
+# Unfortunatelly cookiecutter can't use this right away so
+# you have to copy this file to ~/.cookiecutterrc
+
+default_context:
+
+    c_extension_optional:      'no'
+    c_extension_support:       'no'
+    codecov:                   'yes'
+    command_line_interface:    'no'
+    coveralls:                 'yes'
+    distribution_name:         'pytest-benchmark'
+    email:                     'contact@ionelmc.ro'
+    full_name:                 'Ionel Cristian M\u0103rie\u0219'
+    github_username:           'ionelmc'
+    landscape:                 'yes'
+    package_name:              'pytest-benchmark'
+    project_name:              'pytest-benchmark'
+    project_short_description: 'A ``py.test`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer. See: calibration_.'
+    release_date:              '2015-06-10'
+    repo_name:                 'pytest-benchmark'
+    scrutinizer:               'yes'
+    sphinx_theme:              'sphinx-py3doc-enhanced-theme'
+    test_matrix_configurator:  'no'
+    test_runner:               'pytest'
+    version:                   '0.1.0'
+    website:                   'http://blog.ionelmc.ro'
+    year:                      '2015'
