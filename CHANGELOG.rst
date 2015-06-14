@@ -2,6 +2,16 @@
 Changelog
 =========
 
+2.5.0 (2015-06-15)
+------------------
+
+* Improved test suite a bit (not using `cram` anymore).
+* Improved help text on the ``--benchmark-warmup`` option.
+* Made ``warmup_iterations`` available as a marker argument (eg: ``@pytest.mark.benchmark(warmup_iterations=1234)``).
+* Fixed ``--benchmark-verbose``'s printouts to work properly with output capturing.
+* Changed how warmup iterations are computed (now number of total iterations is used, instead of just the rounds).
+* Fixed a bug where calibration would run forever.
+
 2.4.1 (2015-03-16)
 ------------------
 
