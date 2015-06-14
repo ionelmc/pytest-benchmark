@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, print_function
 
 from collections import defaultdict
 from decimal import Decimal
@@ -269,19 +269,21 @@ class SecondsDecimal(Decimal):
 
 
 class DiagnosticLogger(object):
-    def __init__(self, verbose
-                 # , capman
-                 ):
-        self.term = verbose and py.io.TerminalWriter()
-        # self.capman = capman
+    def __init__(self, verbose, capman):
+        if capman:
+            capman.suspendcapture(in_=True)
+        self.term = verbose and py.io.TerminalWriter(file=sys.stderr)
+        if capman:
+            capman.resumecapture()
+        self.capman = capman
 
     def write(self, text, **kwargs):
         if self.term:
-            # if self.capman:
-            #     self.capman.suspendcapture(in_=True)
+            if self.capman:
+                self.capman.suspendcapture(in_=True)
             self.term.line(text, yellow=True, **kwargs)
-            # if self.capman:
-            #     self.capman.resumecapture()
+            if self.capman:
+                self.capman.resumecapture()
 
 
 class BenchmarkSession(object):
@@ -425,7 +427,7 @@ def benchmark(request):
             add_stats=benchmarksession._benchmarks.append,
             logger=DiagnosticLogger(
                 benchmarksession._verbose,
-                # node.config.pluginmanager.getplugin("capturemanager")
+                request.config.pluginmanager.getplugin("capturemanager")
             ),
             **dict(benchmarksession._options, **options)
         )
