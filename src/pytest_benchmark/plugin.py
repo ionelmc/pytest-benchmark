@@ -1,4 +1,4 @@
-from __future__ import division, print_function
+from __future__ import division
 
 from collections import defaultdict
 from decimal import Decimal
@@ -224,9 +224,9 @@ class BenchmarkFixture(object):
                     duration = min(duration, runner(loops_range))
                     warmup_rounds += 1
                     warmup_iterations += loops
-                self._logger.write("    warmed up for %ss (%s rounds/%s iterations)." % (
+                self._logger.write("    warmed up for %ss (%s x %s iterations)." % (
                     time_format(time.time() - warmup_start),
-                    warmup_rounds, warmup_iterations
+                    warmup_rounds, loops
                 ))
 
             self._logger.write("  - measured %s iterations: %ss." % (loops, time_format(duration)))
