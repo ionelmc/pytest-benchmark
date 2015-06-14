@@ -151,6 +151,18 @@ Setting per-test options:
         # Note: this code is not measured.
         assert result is None
 
+Glossary
+========
+
+    Iteration
+        A single run of your benchmarked function.
+    Round
+        A set of iterations. The size of a `round` is computed in the calibration phase.
+
+        Stats are computed with rounds, not with iterations. The duration for a round is an average of all the iterations in that round.
+
+        See: calibration_ for an explanation of why it's like this.
+
 Features
 ========
 
@@ -162,10 +174,10 @@ Calibration
 ``pytest-benchmark`` will run your function multiple times between measurements. A `round`is that set of runs done between measurements.
 This is quite similar to the builtin ``timeit`` module but it's more robust.
 
-The problem with measuring single runs apears when you have very fast code. To illustrate:
+The problem with measuring single runs appears when you have very fast code. To illustrate:
 
 .. image:: https://github.com/ionelmc/pytest-benchmark/raw/master/docs/measurement-issues.png
-    :alt: Diagram ilustrating issues with measuring very fast code
+    :alt: Diagram illustrating issues with measuring very fast code
 
 In other words, a `round` is a set of runs that are averaged together, those resulting numbers are then used to compute the result tables.
 The default settings will try to keep the round small enough (so that you get to see variance), but not too small, because then you have
