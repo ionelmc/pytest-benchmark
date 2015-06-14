@@ -218,14 +218,17 @@ class BenchmarkFixture(object):
             duration = runner(loops_range)
             if self._warmup:
                 warmup_start = time.time()
+                warmup_iterations = 0
                 warmup_rounds = 0
-                while time.time() - warmup_start < self._max_time and warmup_rounds < self._warmup:
+                while time.time() - warmup_start < self._max_time and warmup_iterations < self._warmup:
                     duration = min(duration, runner(loops_range))
                     warmup_rounds += 1
-                self._logger.write("    warmed up for %ss (%s rounds)." % (
+                    warmup_iterations += loops
+                self._logger.write("    warmed up for %ss (%s rounds/%s iterations)." % (
                     time_format(time.time() - warmup_start),
-                    warmup_rounds
+                    warmup_rounds, warmup_iterations
                 ))
+
             self._logger.write("  - measured %s iterations: %ss." % (loops, time_format(duration)))
 
             if duration / min_time >= 0.75:
