@@ -1,8 +1,5 @@
-version: '{branch}-{build}'
-build: off
+build: false
 environment:
-  global:
-    WITH_COMPILER: "cmd /E:ON /V:ON /C .\\ci\\appveyor-with-compiler.cmd"
   matrix:
     - TOXENV: "check"
     - TOXENV: "py27-pytest27-nodist,coveralls,codecov"
@@ -21,9 +18,13 @@ init:
   - "ECHO %TOXENV%"
   - ps: "ls C:\\Python*"
 install:
-  - "powershell ci\\appveyor-bootstrap.ps1"
+  - ps: Invoke-WebRequest "https://bootstrap.pypa.io/ez_setup.py" -OutFile "c:\\ez_setup.py"
+  - ps: Invoke-WebRequest "https://bootstrap.pypa.io/get-pip.py" -OutFile "c:\\get-pip.py"
+  - "c:\\python27\\python c:\\ez_setup.py"
+  - "c:\\python27\\python c:\\get-pip.py"
+  - "c:\\python27\\Scripts\\pip install tox virtualenv"
 test_script:
-  - "%PYTHON_HOME%\\Scripts\\tox --version"
-  - "%PYTHON_HOME%\\Scripts\\virtualenv --version"
-  - "%PYTHON_HOME%\\Scripts\\pip --version"
-  - "%WITH_COMPILER% %PYTHON_HOME%\\Scripts\\tox"
+  - "c:\\python27\\Scripts\\tox --version"
+  - "c:\\python27\\Scripts\\virtualenv --version"
+  - "c:\\python27\\Scripts\\pip --version"
+  - "c:\\python27\\Scripts\\tox"
