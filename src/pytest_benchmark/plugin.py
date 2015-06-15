@@ -194,12 +194,11 @@ class BenchmarkFixture(object):
         stats = BenchmarkStats(self._name, group=self._group, scale=scale)
         self._add_stats(stats)
 
-        self._logger.write("")
-        self._logger.write("  Running %s rounds ..." % rounds)
+        self._logger.write("  Running %s rounds x %s iterations ..." % (rounds, scale), yellow=True, bold=True)
         run_start = time.time()
         for _ in XRANGE(rounds):
             stats.update(runner(loops_range))
-        self._logger.write("  Ran for %ss." % time_format(time.time() - run_start), bold=True)
+        self._logger.write("  Ran for %ss." % time_format(time.time() - run_start), yellow=True, bold=True)
 
         return function_to_benchmark(*args, **kwargs)
 
@@ -208,9 +207,9 @@ class BenchmarkFixture(object):
         min_time = max(self._min_time, timer_precision * 100)
         min_time_estimate = min_time / 10
         self._logger.write("")
-        self._logger.write("  Timer precision: %ss" % time_format(timer_precision))
+        self._logger.write("  Timer precision: %ss" % time_format(timer_precision), yellow=True, bold=True)
         self._logger.write("  Calibrating to target round %ss; will estimate when reaching %ss." % (
-            time_format(min_time), time_format(min_time_estimate)))
+            time_format(min_time), time_format(min_time_estimate)), yellow=True, bold=True)
 
         loops = 1
         while True:
@@ -224,19 +223,19 @@ class BenchmarkFixture(object):
                     duration = min(duration, runner(loops_range))
                     warmup_rounds += 1
                     warmup_iterations += loops
-                self._logger.write("    warmed up for %ss (%s x %s iterations)." % (
+                self._logger.write("    Warmup: %ss (%s x %s iterations)." % (
                     time_format(time.time() - warmup_start),
                     warmup_rounds, loops
                 ))
 
-            self._logger.write("  - measured %s iterations: %ss." % (loops, time_format(duration)))
+            self._logger.write("    Measured %s iterations: %ss." % (loops, time_format(duration)), yellow=True)
             if duration / min_time >= 0.75:
                 break
 
             if duration >= min_time_estimate:
                 # coarse estimation of the number of loops
                 loops = int(min_time * loops / duration)
-                self._logger.write("  * estimating %s iterations." % loops)
+                self._logger.write("    Estimating %s iterations." % loops, green=True)
                 if loops == 1:
                     # If we got a single loop then bail early - nothing to calibrate if the the
                     # test function is 100 times slower than the timer resolution.
@@ -288,7 +287,7 @@ class DiagnosticLogger(object):
         if self.term:
             if self.capman:
                 self.capman.suspendcapture(in_=True)
-            self.term.line(text, yellow=True, **kwargs)
+            self.term.line(text, **kwargs)
             if self.capman:
                 self.capman.resumecapture()
 
