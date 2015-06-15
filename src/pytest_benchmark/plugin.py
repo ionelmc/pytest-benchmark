@@ -196,6 +196,11 @@ class BenchmarkFixture(object):
 
         self._logger.write("  Running %s rounds x %s iterations ..." % (rounds, scale), yellow=True, bold=True)
         run_start = time.time()
+        if self._warmup:
+            warmup_rounds = min(rounds, max(1, int(self._warmup / scale)))
+            self._logger.write("  Warmup %s rounds x %s iterations ..." % (warmup_rounds, scale))
+            for _ in XRANGE(warmup_rounds):
+                runner(loops_range)
         for _ in XRANGE(rounds):
             stats.update(runner(loops_range))
         self._logger.write("  Ran for %ss." % time_format(time.time() - run_start), yellow=True, bold=True)
