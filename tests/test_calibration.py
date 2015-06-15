@@ -21,5 +21,10 @@ def test_calibrate_fast(benchmark):
 
 
 @pytest.mark.benchmark(warmup=True, warmup_iterations=10 ** 8, max_time=10)
+def test_calibrate_xfast(benchmark):
+    benchmark(lambda: None)
+
+
+@pytest.mark.benchmark(warmup=True, warmup_iterations=10 ** 8, max_time=10)
 def test_calibrate_slow(benchmark):
     benchmark(partial(time.sleep, 0.00001))
