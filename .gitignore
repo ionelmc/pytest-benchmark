@@ -53,6 +53,9 @@ docs/_build
 .ve
 .env
 .cache
+.pytest
 .bootstrap
 *.bak
 *.t.err
+logfile
+logfile.*
