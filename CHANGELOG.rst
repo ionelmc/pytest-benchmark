@@ -11,6 +11,7 @@ Changelog
 * Fixed ``--benchmark-verbose``'s printouts to work properly with output capturing.
 * Changed how warmup iterations are computed (now number of total iterations is used, instead of just the rounds).
 * Fixed a bug where calibration would run forever.
+* Disabled red/green coloring (it was kinda random) when there's a single test in the results table.
 
 2.4.1 (2015-03-16)
 ------------------

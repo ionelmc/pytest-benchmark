@@ -358,12 +358,14 @@ def pytest_terminal_summary(terminalreporter):
     for group, benchmarks in sorted(groups.items(), key=lambda pair: pair[0] or ""):
         worst = {}
         best = {}
-        for prop in "min", "max", "mean", "stddev", "runs", "scale":
+        if len(benchmarks) > 1:
+            for prop in "min", "max", "mean", "stddev":
+                worst[prop] = max(benchmark[prop] for benchmark in benchmarks)
+                best[prop] = min(benchmark[prop] for benchmark in benchmarks)
+        for prop in "runs", "scale":
             worst[prop] = max(benchmark[prop] for benchmark in benchmarks)
-        for prop in "min", "max", "mean", "stddev":
-            best[prop] = min(benchmark[prop] for benchmark in benchmarks)
 
-        unit, adjustment = time_unit(best[benchmarksession._sort])
+        unit, adjustment = time_unit(best.get(benchmarksession._sort, benchmarks[0][benchmarksession._sort]))
         labels = {
             "name": "Name (time in %ss)" % unit,
             "min": "Min",
@@ -405,8 +407,8 @@ def pytest_terminal_summary(terminalreporter):
             for prop in "min", "max", "mean", "stddev":
                 tr.write(
                     "{0:>{1}.4f}".format(benchmark[prop] * adjustment, widths[prop]),
-                    green=benchmark[prop] == best[prop],
-                    red=benchmark[prop] == worst[prop],
+                    green=benchmark[prop] == best.get(prop),
+                    red=benchmark[prop] == worst.get(prop),
                     bold=True,
                 )
             for prop in "runs", "scale":
