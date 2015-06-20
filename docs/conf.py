@@ -24,7 +24,7 @@ project = u'pytest-benchmark'
 year = u'2014-2015'
 author = u'Ionel Cristian M\u0103rie\u0219'
 copyright = '{0}, {1}'.format(year, author)
-version = release = u'2.4.1'
+version = release = u'2.5.0'
 import sphinx_py3doc_enhanced_theme
 html_theme = "sphinx_py3doc_enhanced_theme"
 html_theme_path = [sphinx_py3doc_enhanced_theme.get_html_theme_path()]
