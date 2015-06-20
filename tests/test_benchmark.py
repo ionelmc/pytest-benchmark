@@ -78,19 +78,19 @@ def test_xfast(benchmark):
         "*",
         "* benchmark: 2 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
-        "-----------------------------------------------------------------*",
+        "------*",
         "test_fast          *",
         "test_slow          *",
-        "-----------------------------------------------------------------*",
+        "------*",
         "*",
         "* benchmark 'A': 2 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
-        "-----------------------------------------------------------------*",
+        "------*",
         "test_slower        *",
         "test_xfast         *",
-        "-----------------------------------------------------------------*",
+        "------*",
         "*",
-        "====================* 5 passed in * seconds ====================*",
+        "*====== 5 passed in * seconds ======*",
     ])
 
 
@@ -126,18 +126,18 @@ def test_max_time_min_rounds(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-max-time=0.000001', '--benchmark-min-rounds=1', test)
     result.stdout.fnmatch_lines([
-        "=====================* test session starts ======================*",
+        "*====== test session starts ======*",
         "platform *",
         "plugins: *",
         "collected 3 items",
         "test_max_time_min_rounds.py ...",
         "* benchmark: 2 tests, min 1 rounds (of min 25.00us), 1.00us max time, timer: *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
-        "-----------------------------------------------------------------*",
+        "------*",
         "test_fast          * 1  *",
         "test_slow          * 1  *",
-        "-----------------------------------------------------------------*",
-        "=====================* 3 passed in * seconds ===================*",
+        "------*",
+        "*====== 3 passed in * seconds ======*",
     ])
 
 
@@ -145,18 +145,18 @@ def test_max_time(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-max-time=0.000001', test)
     result.stdout.fnmatch_lines([
-        "=====================* test session starts ======================*",
+        "*====== test session starts ======*",
         "platform *",
         "plugins: *",
         "collected 3 items",
         "test_max_time.py ...",
         "* benchmark: 2 tests, min 5 rounds (of min 25.00us), 1.00us max time, timer: *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
-        "-----------------------------------------------------------------*",
+        "------*",
         "test_fast          * 5  *",
         "test_slow          * 5  *",
-        "-----------------------------------------------------------------*",
-        "=====================* 3 passed in * seconds ===================*",
+        "------*",
+        "*====== 3 passed in * seconds ======*",
     ])
 
 
@@ -182,18 +182,18 @@ def test_disable_gc(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-disable-gc', test)
     result.stdout.fnmatch_lines([
-        "=====================* test session starts ======================*",
+        "*====== test session starts ======*",
         "platform *",
         "plugins: *",
         "collected 2 items",
         "test_disable_gc.py ..",
         "* benchmark: 2 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
-        "-----------------------------------------------------------------*",
+        "------*",
         "test_fast          *",
         "test_slow          *",
-        "-----------------------------------------------------------------*",
-        "=====================* 2 passed in * seconds ===================*",
+        "------*",
+        "*====== 2 passed in * seconds ======*",
     ])
 
 
@@ -201,18 +201,18 @@ def test_custom_timer(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-timer=time.time', test)
     result.stdout.fnmatch_lines([
-        "=====================* test session starts ======================*",
+        "*====== test session starts ======*",
         "platform *",
         "plugins: *",
         "collected 2 items",
         "test_custom_timer.py ..",
         "* benchmark: 2 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
-        "-----------------------------------------------------------------*",
+        "------*",
         "test_fast          *",
         "test_slow          *",
-        "-----------------------------------------------------------------*",
-        "=====================* 2 passed in * seconds ===================*",
+        "------*",
+        "*====== 2 passed in * seconds ======*",
     ])
 
 
@@ -229,18 +229,18 @@ def test_sort_by_mean(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-sort=mean', test)
     result.stdout.fnmatch_lines([
-        "=====================* test session starts ======================*",
+        "*====== test session starts ======*",
         "platform *",
         "plugins: *",
         "collected 2 items",
         "test_sort_by_mean.py ..",
         "* benchmark: 2 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
-        "-----------------------------------------------------------------*",
+        "------*",
         "test_fast          *",
         "test_slow          *",
-        "-----------------------------------------------------------------*",
-        "=====================* 2 passed in * seconds ===================*",
+        "------*",
+        "*====== 2 passed in * seconds ======*",
     ])
 
 
@@ -258,10 +258,10 @@ def test_xdist(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '-n', '1', test)
     result.stdout.fnmatch_lines([
-        "--------------------------------------------------------------------------------",
+        "------*",
         "WARNING: Benchmarks are automatically skipped because xdist plugin is active.Benchmarks cannot be performed reliably in a parallelized environment.",
-        "--------------------------------------------------------------------------------",
-        "============================= test session starts ==============================",
+        "------*",
+        "*====== test session starts ======*",
         "platform *",
         "plugins: *",
         "gw0 I",
@@ -269,7 +269,7 @@ def test_xdist(testdir):
         "*",
         "scheduling tests via LoadScheduling",
         ".ss",
-        "=====================* 1 passed, 2 skipped in * seconds ===================*",
+        "*====== 1 passed, 2 skipped in * seconds ======*",
     ])
 
 
@@ -309,7 +309,7 @@ def test_ok(benchmark, bad_fixture):
 ''')
     result = testdir.runpytest('-vv', test)
     result.stdout.fnmatch_lines([
-        "============================= test session starts ==============================",
+        "*====== test session starts ======*",
         "platform *",
         "plugins: *",
         "collecting ... collected 5 items",
@@ -320,8 +320,8 @@ def test_ok(benchmark, bad_fixture):
         "test_abort_broken.py::test_ok[b] ERROR",
         "test_abort_broken.py::test_ok[c] ERROR",
 
-        "==================================== ERRORS ====================================",
-        "_________________________ ERROR at setup of test_ok[a] _________________________",
+        "*====== ERRORS ======*",
+        "*______ ERROR at setup of test_ok[[]a[]] ______*",
 
         "request = <SubRequest 'bad_fixture' for <Function 'test_ok[a]'>>",
 
@@ -331,7 +331,7 @@ def test_ok(benchmark, bad_fixture):
         "E       ImportError",
 
         "test_abort_broken.py:22: ImportError",
-        "_________________________ ERROR at setup of test_ok[b] _________________________",
+        "*______ ERROR at setup of test_ok[[]b[]] ______*",
 
         "request = <SubRequest 'bad_fixture' for <Function 'test_ok[b]'>>",
 
@@ -341,7 +341,7 @@ def test_ok(benchmark, bad_fixture):
         "E       ImportError",
 
         "test_abort_broken.py:22: ImportError",
-        "_________________________ ERROR at setup of test_ok[c] _________________________",
+        "*______ ERROR at setup of test_ok[[]c[]] ______*",
 
         "request = <SubRequest 'bad_fixture' for <Function 'test_ok[c]'>>",
 
@@ -351,8 +351,8 @@ def test_ok(benchmark, bad_fixture):
         "E       ImportError",
 
         "test_abort_broken.py:22: ImportError",
-        "=================================== FAILURES ===================================",
-        "___________________________________ test_bad ___________________________________",
+        "*====== FAILURES ======*",
+        "*______ test_bad ______*",
 
         "benchmark = <pytest_benchmark.plugin.BenchmarkFixture object at *>",
 
@@ -362,14 +362,14 @@ def test_ok(benchmark, bad_fixture):
         "            raise Exception()",
 
         "test_abort_broken.py:*",
-        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ ",
+        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _*",
         "*pytest_benchmark/plugin.py:*: in __call__",
         "    duration, scale, loops_range = self._calibrate_timer(runner)",
         "*pytest_benchmark/plugin.py:*: in _calibrate_timer",
         "    duration = runner(loops_range)",
         "*pytest_benchmark/plugin.py:*: in runner",
         "    function_to_benchmark(*args, **kwargs)",
-        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ ",
+        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _*",
 
         "    @benchmark",
         "    def result():",
@@ -377,7 +377,7 @@ def test_ok(benchmark, bad_fixture):
         "E       Exception",
 
         "test_abort_broken.py:11: Exception",
-        "__________________________________ test_bad2 ___________________________________",
+        "*______ test_bad2 ______*",
 
         "benchmark = <pytest_benchmark.plugin.BenchmarkFixture object at *>",
 
@@ -391,11 +391,11 @@ def test_ok(benchmark, bad_fixture):
         "test_abort_broken.py:18: AssertionError",
         "* benchmark: 1 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
-        "-----------------------------------------------------------------*",
+        "------*",
         "test_bad2           *",
-        "-----------------------------------------------------------------*",
+        "------*",
 
-        "==================* 2 failed, 3 error in * seconds ====================*",
+        "*====== 2 failed, 3 error in * seconds ======*",
     ])
 
 
@@ -435,7 +435,7 @@ def test_basic(testdir):
     test = testdir.makepyfile(BASIC_TEST)
     result = testdir.runpytest('-vv', '--doctest-modules', test)
     result.stdout.fnmatch_lines([
-        "=====================* test session starts ======================*",
+        "*====== test session starts ======*",
         "platform*",
         "plugins:*",
         "collecting ... collected 5 items",
@@ -447,14 +447,14 @@ def test_basic(testdir):
         "",
         "* benchmark: 4 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer:*",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
-        "-----------------------------------------------------------------*",
+        "------*",
         "test_slow           *",
         "test_slower         *",
         "test_xfast          *",
         "test_fast           *",
-        "-----------------------------------------------------------------*",
+        "------*",
         "",
-        "====================* 5 passed in* seconds ====================*",
+        "*====== 5 passed in* seconds ======*",
     ])
 
 
@@ -462,7 +462,7 @@ def test_skip(testdir):
     test = testdir.makepyfile(BASIC_TEST)
     result = testdir.runpytest('-vv', '--doctest-modules', '--benchmark-skip', test)
     result.stdout.fnmatch_lines([
-        "=====================* test session starts ======================*",
+        "*====== test session starts ======*",
         "platform*",
         "plugins:*",
         "collecting ... collected 5 items",
@@ -471,7 +471,7 @@ def test_skip(testdir):
         "test_skip.py::test_slower SKIPPED",
         "test_skip.py::test_xfast SKIPPED",
         "test_skip.py::test_fast SKIPPED",
-        "==============* 1 passed, 4 skipped in* seconds ===============*",
+        "*====== 1 passed, 4 skipped in* seconds ======*",
     ])
 
 
@@ -479,18 +479,18 @@ def test_mark_selection(testdir):
     test = testdir.makepyfile(BASIC_TEST)
     result = testdir.runpytest('-vv', '--doctest-modules', '-m', 'benchmark', test)
     result.stdout.fnmatch_lines([
-        "=====================* test session starts ======================*",
+        "*====== test session starts ======*",
         "platform*",
         "plugins:*",
         "collecting ... collected 5 items",
         "test_mark_selection.py::test_xfast PASSED",
         "* benchmark: 1 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer:*",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
-        "-----------------------------------------------------------------*",
+        "------*",
         "test_xfast       *",
-        "-----------------------------------------------------------------*",
-        "===========* 4 tests deselected by \"-m 'benchmark'\" =============*",
-        "============* 1 passed, 4 deselected in* seconds ==============*",
+        "------*",
+        "*====== 4 tests deselected by \"-m 'benchmark'\" ======*",
+        "*====== 1 passed, 4 deselected in* seconds ======*",
     ])
 
 
@@ -498,7 +498,7 @@ def test_only_benchmarks(testdir):
     test = testdir.makepyfile(BASIC_TEST)
     result = testdir.runpytest('-vv', '--doctest-modules', '--benchmark-only', test)
     result.stdout.fnmatch_lines([
-        "=====================* test session starts ======================*",
+        "*====== test session starts ======*",
         "platform*",
         "plugins:*",
         "collecting ... collected 5 items",
@@ -509,11 +509,11 @@ def test_only_benchmarks(testdir):
         "test_only_benchmarks.py::test_fast PASSED",
         "* benchmark: 4 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer:*",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
-        "-----------------------------------------------------------------*",
+        "------*",
         "test_slow        *",
         "test_slower      *",
         "test_xfast       *",
         "test_fast        *",
-        "-----------------------------------------------------------------*",
-        "==============* 4 passed, 1 skipped in* seconds ===============*",
+        "------*",
+        "*====== 4 passed, 1 skipped in* seconds ======*",
     ])
