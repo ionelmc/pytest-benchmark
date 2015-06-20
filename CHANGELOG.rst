@@ -2,7 +2,7 @@
 Changelog
 =========
 
-2.5.0 (2015-06-15)
+2.5.0 (2015-06-20)
 ------------------
 
 * Improved test suite a bit (not using `cram` anymore).
