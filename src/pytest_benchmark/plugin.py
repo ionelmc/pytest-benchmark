@@ -1,14 +1,18 @@
 from __future__ import division
 
 from collections import defaultdict
+from datetime import datetime
 from decimal import Decimal
 import argparse
 import gc
 import math
-import py
-import pytest
+import os
+import subprocess
 import sys
 import time
+
+import py
+import pytest
 
 from .compat import XRANGE, PY3
 from .stats import RunningStats
@@ -75,32 +79,59 @@ def parse_seconds(string):
         raise argparse.ArgumentTypeError("Invalid decimal value %r: %r" % (string, exc))
 
 
+def get_commit_id():
+    suffix = ''
+    commit = 'unversioned'
+    if os.path.exists('.git'):
+        desc = subprocess.check_output('git describe --dirty --always --long --abbrev=40'.split()).strip()
+        desc = desc.split('-')
+        if desc[-1].strip() == 'dirty':
+            suffix = '_uncommitted-changes'
+            desc.pop()
+        commit = desc[-1].strip('g')
+    elif os.path.exists('.hg'):
+        desc = subprocess.check_output('hg id --id --debug'.split()).strip()
+        if desc[-1] == '+':
+            suffix = '_uncommitted-changes'
+        commit = desc.strip('+')
+    return '%s_%s%s' % (commit, get_current_time(), suffix)
+
+
+def get_current_time():
+    return datetime.now().strftime("%Y%m%d_%H%M%S")
+
+
 def pytest_addoption(parser):
     group = parser.getgroup("benchmark")
     group.addoption(
         "--benchmark-min-time",
-        action="store", type=parse_seconds, default="0.000025",
-        help="Minimum time per round in seconds. Default: %(default)s"
+        metavar="SECONDS", type=parse_seconds, default="0.000025",
+        help="Minimum time per round in seconds. Default: %(default)r"
     )
     group.addoption(
         "--benchmark-max-time",
-        action="store", type=parse_seconds, default="1.0",
-        help="Maximum time to spend in a benchmark in seconds. Default: %(default)s"
+        metavar="SECONDS", type=parse_seconds, default="1.0",
+        help="Maximum time to spend in a benchmark in seconds. Default: %(default)r"
     )
     group.addoption(
         "--benchmark-min-rounds",
-        action="store", type=parse_rounds, default=5,
-        help="Minimum rounds, even if total time would exceed `--max-time`. Default: %(default)s"
+        metavar="NUM", type=parse_rounds, default=5,
+        help="Minimum rounds, even if total time would exceed `--max-time`. Default: %(default)r"
     )
     group.addoption(
         "--benchmark-sort",
-        action="store", type=parse_sort, default="min",
-        help="Column to sort on. Can be one of: 'min', 'max', 'mean' or 'stddev'. Default: %(default)s"
+        metavar="COL", type=parse_sort, default="min",
+        help="Column to sort on. Can be one of: 'min', 'max', 'mean' or 'stddev'. Default: %(default)r"
+    )
+    group.addoption(
+        "--benchmark-group-by",
+        metavar="LABEL", default="group",
+        help="How to group tests. Can be one of: 'group', 'name' or 'params'. Default: %(default)r"
     )
     group.addoption(
         "--benchmark-timer",
-        action="store", type=parse_timer, default=str(NameWrapper(default_timer)),
-        help="Timer to use when measuring time. Default: %(default)s"
+        metavar="FUNC", type=parse_timer, default=str(NameWrapper(default_timer)),
+        help="Timer to use when measuring time. Default: %(default)r"
     )
     group.addoption(
         "--benchmark-warmup",
@@ -110,8 +141,8 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-warmup-iterations",
-        action="store", type=int, default=100000,
-        help="Max number of iterations to run in the warmup phase. Default: %(default)s"
+        metavar="NUM", type=int, default=100000,
+        help="Max number of iterations to run in the warmup phase. Default: %(default)r"
     )
     group.addoption(
         "--benchmark-verbose",
@@ -132,6 +163,32 @@ def pytest_addoption(parser):
         "--benchmark-only",
         action="store_true", default=False,
         help="Only run benchmarks."
+    )
+    group.addoption(
+        "--benchmark-save",
+        metavar="NAME", nargs="?", default=get_commit_id(),
+        help="Save the current run into 'STORAGE-PATH/counter-NAME.json'. Default is %(default)r"
+    )
+    group.addoption(
+        "--benchmark-autosave",
+        action="store_true",
+        help="Autosave the current run into 'STORAGE-PATH/counter-commit_id.json",
+    )
+    group.addoption(
+        "--benchmark-compare",
+        metavar="NUM", nargs="?",
+        help="Compare the current run against run NUM or the latest saved run if unspecified."
+    )
+    group.addoption(
+        "--benchmark-storage",
+        metavar="STORAGE-PATH", default="./.benchmarks/",
+        help="Specify a different path to store the runs (when --benchmark-save or --benchmark-autosave are used). "
+             "Default is %(default)r",
+    )
+    group.addoption(
+        "--benchmark-histogram",
+        metavar="FILENAME-PREFIX", nargs="?", default="benchmark_%s" % get_current_time(),
+        help="Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. Default is %(default)r"
     )
 
 
