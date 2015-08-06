@@ -201,8 +201,12 @@ def pytest_addoption(parser):
 
 
 def pytest_addhooks(pluginmanager):
-    ''' install hooks so users add add extra info to the json report header'''
-    pluginmanager.addhooks(benchmark_hooks)
+    from . import hookspec
+
+    method = getattr(pluginmanager, "add_hookspecs", None)
+    if method is None:
+        method = pluginmanager.addhooks
+    method(hookspec)
 
 
 class BenchmarkStats(RunningStats):
