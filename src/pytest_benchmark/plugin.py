@@ -285,7 +285,7 @@ class BenchmarkFixture(object):
         return duration, loops, loops_range
 
 
-class DiagnosticLogger(object):
+class Logger(object):
     def __init__(self, verbose, capman):
         if capman:
             capman.suspendcapture(in_=True)
@@ -295,9 +295,20 @@ class DiagnosticLogger(object):
             capman.resumecapture()
         self.capman = capman
 
+    def warn(self, text):
+        if self.capman:
+            self.capman.suspendcapture(in_=True)
+        self.term.sep("-", red=True, bold=True)
+        self.term.write(" WARNING: ", red=True, bold=True)
+        self.term.line(text, red=True)
+        self.term.sep("-", red=True, bold=True)
+        if self.capman:
+            self.capman.resumecapture()
+
     def info(self, text, **kwargs):
         if self.capman:
             self.capman.suspendcapture(in_=True)
+        kwargs.setdefault('purple', gTrue)
         self.term.line(text, **kwargs)
         if self.capman:
             self.capman.resumecapture()
@@ -309,6 +320,11 @@ class DiagnosticLogger(object):
 
 class BenchmarkSession(object):
     def __init__(self, config):
+        self.verbose = config.getoption("benchmark_verbose")
+        self.logger = Logger(
+            self.verbose,
+            config.pluginmanager.getplugin("capturemanager")
+        )
         timer = config.getoption("benchmark_timer")
         self.options = dict(
             min_time=SecondsDecimal(config.getoption("benchmark_min_time")),
@@ -335,7 +351,6 @@ class BenchmarkSession(object):
 
         self.only = config.getoption("benchmark_only")
         self.sort = config.getoption("benchmark_sort")
-        self.verbose = config.getoption("benchmark_verbose")
         if self.skip and self.only:
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
         self.benchmarks = []
@@ -360,14 +375,10 @@ class BenchmarkSession(object):
                 elif len(files) > 1:
                     raise pytest.UsageError("Too many benchmark files matched %r: %s" % (self.compare, files))
                 self.compare, = files
-
+            self.logger.info("Comparing benchmark results to %s" % self.compare)
         self.histogram = first_or_false(config.getoption("benchmark_histogram"))
         self.json = config.getoption("benchmark_json")
         self.group_by = config.getoption("benchmark_group_by")
-        self.logger = DiagnosticLogger(
-            self.verbose,
-            config.pluginmanager.getplugin("capturemanager")
-        )
 
     @property
     def next_num(self):
