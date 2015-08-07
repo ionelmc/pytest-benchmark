@@ -29,4 +29,7 @@ def first_or_false(obj):
     if obj:
         value, = obj
     else:
-        return False
+        value = False
+
+    return value
+
