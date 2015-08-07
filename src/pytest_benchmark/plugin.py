@@ -368,7 +368,8 @@ class BenchmarkSession(object):
                 files.sort()
                 self.compare = files[-1]
             else:
-                files = [f for f in files if f.startswith(self.compare)]
+                rex = re.compile("^0?0?0?%s" % re.escape(self.compare))
+                files = [f for f in files if rex.match(str(f.basename))]
                 if not files:
                     raise pytest.UsageError("No benchmark files matched %r" % self.compare)
                 elif len(files) > 1:
@@ -442,7 +443,14 @@ def pytest_terminal_summary(terminalreporter):
             assert not output_file.exists()
             output_file.write_binary(payload)
         if output_file:
-            bs.logger.info("Saved benchmark data in %s" % output_file, purple=True)
+            bs.logger.info("Saved benchmark data in %s" % output_file)
+
+    if bs.compare:
+        with bs.compare.open('rb') as fh:
+            try:
+                bs.compare = json.load(fh)
+            except Exception as exc:
+                bs.logger.warn("Failed to load %s: %s" % (bs.compare, exc))
 
     timer = bs.options.get('timer')
     for group, benchmarks in config.hook.pytest_benchmark_group_stats(
