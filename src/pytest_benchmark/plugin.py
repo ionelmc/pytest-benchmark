@@ -6,12 +6,12 @@ import gc
 import json
 import math
 import platform
+import re
 import sys
-from distutils.version import StrictVersion
 import time
 from collections import defaultdict
 from datetime import datetime
-import re
+from distutils.version import StrictVersion
 
 import py
 import pytest
