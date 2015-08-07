@@ -162,7 +162,12 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-storage",
-        metavar="STORAGE-PATH", default="./.benchmarks/",
+        metavar="STORAGE-PATH", default="./.benchmarks/%s-%s-%s-%s" % (
+            platform.system(),
+            platform.python_implementation(),
+            ".".join(platform.python_version_tuple()[:2]),
+            platform.architecture()[0]
+        ),
         help="Specify a different path to store the runs (when --benchmark-save or --benchmark-autosave are used). "
              "Default: %(default)r",
     )
