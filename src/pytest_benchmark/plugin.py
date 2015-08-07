@@ -163,12 +163,13 @@ class BenchmarkStats(object):
         except AttributeError:
             return getattr(self, key)
 
-    def json(self):
+    def json(self, data=True):
         out = {
             field: getattr(self.stats, field)
             for field in self.stats.fields
         }
-        out['data'] = self.stats.data
+        if data:
+            out['data'] = self.stats.data
         return out
 
     def update(self, duration):
