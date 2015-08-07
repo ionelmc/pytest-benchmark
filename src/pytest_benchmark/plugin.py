@@ -7,6 +7,7 @@ import json
 import math
 import platform
 import sys
+import textwrap
 import time
 from collections import defaultdict
 from datetime import datetime
@@ -338,14 +339,10 @@ class BenchmarkSession(object):
         )
         self.skip = config.getoption("benchmark_skip")
         if config.getoption("dist", "no") != "no" and not self.skip:
-            tr = config.pluginmanager.getplugin('terminalreporter')
-            tr.write_sep("-", red=True, bold=True)
-            tr.write_line(
-                "WARNING: Benchmarks are automatically skipped because xdist plugin is active."
+            self.logger.warn(
+                "Benchmarks are automatically skipped because xdist plugin is active."
                 "Benchmarks cannot be performed reliably in a parallelized environment.",
-                red=True
             )
-            tr.write_sep("-", red=True, bold=True)
             self.skip = True
         if hasattr(config, "slaveinput"):
             self.skip = True
