@@ -325,12 +325,11 @@ class BenchmarkSession(object):
             self.verbose,
             config.pluginmanager.getplugin("capturemanager")
         )
-        timer = config.getoption("benchmark_timer")
         self.options = dict(
             min_time=SecondsDecimal(config.getoption("benchmark_min_time")),
             min_rounds=config.getoption("benchmark_min_rounds"),
             max_time=SecondsDecimal(config.getoption("benchmark_max_time")),
-            timer=load_timer(timer),
+            timer=load_timer(config.getoption("benchmark_timer")),
             disable_gc=config.getoption("benchmark_disable_gc"),
             warmup=config.getoption("benchmark_warmup"),
             warmup_iterations=config.getoption("benchmark_warmup_iterations"),
