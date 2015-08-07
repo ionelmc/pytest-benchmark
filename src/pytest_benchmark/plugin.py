@@ -7,16 +7,16 @@ import json
 import math
 import platform
 import sys
-import textwrap
+from distutils.version import StrictVersion
 import time
 from collections import defaultdict
 from datetime import datetime
+import re
 
 import py
 import pytest
 
 from . import __version__
-import re
 from .compat import XRANGE
 from .stats import Stats
 from .timers import compute_timer_precision
@@ -447,9 +447,17 @@ def pytest_terminal_summary(terminalreporter):
     if bs.compare:
         with bs.compare.open('rb') as fh:
             try:
-                bs.compare = json.load(fh)
+                compared_benchmark = json.load(fh)
             except Exception as exc:
                 bs.logger.warn("Failed to load %s: %s" % (bs.compare, exc))
+        if StrictVersion(compared_benchmark['version']) > StrictVersion(__version__):
+            bs.logger.warn(
+                "Benchmark data from %s was saved with a newer version (%s) than the current version (%s)." % (
+                    bs.compare,
+                    compared_benchmark['version'],
+                    __version__,
+                )
+            )
 
     timer = bs.options.get('timer')
     for group, benchmarks in config.hook.pytest_benchmark_group_stats(
