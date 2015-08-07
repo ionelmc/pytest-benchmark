@@ -1,84 +1,36 @@
-from __future__ import division, print_function
+from __future__ import division
+from __future__ import print_function
 
-from collections import defaultdict
-from decimal import Decimal
 import argparse
-from datetime import datetime
 import gc
 import json
-import platform
 import math
+import platform
 import sys
 import time
+from collections import defaultdict
+from datetime import datetime
 
 import py
 import pytest
-from .compat import PY3
+
 from .compat import XRANGE
 from .stats import Stats
 from .timers import compute_timer_precision
 from .timers import default_timer
+from .utils import NameWrapper
 from .utils import first_or_false
 from .utils import get_commit_id
 from .utils import get_current_time
+from .utils import load_timer
+from .utils import parse_rounds
+from .utils import parse_seconds
+from .utils import parse_sort
+from .utils import parse_timer
+from .utils import time_format
+from .utils import time_unit
 
 
-class NameWrapper(object):
-    def __init__(self, target):
-        self.target = target
-
-    def __str__(self):
-        name = self.target.__module__ + "." if hasattr(self.target, '__module__') else ""
-        name += self.target.__name__ if hasattr(self.target, '__name__') else repr(self.target)
-        return name
-
-    def __repr__(self):
-        return "NameWrapper(%s)" % repr(self.target)
-
-
-def load_timer(string):
-    if "." not in string:
-        raise argparse.ArgumentTypeError("Value for --benchmark-timer must be in dotted form. Eg: 'module.attr'.")
-    mod, attr = string.rsplit(".", 1)
-    if mod == 'pep418':
-        if PY3:
-            import time
-            return NameWrapper(getattr(time, attr))
-        else:
-            from . import pep418
-            return NameWrapper(getattr(pep418, attr))
-    else:
-        __import__(mod)
-        mod = sys.modules[mod]
-        return NameWrapper(getattr(mod, attr))
-
-
-def parse_timer(string):
-    return str(load_timer(string))
-
-
-def parse_sort(string):
-    if string not in ("min", "max", "mean", "stddev"):
-        raise argparse.ArgumentTypeError("Value for --benchmark-sort must be one of: 'min', 'max', 'mean' or 'stddev'.")
-    return string
-
-
-def parse_rounds(string):
-    try:
-        value = int(string)
-    except ValueError as exc:
-        raise argparse.ArgumentTypeError(exc)
-    else:
-        if value < 1:
-            raise argparse.ArgumentTypeError("Value for --benchmark-rounds must be at least 1.")
-        return value
-
-
-def parse_seconds(string):
-    try:
-        return SecondsDecimal(string).as_string
-    except Exception as exc:
-        raise argparse.ArgumentTypeError("Invalid decimal value %r: %r" % (string, exc))
 
 
 def pytest_addoption(parser):
@@ -326,34 +278,6 @@ class BenchmarkFixture(object):
             else:
                 loops *= 10
         return duration, loops, loops_range
-
-
-def time_unit(value):
-    if value < 1e-6:
-        return "n", 1e9
-    elif value < 1e-3:
-        return "u", 1e6
-    elif value < 1:
-        return "m", 1e3
-    else:
-        return "", 1.
-
-
-def time_format(value):
-    unit, adjustment = time_unit(value)
-    return "{0:.2f}{1:s}".format(value * adjustment, unit)
-
-
-class SecondsDecimal(Decimal):
-    def __float__(self):
-        return float(super(SecondsDecimal, self).__str__())
-
-    def __str__(self):
-        return "{0}s".format(time_format(float(super(SecondsDecimal, self).__str__())))
-
-    @property
-    def as_string(self):
-        return super(SecondsDecimal, self).__str__()
 
 
 class DiagnosticLogger(object):
