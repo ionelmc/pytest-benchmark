@@ -112,6 +112,14 @@ def parse_seconds(string):
         raise argparse.ArgumentTypeError("Invalid decimal value %r: %r" % (string, exc))
 
 
+def parse_save(string):
+    if not string:
+        raise argparse.ArgumentTypeError("Can't be empty.")
+    if any(c in string for c in r"\/:*?<>|"):
+        raise argparse.ArgumentTypeError("Must not contain any of these characters: /:*?<>|\\")
+    return string
+
+
 def time_unit(value):
     if value < 1e-6:
         return "n", 1e9

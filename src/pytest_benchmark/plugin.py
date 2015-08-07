@@ -25,6 +25,7 @@ from .utils import get_commit_id
 from .utils import get_current_time
 from .utils import load_timer
 from .utils import parse_rounds
+from .utils import parse_save
 from .utils import parse_seconds
 from .utils import parse_sort
 from .utils import parse_timer
@@ -102,7 +103,7 @@ def pytest_addoption(parser):
     commit_id = get_commit_id()
     group.addoption(
         "--benchmark-save",
-        action='append', metavar="NAME", nargs="?", default=[], const=commit_id,
+        action='append', metavar="NAME", nargs="?", default=[], const=commit_id, type=parse_save,
         help="Save the current run into 'STORAGE-PATH/counter-NAME.json'. Default: %r" % commit_id
     )
     group.addoption(
@@ -226,16 +227,16 @@ class BenchmarkFixture(object):
         })
         self._add_stats(stats)
 
-        self._logger.write("  Running %s rounds x %s iterations ..." % (rounds, iterations), yellow=True, bold=True)
+        self._logger.debug("  Running %s rounds x %s iterations ..." % (rounds, iterations), yellow=True, bold=True)
         run_start = time.time()
         if self._warmup:
             warmup_rounds = min(rounds, max(1, int(self._warmup / iterations)))
-            self._logger.write("  Warmup %s rounds x %s iterations ..." % (warmup_rounds, iterations))
+            self._logger.debug("  Warmup %s rounds x %s iterations ..." % (warmup_rounds, iterations))
             for _ in XRANGE(warmup_rounds):
                 runner(loops_range)
         for _ in XRANGE(rounds):
             stats.update(runner(loops_range))
-        self._logger.write("  Ran for %ss." % time_format(time.time() - run_start), yellow=True, bold=True)
+        self._logger.debug("  Ran for %ss." % time_format(time.time() - run_start), yellow=True, bold=True)
 
         return function_to_benchmark(*args, **kwargs)
 
@@ -243,9 +244,9 @@ class BenchmarkFixture(object):
         timer_precision = self._get_precision(self._timer)
         min_time = max(self._min_time, timer_precision * 100)
         min_time_estimate = min_time / 10
-        self._logger.write("")
-        self._logger.write("  Timer precision: %ss" % time_format(timer_precision), yellow=True, bold=True)
-        self._logger.write("  Calibrating to target round %ss; will estimate when reaching %ss." % (
+        self._logger.debug("")
+        self._logger.debug("  Timer precision: %ss" % time_format(timer_precision), yellow=True, bold=True)
+        self._logger.debug("  Calibrating to target round %ss; will estimate when reaching %ss." % (
             time_format(min_time), time_format(min_time_estimate)), yellow=True, bold=True)
 
         loops = 1
@@ -260,19 +261,19 @@ class BenchmarkFixture(object):
                     duration = min(duration, runner(loops_range))
                     warmup_rounds += 1
                     warmup_iterations += loops
-                self._logger.write("    Warmup: %ss (%s x %s iterations)." % (
+                self._logger.debug("    Warmup: %ss (%s x %s iterations)." % (
                     time_format(time.time() - warmup_start),
                     warmup_rounds, loops
                 ))
 
-            self._logger.write("    Measured %s iterations: %ss." % (loops, time_format(duration)), yellow=True)
+            self._logger.debug("    Measured %s iterations: %ss." % (loops, time_format(duration)), yellow=True)
             if duration / min_time >= 0.75:
                 break
 
             if duration >= min_time_estimate:
                 # coarse estimation of the number of loops
                 loops = int(min_time * loops / duration)
-                self._logger.write("    Estimating %s iterations." % loops, green=True)
+                self._logger.debug("    Estimating %s iterations." % loops, green=True)
                 if loops == 1:
                     # If we got a single loop then bail early - nothing to calibrate if the the
                     # test function is 100 times slower than the timer resolution.
@@ -287,18 +288,22 @@ class DiagnosticLogger(object):
     def __init__(self, verbose, capman):
         if capman:
             capman.suspendcapture(in_=True)
-        self.term = verbose and py.io.TerminalWriter(file=sys.stderr)
+        self.verbose = verbose
+        self.term = py.io.TerminalWriter(file=sys.stderr)
         if capman:
             capman.resumecapture()
         self.capman = capman
 
-    def write(self, text, **kwargs):
-        if self.term:
-            if self.capman:
-                self.capman.suspendcapture(in_=True)
-            self.term.line(text, **kwargs)
-            if self.capman:
-                self.capman.resumecapture()
+    def info(self, text, **kwargs):
+        if self.capman:
+            self.capman.suspendcapture(in_=True)
+        self.term.line(text, **kwargs)
+        if self.capman:
+            self.capman.resumecapture()
+
+    def debug(self, text, **kwargs):
+        if self.verbose:
+            self.info(text, **kwargs)
 
 
 class BenchmarkSession(object):
@@ -337,9 +342,10 @@ class BenchmarkSession(object):
         self.autosave = config.getoption("benchmark_autosave")
         self.compare = config.getoption("benchmark_compare")
         self.storage = py.path.local(config.getoption("benchmark_storage"))
+        self.storage.ensure(dir=1)
+
         if self.compare:
-            self.storage.ensure(dir=1)
-            files = self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json")
+            files = self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json", sort=True)
             if not files:
                 raise pytest.UsageError(
                     "No benchmark files in %r. Expected files matching [0-9][0-9][0-9][0-9]_*.json" % self.storage)
@@ -361,6 +367,19 @@ class BenchmarkSession(object):
             self.verbose,
             config.pluginmanager.getplugin("capturemanager")
         )
+
+    @property
+    def next_num(self):
+        files = self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json")
+        files.sort(reverse=True)
+        if not files:
+            return "0001"
+        for f in files:
+            try:
+                return "%04i" % (int(str(f.basename).split('_')[0]) + 1)
+            except ValueError:
+                raise
+        return "0001"
 
 
 def pytest_runtest_call(item, __multicall__):
@@ -397,10 +416,22 @@ def pytest_terminal_summary(terminalreporter):
     if bs.json or bs.save or bs.autosave:
         output_json = config.hook.pytest_benchmark_generate_json(config=config, benchmarks=bs.benchmarks)
         config.hook.pytest_benchmark_update_json(config=config, benchmarks=bs.benchmarks, output_json=output_json)
-
+        payload = json.dumps(output_json, indent=4)
         if bs.json:
             with bs.json as fh:
-                fh.write(json.dumps(output_json, indent=4))
+                fh.write(payload)
+                bs.logger.info("Wrote benchmark data in %s" % bs.json, purple=True)
+        output_file = None
+        if bs.save:
+            output_file = bs.storage.join("%s_%s.json" % (bs.next_num, bs.save))
+            assert not output_file.exists()
+            output_file.write_binary(payload)
+        elif bs.autosave:
+            output_file = bs.storage.join("%s_%s.json" % (bs.next_num, get_commit_id()))
+            assert not output_file.exists()
+            output_file.write_binary(payload)
+        if output_file:
+            bs.logger.info("Saved benchmark data in %s" % output_file, purple=True)
 
     timer = bs.options.get('timer')
     for group, benchmarks in config.hook.pytest_benchmark_group_stats(
