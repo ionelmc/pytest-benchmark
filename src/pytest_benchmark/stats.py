@@ -52,8 +52,8 @@ class RunningStats(object):
         )
 
 
-class AdvancedStats(object):
-    fields = "min", "max", "mean", "stddev", "rounds",
+class Stats(object):
+    fields = "min", "max", "mean", "stddev", "rounds", "median", "iqr"
 
     def __init__(self):
         self.data = []

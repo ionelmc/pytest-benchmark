@@ -1,12 +1,12 @@
 import pytest
 
 from pytest_benchmark.stats import RunningStats
-from pytest_benchmark.stats import AdvancedStats
+from pytest_benchmark.stats import Stats
 
 
-@pytest.fixture(params=range(2), ids=['RunningStats', 'AdvancedStats'])
+@pytest.fixture(params=range(2), ids=['RunningStats', 'Stats'])
 def stats_class(request):
-    return [RunningStats, AdvancedStats][request.param]
+    return [RunningStats, Stats][request.param]
 
 
 def test_1(stats_class):
@@ -35,39 +35,39 @@ def test_2(stats_class):
 
 
 def test_iqr():
-    stats = AdvancedStats()
+    stats = Stats()
     for i in 6, 7, 15, 36, 39, 40, 41, 42, 43, 47, 49:
         stats.update(i)
     assert stats.iqr == 22.5  # https://en.wikipedia.org/wiki/Quartile#Example_1
 
-    stats = AdvancedStats()
+    stats = Stats()
     for i in 7, 15, 36, 39, 40, 41:
         stats.update(i)
     assert stats.iqr == 25.0  # https://en.wikipedia.org/wiki/Quartile#Example_2
 
-    stats = AdvancedStats()
+    stats = Stats()
     for i in 1, 2, 3, 4, 5, 6, 7, 8, 9:
         stats.update(i)
     assert stats.iqr == 4.5  # http://www.phusewiki.org/docs/2012/PRESENTATIONS/SP/SP06%20.pdf - method 1
 
-    stats = AdvancedStats()
+    stats = Stats()
     for i in 1, 2, 3, 4, 5, 6, 7, 8:
         stats.update(i)
     assert stats.iqr == 4.0  # http://www.lexjansen.com/nesug/nesug07/po/po08.pdf - method 1
 
-    stats = AdvancedStats()
+    stats = Stats()
     for i in 1, 2, 1, 123, 4, 1234, 1, 234, 12, 34, 12, 3, 2, 34, 23:
         stats.update(i)
     assert stats.iqr == 32.0
 
-    stats = AdvancedStats()
+    stats = Stats()
     for i in 1, 2, 3, 10, 10.1234, 11, 12, 13., 10.1115, 11.1115, 12.1115, 13.5, 10.75, 11.75, 13.12175, 13.1175, 20, \
              50, 52:
         stats.update(i)
     assert stats.stddev == 13.518730097622106
     assert stats.iqr == 3.006212500000002  # close enough: http://www.wessa.net/rwasp_variability.wasp
 
-    stats = AdvancedStats()
+    stats = Stats()
     for i in [
         11.2, 11.8, 13.2, 12.9, 12.1, 13.5, 14.8, 14.8, 13.6, 11.9, 10.4, 11.8, 11.5, 12.6, 14.1, 13.5, 12.5, 14.9,
         17.0, 17.0, 15.8, 13.3, 11.4, 14.0, 14.5, 15.0, 17.8, 16.3, 17.2, 17.8, 19.9, 19.9, 18.4, 16.2, 14.6, 16.6,

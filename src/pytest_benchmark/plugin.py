@@ -1,32 +1,29 @@
-from __future__ import division
+from __future__ import division, print_function
 
 from collections import defaultdict
-from datetime import datetime
 from decimal import Decimal
 import argparse
-import datetime
+from datetime import datetime
 import gc
 import json
+import platform
 import math
-import os
-import subprocess
 import sys
-import socket
 import time
 
 import py
 import pytest
-
-from .compat import XRANGE, PY3
-from .stats import RunningStats
+from .compat import PY3
+from .compat import XRANGE
+from .stats import Stats
 from .timers import compute_timer_precision
 from .timers import default_timer
-
-from . import benchmark_hooks
+from .utils import first_or_false
+from .utils import get_commit_id
+from .utils import get_current_time
 
 
 class NameWrapper(object):
-
     def __init__(self, target):
         self.target = target
 
@@ -82,28 +79,6 @@ def parse_seconds(string):
         return SecondsDecimal(string).as_string
     except Exception as exc:
         raise argparse.ArgumentTypeError("Invalid decimal value %r: %r" % (string, exc))
-
-
-def get_commit_id():
-    suffix = ''
-    commit = 'unversioned'
-    if os.path.exists('.git'):
-        desc = subprocess.check_output('git describe --dirty --always --long --abbrev=40'.split()).strip()
-        desc = desc.split('-')
-        if desc[-1].strip() == 'dirty':
-            suffix = '_uncommitted-changes'
-            desc.pop()
-        commit = desc[-1].strip('g')
-    elif os.path.exists('.hg'):
-        desc = subprocess.check_output('hg id --id --debug'.split()).strip()
-        if desc[-1] == '+':
-            suffix = '_uncommitted-changes'
-        commit = desc.strip('+')
-    return '%s_%s%s' % (commit, get_current_time(), suffix)
-
-
-def get_current_time():
-    return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
 def pytest_addoption(parser):
@@ -169,10 +144,11 @@ def pytest_addoption(parser):
         action="store_true", default=False,
         help="Only run benchmarks."
     )
+    commit_id = get_commit_id()
     group.addoption(
         "--benchmark-save",
-        metavar="NAME", nargs="?", default=get_commit_id(),
-        help="Save the current run into 'STORAGE-PATH/counter-NAME.json'. Default is %(default)r"
+        action='append', metavar="NAME", nargs="?", default=[], const=commit_id,
+        help="Save the current run into 'STORAGE-PATH/counter-NAME.json'. Default: %r" % commit_id
     )
     group.addoption(
         "--benchmark-autosave",
@@ -188,16 +164,19 @@ def pytest_addoption(parser):
         "--benchmark-storage",
         metavar="STORAGE-PATH", default="./.benchmarks/",
         help="Specify a different path to store the runs (when --benchmark-save or --benchmark-autosave are used). "
-             "Default is %(default)r",
+             "Default: %(default)r",
     )
+    prefix = "benchmark_%s" % get_current_time()
     group.addoption(
         "--benchmark-histogram",
-        metavar="FILENAME-PREFIX", nargs="?", default="benchmark_%s" % get_current_time(),
-        help="Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. Default is %(default)r"
+        action='append', metavar="FILENAME-PREFIX", nargs="?", default=[], const=prefix,
+        help="Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. Default: %r" % prefix
     )
-    group.addoption('--benchmark-json-path',  action="store",
-        dest="benchmark_json_path", metavar="path", default=None,
-        help="create json report file at given path.")
+    group.addoption(
+        "--benchmark-json",
+        metavar="PATH", type=argparse.FileType('w'),
+        help="Dump a JSON report into PATH."
+    )
 
 
 def pytest_addhooks(pluginmanager):
@@ -209,18 +188,30 @@ def pytest_addhooks(pluginmanager):
     method(hookspec)
 
 
-class BenchmarkStats(RunningStats):
-    def __init__(self, name, group, scale):
+class BenchmarkStats(object):
+    def __init__(self, name, group, iterations, options):
         self.name = name
         self.group = group
-        self.scale = scale
-        super(BenchmarkStats, self).__init__()
+        self.iterations = iterations
+        self.stats = Stats()
+        self.options = options
 
     def __getitem__(self, key):
-        return getattr(self, key)
+        try:
+            return getattr(self.stats, key)
+        except AttributeError:
+            return getattr(self, key)
+
+    def json(self):
+        out = {
+            field: getattr(self.stats, field)
+            for field in self.stats.fields
+        }
+        out['data'] = self.stats.data
+        return out
 
     def update(self, duration):
-        super(BenchmarkStats, self).update(duration / self.scale)
+        self.stats.update(duration / self.iterations)
 
 
 class BenchmarkFixture(object):
@@ -259,20 +250,27 @@ class BenchmarkFixture(object):
                 gc.enable()
             return end - start
 
-        duration, scale, loops_range = self._calibrate_timer(runner)
+        duration, iterations, loops_range = self._calibrate_timer(runner)
 
         # Choose how many time we must repeat the test
         rounds = int(math.ceil(self._max_time / duration))
         rounds = max(rounds, self._min_rounds)
 
-        stats = BenchmarkStats(self._name, group=self._group, scale=scale)
+        stats = BenchmarkStats(self._name, group=self._group, iterations=iterations, options={
+            "disable_gc": self._disable_gc,
+            "timer": self._timer,
+            "min_rounds": self._min_rounds,
+            "max_time": self._max_time,
+            "min_time": self._min_time,
+            "warmup": self._warmup,
+        })
         self._add_stats(stats)
 
-        self._logger.write("  Running %s rounds x %s iterations ..." % (rounds, scale), yellow=True, bold=True)
+        self._logger.write("  Running %s rounds x %s iterations ..." % (rounds, iterations), yellow=True, bold=True)
         run_start = time.time()
         if self._warmup:
-            warmup_rounds = min(rounds, max(1, int(self._warmup / scale)))
-            self._logger.write("  Warmup %s rounds x %s iterations ..." % (warmup_rounds, scale))
+            warmup_rounds = min(rounds, max(1, int(self._warmup / iterations)))
+            self._logger.write("  Warmup %s rounds x %s iterations ..." % (warmup_rounds, iterations))
             for _ in XRANGE(warmup_rounds):
                 runner(loops_range)
         for _ in XRANGE(rounds):
@@ -404,6 +402,22 @@ class BenchmarkSession(object):
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
         self._benchmarks = []
 
+        print("save:", repr(config.getoption("benchmark_save")))
+        print("autosave:", repr(config.getoption("benchmark_autosave")))
+        print("compare:", repr(config.getoption("benchmark_compare")))
+        print("storage:", repr(config.getoption("benchmark_storage")))
+        print("histogram:", repr(config.getoption("benchmark_histogram")))
+        print("json:", repr(config.getoption("benchmark_json")))
+        print("group_by:", repr(config.getoption("benchmark_group_by")))
+
+        self._save = first_or_false(config.getoption("benchmark_save"))
+        self._autosave = config.getoption("benchmark_autosave")
+        self._compare = config.getoption("benchmark_compare")
+        self._storage = config.getoption("benchmark_storage")
+        self._histogram = first_or_false(config.getoption("benchmark_histogram"))
+        self._json = config.getoption("benchmark_json")
+        self._group_by = config.getoption("benchmark_group_by")
+
 
 def pytest_runtest_call(item, __multicall__):
     benchmarksession = item.config._benchmarksession
@@ -421,44 +435,58 @@ def pytest_runtest_call(item, __multicall__):
             __multicall__.execute()
 
 
+def pytest_benchmark_group_stats(benchmarks, group_by):
+    groups = defaultdict(list)
+    for bench in benchmarks:
+        groups[bench.group].append(bench)
+    return sorted(groups.items(), key=lambda pair: pair[0] or "")
+
+
 def pytest_terminal_summary(terminalreporter):
     tr = terminalreporter
-    benchmarksession = tr.config._benchmarksession
+    config = tr.config
+    bs = config._benchmarksession
 
-    if not benchmarksession._benchmarks:
+    if not bs._benchmarks:
         return
 
-    write_json(terminalreporter)
+    if bs._json or bs._save or bs._autosave:
+        output_json = config.hook.pytest_benchmark_generate_json(config=config, benchmarks=bs._benchmarks)
+        config.hook.pytest_benchmark_update_json(config=config, benchmarks=bs._benchmarks, output_json=output_json)
 
-    timer = benchmarksession._options.get('timer')
+        if bs._json:
+            with bs._json as fh:
+                fh.write(json.dumps(output_json, indent=4))
 
-    groups = defaultdict(list)
-    for bench in benchmarksession._benchmarks:
-        groups[bench.group].append(bench)
-    for group, benchmarks in sorted(groups.items(), key=lambda pair: pair[0] or ""):
+    timer = bs._options.get('timer')
+    for group, benchmarks in config.hook.pytest_benchmark_group_stats(
+            config=config,
+            benchmarks=bs._benchmarks,
+            group_by=bs._group_by
+    ):
         worst = {}
         best = {}
         if len(benchmarks) > 1:
             for prop in "min", "max", "mean", "stddev":
-                worst[prop] = max(benchmark[prop] for benchmark in benchmarks)
-                best[prop] = min(benchmark[prop] for benchmark in benchmarks)
-        for prop in "runs", "scale":
+                worst[prop] = max(bench[prop] for bench in benchmarks)
+                best[prop] = min(bench[prop] for bench in benchmarks)
+        for prop in "rounds", "iterations":
             worst[prop] = max(benchmark[prop] for benchmark in benchmarks)
 
-        unit, adjustment = time_unit(best.get(benchmarksession._sort, benchmarks[0][benchmarksession._sort]))
+        unit, adjustment = time_unit(best.get(bs._sort, benchmarks[0][bs._sort]))
         labels = {
             "name": "Name (time in %ss)" % unit,
             "min": "Min",
             "max": "Max",
             "mean": "Mean",
             "stddev": "StdDev",
-            "runs": "Rounds",
-            "scale": "Iterations",
+            "rounds": "Rounds",
+            "iterations": "Iterations",
         }
         widths = {
             "name": 3 + max(len(labels["name"]), max(len(benchmark.name) for benchmark in benchmarks)),
-            "runs": 2 + max(len(labels["runs"]), len(str(worst["runs"]))),
-            "scale": 2 + max(len(labels["scale"]), len(str(worst["scale"]))),
+            "rounds": 2 + max(len(labels["rounds"]), len(str(worst["rounds"]))),
+            "iterations": 2 + max(len(labels["iterations"]), len(str(worst["iterations"]))),
         }
         for prop in "min", "max", "mean", "stddev":
             widths[prop] = 2 + max(len(labels[prop]), max(
@@ -469,16 +497,16 @@ def pytest_terminal_summary(terminalreporter):
         tr.write_line(
             (" benchmark%(name)s: %(count)s tests, min %(min_rounds)s rounds (of min %(min_time)s),"
              " %(max_time)s max time, timer: %(timer)s " % dict(
-                 benchmarksession._options,
-                 count=len(benchmarks),
-                 name="" if group is None else " %r" % group,
-                 timer=timer,
-             )).center(sum(widths.values()), '-'),
+                bs._options,
+                count=len(benchmarks),
+                name="" if group is None else " %r" % group,
+                timer=timer,
+            )).center(sum(widths.values()), '-'),
             yellow=True,
         )
         tr.write_line(labels["name"].ljust(widths["name"]) + "".join(
             labels[prop].rjust(widths[prop])
-            for prop in ("min", "max", "mean", "stddev", "runs", "scale")
+            for prop in ("min", "max", "mean", "stddev", "rounds", "iterations")
         ))
         tr.write_line("-" * sum(widths.values()), yellow=True)
 
@@ -491,7 +519,7 @@ def pytest_terminal_summary(terminalreporter):
                     red=benchmark[prop] == worst.get(prop),
                     bold=True,
                 )
-            for prop in "runs", "scale":
+            for prop in "rounds", "iterations":
                 tr.write("{0:>{1}}".format(benchmark[prop], widths[prop]))
             tr.write("\n")
 
@@ -499,57 +527,50 @@ def pytest_terminal_summary(terminalreporter):
         tr.write_line("")
 
 
-def write_json(terminalreporter):
-    tr = terminalreporter
-    benchmarksession = tr.config._benchmarksession
-
-    if not benchmarksession._benchmarks:
-        return
-    if not tr.config.option.benchmark_json_path:
-        return
-
-    jsonData = {}
-
-    jsonData['header'] = {}
-
-    jsonData['header']['hostname'] = socket.gethostname()
-    jsonData['header']['report_datetime'] = datetime.datetime.utcnow().isoformat()
-
-    tr.config.hook.pytest_benchmark_add_extra_info(headerDict=jsonData['header'])
+def pytest_benchmark_generate_machine_info():
+    return {
+        "node": platform.node(),
+        "processor": platform.processor(),
+        "machine": platform.machine(),
+        "python_compiler": platform.python_compiler(),
+        "python_implementation": platform.python_implementation(),
+        "python_version": platform.python_version(),
+        "release": platform.release(),
+        "system": platform.system()
+    }
 
 
-    groups = defaultdict(list)
-    for bench in benchmarksession._benchmarks:
-        groups[bench.group].append(bench)
+def pytest_benchmark_generate_commit_info():
+    return {
+        "id": get_commit_id(),
+    }
 
 
-    labels = {
-            "name": "Name",
-            "min": "Min",
-            "max": "Max",
-            "mean": "Mean",
-            "stddev": "StdDev",
-            "runs": "Rounds",
-            "scale": "Iterations",
-        }
-    allBenchmarks = {}
-    for group, benchmarks in sorted(groups.items(), key=lambda pair: pair[0] or ""):
-        if group is None:
-            group = 'default'
-        groupData = []
-        for benchmark in benchmarks:
-            tt = { jsonName: benchmark[prop] for prop, jsonName in labels.items() }
-            tt['status'] = 'passed'
-            allBenchmarks[tt['Name']] = tt
-            groupData.append(tt)
-        jsonData[group] = groupData
+def pytest_benchmark_generate_json(config, benchmarks):
+    machine_info = config.hook.pytest_benchmark_generate_machine_info(config=config)
+    config.hook.pytest_benchmark_update_machine_info(config=config, machine_info=machine_info)
 
-    for status in ('error', 'failed'):
-        for rep in tr.getreports(status):
-            allBenchmarks[rep.nodeid]['status'] = status
+    commit_info = config.hook.pytest_benchmark_generate_commit_info(config=config)
+    config.hook.pytest_benchmark_update_commit_info(config=config, commit_info=commit_info)
 
-    with open(tr.config.option.benchmark_json_path,'w') as f:
-        f.write(json.dumps(jsonData, indent=4))
+    benchmarks_json = []
+    output_json = {
+        'machine_info': machine_info,
+        'commit_info': commit_info,
+        'benchmarks': benchmarks_json,
+        'datetime': datetime.utcnow().isoformat(),
+    }
+    for bench in benchmarks:
+        benchmarks_json.append({
+            'group': bench.group,
+            'name': bench.name,
+            'stats': bench.json(),
+            'options': dict(
+                iterations=bench.iterations,
+                **{k: v.__name__ if callable(v) else v for k, v in bench.options.items()}
+            )
+        })
+    return output_json
 
 
 @pytest.fixture(scope="function")
@@ -602,7 +623,8 @@ def pytest_runtest_setup(item):
         if benchmark.args:
             raise ValueError("benchmark mark can't have positional arguments.")
         for name in benchmark.kwargs:
-            if name not in ("max_time", "min_rounds", "min_time", "timer", "group", "disable_gc", "warmup", "warmup_iterations"):
+            if name not in (
+            "max_time", "min_rounds", "min_time", "timer", "group", "disable_gc", "warmup", "warmup_iterations"):
                 raise ValueError("benchmark mark can't have %r keyword argument." % name)
 
 
