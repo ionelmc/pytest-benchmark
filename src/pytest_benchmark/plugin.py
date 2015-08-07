@@ -413,6 +413,10 @@ class BenchmarkSession(object):
         self.histogram = first_or_false(config.getoption("benchmark_histogram"))
         self.json = config.getoption("benchmark_json")
         self.group_by = config.getoption("benchmark_group_by")
+        self.logger = DiagnosticLogger(
+            self.verbose,
+            config.pluginmanager.getplugin("capturemanager")
+        )
 
 
 def pytest_runtest_call(item, __multicall__):
@@ -571,9 +575,9 @@ def pytest_benchmark_generate_json(config, benchmarks):
 
 @pytest.fixture(scope="function")
 def benchmark(request):
-    benchmarksession = request.config._benchmarksession
+    bs = request.config._benchmarksession
 
-    if benchmarksession.skip:
+    if bs.skip:
         pytest.skip("Benchmarks are disabled.")
     else:
         node = request.node
@@ -583,12 +587,9 @@ def benchmark(request):
             options['timer'] = NameWrapper(options['timer'])
         fixture = BenchmarkFixture(
             node.name,
-            add_stats=benchmarksession.benchmarks.append,
-            logger=DiagnosticLogger(
-                benchmarksession.verbose,
-                request.config.pluginmanager.getplugin("capturemanager")
-            ),
-            **dict(benchmarksession.options, **options)
+            add_stats=bs.benchmarks.append,
+            logger=bs.logger,
+            **dict(bs.options, **options)
         )
         return fixture
 
