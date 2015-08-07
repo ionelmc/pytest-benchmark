@@ -377,7 +377,7 @@ class DiagnosticLogger(object):
 class BenchmarkSession(object):
     def __init__(self, config):
         timer = config.getoption("benchmark_timer")
-        self._options = dict(
+        self.options = dict(
             min_time=SecondsDecimal(config.getoption("benchmark_min_time")),
             min_rounds=config.getoption("benchmark_min_rounds"),
             max_time=SecondsDecimal(config.getoption("benchmark_max_time")),
@@ -386,8 +386,8 @@ class BenchmarkSession(object):
             warmup=config.getoption("benchmark_warmup"),
             warmup_iterations=config.getoption("benchmark_warmup_iterations"),
         )
-        self._skip = config.getoption("benchmark_skip")
-        if config.getoption("dist", "no") != "no" and not self._skip:
+        self.skip = config.getoption("benchmark_skip")
+        if config.getoption("dist", "no") != "no" and not self.skip:
             tr = config.pluginmanager.getplugin('terminalreporter')
             tr.write_sep("-", red=True, bold=True)
             tr.write_line(
@@ -396,45 +396,36 @@ class BenchmarkSession(object):
                 red=True
             )
             tr.write_sep("-", red=True, bold=True)
-            self._skip = True
+            self.skip = True
         if hasattr(config, "slaveinput"):
-            self._skip = True
+            self.skip = True
 
-        self._only = config.getoption("benchmark_only")
-        self._sort = config.getoption("benchmark_sort")
-        self._verbose = config.getoption("benchmark_verbose")
-        if self._skip and self._only:
+        self.only = config.getoption("benchmark_only")
+        self.sort = config.getoption("benchmark_sort")
+        self.verbose = config.getoption("benchmark_verbose")
+        if self.skip and self.only:
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
-        self._benchmarks = []
-
-        print("save:", repr(config.getoption("benchmark_save")))
-        print("autosave:", repr(config.getoption("benchmark_autosave")))
-        print("compare:", repr(config.getoption("benchmark_compare")))
-        print("storage:", repr(config.getoption("benchmark_storage")))
-        print("histogram:", repr(config.getoption("benchmark_histogram")))
-        print("json:", repr(config.getoption("benchmark_json")))
-        print("group_by:", repr(config.getoption("benchmark_group_by")))
-
-        self._save = first_or_false(config.getoption("benchmark_save"))
-        self._autosave = config.getoption("benchmark_autosave")
-        self._compare = config.getoption("benchmark_compare")
-        self._storage = config.getoption("benchmark_storage")
-        self._histogram = first_or_false(config.getoption("benchmark_histogram"))
-        self._json = config.getoption("benchmark_json")
-        self._group_by = config.getoption("benchmark_group_by")
+        self.benchmarks = []
+        self.save = first_or_false(config.getoption("benchmark_save"))
+        self.autosave = config.getoption("benchmark_autosave")
+        self.compare = config.getoption("benchmark_compare")
+        self.storage = config.getoption("benchmark_storage")
+        self.histogram = first_or_false(config.getoption("benchmark_histogram"))
+        self.json = config.getoption("benchmark_json")
+        self.group_by = config.getoption("benchmark_group_by")
 
 
 def pytest_runtest_call(item, __multicall__):
     benchmarksession = item.config._benchmarksession
 
-    benchmark = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
-    if isinstance(benchmark, BenchmarkFixture):
-        if benchmarksession._skip:
+    fixure = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
+    if isinstance(fixure, BenchmarkFixture):
+        if benchmarksession.skip:
             pytest.skip("Skipping benchmark (--benchmark-skip active).")
         else:
             __multicall__.execute()
     else:
-        if benchmarksession._only:
+        if benchmarksession.only:
             pytest.skip("Skipping non-benchmark (--benchmark-only active).")
         else:
             __multicall__.execute()
@@ -452,22 +443,22 @@ def pytest_terminal_summary(terminalreporter):
     config = tr.config
     bs = config._benchmarksession
 
-    if not bs._benchmarks:
+    if not bs.benchmarks:
         return
 
-    if bs._json or bs._save or bs._autosave:
-        output_json = config.hook.pytest_benchmark_generate_json(config=config, benchmarks=bs._benchmarks)
-        config.hook.pytest_benchmark_update_json(config=config, benchmarks=bs._benchmarks, output_json=output_json)
+    if bs.json or bs.save or bs.autosave:
+        output_json = config.hook.pytest_benchmark_generate_json(config=config, benchmarks=bs.benchmarks)
+        config.hook.pytest_benchmark_update_json(config=config, benchmarks=bs.benchmarks, output_json=output_json)
 
-        if bs._json:
-            with bs._json as fh:
+        if bs.json:
+            with bs.json as fh:
                 fh.write(json.dumps(output_json, indent=4))
 
-    timer = bs._options.get('timer')
+    timer = bs.options.get('timer')
     for group, benchmarks in config.hook.pytest_benchmark_group_stats(
             config=config,
-            benchmarks=bs._benchmarks,
-            group_by=bs._group_by
+            benchmarks=bs.benchmarks,
+            group_by=bs.group_by
     ):
         worst = {}
         best = {}
@@ -478,7 +469,7 @@ def pytest_terminal_summary(terminalreporter):
         for prop in "rounds", "iterations":
             worst[prop] = max(benchmark[prop] for benchmark in benchmarks)
 
-        unit, adjustment = time_unit(best.get(bs._sort, benchmarks[0][bs._sort]))
+        unit, adjustment = time_unit(best.get(bs.sort, benchmarks[0][bs.sort]))
         labels = {
             "name": "Name (time in %ss)" % unit,
             "min": "Min",
@@ -502,7 +493,7 @@ def pytest_terminal_summary(terminalreporter):
         tr.write_line(
             (" benchmark%(name)s: %(count)s tests, min %(min_rounds)s rounds (of min %(min_time)s),"
              " %(max_time)s max time, timer: %(timer)s " % dict(
-                bs._options,
+                bs.options,
                 count=len(benchmarks),
                 name="" if group is None else " %r" % group,
                 timer=timer,
@@ -582,7 +573,7 @@ def pytest_benchmark_generate_json(config, benchmarks):
 def benchmark(request):
     benchmarksession = request.config._benchmarksession
 
-    if benchmarksession._skip:
+    if benchmarksession.skip:
         pytest.skip("Benchmarks are disabled.")
     else:
         node = request.node
@@ -590,17 +581,16 @@ def benchmark(request):
         options = marker.kwargs if marker else {}
         if 'timer' in options:
             options['timer'] = NameWrapper(options['timer'])
-        benchmark = BenchmarkFixture(
+        fixture = BenchmarkFixture(
             node.name,
-            add_stats=benchmarksession._benchmarks.append,
+            add_stats=benchmarksession.benchmarks.append,
             logger=DiagnosticLogger(
-                benchmarksession._verbose,
+                benchmarksession.verbose,
                 request.config.pluginmanager.getplugin("capturemanager")
             ),
-            **dict(benchmarksession._options, **options)
+            **dict(benchmarksession.options, **options)
         )
-
-        return benchmark
+        return fixture
 
 
 @pytest.fixture(scope="function")
@@ -623,13 +613,14 @@ def benchmark_weave(benchmark):
 
 
 def pytest_runtest_setup(item):
-    benchmark = item.get_marker("benchmark")
-    if benchmark:
-        if benchmark.args:
+    marker = item.get_marker("benchmark")
+    if marker:
+        if marker.args:
             raise ValueError("benchmark mark can't have positional arguments.")
-        for name in benchmark.kwargs:
+        for name in marker.kwargs:
             if name not in (
-            "max_time", "min_rounds", "min_time", "timer", "group", "disable_gc", "warmup", "warmup_iterations"):
+                    "max_time", "min_rounds", "min_time", "timer", "group", "disable_gc", "warmup",
+                    "warmup_iterations"):
                 raise ValueError("benchmark mark can't have %r keyword argument." % name)
 
 
