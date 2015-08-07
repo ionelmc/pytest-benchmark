@@ -157,7 +157,7 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-compare",
-        metavar="NUM", nargs="?",
+        metavar="NUM", nargs="?", default=[], const=None,
         help="Compare the current run against run NUM or the latest saved run if unspecified."
     )
     group.addoption(
