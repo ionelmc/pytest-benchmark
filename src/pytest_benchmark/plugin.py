@@ -19,6 +19,7 @@ from .stats import Stats
 from .timers import compute_timer_precision
 from .timers import default_timer
 from .utils import NameWrapper
+from .utils import SecondsDecimal
 from .utils import first_or_false
 from .utils import get_commit_id
 from .utils import get_current_time
@@ -31,6 +32,8 @@ from .utils import time_format
 from .utils import time_unit
 
 
+class MissingBenchmarkData(Exception):
+    pass
 
 
 def pytest_addoption(parser):
@@ -109,7 +112,7 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-compare",
-        metavar="NUM", nargs="?", default=[], const=None,
+        metavar="NUM", nargs="?", default=[], const=True,
         help="Compare the current run against run NUM or the latest saved run if unspecified."
     )
     group.addoption(
@@ -333,7 +336,24 @@ class BenchmarkSession(object):
         self.save = first_or_false(config.getoption("benchmark_save"))
         self.autosave = config.getoption("benchmark_autosave")
         self.compare = config.getoption("benchmark_compare")
-        self.storage = config.getoption("benchmark_storage")
+        self.storage = py.path.local(config.getoption("benchmark_storage"))
+        if self.compare:
+            self.storage.ensure(dir=1)
+            files = self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json")
+            if not files:
+                raise pytest.UsageError(
+                    "No benchmark files in %r. Expected files matching [0-9][0-9][0-9][0-9]_*.json" % self.storage)
+            if self.compare is True:
+                files.sort()
+                self.compare = files[-1]
+            else:
+                files = [f for f in files if f.startswith(self.compare)]
+                if not files:
+                    raise pytest.UsageError("No benchmark files matched %r" % self.compare)
+                elif len(files) > 1:
+                    raise pytest.UsageError("Too many benchmark files matched %r: %s" % (self.compare, files))
+                self.compare, = files
+
         self.histogram = first_or_false(config.getoption("benchmark_histogram"))
         self.json = config.getoption("benchmark_json")
         self.group_by = config.getoption("benchmark_group_by")
