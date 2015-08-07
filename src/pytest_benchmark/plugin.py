@@ -420,16 +420,16 @@ class BenchmarkSession(object):
 
 
 def pytest_runtest_call(item, __multicall__):
-    benchmarksession = item.config._benchmarksession
+    bs = item.config._benchmarksession
 
     fixure = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
     if isinstance(fixure, BenchmarkFixture):
-        if benchmarksession.skip:
+        if bs.skip:
             pytest.skip("Skipping benchmark (--benchmark-skip active).")
         else:
             __multicall__.execute()
     else:
-        if benchmarksession.only:
+        if bs.only:
             pytest.skip("Skipping non-benchmark (--benchmark-only active).")
         else:
             __multicall__.execute()
