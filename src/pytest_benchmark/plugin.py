@@ -14,6 +14,8 @@ from datetime import datetime
 import py
 import pytest
 
+from . import __version__
+import re
 from .compat import XRANGE
 from .stats import Stats
 from .timers import compute_timer_precision
@@ -553,6 +555,7 @@ def pytest_benchmark_generate_json(config, benchmarks):
         'commit_info': commit_info,
         'benchmarks': benchmarks_json,
         'datetime': datetime.utcnow().isoformat(),
+        'version': __version__,
     }
     for bench in benchmarks:
         benchmarks_json.append({
