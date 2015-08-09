@@ -1,16 +1,8 @@
-import pytest
-
-from pytest_benchmark.stats import RunningStats
 from pytest_benchmark.stats import Stats
 
 
-@pytest.fixture(params=range(2), ids=['RunningStats', 'Stats'])
-def stats_class(request):
-    return [RunningStats, Stats][request.param]
-
-
-def test_1(stats_class):
-    stats = stats_class()
+def test_1():
+    stats = Stats()
     for i in 4., 36., 45., 50., 75.:
         stats.update(i)
     assert stats.mean == 42.
@@ -21,8 +13,8 @@ def test_1(stats_class):
     assert stats.total == 210.
 
 
-def test_2(stats_class):
-    stats = stats_class()
+def test_2():
+    stats = Stats()
     stats.update(17.)
     stats.update(19.)
     stats.update(24.)
