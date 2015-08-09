@@ -432,6 +432,17 @@ class BenchmarkSession(object):
                         __version__,
                     )
                 )
+            machine_info = self.onfig.hook.pytest_benchmark_generate_machine_info(config=self.config)
+            self.config.hook.pytest_benchmark_update_machine_info(config=self.config, machine_info=machine_info)
+
+            if compared_benchmark['machine_info'] != machine_info:
+                self.logger.warn(
+                    "Benchmark machine_info is different. Current: %s VS saved: %s." % (
+                        machine_info,
+                        compared_benchmark['machine_info'],
+                    )
+                )
+
 
     def display(self, tr):
         if not self.benchmarks:
