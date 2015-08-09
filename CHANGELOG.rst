@@ -2,10 +2,28 @@
 Changelog
 =========
 
-2.6.0 (?????????)
+3.0.0 (?????????)
 -----------------
 
-* Added JSON reports.
+* Added JSON report saving (The ``--benchmark-json`` command line arguments).
+* Added benchmark data storage(the ``--benchmark-save`` and ``--benchmark-autosave`` command line arguments).
+* Added comparison to previous runs (The ``--benchmark-compare``  command line argument).
+* Added possibility to group by test name or ...
+
+* Changed ``benchmark_weave`` to no longer be a context manager. Cleanup is performed automatically. *BACKWARDS INCOMPATIBLE*
+* Added ``benchmark.weave`` method (alternative to ``benchmark_weave`` fixture).
+
+* Added new hooks to allow customization:
+
+  * ``pytest_benchmark_generate_machine_info(config)```
+  * ``pytest_benchmark_update_machine_info(config, info)```
+  * ``pytest_benchmark_generate_commit_info(config)```
+  * ``pytest_benchmark_update_commit_info(config, info)```
+  * ``pytest_benchmark_group_stats(config, benchmarks, group_by)```
+  * ``pytest_benchmark_generate_json(config, benchmarks)```
+  * ``pytest_benchmark_update_json(config, benchmarks, output_json)```
+  * ``pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark)```
+
 
 2.5.0 (2015-06-20)
 ------------------
@@ -52,7 +70,7 @@ Changelog
 2.0.0 (2014-12-19)
 ------------------
 
-* Replace the context-manager based API with a simple callback interface.
+* Replace the context-manager based API with a simple callback interface. *BACKWARDS INCOMPATIBLE*
 * Implement timer calibration for precise measurements.
 
 1.0.0 (2014-12-15)
