@@ -213,10 +213,13 @@ class BenchmarkFixture(object):
             gcenabled = gc.isenabled()
             if self._disable_gc:
                 gc.disable()
+            tracer = sys.gettrace()
+            sys.settrace(None)
             start = timer()
             for _ in loops_range:
                 function_to_benchmark(*args, **kwargs)
             end = timer()
+            sys.settrace(tracer)
             if gcenabled:
                 gc.enable()
             return end - start
