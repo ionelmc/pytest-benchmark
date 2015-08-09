@@ -45,14 +45,15 @@ def get_commit_info():
     dirty = False
     commit = 'unversioned'
     if os.path.exists('.git'):
-        desc = subprocess.check_output('git describe --dirty --always --long --abbrev=40'.split()).strip()
+        desc = subprocess.check_output('git describe --dirty --always --long --abbrev=40'.split(),
+                                       universal_newlines=True).strip()
         desc = desc.split('-')
         if desc[-1].strip() == 'dirty':
             dirty = True
             desc.pop()
         commit = desc[-1].strip('g')
     elif os.path.exists('.hg'):
-        desc = subprocess.check_output('hg id --id --debug'.split()).strip()
+        desc = subprocess.check_output('hg id --id --debug'.split(), universal_newlines=True).strip()
         if desc[-1] == '+':
             dirty = True
         commit = desc.strip('+')
