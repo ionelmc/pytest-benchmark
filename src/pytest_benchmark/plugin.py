@@ -395,6 +395,121 @@ class BenchmarkSession(object):
                 raise
         return "0001"
 
+    def display(self, tr):
+        bs = self
+        config = tr.config
+        if not bs.benchmarks:
+            return
+
+        if bs.json or bs.save or bs.autosave:
+            output_json = config.hook.pytest_benchmark_generate_json(config=config, benchmarks=bs.benchmarks)
+            config.hook.pytest_benchmark_update_json(config=config, benchmarks=bs.benchmarks, output_json=output_json)
+            payload = json.dumps(output_json, indent=4)
+            if bs.json:
+                with bs.json as fh:
+                    fh.write(payload)
+                    bs.logger.info("Wrote benchmark data in %s" % bs.json, purple=True)
+            output_file = None
+            if bs.save:
+                output_file = bs.storage.join("%s_%s.json" % (bs.next_num, bs.save))
+                assert not output_file.exists()
+                output_file.write_binary(payload)
+            elif bs.autosave:
+                output_file = bs.storage.join("%s_%s.json" % (bs.next_num, get_commit_id()))
+                assert not output_file.exists()
+                output_file.write_binary(payload)
+            if output_file:
+                bs.logger.info("Saved benchmark data in %s" % output_file)
+
+        if bs.compare:
+            with bs.compare.open('rb') as fh:
+                try:
+                    compared_benchmark = json.load(fh)
+                except Exception as exc:
+                    bs.logger.warn("Failed to load %s: %s" % (bs.compare, exc))
+            if 'version' in compared_benchmark and StrictVersion(compared_benchmark['version']) > StrictVersion(__version__):
+                bs.logger.warn(
+                    "Benchmark data from %s was saved with a newer version (%s) than the current version (%s)." % (
+                        bs.compare,
+                        compared_benchmark['version'],
+                        __version__,
+                    )
+                )
+
+        timer = bs.options.get('timer')
+        for group, benchmarks in config.hook.pytest_benchmark_group_stats(
+                config=config,
+                benchmarks=bs.benchmarks,
+                group_by=bs.group_by
+        ):
+            worst = {}
+            best = {}
+            if len(benchmarks) > 1:
+                for prop in "min", "max", "mean", "stddev":
+                    worst[prop] = max(bench[prop] for bench in benchmarks)
+                    best[prop] = min(bench[prop] for bench in benchmarks)
+            for prop in "outliers", "rounds", "iterations":
+                worst[prop] = max(benchmark[prop] for benchmark in benchmarks)
+
+            unit, adjustment = time_unit(best.get(bs.sort, benchmarks[0][bs.sort]))
+            labels = {
+                "name": "Name (time in %ss)" % unit,
+                "min": "Min",
+                "max": "Max",
+                "mean": "Mean",
+                "stddev": "StdDev",
+                "rounds": "Rounds",
+                "iterations": "Iterations",
+                "iqr": "IQR",
+                "outliers": "Outliers(*)",
+            }
+            widths = {
+                "name": 3 + max(len(labels["name"]), max(len(benchmark.name) for benchmark in benchmarks)),
+                "rounds": 2 + max(len(labels["rounds"]), len(str(worst["rounds"]))),
+                "iterations": 2 + max(len(labels["iterations"]), len(str(worst["iterations"]))),
+                "outliers": 2 + max(len(labels["outliers"]), len(str(worst["outliers"]))),
+            }
+            for prop in "min", "max", "mean", "stddev", "iqr":
+                widths[prop] = 2 + max(len(labels[prop]), max(
+                    len("{0:,.4f}".format(benchmark[prop] * adjustment))
+                    for benchmark in benchmarks
+                ))
+
+            tr.write_line(
+                (" benchmark%(name)s: %(count)s tests, min %(min_rounds)s rounds (of min %(min_time)s),"
+                 " %(max_time)s max time, timer: %(timer)s " % dict(
+                    bs.options,
+                    count=len(benchmarks),
+                    name="" if group is None else " %r" % group,
+                    timer=timer,
+                )).center(sum(widths.values()), '-'),
+                yellow=True,
+            )
+            tr.write_line(labels["name"].ljust(widths["name"]) + "".join(
+                labels[prop].rjust(widths[prop])
+                for prop in ("min", "max", "mean", "stddev", "iqr", "outliers", "rounds", "iterations")
+            ))
+            tr.write_line("-" * sum(widths.values()), yellow=True)
+
+            for bench in benchmarks:
+                tr.write(bench.name.ljust(widths["name"]))
+                for prop in "min", "max", "mean", "stddev", "iqr":
+                    tr.write(
+                        "{0:>{1},.4f}".format(bench[prop] * adjustment, widths[prop]),
+                        green=bench[prop] == best.get(prop),
+                        red=bench[prop] == worst.get(prop),
+                        bold=True,
+                    )
+                for prop in "outliers", "rounds", "iterations":
+                    tr.write("{0:>{1}}".format(bench[prop], widths[prop]))
+                tr.write("\n")
+
+            tr.write_line("-" * sum(widths.values()), yellow=True)
+            tr.write_line("")
+            tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
+                          "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
+            tr.write_line("")
+
 
 def pytest_runtest_call(item, __multicall__):
     bs = item.config._benchmarksession
@@ -420,121 +535,7 @@ def pytest_benchmark_group_stats(benchmarks, group_by):
 
 
 def pytest_terminal_summary(terminalreporter):
-    tr = terminalreporter
-    config = tr.config
-    bs = config._benchmarksession
-
-    if not bs.benchmarks:
-        return
-
-    if bs.json or bs.save or bs.autosave:
-        output_json = config.hook.pytest_benchmark_generate_json(config=config, benchmarks=bs.benchmarks)
-        config.hook.pytest_benchmark_update_json(config=config, benchmarks=bs.benchmarks, output_json=output_json)
-        payload = json.dumps(output_json, indent=4)
-        if bs.json:
-            with bs.json as fh:
-                fh.write(payload)
-                bs.logger.info("Wrote benchmark data in %s" % bs.json, purple=True)
-        output_file = None
-        if bs.save:
-            output_file = bs.storage.join("%s_%s.json" % (bs.next_num, bs.save))
-            assert not output_file.exists()
-            output_file.write_binary(payload)
-        elif bs.autosave:
-            output_file = bs.storage.join("%s_%s.json" % (bs.next_num, get_commit_id()))
-            assert not output_file.exists()
-            output_file.write_binary(payload)
-        if output_file:
-            bs.logger.info("Saved benchmark data in %s" % output_file)
-
-    if bs.compare:
-        with bs.compare.open('rb') as fh:
-            try:
-                compared_benchmark = json.load(fh)
-            except Exception as exc:
-                bs.logger.warn("Failed to load %s: %s" % (bs.compare, exc))
-        if 'version' in compared_benchmark and StrictVersion(compared_benchmark['version']) > StrictVersion(__version__):
-            bs.logger.warn(
-                "Benchmark data from %s was saved with a newer version (%s) than the current version (%s)." % (
-                    bs.compare,
-                    compared_benchmark['version'],
-                    __version__,
-                )
-            )
-
-    timer = bs.options.get('timer')
-    for group, benchmarks in config.hook.pytest_benchmark_group_stats(
-            config=config,
-            benchmarks=bs.benchmarks,
-            group_by=bs.group_by
-    ):
-        worst = {}
-        best = {}
-        if len(benchmarks) > 1:
-            for prop in "min", "max", "mean", "stddev":
-                worst[prop] = max(bench[prop] for bench in benchmarks)
-                best[prop] = min(bench[prop] for bench in benchmarks)
-        for prop in "outliers", "rounds", "iterations":
-            worst[prop] = max(benchmark[prop] for benchmark in benchmarks)
-
-        unit, adjustment = time_unit(best.get(bs.sort, benchmarks[0][bs.sort]))
-        labels = {
-            "name": "Name (time in %ss)" % unit,
-            "min": "Min",
-            "max": "Max",
-            "mean": "Mean",
-            "stddev": "StdDev",
-            "rounds": "Rounds",
-            "iterations": "Iterations",
-            "iqr": "IQR",
-            "outliers": "Outliers(*)",
-        }
-        widths = {
-            "name": 3 + max(len(labels["name"]), max(len(benchmark.name) for benchmark in benchmarks)),
-            "rounds": 2 + max(len(labels["rounds"]), len(str(worst["rounds"]))),
-            "iterations": 2 + max(len(labels["iterations"]), len(str(worst["iterations"]))),
-            "outliers": 2 + max(len(labels["outliers"]), len(str(worst["outliers"]))),
-        }
-        for prop in "min", "max", "mean", "stddev", "iqr":
-            widths[prop] = 2 + max(len(labels[prop]), max(
-                len("{0:,.4f}".format(benchmark[prop] * adjustment))
-                for benchmark in benchmarks
-            ))
-
-        tr.write_line(
-            (" benchmark%(name)s: %(count)s tests, min %(min_rounds)s rounds (of min %(min_time)s),"
-             " %(max_time)s max time, timer: %(timer)s " % dict(
-                bs.options,
-                count=len(benchmarks),
-                name="" if group is None else " %r" % group,
-                timer=timer,
-            )).center(sum(widths.values()), '-'),
-            yellow=True,
-        )
-        tr.write_line(labels["name"].ljust(widths["name"]) + "".join(
-            labels[prop].rjust(widths[prop])
-            for prop in ("min", "max", "mean", "stddev", "iqr", "outliers", "rounds", "iterations")
-        ))
-        tr.write_line("-" * sum(widths.values()), yellow=True)
-
-        for bench in benchmarks:
-            tr.write(bench.name.ljust(widths["name"]))
-            for prop in "min", "max", "mean", "stddev", "iqr":
-                tr.write(
-                    "{0:>{1},.4f}".format(bench[prop] * adjustment, widths[prop]),
-                    green=bench[prop] == best.get(prop),
-                    red=bench[prop] == worst.get(prop),
-                    bold=True,
-                )
-            for prop in "outliers", "rounds", "iterations":
-                tr.write("{0:>{1}}".format(bench[prop], widths[prop]))
-            tr.write("\n")
-
-        tr.write_line("-" * sum(widths.values()), yellow=True)
-        tr.write_line("")
-        tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
-                      "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
-        tr.write_line("")
+    terminalreporter.config._benchmarksession.display(terminalreporter)
 
 
 def pytest_benchmark_generate_machine_info():
