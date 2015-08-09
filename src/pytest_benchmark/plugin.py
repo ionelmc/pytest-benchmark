@@ -311,7 +311,7 @@ class Logger(object):
     def info(self, text, **kwargs):
         if self.capman:
             self.capman.suspendcapture(in_=True)
-        kwargs.setdefault('purple', gTrue)
+        kwargs.setdefault('purple', True)
         self.term.line(text, **kwargs)
         if self.capman:
             self.capman.resumecapture()
