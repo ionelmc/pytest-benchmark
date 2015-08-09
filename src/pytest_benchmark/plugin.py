@@ -548,13 +548,11 @@ class BenchmarkSession(object):
         tr.write("".ljust(widths["name"]))
         for prop in "min", "max", "mean", "stddev", "iqr":
             val = bench[prop] - stats[prop]
-            strval = "{0:,.4f}".format(abs(val * adjustment))
+            fmt = "{0:,.4f}".format(abs(val * adjustment))
             if val > 0:
-                tr.write("{0:>{1}}".format("+", widths[prop] - len(strval)), bold=True, red=True)
-                tr.write(strval, red=True)
+                tr.write("{0:>{1}}".format("+" + fmt, widths[prop]), red=True)
             elif val < 0:
-                tr.write("{0:>{1}}".format("-", widths[prop] - len(strval)), bold=True, green=True)
-                tr.write(strval, green=True)
+                tr.write("{0:>{1}}".format("-" + fmt, widths[prop]), green=True)
             else:
                 tr.write("{0:>{1}}".format("NC", widths[prop]), bold=True, black=True)
 
