@@ -2,6 +2,7 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
+from contextlib import contextmanager
 import gc
 import json
 import math
@@ -205,6 +206,7 @@ class BenchmarkFixture(object):
         self._add_stats = add_stats
         self._warmup = warmup and warmup_iterations
         self._logger = logger
+        self._cleanup_callbacks = []
 
     def __call__(self, function_to_benchmark, *args, **kwargs):
         def runner(loops_range, timer=self._timer):
@@ -247,6 +249,27 @@ class BenchmarkFixture(object):
         self._logger.debug("  Ran for %ss." % time_format(time.time() - run_start), yellow=True, bold=True)
 
         return function_to_benchmark(*args, **kwargs)
+
+    def weave(self, target, **kwargs):
+        try:
+            import aspectlib
+        except ImportError as exc:
+            raise ImportError(exc.args, "Please install aspectlib or pytest-benchmark[aspect]")
+
+        def aspect(function):
+            def wrapper(*args, **kwargs):
+                return self(function, *args, **kwargs)
+
+            return wrapper
+
+        self._cleanup_callbacks.append(aspectlib.weave(target, aspect, **kwargs).rollback)
+
+    patch = weave
+
+    def _cleanup(self):
+        while self._cleanup_callbacks:
+            callback = self._cleanup_callbacks.pop()
+            callback()
 
     def _calibrate_timer(self, runner):
         timer_precision = self._get_precision(self._timer)
@@ -682,26 +705,13 @@ def benchmark(request):
             logger=bs.logger,
             **dict(bs.options, **options)
         )
+        request.addfinalizer(fixture._cleanup)
         return fixture
 
 
 @pytest.fixture(scope="function")
 def benchmark_weave(benchmark):
-    try:
-        import aspectlib
-    except ImportError as exc:
-        raise ImportError(exc.args, "Please install aspectlib or pytest-benchmark[aspect]")
-
-    def aspect(function):
-        def wrapper(*args, **kwargs):
-            return benchmark(function, *args, **kwargs)
-
-        return wrapper
-
-    def weave(target, **kwargs):
-        return aspectlib.weave(target, aspect, **kwargs)
-
-    return weave
+    return benchmark.weave
 
 
 def pytest_runtest_setup(item):

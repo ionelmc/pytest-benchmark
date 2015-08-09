@@ -1,5 +1,4 @@
 import time
-from functools import partial
 
 import pytest
 
@@ -15,7 +14,15 @@ class Foo(object):
         time.sleep(duration)
 
 
-def test_foo(benchmark_weave):
-    with benchmark_weave(Foo.internal, lazy=True):
-        f = Foo()
-        f.run()
+@pytest.mark.benchmark(max_time=0.001)
+def test_weave_fixture(benchmark_weave):
+    benchmark_weave(Foo.internal, lazy=True)
+    f = Foo()
+    f.run()
+
+
+@pytest.mark.benchmark(max_time=0.001)
+def test_weave_method(benchmark):
+    benchmark.weave(Foo.internal, lazy=True)
+    f = Foo()
+    f.run()
