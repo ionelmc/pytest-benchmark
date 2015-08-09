@@ -530,7 +530,7 @@ def pytest_terminal_summary(terminalreporter):
         tr.write_line("-" * sum(widths.values()), yellow=True)
         tr.write_line("")
         tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
-                      "1.5 IQR (Interquartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
+                      "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
         tr.write_line("")
 
 
