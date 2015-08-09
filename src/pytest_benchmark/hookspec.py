@@ -44,6 +44,10 @@ def pytest_benchmark_update_json(config, benchmarks, output_json):
     pass
 
 
+def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark):
+    pass
+
+
 pytest_benchmark_generate_commit_info.firstresult = True
 pytest_benchmark_generate_json.firstresult = True
 pytest_benchmark_generate_machine_info.firstresult = True

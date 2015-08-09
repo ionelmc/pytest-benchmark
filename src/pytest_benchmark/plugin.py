@@ -432,17 +432,11 @@ class BenchmarkSession(object):
                         __version__,
                     )
                 )
-            machine_info = self.onfig.hook.pytest_benchmark_generate_machine_info(config=self.config)
+            machine_info = self.config.hook.pytest_benchmark_generate_machine_info(config=self.config)
             self.config.hook.pytest_benchmark_update_machine_info(config=self.config, machine_info=machine_info)
-
-            if compared_benchmark['machine_info'] != machine_info:
-                self.logger.warn(
-                    "Benchmark machine_info is different. Current: %s VS saved: %s." % (
-                        machine_info,
-                        compared_benchmark['machine_info'],
-                    )
-                )
-
+            self.config.hook.pytest_benchmark_compare_machine_info(config=self.config, benchmarksession=self,
+                                                                   machine_info=machine_info,
+                                                                   compared_benchmark=compared_benchmark)
 
     def display(self, tr):
         if not self.benchmarks:
@@ -524,6 +518,16 @@ class BenchmarkSession(object):
             tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
                           "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
             tr.write_line("")
+
+
+def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark):
+    if compared_benchmark['machine_info'] != machine_info:
+        benchmarksession.logger.warn(
+            "Benchmark machine_info is different. Current: %s VS saved: %s." % (
+                machine_info,
+                compared_benchmark['machine_info'],
+            )
+        )
 
 
 def pytest_runtest_call(item, __multicall__):
