@@ -37,21 +37,29 @@ class NameWrapper(object):
 
 
 def get_commit_id():
-    suffix = ''
+    info = get_commit_info()
+    return '%s_%s%s' % (info['id'], get_current_time(), '_uncommitted-changes' if info['dirty'] else '')
+
+
+def get_commit_info():
+    dirty = False
     commit = 'unversioned'
     if os.path.exists('.git'):
         desc = subprocess.check_output('git describe --dirty --always --long --abbrev=40'.split()).strip()
         desc = desc.split('-')
         if desc[-1].strip() == 'dirty':
-            suffix = '_uncommitted-changes'
+            dirty = True
             desc.pop()
         commit = desc[-1].strip('g')
     elif os.path.exists('.hg'):
         desc = subprocess.check_output('hg id --id --debug'.split()).strip()
         if desc[-1] == '+':
-            suffix = '_uncommitted-changes'
+            dirty = True
         commit = desc.strip('+')
-    return '%s_%s%s' % (commit, get_current_time(), suffix)
+    return {
+        'id': commit,
+        'dirty': dirty
+    }
 
 
 def get_current_time():

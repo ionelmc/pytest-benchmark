@@ -6,8 +6,8 @@ import gc
 import json
 import math
 import platform
-import re
 import sys
+import traceback
 import time
 from collections import defaultdict
 from datetime import datetime
@@ -25,6 +25,7 @@ from .utils import NameWrapper
 from .utils import SecondsDecimal
 from .utils import first_or_false
 from .utils import get_commit_id
+from .utils import get_commit_info
 from .utils import get_current_time
 from .utils import load_timer
 from .utils import parse_rounds
@@ -311,6 +312,15 @@ class Logger(object):
         if self.capman:
             self.capman.resumecapture()
 
+    def error(self, text):
+        if self.capman:
+            self.capman.suspendcapture(in_=True)
+        self.term.sep("-", red=True, bold=True)
+        self.term.line(text, red=True, bold=True)
+        self.term.sep("-", red=True, bold=True)
+        if self.capman:
+            self.capman.resumecapture()
+
     def info(self, text, **kwargs):
         if self.capman:
             self.capman.suspendcapture(in_=True)
@@ -325,6 +335,9 @@ class Logger(object):
 
 
 class BenchmarkSession(object):
+    compare_by_fullname = None
+    compare_by_name = None
+
     def __init__(self, config):
         self.verbose = config.getoption("benchmark_verbose")
         self.logger = Logger(
@@ -371,14 +384,12 @@ class BenchmarkSession(object):
                 files.sort()
                 self.compare = files[-1]
             else:
-                rex = re.compile("^0?0?0?%s" % re.escape(self.compare))
-                files = [f for f in files if rex.match(str(f.basename))]
+                files = [f for f in files if str(f.basename).startswith(self.compare)]
                 if not files:
                     raise pytest.UsageError("No benchmark files matched %r" % self.compare)
                 elif len(files) > 1:
                     raise pytest.UsageError("Too many benchmark files matched %r: %s" % (self.compare, files))
                 self.compare, = files
-            self.logger.info("Comparing benchmark results to %s" % self.compare)
         self.histogram = first_or_false(config.getoption("benchmark_histogram"))
         self.json = config.getoption("benchmark_json")
         self.group_by = config.getoption("benchmark_group_by")
@@ -437,11 +448,19 @@ class BenchmarkSession(object):
             self.config.hook.pytest_benchmark_compare_machine_info(config=self.config, benchmarksession=self,
                                                                    machine_info=machine_info,
                                                                    compared_benchmark=compared_benchmark)
+            self.compare_by_name = {bench['name']: bench for bench in compared_benchmark['benchmarks']}
+            self.compare_by_fullname = {bench['fullname']: bench for bench in compared_benchmark['benchmarks']}
+
+            self.logger.info("Comparing against benchmark %s:" % self.compare.basename, bold=True)
+            self.logger.info("| commit info: %s" % ", ".join("%s=%s" % i for i in compared_benchmark['commit_info'].items()))
+            self.logger.info("| saved at: %s" % compared_benchmark['datetime'])
+            self.logger.info("| saved using pytest-benchmark %s:" % compared_benchmark['version'])
 
     def display(self, tr):
         if not self.benchmarks:
             return
 
+        tr.ensure_newline()
         self.handle_saving()
         self.handle_loading()
 
@@ -512,12 +531,36 @@ class BenchmarkSession(object):
                 for prop in "outliers", "rounds", "iterations":
                     tr.write("{0:>{1}}".format(bench[prop], widths[prop]))
                 tr.write("\n")
+                if self.compare:
+                    if bench.fullname in self.compare_by_fullname:
+                        self.display_compare_row(tr, widths, adjustment, bench,
+                                                 self.compare_by_fullname[bench.fullname])
+                    elif bench.name in self.compare_by_name:
+                        self.display_compare_row(tr, widths, adjustment, bench, self.compare_by_name[bench.name])
 
             tr.write_line("-" * sum(widths.values()), yellow=True)
-            tr.write_line("")
             tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
                           "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
             tr.write_line("")
+
+    def display_compare_row(self, tr, widths, adjustment, bench, comp):
+        stats = comp['stats']
+        tr.write("".ljust(widths["name"]))
+        for prop in "min", "max", "mean", "stddev", "iqr":
+            val = bench[prop] - stats[prop]
+            strval = "{0:,.4f}".format(abs(val * adjustment))
+            if val > 0:
+                tr.write("{0:>{1}}".format("+", widths[prop] - len(strval)), bold=True, red=True)
+                tr.write(strval, red=True)
+            elif val < 0:
+                tr.write("{0:>{1}}".format("-", widths[prop] - len(strval)), bold=True, green=True)
+                tr.write(strval, green=True)
+            else:
+                tr.write("{0:>{1}}".format("NC", widths[prop]), bold=True, black=True)
+
+        for prop in "outliers", "rounds", "iterations":
+            tr.write("{0:>{1}}".format(stats[prop], widths[prop]))
+        tr.write("\n")
 
 
 def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark):
@@ -554,7 +597,11 @@ def pytest_benchmark_group_stats(benchmarks, group_by):
 
 
 def pytest_terminal_summary(terminalreporter):
-    terminalreporter.config._benchmarksession.display(terminalreporter)
+    try:
+        terminalreporter.config._benchmarksession.display(terminalreporter)
+    except Exception:
+        terminalreporter.config._benchmarksession.logger.error("\n%s" % traceback.format_exc())
+        raise
 
 
 def pytest_benchmark_generate_machine_info():
@@ -571,9 +618,7 @@ def pytest_benchmark_generate_machine_info():
 
 
 def pytest_benchmark_generate_commit_info():
-    return {
-        "id": get_commit_id(),
-    }
+    return get_commit_info()
 
 
 def pytest_benchmark_generate_json(config, benchmarks):
@@ -596,9 +641,9 @@ def pytest_benchmark_generate_json(config, benchmarks):
             'group': bench.group,
             'name': bench.name,
             'fullname': bench.fullname,
-            'stats': bench.json(),
+            'stats': dict(bench.json(), iterations=bench.iterations),
             'options': dict(
-                iterations=bench.iterations,
+
                 **{k: v.__name__ if callable(v) else v for k, v in bench.options.items()}
             )
         })
