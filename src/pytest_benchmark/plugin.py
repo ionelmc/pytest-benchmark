@@ -514,17 +514,17 @@ def pytest_terminal_summary(terminalreporter):
         ))
         tr.write_line("-" * sum(widths.values()), yellow=True)
 
-        for benchmark in benchmarks:
-            tr.write(benchmark.name.ljust(widths["name"]))
+        for bench in benchmarks:
+            tr.write(bench.name.ljust(widths["name"]))
             for prop in "min", "max", "mean", "stddev", "iqr":
                 tr.write(
-                    "{0:>{1},.4f}".format(benchmark[prop] * adjustment, widths[prop]),
-                    green=benchmark[prop] == best.get(prop),
-                    red=benchmark[prop] == worst.get(prop),
+                    "{0:>{1},.4f}".format(bench[prop] * adjustment, widths[prop]),
+                    green=bench[prop] == best.get(prop),
+                    red=bench[prop] == worst.get(prop),
                     bold=True,
                 )
             for prop in "outliers", "rounds", "iterations":
-                tr.write("{0:>{1}}".format(benchmark[prop], widths[prop]))
+                tr.write("{0:>{1}}".format(bench[prop], widths[prop]))
             tr.write("\n")
 
         tr.write_line("-" * sum(widths.values()), yellow=True)
