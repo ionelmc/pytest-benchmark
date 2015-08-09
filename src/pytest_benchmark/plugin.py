@@ -494,7 +494,7 @@ def pytest_terminal_summary(terminalreporter):
         }
         for prop in "min", "max", "mean", "stddev", "iqr":
             widths[prop] = 2 + max(len(labels[prop]), max(
-                len("{0:.4f}".format(benchmark[prop] * adjustment))
+                len("{0:,.4f}".format(benchmark[prop] * adjustment))
                 for benchmark in benchmarks
             ))
 
@@ -518,7 +518,7 @@ def pytest_terminal_summary(terminalreporter):
             tr.write(benchmark.name.ljust(widths["name"]))
             for prop in "min", "max", "mean", "stddev", "iqr":
                 tr.write(
-                    "{0:>{1}.4f}".format(benchmark[prop] * adjustment, widths[prop]),
+                    "{0:>{1},.4f}".format(benchmark[prop] * adjustment, widths[prop]),
                     green=benchmark[prop] == best.get(prop),
                     red=benchmark[prop] == worst.get(prop),
                     bold=True,
