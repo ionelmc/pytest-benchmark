@@ -7,8 +7,8 @@ import json
 import math
 import platform
 import sys
-import traceback
 import time
+import traceback
 from collections import defaultdict
 from datetime import datetime
 from distutils.version import StrictVersion
@@ -21,8 +21,9 @@ from .compat import XRANGE
 from .stats import Stats
 from .timers import compute_timer_precision
 from .timers import default_timer
-from .utils import NameWrapper, clonefunc
+from .utils import NameWrapper
 from .utils import SecondsDecimal
+from .utils import clonefunc
 from .utils import first_or_false
 from .utils import get_commit_id
 from .utils import get_commit_info
