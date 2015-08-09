@@ -153,9 +153,10 @@ def pytest_addhooks(pluginmanager):
 
 
 class BenchmarkStats(object):
-    def __init__(self, name, group, iterations, options):
-        self.name = name
-        self.group = group
+    def __init__(self, fixture, iterations, options):
+        self.name = fixture.name
+        self.fullname = fixture.fullname
+        self.group = fixture.group
         self.iterations = iterations
         self.stats = Stats()
         self.options = options
@@ -189,11 +190,13 @@ class BenchmarkFixture(object):
         else:
             return cls._precisions.setdefault(timer, compute_timer_precision(timer))
 
-    def __init__(self, name, disable_gc, timer, min_rounds, min_time, max_time, warmup, warmup_iterations,
+    def __init__(self, node, disable_gc, timer, min_rounds, min_time, max_time, warmup, warmup_iterations,
                  add_stats, logger, group=None):
+        self.name = node.name
+        self.fullname = node._nodeid
+        self.group = group
+
         self._disable_gc = disable_gc
-        self._name = name
-        self._group = group
         self._timer = timer.target
         self._min_rounds = min_rounds
         self._max_time = float(max_time)
@@ -221,7 +224,7 @@ class BenchmarkFixture(object):
         rounds = int(math.ceil(self._max_time / duration))
         rounds = max(rounds, self._min_rounds)
 
-        stats = BenchmarkStats(self._name, group=self._group, iterations=iterations, options={
+        stats = BenchmarkStats(self, iterations=iterations, options={
             "disable_gc": self._disable_gc,
             "timer": self._timer,
             "min_rounds": self._min_rounds,
@@ -572,6 +575,7 @@ def pytest_benchmark_generate_json(config, benchmarks):
         benchmarks_json.append({
             'group': bench.group,
             'name': bench.name,
+            'fullname': bench.fullname,
             'stats': bench.json(),
             'options': dict(
                 iterations=bench.iterations,
@@ -594,7 +598,7 @@ def benchmark(request):
         if 'timer' in options:
             options['timer'] = NameWrapper(options['timer'])
         fixture = BenchmarkFixture(
-            node.name,
+            node,
             add_stats=bs.benchmarks.append,
             logger=bs.logger,
             **dict(bs.options, **options)
