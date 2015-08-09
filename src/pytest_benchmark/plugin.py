@@ -417,7 +417,7 @@ class BenchmarkSession(object):
             if output_file:
                 self.logger.info("Saved benchmark data in %s" % output_file)
 
-    def load_compared(self):
+    def handle_loading(self):
         if self.compare:
             with self.compare.open('rb') as fh:
                 try:
@@ -438,7 +438,7 @@ class BenchmarkSession(object):
             return
 
         self.handle_saving()
-        self.load_compared()
+        self.handle_loading()
 
         timer = self.options.get('timer')
         for group, benchmarks in self.config.hook.pytest_benchmark_group_stats(
