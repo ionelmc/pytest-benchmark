@@ -450,7 +450,7 @@ def pytest_terminal_summary(terminalreporter):
                 compared_benchmark = json.load(fh)
             except Exception as exc:
                 bs.logger.warn("Failed to load %s: %s" % (bs.compare, exc))
-        if StrictVersion(compared_benchmark['version']) > StrictVersion(__version__):
+        if 'version' in compared_benchmark and StrictVersion(compared_benchmark['version']) > StrictVersion(__version__):
             bs.logger.warn(
                 "Benchmark data from %s was saved with a newer version (%s) than the current version (%s)." % (
                     bs.compare,
@@ -483,13 +483,14 @@ def pytest_terminal_summary(terminalreporter):
             "stddev": "StdDev",
             "rounds": "Rounds",
             "iterations": "Iterations",
+            "iqr": "IQR",
         }
         widths = {
             "name": 3 + max(len(labels["name"]), max(len(benchmark.name) for benchmark in benchmarks)),
             "rounds": 2 + max(len(labels["rounds"]), len(str(worst["rounds"]))),
             "iterations": 2 + max(len(labels["iterations"]), len(str(worst["iterations"]))),
         }
-        for prop in "min", "max", "mean", "stddev":
+        for prop in "min", "max", "mean", "stddev", "iqr":
             widths[prop] = 2 + max(len(labels[prop]), max(
                 len("{0:.4f}".format(benchmark[prop] * adjustment))
                 for benchmark in benchmarks
@@ -507,13 +508,13 @@ def pytest_terminal_summary(terminalreporter):
         )
         tr.write_line(labels["name"].ljust(widths["name"]) + "".join(
             labels[prop].rjust(widths[prop])
-            for prop in ("min", "max", "mean", "stddev", "rounds", "iterations")
+            for prop in ("min", "max", "mean", "stddev", "iqr", "rounds", "iterations")
         ))
         tr.write_line("-" * sum(widths.values()), yellow=True)
 
         for benchmark in benchmarks:
             tr.write(benchmark.name.ljust(widths["name"]))
-            for prop in "min", "max", "mean", "stddev":
+            for prop in "min", "max", "mean", "stddev", "iqr":
                 tr.write(
                     "{0:>{1}.4f}".format(benchmark[prop] * adjustment, widths[prop]),
                     green=benchmark[prop] == best.get(prop),
