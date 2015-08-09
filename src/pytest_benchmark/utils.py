@@ -135,3 +135,15 @@ def time_format(value):
     unit, adjustment = time_unit(value)
     return "{0:.2f}{1:s}".format(value * adjustment, unit)
 
+
+class cached_property(object):
+    def __init__(self, func):
+        self.__doc__ = getattr(func, '__doc__')
+        self.func = func
+
+    def __get__(self, obj, cls):
+        if obj is None:
+            return self
+        value = obj.__dict__[self.func.__name__] = self.func(obj)
+        return value
+

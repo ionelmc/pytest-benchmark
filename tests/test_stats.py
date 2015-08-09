@@ -26,6 +26,18 @@ def test_2():
     assert stats.total == 60.
 
 
+def test_single_item():
+    stats = Stats()
+    stats.update(1)
+    assert stats.mean == 1
+    assert stats.min == 1
+    assert stats.max == 1
+    assert stats.stddev == 0
+    assert stats.iqr == 0
+    assert stats.rounds == 1
+    assert stats.total == 1
+
+
 def test_iqr():
     stats = Stats()
     for i in 6, 7, 15, 36, 39, 40, 41, 42, 43, 47, 49:
