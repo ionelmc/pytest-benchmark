@@ -471,7 +471,7 @@ def pytest_terminal_summary(terminalreporter):
             for prop in "min", "max", "mean", "stddev":
                 worst[prop] = max(bench[prop] for bench in benchmarks)
                 best[prop] = min(bench[prop] for bench in benchmarks)
-        for prop in "rounds", "iterations":
+        for prop in "outliers", "rounds", "iterations":
             worst[prop] = max(benchmark[prop] for benchmark in benchmarks)
 
         unit, adjustment = time_unit(best.get(bs.sort, benchmarks[0][bs.sort]))
@@ -484,11 +484,13 @@ def pytest_terminal_summary(terminalreporter):
             "rounds": "Rounds",
             "iterations": "Iterations",
             "iqr": "IQR",
+            "outliers": "Outliers(*)",
         }
         widths = {
             "name": 3 + max(len(labels["name"]), max(len(benchmark.name) for benchmark in benchmarks)),
             "rounds": 2 + max(len(labels["rounds"]), len(str(worst["rounds"]))),
             "iterations": 2 + max(len(labels["iterations"]), len(str(worst["iterations"]))),
+            "outliers": 2 + max(len(labels["outliers"]), len(str(worst["outliers"]))),
         }
         for prop in "min", "max", "mean", "stddev", "iqr":
             widths[prop] = 2 + max(len(labels[prop]), max(
@@ -508,7 +510,7 @@ def pytest_terminal_summary(terminalreporter):
         )
         tr.write_line(labels["name"].ljust(widths["name"]) + "".join(
             labels[prop].rjust(widths[prop])
-            for prop in ("min", "max", "mean", "stddev", "iqr", "rounds", "iterations")
+            for prop in ("min", "max", "mean", "stddev", "iqr", "outliers", "rounds", "iterations")
         ))
         tr.write_line("-" * sum(widths.values()), yellow=True)
 
@@ -521,11 +523,14 @@ def pytest_terminal_summary(terminalreporter):
                     red=benchmark[prop] == worst.get(prop),
                     bold=True,
                 )
-            for prop in "rounds", "iterations":
+            for prop in "outliers", "rounds", "iterations":
                 tr.write("{0:>{1}}".format(benchmark[prop], widths[prop]))
             tr.write("\n")
 
         tr.write_line("-" * sum(widths.values()), yellow=True)
+        tr.write_line("")
+        tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
+                      "1.5 IQR (Interquartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
         tr.write_line("")
 
 
