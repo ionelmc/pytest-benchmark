@@ -36,7 +36,7 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
     pass
 
 
-def pytest_benchmark_generate_json(config, benchmarks):
+def pytest_benchmark_generate_json(config, benchmarks, include_data):
     pass
 
 

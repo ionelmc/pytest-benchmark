@@ -20,7 +20,7 @@ Changelog
   * ``pytest_benchmark_generate_commit_info(config)```
   * ``pytest_benchmark_update_commit_info(config, info)```
   * ``pytest_benchmark_group_stats(config, benchmarks, group_by)```
-  * ``pytest_benchmark_generate_json(config, benchmarks)```
+  * ``pytest_benchmark_generate_json(config, benchmarks, include_data)```
   * ``pytest_benchmark_update_json(config, benchmarks, output_json)```
   * ``pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark)```
 

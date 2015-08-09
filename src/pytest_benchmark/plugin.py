@@ -2,7 +2,6 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
-from contextlib import contextmanager
 import gc
 import json
 import math
@@ -117,6 +116,12 @@ def pytest_addoption(parser):
         help="Autosave the current run into 'STORAGE-PATH/counter-commit_id.json",
     )
     group.addoption(
+        "--benchmark-save-data",
+        action="store_true",
+        help="Use this to make --benchmark-save and --benchmark-autosave include all the timing data,"
+             " not just the stats.",
+    )
+    group.addoption(
         "--benchmark-compare",
         metavar="NUM", nargs="?", default=[], const=True,
         help="Compare the current run against run NUM or the latest saved run if unspecified."
@@ -141,7 +146,8 @@ def pytest_addoption(parser):
     group.addoption(
         "--benchmark-json",
         metavar="PATH", type=argparse.FileType('w'),
-        help="Dump a JSON report into PATH."
+        help="Dump a JSON report into PATH. "
+             "Note that this will include the complete data (all the timings, not just the stats)."
     )
 
 
@@ -169,12 +175,12 @@ class BenchmarkStats(object):
         except AttributeError:
             return getattr(self, key)
 
-    def json(self, data=True):
+    def json(self, include_data=True):
         out = {
             field: getattr(self.stats, field)
             for field in self.stats.fields
         }
-        if data:
+        if include_data:
             out['data'] = self.stats.data
         return out
 
@@ -419,6 +425,8 @@ class BenchmarkSession(object):
         self.histogram = first_or_false(config.getoption("benchmark_histogram"))
         self.json = config.getoption("benchmark_json")
         self.group_by = config.getoption("benchmark_group_by")
+        self.save_data = config.getoption("benchmark_save_data")
+
 
     @property
     def next_num(self):
@@ -434,9 +442,34 @@ class BenchmarkSession(object):
         return "0001"
 
     def handle_saving(self):
-        if self.json or self.save or self.autosave:
-            output_json = self.config.hook.pytest_benchmark_generate_json(config=self.config, benchmarks=self.benchmarks)
-            self.config.hook.pytest_benchmark_update_json(config=self.config, benchmarks=self.benchmarks, output_json=output_json)
+        if self.json:
+            output_json = self.config.hook.pytest_benchmark_generate_json(
+                config=self.config,
+                benchmarks=self.benchmarks,
+                include_data=True
+            )
+            self.config.hook.pytest_benchmark_update_json(
+                config=self.config,
+                benchmarks=self.benchmarks,
+                output_json=output_json
+            )
+            payload = json.dumps(output_json, indent=4)
+            if self.json:
+                with self.json as fh:
+                    fh.write(payload)
+                    self.logger.info("Wrote benchmark data in %s" % self.json, purple=True)
+
+        if self.save or self.autosave:
+            output_json = self.config.hook.pytest_benchmark_generate_json(
+                config=self.config,
+                benchmarks=self.benchmarks,
+                include_data=self.save_data
+            )
+            self.config.hook.pytest_benchmark_update_json(
+                config=self.config,
+                benchmarks=self.benchmarks,
+                output_json=output_json
+            )
             payload = json.dumps(output_json, indent=4)
             if self.json:
                 with self.json as fh:
@@ -661,7 +694,7 @@ def pytest_benchmark_generate_commit_info():
     return get_commit_info()
 
 
-def pytest_benchmark_generate_json(config, benchmarks):
+def pytest_benchmark_generate_json(config, benchmarks, include_data):
     machine_info = config.hook.pytest_benchmark_generate_machine_info(config=config)
     config.hook.pytest_benchmark_update_machine_info(config=config, machine_info=machine_info)
 
@@ -681,7 +714,7 @@ def pytest_benchmark_generate_json(config, benchmarks):
             'group': bench.group,
             'name': bench.name,
             'fullname': bench.fullname,
-            'stats': dict(bench.json(), iterations=bench.iterations),
+            'stats': dict(bench.json(include_data=include_data), iterations=bench.iterations),
             'options': dict(
 
                 **{k: v.__name__ if callable(v) else v for k, v in bench.options.items()}
