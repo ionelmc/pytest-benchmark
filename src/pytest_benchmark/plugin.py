@@ -21,7 +21,7 @@ from .compat import XRANGE
 from .stats import Stats
 from .timers import compute_timer_precision
 from .timers import default_timer
-from .utils import NameWrapper
+from .utils import NameWrapper, clonefunc
 from .utils import SecondsDecimal
 from .utils import first_or_false
 from .utils import get_commit_id
@@ -215,6 +215,12 @@ class BenchmarkFixture(object):
         self._cleanup_callbacks = []
 
     def __call__(self, function_to_benchmark, *args, **kwargs):
+        if platform.python_implementation() == "PyPy":
+            # This was discussed with Antonio Cuni.
+            # Cloning the function should help if you run the same
+            # function with different arguments over multiple tests.
+            function_to_benchmark = clonefunc(function_to_benchmark)
+
         def runner(loops_range, timer=self._timer):
             gcenabled = gc.isenabled()
             if self._disable_gc:
