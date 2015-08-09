@@ -665,7 +665,12 @@ def pytest_runtest_call(item, __multicall__):
 def pytest_benchmark_group_stats(benchmarks, group_by):
     groups = defaultdict(list)
     for bench in benchmarks:
-        groups[bench.group].append(bench)
+        if group_by == 'group':
+            groups[bench.group].append(bench)
+        elif group_by == 'name':
+            groups[bench.name].append(bench)
+        else:
+            raise NotImplementedError("Unsupported grouping %r." % group_by)
     return sorted(groups.items(), key=lambda pair: pair[0] or "")
 
 
