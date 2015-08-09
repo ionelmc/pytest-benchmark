@@ -503,6 +503,15 @@ class BenchmarkSession(object):
                     for benchmark in benchmarks
                 ))
 
+            rpadding = 8 if self.compare else 0
+            labels_line = labels["name"].ljust(widths["name"]) + "".join(
+                labels[prop].rjust(widths[prop]) + (
+                    " " * rpadding
+                    if prop not in ["outliers", "rounds", "iterations"]
+                    else ""
+                )
+                for prop in ("min", "max", "mean", "stddev", "iqr", "outliers", "rounds", "iterations")
+            )
             tr.write_line(
                 (" benchmark%(name)s: %(count)s tests, min %(min_rounds)s rounds (of min %(min_time)s),"
                  " %(max_time)s max time, timer: %(timer)s " % dict(
@@ -510,20 +519,17 @@ class BenchmarkSession(object):
                     count=len(benchmarks),
                     name="" if group is None else " %r" % group,
                     timer=timer,
-                )).center(sum(widths.values()), '-'),
+                )).center(len(labels_line), '-'),
                 yellow=True,
             )
-            tr.write_line(labels["name"].ljust(widths["name"]) + "".join(
-                labels[prop].rjust(widths[prop])
-                for prop in ("min", "max", "mean", "stddev", "iqr", "outliers", "rounds", "iterations")
-            ))
-            tr.write_line("-" * sum(widths.values()), yellow=True)
+            tr.write_line(labels_line)
+            tr.write_line("-" * len(labels_line), yellow=True)
 
             for bench in benchmarks:
                 tr.write(bench.name.ljust(widths["name"]))
                 for prop in "min", "max", "mean", "stddev", "iqr":
                     tr.write(
-                        "{0:>{1},.4f}".format(bench[prop] * adjustment, widths[prop]),
+                        "{0:>{1},.4f}{2:>{3}}".format(bench[prop] * adjustment, widths[prop], "", rpadding),
                         green=bench[prop] == best.get(prop),
                         red=bench[prop] == worst.get(prop),
                         bold=True,
@@ -538,7 +544,7 @@ class BenchmarkSession(object):
                     elif bench.name in self.compare_by_name:
                         self.display_compare_row(tr, widths, adjustment, bench, self.compare_by_name[bench.name])
 
-            tr.write_line("-" * sum(widths.values()), yellow=True)
+            tr.write_line("-" * len(labels_line), yellow=True)
             tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
                           "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
             tr.write_line("")
@@ -547,14 +553,24 @@ class BenchmarkSession(object):
         stats = comp['stats']
         tr.write("".ljust(widths["name"]))
         for prop in "min", "max", "mean", "stddev", "iqr":
-            val = bench[prop] - stats[prop]
+            new = bench[prop]
+            old = stats[prop]
+            val = new - old
             fmt = "{0:,.4f}".format(abs(val * adjustment))
             if val > 0:
-                tr.write("{0:>{1}}".format("+" + fmt, widths[prop]), red=True)
+                tr.write(
+                    "{0:>{1}} {2:<7}".format("+" + fmt, widths[prop],
+                                             "(%i%%)" % abs(new / old * 100 - 100) if old else 'inf'),
+                    red=True
+                )
             elif val < 0:
-                tr.write("{0:>{1}}".format("-" + fmt, widths[prop]), green=True)
+                tr.write(
+                    "{0:>{1}} {2:<7}".format("-" + fmt, widths[prop],
+                                             "(%i%%)" % abs(new / old * 100 - 100) if old else 'inf'),
+                    green=True
+                )
             else:
-                tr.write("{0:>{1}}".format("NC", widths[prop]), bold=True, black=True)
+                tr.write("{0:>{1}}        ".format("NC", widths[prop]), bold=True, black=True)
 
         for prop in "outliers", "rounds", "iterations":
             tr.write("{0:>{1}}".format(stats[prop], widths[prop]))
