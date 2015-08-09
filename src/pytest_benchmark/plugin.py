@@ -331,6 +331,7 @@ class BenchmarkSession(object):
             self.verbose,
             config.pluginmanager.getplugin("capturemanager")
         )
+        self.config = config
         self.options = dict(
             min_time=SecondsDecimal(config.getoption("benchmark_min_time")),
             min_rounds=config.getoption("benchmark_min_rounds"),
@@ -395,52 +396,55 @@ class BenchmarkSession(object):
                 raise
         return "0001"
 
-    def display(self, tr):
-        bs = self
-        config = tr.config
-        if not bs.benchmarks:
-            return
-
-        if bs.json or bs.save or bs.autosave:
-            output_json = config.hook.pytest_benchmark_generate_json(config=config, benchmarks=bs.benchmarks)
-            config.hook.pytest_benchmark_update_json(config=config, benchmarks=bs.benchmarks, output_json=output_json)
+    def handle_saving(self):
+        if self.json or self.save or self.autosave:
+            output_json = self.config.hook.pytest_benchmark_generate_json(config=self.config, benchmarks=self.benchmarks)
+            self.config.hook.pytest_benchmark_update_json(config=self.config, benchmarks=self.benchmarks, output_json=output_json)
             payload = json.dumps(output_json, indent=4)
-            if bs.json:
-                with bs.json as fh:
+            if self.json:
+                with self.json as fh:
                     fh.write(payload)
-                    bs.logger.info("Wrote benchmark data in %s" % bs.json, purple=True)
+                    self.logger.info("Wrote benchmark data in %s" % self.json, purple=True)
             output_file = None
-            if bs.save:
-                output_file = bs.storage.join("%s_%s.json" % (bs.next_num, bs.save))
+            if self.save:
+                output_file = self.storage.join("%s_%s.json" % (self.next_num, self.save))
                 assert not output_file.exists()
                 output_file.write_binary(payload)
-            elif bs.autosave:
-                output_file = bs.storage.join("%s_%s.json" % (bs.next_num, get_commit_id()))
+            elif self.autosave:
+                output_file = self.storage.join("%s_%s.json" % (self.next_num, get_commit_id()))
                 assert not output_file.exists()
                 output_file.write_binary(payload)
             if output_file:
-                bs.logger.info("Saved benchmark data in %s" % output_file)
+                self.logger.info("Saved benchmark data in %s" % output_file)
 
-        if bs.compare:
-            with bs.compare.open('rb') as fh:
+    def load_compared(self):
+        if self.compare:
+            with self.compare.open('rb') as fh:
                 try:
                     compared_benchmark = json.load(fh)
                 except Exception as exc:
-                    bs.logger.warn("Failed to load %s: %s" % (bs.compare, exc))
+                    self.logger.warn("Failed to load %s: %s" % (self.compare, exc))
             if 'version' in compared_benchmark and StrictVersion(compared_benchmark['version']) > StrictVersion(__version__):
-                bs.logger.warn(
+                self.logger.warn(
                     "Benchmark data from %s was saved with a newer version (%s) than the current version (%s)." % (
-                        bs.compare,
+                        self.compare,
                         compared_benchmark['version'],
                         __version__,
                     )
                 )
 
-        timer = bs.options.get('timer')
-        for group, benchmarks in config.hook.pytest_benchmark_group_stats(
-                config=config,
-                benchmarks=bs.benchmarks,
-                group_by=bs.group_by
+    def display(self, tr):
+        if not self.benchmarks:
+            return
+
+        self.handle_saving()
+        self.load_compared()
+
+        timer = self.options.get('timer')
+        for group, benchmarks in self.config.hook.pytest_benchmark_group_stats(
+                config=self.config,
+                benchmarks=self.benchmarks,
+                group_by=self.group_by
         ):
             worst = {}
             best = {}
@@ -451,7 +455,7 @@ class BenchmarkSession(object):
             for prop in "outliers", "rounds", "iterations":
                 worst[prop] = max(benchmark[prop] for benchmark in benchmarks)
 
-            unit, adjustment = time_unit(best.get(bs.sort, benchmarks[0][bs.sort]))
+            unit, adjustment = time_unit(best.get(self.sort, benchmarks[0][self.sort]))
             labels = {
                 "name": "Name (time in %ss)" % unit,
                 "min": "Min",
@@ -478,7 +482,7 @@ class BenchmarkSession(object):
             tr.write_line(
                 (" benchmark%(name)s: %(count)s tests, min %(min_rounds)s rounds (of min %(min_time)s),"
                  " %(max_time)s max time, timer: %(timer)s " % dict(
-                    bs.options,
+                    self.options,
                     count=len(benchmarks),
                     name="" if group is None else " %r" % group,
                     timer=timer,
