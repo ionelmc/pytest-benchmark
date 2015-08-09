@@ -7,7 +7,7 @@ from .utils import cached_property
 
 class Stats(object):
     fields = (
-        "min", "max", "mean", "stddev", "rounds", "median", "iqr", "q1", "q2", "iqr_outliers", "stddev_outliers",
+        "min", "max", "mean", "stddev", "rounds", "median", "iqr", "q1", "q3", "iqr_outliers", "stddev_outliers",
         "outliers"
     )
 
