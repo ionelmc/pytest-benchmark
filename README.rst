@@ -148,27 +148,27 @@ If you need to do some wrapping (like special setup), you can use it as a decora
                         Disable GC during benchmarks.
   --benchmark-skip      Skip running any benchmarks.
   --benchmark-only      Only run benchmarks.
-  --benchmark-save=[NAME]
+  --benchmark-save=NAME
                         Save the current run into 'STORAGE-PATH/counter-
-                        NAME.json'. Default: 'ccf3bcfc962a37d088507b542bd8e3af
-                        2ce515b6_20150810_033444_uncommitted-changes'
+                        NAME.json'. Default: '5b713454c44b6cbdf48bfb2bc3fa996f
+                        d87f49ef_20150810_033847_uncommitted-changes'
   --benchmark-autosave  Autosave the current run into 'STORAGE-PATH/counter-
                         commit_id.json
   --benchmark-save-data
                         Use this to make --benchmark-save and --benchmark-
                         autosave include all the timing data, not just the
                         stats.
-  --benchmark-compare=[NUM]
+  --benchmark-compare=NUM
                         Compare the current run against run NUM or the latest
                         saved run if unspecified.
   --benchmark-storage=STORAGE-PATH
                         Specify a different path to store the runs (when
                         --benchmark-save or --benchmark-autosave are used).
                         Default: './.benchmarks/Linux-CPython-2.7-64bit'
-  --benchmark-histogram=[FILENAME-PREFIX]
+  --benchmark-histogram=FILENAME-PREFIX
                         Plot graphs of min/max/avg/stddev over time in
                         FILENAME-PREFIX-test_name.svg. Default:
-                        'benchmark_20150810_033444'
+                        'benchmark_20150810_033847'
   --benchmark-json=PATH
                         Dump a JSON report into PATH. Note that this will
                         include the complete data (all the timings, not just
