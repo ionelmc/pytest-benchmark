@@ -38,6 +38,8 @@ from .utils import time_format
 from .utils import time_unit
 
 
+NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
+
 class MissingBenchmarkData(Exception):
     pass
 
@@ -566,8 +568,8 @@ class BenchmarkSession(object):
             }
             for prop in "min", "max", "mean", "stddev", "iqr":
                 widths[prop] = 2 + max(len(labels[prop]), max(
-                    len("{0:,.4f}".format(benchmark[prop] * adjustment))
-                    for benchmark in benchmarks
+                    len(NUMBER_FMT.format(bench[prop] * adjustment))
+                    for bench in benchmarks
                 ))
 
             rpadding = 8 if self.compare else 0
@@ -623,7 +625,7 @@ class BenchmarkSession(object):
             new = bench[prop]
             old = stats[prop]
             val = new - old
-            fmt = "{0:,.4f}".format(abs(val * adjustment))
+            fmt = NUMBER_FMT.format(abs(val * adjustment))
             if val > 0:
                 tr.write(
                     "{0:>{1}} {2:<7}".format("+" + fmt, widths[prop],
