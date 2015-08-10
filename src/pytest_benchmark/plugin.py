@@ -40,6 +40,7 @@ from .utils import time_unit
 
 NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
 
+
 class MissingBenchmarkData(Exception):
     pass
 
