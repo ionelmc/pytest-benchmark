@@ -435,7 +435,6 @@ class BenchmarkSession(object):
         self.group_by = config.getoption("benchmark_group_by")
         self.save_data = config.getoption("benchmark_save_data")
 
-
     @property
     def next_num(self):
         files = self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json")
@@ -502,14 +501,15 @@ class BenchmarkSession(object):
                     compared_benchmark = json.load(fh)
                 except Exception as exc:
                     self.logger.warn("Failed to load %s: %s" % (self.compare, exc))
-            if 'version' in compared_benchmark and StrictVersion(compared_benchmark['version']) > StrictVersion(__version__):
-                self.logger.warn(
-                    "Benchmark data from %s was saved with a newer version (%s) than the current version (%s)." % (
-                        self.compare,
-                        compared_benchmark['version'],
-                        __version__,
+            if 'version' in compared_benchmark:
+                if StrictVersion(compared_benchmark['version']) > StrictVersion(__version__):
+                    self.logger.warn(
+                        "Benchmark data from %s was saved with a newer version (%s) than the current version (%s)." % (
+                            self.compare,
+                            compared_benchmark['version'],
+                            __version__,
+                        )
                     )
-                )
             machine_info = self.config.hook.pytest_benchmark_generate_machine_info(config=self.config)
             self.config.hook.pytest_benchmark_update_machine_info(config=self.config, machine_info=machine_info)
             self.config.hook.pytest_benchmark_compare_machine_info(config=self.config, benchmarksession=self,
