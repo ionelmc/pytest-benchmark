@@ -121,30 +121,58 @@ If you need to do some wrapping (like special setup), you can use it as a decora
 
 ``py.test`` command-line options:
 
-    --benchmark-min-time=BENCHMARK_MIN_TIME
-                          Minimum time per round. Default: 25.00us
-    --benchmark-max-time=BENCHMARK_MAX_TIME
-                          Maximum time to spend in a benchmark. Default: 1.00s
-    --benchmark-min-rounds=BENCHMARK_MIN_ROUNDS
-                          Minimum rounds, even if total time would exceed `--max-time`. Default: 5
-    --benchmark-sort=BENCHMARK_SORT
-                          Column to sort on. Can be one of: 'min', 'max', 'mean' or 'stddev'.
-                          Default: min
-    --benchmark-timer=BENCHMARK_TIMER
-                          Timer to use when measuring time. Default: time.perf_counter
-    --benchmark-warmup    Runs the benchmarks two times. Discards data from the first run.
-    --benchmark-warmup-iterations=BENCHMARK_WARMUP_ITERATIONS
-                          Max number of iterations to run in the warmup phase. Default: 100000
-    --benchmark-verbose   Dump diagnostic and progress information.
-    --benchmark-disable-gc
-                          Disable GC during benchmarks.
-    --benchmark-skip      Skip running any benchmarks.
-    --benchmark-only      Only run benchmarks.
-    --benchmark-name-length={short,full}
-                          length of name in report
-    --benchmark-json-path=path
-                          create json report file at given path.
-
+  --benchmark-min-time=SECONDS
+                        Minimum time per round in seconds. Default: '0.000025'
+  --benchmark-max-time=SECONDS
+                        Maximum time to spend in a benchmark in seconds.
+                        Default: '1.0'
+  --benchmark-min-rounds=NUM
+                        Minimum rounds, even if total time would exceed
+                        `--max-time`. Default: 5
+  --benchmark-sort=COL  Column to sort on. Can be one of: 'min', 'max', 'mean'
+                        or 'stddev'. Default: 'min'
+  --benchmark-group-by=LABEL
+                        How to group tests. Can be one of: 'group', 'name' or
+                        'params'. Default: 'group'
+  --benchmark-timer=FUNC
+                        Timer to use when measuring time. Default: 'time.time'
+  --benchmark-warmup    Activates warmup. Will run the test function up to
+                        number of times in the calibration phase. See
+                        `--benchmark-warmup-iterations`. Note: Even the warmup
+                        phase obeys --benchmark-max-time.
+  --benchmark-warmup-iterations=NUM
+                        Max number of iterations to run in the warmup phase.
+                        Default: 100000
+  --benchmark-verbose   Dump diagnostic and progress information.
+  --benchmark-disable-gc
+                        Disable GC during benchmarks.
+  --benchmark-skip      Skip running any benchmarks.
+  --benchmark-only      Only run benchmarks.
+  --benchmark-save=[NAME]
+                        Save the current run into 'STORAGE-PATH/counter-
+                        NAME.json'. Default: 'ccf3bcfc962a37d088507b542bd8e3af
+                        2ce515b6_20150810_033444_uncommitted-changes'
+  --benchmark-autosave  Autosave the current run into 'STORAGE-PATH/counter-
+                        commit_id.json
+  --benchmark-save-data
+                        Use this to make --benchmark-save and --benchmark-
+                        autosave include all the timing data, not just the
+                        stats.
+  --benchmark-compare=[NUM]
+                        Compare the current run against run NUM or the latest
+                        saved run if unspecified.
+  --benchmark-storage=STORAGE-PATH
+                        Specify a different path to store the runs (when
+                        --benchmark-save or --benchmark-autosave are used).
+                        Default: './.benchmarks/Linux-CPython-2.7-64bit'
+  --benchmark-histogram=[FILENAME-PREFIX]
+                        Plot graphs of min/max/avg/stddev over time in
+                        FILENAME-PREFIX-test_name.svg. Default:
+                        'benchmark_20150810_033444'
+  --benchmark-json=PATH
+                        Dump a JSON report into PATH. Note that this will
+                        include the complete data (all the timings, not just
+                        the stats).
 
 Setting per-test options:
 
@@ -238,11 +266,11 @@ JSON report
 ===========
 
 pytest-benchmark can produce a report of activity as a JSON file.
-Just specify a location for the report using --benchmark-json-path. It's also recommended that you 
-set --benchmark-name-length=full if you have a large test suite, this will guarantee unique names 
+Just specify a location for the report using --benchmark-json-path. It's also recommended that you
+set --benchmark-name-length=full if you have a large test suite, this will guarantee unique names
 for all the tests
 
-You can added extra information to the header of the report by adding the 
+You can added extra information to the header of the report by adding the
 pytest_benchmark_add_extra_info hook to your conftest.py.
 
 .. sourcecode:: python
