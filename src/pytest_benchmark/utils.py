@@ -1,16 +1,31 @@
 from __future__ import division
 from __future__ import print_function
 
-from decimal import Decimal
 import argparse
-import sys
 import os
 import subprocess
-from datetime import datetime
+import sys
 import types
+from datetime import datetime
+from decimal import Decimal
 
 from .compat import PY3
 
+try:
+    from subprocess import check_output
+except ImportError:
+    def check_output(*popenargs, **kwargs):
+        if 'stdout' in kwargs:
+            raise ValueError('stdout argument not allowed, it will be overridden.')
+        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get("args")
+            if cmd is None:
+                cmd = popenargs[0]
+            raise subprocess.CalledProcessError(retcode, cmd)
+        return output
 
 class SecondsDecimal(Decimal):
     def __float__(self):
@@ -46,7 +61,7 @@ def get_commit_info():
     dirty = False
     commit = 'unversioned'
     if os.path.exists('.git'):
-        desc = subprocess.check_output('git describe --dirty --always --long --abbrev=40'.split(),
+        desc = check_output('git describe --dirty --always --long --abbrev=40'.split(),
                                        universal_newlines=True).strip()
         desc = desc.split('-')
         if desc[-1].strip() == 'dirty':
@@ -54,7 +69,7 @@ def get_commit_info():
             desc.pop()
         commit = desc[-1].strip('g')
     elif os.path.exists('.hg'):
-        desc = subprocess.check_output('hg id --id --debug'.split(), universal_newlines=True).strip()
+        desc = check_output('hg id --id --debug'.split(), universal_newlines=True).strip()
         if desc[-1] == '+':
             dirty = True
         commit = desc.strip('+')
