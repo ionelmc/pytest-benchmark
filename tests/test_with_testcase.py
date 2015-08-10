@@ -19,5 +19,5 @@ class TerribleTerribleWayToWritePatchTests(unittest.TestCase):
         self.benchmark_weave = benchmark_weave
 
     def test_foo2(self):
-        with self.benchmark_weave('time.sleep'):
-            time.sleep(0.0000001)
+        self.benchmark_weave('time.sleep')
+        time.sleep(0.0000001)
