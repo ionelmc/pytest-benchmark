@@ -27,6 +27,7 @@ except ImportError:
             raise subprocess.CalledProcessError(retcode, cmd)
         return output
 
+
 class SecondsDecimal(Decimal):
     def __float__(self):
         return float(super(SecondsDecimal, self).__str__())
@@ -62,7 +63,7 @@ def get_commit_info():
     commit = 'unversioned'
     if os.path.exists('.git'):
         desc = check_output('git describe --dirty --always --long --abbrev=40'.split(),
-                                       universal_newlines=True).strip()
+                            universal_newlines=True).strip()
         desc = desc.split('-')
         if desc[-1].strip() == 'dirty':
             dirty = True
