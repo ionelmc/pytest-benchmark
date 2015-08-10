@@ -22,7 +22,7 @@ def test_help(testdir):
         "                        How to group tests. Can be one of: 'group', 'name' or",
         "                        'params'. Default: 'group'",
         "  --benchmark-timer=FUNC",
-        "                        Timer to use when measuring time. Default: 'time.time'",
+        "                        Timer to use when measuring time. Default: *",
         "  --benchmark-warmup    Activates warmup. Will run the test function up to",
         "                        number of times in the calibration phase. See",
         "                        `--benchmark-warmup-iterations`. Note: Even the warmup",
