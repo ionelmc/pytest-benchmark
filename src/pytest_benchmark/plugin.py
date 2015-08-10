@@ -39,6 +39,7 @@ from .utils import time_unit
 
 
 NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
+ALIGNED_NUMBER_FMT = "{0:>{1},.4f}{2:>{3}}" if sys.version_info[:2] > (2, 6) else "{0:>{1}.4f}{2:>{3}}"
 
 
 class MissingBenchmarkData(Exception):
@@ -599,7 +600,7 @@ class BenchmarkSession(object):
                 tr.write(bench.name.ljust(widths["name"]))
                 for prop in "min", "max", "mean", "stddev", "iqr":
                     tr.write(
-                        "{0:>{1},.4f}{2:>{3}}".format(bench[prop] * adjustment, widths[prop], "", rpadding),
+                        ALIGNED_NUMBER_FMT.format(bench[prop] * adjustment, widths[prop], "", rpadding),
                         green=bench[prop] == best.get(prop),
                         red=bench[prop] == worst.get(prop),
                         bold=True,
