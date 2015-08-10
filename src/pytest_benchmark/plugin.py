@@ -319,7 +319,7 @@ class BenchmarkFixture(object):
 
             if duration >= min_time_estimate:
                 # coarse estimation of the number of loops
-                loops = int(min_time * loops / duration)
+                loops = round(min_time * loops / duration) + 1
                 self._logger.debug("    Estimating %s iterations." % loops, green=True)
                 if loops == 1:
                     # If we got a single loop then bail early - nothing to calibrate if the the
