@@ -8,24 +8,26 @@ def test_help(testdir):
     result.stdout.fnmatch_lines([
         "*", "*",
         "benchmark:",
-        "  --benchmark-min-time=BENCHMARK_MIN_TIME",
-        "                        Minimum time per round in seconds. Default: 0.000025",
-        "  --benchmark-max-time=BENCHMARK_MAX_TIME",
+        "  --benchmark-min-time=SECONDS",
+        "                        Minimum time per round in seconds. Default: '0.000025'",
+        "  --benchmark-max-time=SECONDS",
         "                        Maximum time to spend in a benchmark in seconds.",
-        "                        Default: 1.0",
-        "  --benchmark-min-rounds=BENCHMARK_MIN_ROUNDS",
+        "                        Default: '1.0'",
+        "  --benchmark-min-rounds=NUM",
         "                        Minimum rounds, even if total time would exceed",
         "                        `--max-time`. Default: 5",
-        "  --benchmark-sort=BENCHMARK_SORT",
-        "                        Column to sort on. Can be one of: 'min', 'max', 'mean'",
-        "                        or 'stddev'. Default: min",
-        "  --benchmark-timer=BENCHMARK_TIMER",
-        "                        Timer to use when measuring time. Default:*",
+        "  --benchmark-sort=COL  Column to sort on. Can be one of: 'min', 'max', 'mean'",
+        "                        or 'stddev'. Default: 'min'",
+        "  --benchmark-group-by=LABEL",
+        "                        How to group tests. Can be one of: 'group', 'name' or",
+        "                        'params'. Default: 'group'",
+        "  --benchmark-timer=FUNC",
+        "                        Timer to use when measuring time. Default: 'time.time'",
         "  --benchmark-warmup    Activates warmup. Will run the test function up to",
         "                        number of times in the calibration phase. See",
         "                        `--benchmark-warmup-iterations`. Note: Even the warmup",
         "                        phase obeys --benchmark-max-time.",
-        "  --benchmark-warmup-iterations=BENCHMARK_WARMUP_ITERATIONS",
+        "  --benchmark-warmup-iterations=NUM",
         "                        Max number of iterations to run in the warmup phase.",
         "                        Default: 100000",
         "  --benchmark-verbose   Dump diagnostic and progress information.",
@@ -33,6 +35,30 @@ def test_help(testdir):
         "                        Disable GC during benchmarks.",
         "  --benchmark-skip      Skip running any benchmarks.",
         "  --benchmark-only      Only run benchmarks.",
+        "  --benchmark-save=[NAME]",
+        "                        Save the current run into 'STORAGE-PATH/counter-",
+        "                        NAME.json'. Default: '*",
+        "  --benchmark-autosave  Autosave the current run into 'STORAGE-PATH/counter-",
+        "                        commit_id.json",
+        "  --benchmark-save-data",
+        "                        Use this to make --benchmark-save and --benchmark-",
+        "                        autosave include all the timing data, not just the",
+        "                        stats.",
+        "  --benchmark-compare=[NUM]",
+        "                        Compare the current run against run NUM or the latest",
+        "                        saved run if unspecified.",
+        "  --benchmark-storage=STORAGE-PATH",
+        "                        Specify a different path to store the runs (when",
+        "                        --benchmark-save or --benchmark-autosave are used).",
+        "                        Default: './.benchmarks/*'",
+        "  --benchmark-histogram=[FILENAME-PREFIX]",
+        "                        Plot graphs of min/max/avg/stddev over time in",
+        "                        FILENAME-PREFIX-test_name.svg. Default:",
+        "                        'benchmark_*'",
+        "  --benchmark-json=PATH",
+        "                        Dump a JSON report into PATH. Note that this will",
+        "                        include the complete data (all the timings, not just",
+        "                        the stats).",
         "*",
     ])
 
@@ -65,10 +91,7 @@ def test_xfast(benchmark):
 ''')
     result = testdir.runpytest('-vv', '--doctest-modules', test)
     result.stdout.fnmatch_lines([
-        "*= test session starts =*",
-        "platform *",
-        "plugins: *",
-        "collecting ... collected 5 items",
+        "*collected 5 items",
         "*",
         "test_groups.py::*test_groups PASSED",
         "test_groups.py::test_fast PASSED",
@@ -77,18 +100,8 @@ def test_xfast(benchmark):
         "test_groups.py::test_xfast PASSED",
         "*",
         "* benchmark: 2 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
-        "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
-        "------*",
-        "test_fast          *",
-        "test_slow          *",
-        "------*",
         "*",
         "* benchmark 'A': 2 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
-        "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
-        "------*",
-        "test_slower        *",
-        "test_xfast         *",
-        "------*",
         "*",
         "*====== 5 passed in * seconds ======*",
     ])
@@ -126,10 +139,7 @@ def test_max_time_min_rounds(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-max-time=0.000001', '--benchmark-min-rounds=1', test)
     result.stdout.fnmatch_lines([
-        "*====== test session starts ======*",
-        "platform *",
-        "plugins: *",
-        "collected 3 items",
+        "*collected 3 items",
         "test_max_time_min_rounds.py ...",
         "* benchmark: 2 tests, min 1 rounds (of min 25.00us), 1.00us max time, timer: *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
@@ -145,10 +155,7 @@ def test_max_time(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-max-time=0.000001', test)
     result.stdout.fnmatch_lines([
-        "*====== test session starts ======*",
-        "platform *",
-        "plugins: *",
-        "collected 3 items",
+        "*collected 3 items",
         "test_max_time.py ...",
         "* benchmark: 2 tests, min 5 rounds (of min 25.00us), 1.00us max time, timer: *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
@@ -182,10 +189,7 @@ def test_disable_gc(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-disable-gc', test)
     result.stdout.fnmatch_lines([
-        "*====== test session starts ======*",
-        "platform *",
-        "plugins: *",
-        "collected 2 items",
+        "*collected 2 items",
         "test_disable_gc.py ..",
         "* benchmark: 2 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
@@ -201,10 +205,7 @@ def test_custom_timer(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-timer=time.time', test)
     result.stdout.fnmatch_lines([
-        "*====== test session starts ======*",
-        "platform *",
-        "plugins: *",
-        "collected 2 items",
+        "*collected 2 items",
         "test_custom_timer.py ..",
         "* benchmark: 2 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
@@ -229,10 +230,7 @@ def test_sort_by_mean(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-sort=mean', test)
     result.stdout.fnmatch_lines([
-        "*====== test session starts ======*",
-        "platform *",
-        "plugins: *",
-        "collected 2 items",
+        "*collected 2 items",
         "test_sort_by_mean.py ..",
         "* benchmark: 2 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
@@ -257,19 +255,10 @@ def test_xdist(testdir):
     pytest.importorskip('xdist')
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '-n', '1', test)
-    result.stdout.fnmatch_lines([
+    result.stderr.fnmatch_lines([
         "------*",
-        "WARNING: Benchmarks are automatically skipped because xdist plugin is active.Benchmarks cannot be performed reliably in a parallelized environment.",
+        " WARNING: Benchmarks are automatically skipped because xdist plugin is active.Benchmarks cannot be performed reliably in a parallelized environment.",
         "------*",
-        "*====== test session starts ======*",
-        "platform *",
-        "plugins: *",
-        "gw0 I",
-        "gw0 [3]",
-        "*",
-        "scheduling tests via LoadScheduling",
-        ".ss",
-        "*====== 1 passed, 2 skipped in * seconds ======*",
     ])
 
 
@@ -309,10 +298,7 @@ def test_ok(benchmark, bad_fixture):
 ''')
     result = testdir.runpytest('-vv', test)
     result.stdout.fnmatch_lines([
-        "*====== test session starts ======*",
-        "platform *",
-        "plugins: *",
-        "collecting ... collected 5 items",
+        "*collected 5 items",
 
         "test_abort_broken.py::test_bad FAILED",
         "test_abort_broken.py::test_bad2 FAILED",
@@ -359,12 +345,11 @@ def test_ok(benchmark, bad_fixture):
         "    def test_bad(benchmark):",
         ">       @benchmark",
         "        def result():",
-        "            raise Exception()",
 
         "test_abort_broken.py:*",
         "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _*",
         "*pytest_benchmark/plugin.py:*: in __call__",
-        "    duration, scale, loops_range = self._calibrate_timer(runner)",
+        "    duration, iterations, loops_range = self._calibrate_timer(runner)",
         "*pytest_benchmark/plugin.py:*: in _calibrate_timer",
         "    duration = runner(loops_range)",
         "*pytest_benchmark/plugin.py:*: in runner",
@@ -435,10 +420,7 @@ def test_basic(testdir):
     test = testdir.makepyfile(BASIC_TEST)
     result = testdir.runpytest('-vv', '--doctest-modules', test)
     result.stdout.fnmatch_lines([
-        "*====== test session starts ======*",
-        "platform*",
-        "plugins:*",
-        "collecting ... collected 5 items",
+        "*collected 5 items",
         "test_basic.py::*test_basic PASSED",
         "test_basic.py::test_slow PASSED",
         "test_basic.py::test_slower PASSED",
@@ -462,10 +444,7 @@ def test_skip(testdir):
     test = testdir.makepyfile(BASIC_TEST)
     result = testdir.runpytest('-vv', '--doctest-modules', '--benchmark-skip', test)
     result.stdout.fnmatch_lines([
-        "*====== test session starts ======*",
-        "platform*",
-        "plugins:*",
-        "collecting ... collected 5 items",
+        "*collected 5 items",
         "test_skip.py::*test_skip PASSED",
         "test_skip.py::test_slow SKIPPED",
         "test_skip.py::test_slower SKIPPED",
@@ -479,10 +458,7 @@ def test_mark_selection(testdir):
     test = testdir.makepyfile(BASIC_TEST)
     result = testdir.runpytest('-vv', '--doctest-modules', '-m', 'benchmark', test)
     result.stdout.fnmatch_lines([
-        "*====== test session starts ======*",
-        "platform*",
-        "plugins:*",
-        "collecting ... collected 5 items",
+        "*collected 5 items",
         "test_mark_selection.py::test_xfast PASSED",
         "* benchmark: 1 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer:*",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
@@ -498,10 +474,7 @@ def test_only_benchmarks(testdir):
     test = testdir.makepyfile(BASIC_TEST)
     result = testdir.runpytest('-vv', '--doctest-modules', '--benchmark-only', test)
     result.stdout.fnmatch_lines([
-        "*====== test session starts ======*",
-        "platform*",
-        "plugins:*",
-        "collecting ... collected 5 items",
+        "*collected 5 items",
         "test_only_benchmarks.py::*test_only_benchmarks SKIPPED",
         "test_only_benchmarks.py::test_slow PASSED",
         "test_only_benchmarks.py::test_slower PASSED",
