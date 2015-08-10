@@ -177,10 +177,10 @@ class BenchmarkStats(object):
             return getattr(self, key)
 
     def json(self, include_data=True):
-        out = {
-            field: getattr(self.stats, field)
+        out = dict(
+            (field, getattr(self.stats, field))
             for field in self.stats.fields
-        }
+        )
         if include_data:
             out['data'] = self.stats.data
         return out
@@ -515,8 +515,8 @@ class BenchmarkSession(object):
             self.config.hook.pytest_benchmark_compare_machine_info(config=self.config, benchmarksession=self,
                                                                    machine_info=machine_info,
                                                                    compared_benchmark=compared_benchmark)
-            self.compare_by_name = {bench['name']: bench for bench in compared_benchmark['benchmarks']}
-            self.compare_by_fullname = {bench['fullname']: bench for bench in compared_benchmark['benchmarks']}
+            self.compare_by_name = dict((bench['name'], bench) for bench in compared_benchmark['benchmarks'])
+            self.compare_by_fullname = dict((bench['fullname'], bench) for bench in compared_benchmark['benchmarks'])
 
             self.logger.info("Comparing against benchmark %s:" % self.compare.basename, bold=True)
             self.logger.info("| commit info: %s" % ", ".join("%s=%s" % i for i in compared_benchmark['commit_info'].items()))
@@ -729,8 +729,7 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data):
             'fullname': bench.fullname,
             'stats': dict(bench.json(include_data=include_data), iterations=bench.iterations),
             'options': dict(
-
-                **{k: v.__name__ if callable(v) else v for k, v in bench.options.items()}
+                (k, v.__name__ if callable(v) else v) for k, v in bench.options.items()
             )
         })
     return output_json
