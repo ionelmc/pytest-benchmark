@@ -37,7 +37,6 @@ from .utils import parse_timer
 from .utils import time_format
 from .utils import time_unit
 
-
 NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
 ALIGNED_NUMBER_FMT = "{0:>{1},.4f}{2:>{3}}" if sys.version_info[:2] > (2, 6) else "{0:>{1}.4f}{2:>{3}}"
 
@@ -71,7 +70,8 @@ def pytest_addoption(parser):
     group.addoption(
         "--benchmark-group-by",
         metavar="LABEL", default="group",
-        help="How to group tests. Can be one of: 'group', 'name' or 'params'. Default: %(default)r"
+        help="How to group tests. Can be one of: 'group', 'name', 'fullname', 'func', 'fullfunc' or 'param'."
+             " Default: %(default)r"
     )
     group.addoption(
         "--benchmark-timer",
@@ -170,6 +170,8 @@ class BenchmarkStats(object):
         self.name = fixture.name
         self.fullname = fixture.fullname
         self.group = fixture.group
+        self.param = fixture.param
+
         self.iterations = iterations
         self.stats = Stats()
         self.options = options
@@ -207,6 +209,7 @@ class BenchmarkFixture(object):
                  add_stats, logger, group=None):
         self.name = node.name
         self.fullname = node._nodeid
+        self.param = node.callspec.id if hasattr(node, 'callspec') else None
         self.group = group
 
         self._disable_gc = disable_gc
@@ -620,8 +623,8 @@ class BenchmarkSession(object):
                           "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
             tr.write_line("")
 
-    def display_compare_row(self, tr, widths, adjustment, bench, comp):
-        stats = comp['stats']
+    def display_compare_row(self, tr, widths, adjustment, bench, compare_to):
+        stats = compare_to['stats']
         tr.write("".ljust(widths["name"]))
         for prop in "min", "max", "mean", "stddev", "iqr":
             new = bench[prop]
@@ -681,6 +684,14 @@ def pytest_benchmark_group_stats(benchmarks, group_by):
             groups[bench.group].append(bench)
         elif group_by == 'name':
             groups[bench.name].append(bench)
+        elif group_by == 'func':
+            groups[bench.name.split('[')[0]].append(bench)
+        elif group_by == 'fullfunc':
+            groups[bench.fullname.split('[')[0]].append(bench)
+        elif group_by == 'fullname':
+            groups[bench.fullname].append(bench)
+        elif group_by == 'param':
+            groups[bench.param].append(bench)
         else:
             raise NotImplementedError("Unsupported grouping %r." % group_by)
     return sorted(groups.items(), key=lambda pair: pair[0] or "")
