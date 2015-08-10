@@ -537,7 +537,57 @@ class BenchmarkSession(object):
         tr.ensure_newline()
         self.handle_saving()
         self.handle_loading()
+        self.display_results_table(tr)
+        self.handle_histogram()
 
+    def handle_histogram(self):
+        if self.histogram:
+            history = {}
+            for bench_file in self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json"):
+                with bench_file.open('rb') as fh:
+                    data = history[bench_file.purebasename] = json.load(fh)
+                    data['by_name'] = dict((bench['name'], bench) for bench in data['benchmarks'])
+                    data['by_fullname'] = dict((bench['fullname'], bench) for bench in data['benchmarks'])
+
+            plot_data = {}
+            for bench in self.benchmarks:
+                print(bench.name)
+                table = self.generate_histogram_table(bench, history, sorted(history))
+
+                # unit, adjustment = time_unit(self.sort, benchmarks[0][self.sort]))
+
+                print("\n".join(" ".join(map(str, row)) for row in table))
+
+    @staticmethod
+    def generate_histogram_table(current, history, sequence,
+                                 columns=("min", "max", "mean", "stddev", "iqr", "rounds", "iterations")):
+        for name in sequence:
+            trial = history[name]
+            name, extra = name.split('_', 1)
+            for bench in trial['benchmarks']:
+
+                if bench['fullname'] == current.fullname:
+                    found = True
+                elif bench['name'] == current.name:
+                    found = True
+                else:
+                    found = False
+
+                if found:
+                    stats = bench['stats']
+                    data = [name]
+                    data.extend(
+                        stats[col] for col in columns
+                    )
+                    yield data
+                    break
+        data = ['last']
+        data.extend(
+            current[col] for col in columns
+        )
+        yield data
+
+    def display_results_table(self, tr):
         timer = self.options.get('timer')
         for group, benchmarks in self.config.hook.pytest_benchmark_group_stats(
                 config=self.config,
