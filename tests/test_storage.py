@@ -137,7 +137,7 @@ class MockSession(BenchmarkSession):
             pytest_benchmark_update_commit_info=lambda **kwargs: None,
         ))
         self.group_by = 'group'
-        for bench_file in self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json"):
+        for bench_file in reversed(self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json", sort=True)):
             with bench_file.open('rU') as fh:
                 data = json.load(fh)
             self.benchmarks.extend(
