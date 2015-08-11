@@ -135,7 +135,7 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-compare-fail",
-        action='append', metavar="EXPR", nargs="+", default=[], const=prefix, type=parse_compare_fail,
+        action='append', metavar="EXPR", nargs="+", default=[], type=parse_compare_fail,
         help="Fail test if performance regresses according to given EXPR"
              " (eg: min:5% or mean:0.001 for number of seconds). Can be used multiple times."
     )
