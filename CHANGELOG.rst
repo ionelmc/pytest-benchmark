@@ -5,10 +5,12 @@ Changelog
 3.0.0 (?????????)
 -----------------
 
-* Added JSON report saving (The ``--benchmark-json`` command line arguments).
+* Added JSON report saving (the ``--benchmark-json`` command line arguments).
 * Added benchmark data storage(the ``--benchmark-save`` and ``--benchmark-autosave`` command line arguments).
-* Added comparison to previous runs (The ``--benchmark-compare``  command line argument).
-* Added possibility to group by test name or ...
+* Added comparison to previous runs (the ``--benchmark-compare`` command line argument).
+* Added performance regression checks (the ``--benchmark-compare-fail`` command line argument).
+* Added possibility to group by various parts of test name (the `--benchmark-compare-group-by`` command line argument).
+* Added historical plotting (the ``--benchmark-histogram`` command line argument).
 
 * Changed ``benchmark_weave`` to no longer be a context manager. Cleanup is performed automatically. *BACKWARDS INCOMPATIBLE*
 * Added ``benchmark.weave`` method (alternative to ``benchmark_weave`` fixture).
@@ -23,6 +25,13 @@ Changelog
   * ``pytest_benchmark_generate_json(config, benchmarks, include_data)``
   * ``pytest_benchmark_update_json(config, benchmarks, output_json)``
   * ``pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark)``
+
+* Changed the timing code to:
+
+  * Clone the function on PyPy (to avoid respecialization if same function is tested with different arguments).
+  * Tracers are automatically disabled when running the test function (like coverage tracers).
+  * Fixed an issue with calibration code getting stuck.
+
 
 
 2.5.0 (2015-06-20)

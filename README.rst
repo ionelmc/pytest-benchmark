@@ -132,8 +132,9 @@ If you need to do some wrapping (like special setup), you can use it as a decora
   --benchmark-sort=COL  Column to sort on. Can be one of: 'min', 'max', 'mean'
                         or 'stddev'. Default: 'min'
   --benchmark-group-by=LABEL
-                        How to group tests. Can be one of: 'group', 'name' or
-                        'params'. Default: 'group'
+                        How to group tests. Can be one of: 'group', 'name',
+                        'fullname', 'func', 'fullfunc' or 'param'. Default:
+                        'group'
   --benchmark-timer=FUNC
                         Timer to use when measuring time. Default: 'time.time'
   --benchmark-warmup    Activates warmup. Will run the test function up to
@@ -150,8 +151,8 @@ If you need to do some wrapping (like special setup), you can use it as a decora
   --benchmark-only      Only run benchmarks.
   --benchmark-save=NAME
                         Save the current run into 'STORAGE-PATH/counter-
-                        NAME.json'. Default: '5b713454c44b6cbdf48bfb2bc3fa996f
-                        d87f49ef_20150810_033847_uncommitted-changes'
+                        NAME.json'. Default: 'e689af57e7439b9005749d806248897a
+                        d550eab5_20150811_041632_uncommitted-changes'
   --benchmark-autosave  Autosave the current run into 'STORAGE-PATH/counter-
                         commit_id.json
   --benchmark-save-data
@@ -161,18 +162,23 @@ If you need to do some wrapping (like special setup), you can use it as a decora
   --benchmark-compare=NUM
                         Compare the current run against run NUM or the latest
                         saved run if unspecified.
+  --benchmark-compare-fail=EXPR
+                        Fail test if performance regresses according to given
+                        EXPR (eg: min:5% or mean:0.001 for number of seconds).
+                        Can be used multiple times.
   --benchmark-storage=STORAGE-PATH
                         Specify a different path to store the runs (when
                         --benchmark-save or --benchmark-autosave are used).
                         Default: './.benchmarks/Linux-CPython-2.7-64bit'
-  --benchmark-histogram=FILENAME-PREFIX
+  --benchmark-histogram=[FILENAME-PREFIX]
                         Plot graphs of min/max/avg/stddev over time in
                         FILENAME-PREFIX-test_name.svg. Default:
-                        'benchmark_20150810_033847'
+                        'benchmark_20150811_041632'
   --benchmark-json=PATH
                         Dump a JSON report into PATH. Note that this will
                         include the complete data (all the timings, not just
                         the stats).
+
 
 Setting per-test options:
 
