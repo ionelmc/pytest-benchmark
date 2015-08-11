@@ -42,6 +42,9 @@ NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
 ALIGNED_NUMBER_FMT = "{0:>{1},.4f}{2:>{3}}" if sys.version_info[:2] > (2, 6) else "{0:>{1}.4f}{2:>{3}}"
 HISTOGRAM_CURRENT = "now"
 
+class PerformanceRegression(Exception):
+    pass
+
 
 class MissingBenchmarkData(Exception):
     pass
@@ -135,9 +138,9 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-compare-fail",
-        action='append', metavar="EXPR", nargs="+", default=[], type=parse_compare_fail,
+        metavar="EXPR", nargs="+", type=parse_compare_fail,
         help="Fail test if performance regresses according to given EXPR"
-             " (eg: min:5% or mean:0.001 for number of seconds). Can be used multiple times."
+             " (eg: min:5%% or mean:0.001 for number of seconds). Can be used multiple times."
     )
     group.addoption(
         "--benchmark-storage",
@@ -557,10 +560,10 @@ class BenchmarkSession(object):
 
     def check_regressions(self):
         if self.performance_regressions:
-            self.logger.error("Performance has regressed: " + "\n".join(
-                "%s - %s" % line for line in self.performance_regressions
+            self.logger.error("Performance has regressed: \n" + "\n".join(
+                "\t%s - %s" % line for line in self.performance_regressions
             ))
-            raise pytest.UsageError("Performance has regressed.")
+            raise PerformanceRegression("Performance has regressed.")
 
     def handle_histogram(self):
         if self.histogram:
@@ -746,7 +749,7 @@ class BenchmarkSession(object):
 
         if self.compare_fail:
             for check in self.compare_fail:
-                fail = check.fails(bench, compare_to)
+                fail = check.fails(bench, stats)
                 if fail:
                     self.performance_regressions.append((bench.fullname, fail))
 
@@ -825,6 +828,8 @@ def pytest_benchmark_group_stats(benchmarks, group_by):
 def pytest_terminal_summary(terminalreporter):
     try:
         terminalreporter.config._benchmarksession.display(terminalreporter)
+    except PerformanceRegression:
+        raise
     except Exception:
         terminalreporter.config._benchmarksession.logger.error("\n%s" % traceback.format_exc())
         raise
