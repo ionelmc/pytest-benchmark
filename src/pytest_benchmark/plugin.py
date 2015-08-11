@@ -134,6 +134,12 @@ def pytest_addoption(parser):
         help="Compare the current run against run NUM or the latest saved run if unspecified."
     )
     group.addoption(
+        "--benchmark-compare-fail",
+        action='append', metavar="EXPR", nargs="+", default=[], const=prefix, type=parse_compare_fail,
+        help="Fail test if performance regresses according to given EXPR"
+             " (eg: min:5% or mean:0.001 for number of seconds). Can be used multiple times."
+    )
+    group.addoption(
         "--benchmark-storage",
         metavar="STORAGE-PATH", default="./.benchmarks/%s-%s-%s-%s" % (
             platform.system(),
@@ -149,12 +155,6 @@ def pytest_addoption(parser):
         "--benchmark-histogram",
         action='append', metavar="FILENAME-PREFIX", nargs="?", default=[], const=prefix,
         help="Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. Default: %r" % prefix
-    )
-    group.addoption(
-        "--benchmark-compare-fail",
-        action='append', metavar="EXPR", nargs="+", default=[], const=prefix, type=parse_compare_fail,
-        help="Fail test if performance regresses according to given EXPR"
-             " (eg: min:5% or mean:0.001 for number of seconds). Can be used multiple times."
     )
     group.addoption(
         "--benchmark-json",
@@ -431,6 +431,7 @@ class BenchmarkSession(object):
 
         self.compare = config.getoption("benchmark_compare")
         self.compare_fail = config.getoption("benchmark_compare_fail")
+        self.performance_regressions = []
         if self.compare_fail and not self.compare:
             raise pytest.UsageError("--benchmark-compare-fail requires --benchmark-compare.")
 
@@ -555,9 +556,11 @@ class BenchmarkSession(object):
         self.handle_histogram()
 
     def check_regressions(self):
-        if self.compare_fail:
-            for check in self.compare_fail:
-                pass
+        if self.performance_regressions:
+            self.logger.error("Performance has regressed: " + "\n".join(
+                "%s - %s" % line for line in self.performance_regressions
+            ))
+            raise pytest.UsageError("Performance has regressed.")
 
     def handle_histogram(self):
         if self.histogram:
@@ -740,6 +743,13 @@ class BenchmarkSession(object):
 
     def display_compare_row(self, tr, widths, adjustment, bench, compare_to):
         stats = compare_to['stats']
+
+        if self.compare_fail:
+            for check in self.compare_fail:
+                fail = check.fails(bench, compare_to)
+                if fail:
+                    self.performance_regressions.append((bench.fullname, fail))
+
         tr.write("".ljust(widths["name"]))
         for prop in "min", "max", "mean", "stddev", "median", "iqr":
             new = bench[prop]
