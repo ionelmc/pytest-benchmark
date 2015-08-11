@@ -21,7 +21,7 @@ from .compat import XRANGE
 from .stats import Stats
 from .timers import compute_timer_precision
 from .timers import default_timer
-from .utils import NameWrapper
+from .utils import NameWrapper, format_dict
 from .utils import SecondsDecimal
 from .utils import clonefunc
 from .utils import first_or_false
@@ -521,11 +521,13 @@ class BenchmarkSession(object):
 
     def handle_loading(self):
         if self.compare:
-            with self.compare.open('rb') as fh:
+            with self.compare.open('rU') as fh:
                 try:
                     compared_benchmark = json.load(fh)
                 except Exception as exc:
                     self.logger.warn("Failed to load %s: %s" % (self.compare, exc))
+                    return
+
             if 'version' in compared_benchmark:
                 if StrictVersion(compared_benchmark['version']) > StrictVersion(__version__):
                     self.logger.warn(
@@ -544,7 +546,7 @@ class BenchmarkSession(object):
             self.compare_by_fullname = dict((bench['fullname'], bench) for bench in compared_benchmark['benchmarks'])
 
             self.logger.info("Comparing against benchmark %s:" % self.compare.basename, bold=True)
-            self.logger.info("| commit info: %s" % ", ".join("%s=%s" % i for i in compared_benchmark['commit_info'].items()))
+            self.logger.info("| commit info: %s" % format_dict(compared_benchmark['commit_info']))
             self.logger.info("| saved at: %s" % compared_benchmark['datetime'])
             self.logger.info("| saved using pytest-benchmark %s:" % compared_benchmark['version'])
 
@@ -561,7 +563,7 @@ class BenchmarkSession(object):
 
     def check_regressions(self):
         if self.performance_regressions:
-            self.logger.error("Performance has regressed: \n" + "\n".join(
+            self.logger.error("Performance has regressed: \n%s" % "\n".join(
                 "\t%s - %s" % line for line in self.performance_regressions
             ))
             raise PerformanceRegression("Performance has regressed.")
@@ -586,7 +588,7 @@ class BenchmarkSession(object):
 
             history = {}
             for bench_file in self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json"):
-                with bench_file.open('rb') as fh:
+                with bench_file.open('rU') as fh:
                     data = history[bench_file.purebasename] = json.load(fh)
                     # data['by_name'] = dict((bench['name'], bench) for bench in data['benchmarks'])
                     data['by_fullname'] = dict((bench['fullname'], bench) for bench in data['benchmarks'])
@@ -783,8 +785,8 @@ def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info
     if compared_benchmark['machine_info'] != machine_info:
         benchmarksession.logger.warn(
             "Benchmark machine_info is different. Current: %s VS saved: %s." % (
-                machine_info,
-                compared_benchmark['machine_info'],
+                format_dict(machine_info),
+                format_dict(compared_benchmark['machine_info']),
             )
         )
 
@@ -805,7 +807,7 @@ def pytest_runtest_call(item, __multicall__):
             __multicall__.execute()
 
 
-def pytest_benchmark_group_stats(benchmarks, group_by):
+def pytest_benchmark_group_stats(config, benchmarks, group_by):
     groups = defaultdict(list)
     for bench in benchmarks:
         if group_by == 'group':

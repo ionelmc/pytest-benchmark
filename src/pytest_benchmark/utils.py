@@ -238,3 +238,8 @@ def clonefunc(f):
         return types.FunctionType(co2, f.__globals__, f.__name__, f.__defaults__, f.__closure__)
     except AttributeError:
         return f
+
+
+def format_dict(obj):
+    return "{%s}" % ", ".join("%s: %r" % i for i in sorted(obj.items()))
+
