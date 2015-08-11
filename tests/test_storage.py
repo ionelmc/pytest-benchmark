@@ -1,15 +1,10 @@
 import json
 import logging
+from io import StringIO, BytesIO
 
 import py
 import pytest
-
 from freezegun import freeze_time
-
-try:
-    from io import StringIO
-except ImportError:
-    from cStringIO import StringIO
 
 from pytest_benchmark.plugin import BenchmarkSession, PerformanceRegression
 from pytest_benchmark.plugin import pytest_benchmark_compare_machine_info
@@ -109,10 +104,10 @@ class Namespace(object):
         return self.__dict__[item]
 
 
-class TestFriendlyStringIO(StringIO):
+class TestFriendlyFileLike(BytesIO):
     def close(self):
         value = self.getvalue()
-        super(TestFriendlyStringIO, self).close()
+        super(TestFriendlyFileLike, self).close()
         self.getvalue = lambda: value
 
 
@@ -159,6 +154,26 @@ class MockSession(BenchmarkSession):
             break
 
 
+try:
+    text_type = unicode
+except NameError:
+    text_type = str
+
+
+def force_text(text):
+    if isinstance(text, text_type):
+        return text
+    else:
+        return text.decode('utf-8')
+
+
+def force_bytes(text):
+    if isinstance(text, text_type):
+        return text.encode('utf-8')
+    else:
+        return text
+
+
 @pytest.fixture
 def sess(request):
     return MockSession()
@@ -167,9 +182,9 @@ def sess(request):
 def make_logger(sess):
     output = StringIO()
     sess.logger = Namespace(
-        warn=lambda text: output.write(text + '\n'),
-        info=lambda text, **opts: output.write(text + '\n'),
-        error=lambda text: output.write(text + '\n'),
+        warn=lambda text: output.write(force_text(text) + u'\n'),
+        info=lambda text, **opts: output.write(force_text(text) + u'\n'),
+        error=lambda text: output.write(force_text(text) + u'\n'),
     )
     return output
 
@@ -188,8 +203,8 @@ def test_regression_checks(sess):
         DifferenceRegressionCheck("max", 0.5)
     ]
     sess.display_results_table(Namespace(
-        write_line=lambda line, **opts: output.write(line + '\n'),
-        write=lambda text, **opts: output.write(text),
+        write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
+        write=lambda text, **opts: output.write(force_text(text)),
     ))
     assert sess.performance_regressions == [
         ('tests/test_func/test_perf.py::test_engine',
@@ -213,15 +228,15 @@ def test_compare(sess):
     output = make_logger(sess)
     sess.handle_loading()
     sess.display_results_table(Namespace(
-        write_line=lambda line, **opts: output.write(line + '\n'),
-        write=lambda text, **opts: output.write(text),
+        write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
+        write=lambda text, **opts: output.write(force_text(text)),
     ))
     assert output.getvalue() == (
-        "Benchmark machine_info is different. Current: {foo: 'bar'} VS saved: {"
-        "machine: 'x86_64', node: 'jenkins', processor: 'x86_64', python_compiler: 'GCC 4.6.3', "
-        "python_implementation: 'CPython', python_version: '2.7.3', release: '3.13.0-53-generic', system: 'Linux'}.\n"
-        "Comparing against benchmark 0001_b692275e28a23b5d4aae70f453079ba593e60290_20150811_052350.json:\n"
-        "| commit info: {dirty: False, id: 'b692275e28a23b5d4aae70f453079ba593e60290'}\n"
+        'Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {'
+        'machine: "x86_64", node: "jenkins", processor: "x86_64", python_compiler: "GCC 4.6.3", '
+        'python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-53-generic", system: "Linux"}.\n'
+        'Comparing against benchmark 0001_b692275e28a23b5d4aae70f453079ba593e60290_20150811_052350.json:\n'
+        '| commit info: {dirty: false, id: "b692275e28a23b5d4aae70f453079ba593e60290"}\n'
         "| saved at: 2015-08-11T02:23:50.661428\n"
         "| saved using pytest-benchmark 2.5.0:\n"
         "-------------------------------------- benchmark: 1 tests, min 123 rounds (of min 234), "
@@ -246,11 +261,11 @@ def test_compare(sess):
 def test_save_json(sess, tmpdir):
     sess.save = False
     sess.autosave = False
-    sess.json = TestFriendlyStringIO()
+    sess.json = TestFriendlyFileLike()
     sess.save_data = False
     sess.handle_saving()
     assert tmpdir.listdir() == []
-    assert json.loads(sess.json.getvalue()) == JSON_DATA
+    assert json.loads(sess.json.getvalue().decode()) == JSON_DATA
 
 
 @freeze_time("2012-01-14 12:00:01")
@@ -263,7 +278,8 @@ def test_save_with_name(sess, tmpdir):
     sess.handle_saving()
     files = tmpdir.listdir()
     assert len(files) == 1
-    assert json.loads(files[0].read()) == SAVE_DATA
+    print(files[0].read())
+    assert json.load(files[0].open('rU')) == SAVE_DATA
 
 
 @freeze_time("2012-01-14 12:00:01")
@@ -276,7 +292,7 @@ def test_save_no_name(sess, tmpdir):
     sess.handle_saving()
     files = tmpdir.listdir()
     assert len(files) == 1
-    assert json.loads(files[0].read()) == SAVE_DATA
+    assert json.load(files[0].open('rU')) == SAVE_DATA
 
 
 @freeze_time("2012-01-14 12:00:01")
@@ -289,4 +305,4 @@ def test_autosave(sess, tmpdir):
     sess.handle_saving()
     files = tmpdir.listdir()
     assert len(files) == 1
-    assert json.loads(files[0].read()) == SAVE_DATA
+    assert json.load(files[0].open('rU')) == SAVE_DATA

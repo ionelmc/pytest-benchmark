@@ -21,10 +21,11 @@ from .compat import XRANGE
 from .stats import Stats
 from .timers import compute_timer_precision
 from .timers import default_timer
-from .utils import NameWrapper, format_dict
+from .utils import NameWrapper
 from .utils import SecondsDecimal
 from .utils import clonefunc
 from .utils import first_or_false
+from .utils import format_dict
 from .utils import get_commit_id
 from .utils import get_commit_info
 from .utils import get_current_time
@@ -162,7 +163,7 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-json",
-        metavar="PATH", type=argparse.FileType('w'),
+        metavar="PATH", type=argparse.FileType('wb'),
         help="Dump a JSON report into PATH. "
              "Note that this will include the complete data (all the timings, not just the stats)."
     )
@@ -485,9 +486,8 @@ class BenchmarkSession(object):
                 benchmarks=self.benchmarks,
                 output_json=output_json
             )
-            payload = json.dumps(output_json, indent=4)
             with self.json as fh:
-                fh.write(payload)
+                fh.write(json.dumps(output_json, ensure_ascii=True, indent=4).encode())
             self.logger.info("Wrote benchmark data in %s" % self.json, purple=True)
 
         if self.save or self.autosave:
@@ -501,17 +501,17 @@ class BenchmarkSession(object):
                 benchmarks=self.benchmarks,
                 output_json=output_json
             )
-            payload = json.dumps(output_json, indent=4)
             output_file = None
             if self.save:
                 output_file = self.storage.join("%s_%s.json" % (self.next_num, self.save))
                 assert not output_file.exists()
-                output_file.write(payload)
             elif self.autosave:
                 output_file = self.storage.join("%s_%s.json" % (self.next_num, get_commit_id()))
                 assert not output_file.exists()
-                output_file.write(payload)
+
             if output_file:
+                with output_file.open('wb') as fh:
+                    fh.write(json.dumps(output_json, ensure_ascii=True, indent=4).encode())
                 self.logger.info("Saved benchmark data in %s" % output_file)
 
     def handle_loading(self):

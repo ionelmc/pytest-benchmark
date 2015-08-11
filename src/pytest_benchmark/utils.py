@@ -2,15 +2,17 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
+import json
 import os
+import re
 import subprocess
 import sys
 import types
 from datetime import datetime
 from decimal import Decimal
-import re
 
 from .compat import PY3
+
 
 try:
     from subprocess import check_output
@@ -241,4 +243,4 @@ def clonefunc(f):
 
 
 def format_dict(obj):
-    return "{%s}" % ", ".join("%s: %r" % i for i in sorted(obj.items()))
+    return "{%s}" % ", ".join("%s: %s" % (k, json.dumps(v)) for k, v in sorted(obj.items()))
