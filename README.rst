@@ -268,26 +268,10 @@ pytest-benchmark[aspect]`):
         f.run()
 
 
-JSON report
-===========
+Benchmark stats storage, comparison, regression checking and plotting
+=====================================================================
 
-pytest-benchmark can produce a report of activity as a JSON file.
-Just specify a location for the report using --benchmark-json-path. It's also recommended that you
-set --benchmark-name-length=full if you have a large test suite, this will guarantee unique names
-for all the tests
-
-You can added extra information to the header of the report by adding the
-pytest_benchmark_add_extra_info hook to your conftest.py.
-
-.. sourcecode:: python
-
-   def pytest_benchmark_add_extra_info(headerDict):
-       headerDict['user'] = getpass.getuser()
-
-       head_sha = subprocess.check_output('git rev-parse HEAD', shell=True)
-
-       headerDict['revision'] = head_sha.strip()
-
+TODO: Describe typical workflow to track performance and identify regressions.
 
 Documentation
 =============
