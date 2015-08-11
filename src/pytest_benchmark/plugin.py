@@ -39,6 +39,12 @@ from .utils import time_unit
 
 NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
 ALIGNED_NUMBER_FMT = "{0:>{1},.4f}{2:>{3}}" if sys.version_info[:2] > (2, 6) else "{0:>{1}.4f}{2:>{3}}"
+# HISTOGRAM_COLUMNS = "min", "max", "mean", "stddev", "median", "iqr", "q1", "q3"
+# HISTOGRAM_GETTERS = dict(
+#     (field, operator.itemgetter(index))
+#     for index, field in enumerate(HISTOGRAM_COLUMNS)
+# )
+HISTOGRAM_CURRENT = "now"
 
 
 class MissingBenchmarkData(Exception):
@@ -542,6 +548,22 @@ class BenchmarkSession(object):
 
     def handle_histogram(self):
         if self.histogram:
+            try:
+                from pygal.graph.box import Box
+                from pygal.style import DefaultStyle
+
+                class Plot(Box):
+                    def _box_points(self, serie, _):
+                        return (serie[0],
+                                serie[0],
+                                serie[1],
+                                serie[2],
+                                serie[3],
+                                serie[4],
+                                serie[4]), []
+            except ImportError as exc:
+                raise ImportError(exc.args, "Please install pygal or pytest-benchmark[histogram]")
+
             history = {}
             for bench_file in self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json"):
                 with bench_file.open('rb') as fh:
@@ -549,18 +571,55 @@ class BenchmarkSession(object):
                     data['by_name'] = dict((bench['name'], bench) for bench in data['benchmarks'])
                     data['by_fullname'] = dict((bench['fullname'], bench) for bench in data['benchmarks'])
 
-            plot_data = {}
             for bench in self.benchmarks:
-                print(bench.name)
-                table = self.generate_histogram_table(bench, history, sorted(history))
+                name = bench.fullname
+                for c in "\/:*?<>|":
+                    name = name.replace(c, '_').replace('__', '_')
+                output_file = py.path.local("%s-%s.svg" % (self.histogram, name))
 
-                # unit, adjustment = time_unit(self.sort, benchmarks[0][self.sort]))
+                table = list(self.generate_histogram_table(bench, history, sorted(history)))
 
-                print("\n".join(" ".join(map(str, row)) for row in table))
+                unit, adjustment = time_unit(min(
+                    row[self.sort]
+                    for label, row in table
+                ))
+
+                class Style(DefaultStyle):
+                    colors = []
+                    for label, row in table:
+                        if label == HISTOGRAM_CURRENT:
+                            colors.append(DefaultStyle.colors[0])
+                        elif self.compare and str(self.compare.basename).startswith(label):
+                            colors.append(DefaultStyle.colors[2])
+                        else:
+                            colors.append('#000000')
+
+                minimum = int(min(row['min'] * adjustment for _, row in table) - 25)
+                maximum = int(max(row['max'] * adjustment for _, row in table) + 25)
+                plot = Plot(
+                    x_label_rotation=-90,
+                    x_labels=[label for label, _ in table],
+                    show_legend=False,
+                    title="Speed in %sseconds of %s" % (unit, bench.fullname),
+                    x_title="Trial",
+                    y_title="%ss" % unit,
+                    style=Style,
+                    min_scale=20,
+                    max_scale=20,
+                    range=(minimum, maximum),
+                    zero=minimum,
+                )
+
+                for label, row in table:
+                    plot.add(label,
+                             [row[field] * adjustment for field in 'min', 'q1', 'median', 'q3', 'max'],
+                             stroke_style={'width': 1})
+                plot.render_to_file(str(output_file))
+                self.logger.info("Generated histogram %s" % output_file, bold=True)
+
 
     @staticmethod
-    def generate_histogram_table(current, history, sequence,
-                                 columns=("min", "max", "mean", "stddev", "iqr", "rounds", "iterations")):
+    def generate_histogram_table(current, history, sequence):
         for name in sequence:
             trial = history[name]
             name, extra = name.split('_', 1)
@@ -574,18 +633,10 @@ class BenchmarkSession(object):
                     found = False
 
                 if found:
-                    stats = bench['stats']
-                    data = [name]
-                    data.extend(
-                        stats[col] for col in columns
-                    )
-                    yield data
+                    yield '%s' % name, bench['stats']
                     break
-        data = ['last']
-        data.extend(
-            current[col] for col in columns
-        )
-        yield data
+
+        yield HISTOGRAM_CURRENT, current.json()
 
     def display_results_table(self, tr):
         timer = self.options.get('timer')
@@ -613,6 +664,7 @@ class BenchmarkSession(object):
                 "rounds": "Rounds",
                 "iterations": "Iterations",
                 "iqr": "IQR",
+                "median": "Median",
                 "outliers": "Outliers(*)",
             }
             widths = {
@@ -621,7 +673,7 @@ class BenchmarkSession(object):
                 "iterations": 2 + max(len(labels["iterations"]), len(str(worst["iterations"]))),
                 "outliers": 2 + max(len(labels["outliers"]), len(str(worst["outliers"]))),
             }
-            for prop in "min", "max", "mean", "stddev", "iqr":
+            for prop in "min", "max", "mean", "stddev", "median", "iqr":
                 widths[prop] = 2 + max(len(labels[prop]), max(
                     len(NUMBER_FMT.format(bench[prop] * adjustment))
                     for bench in benchmarks
@@ -634,7 +686,7 @@ class BenchmarkSession(object):
                     if prop not in ["outliers", "rounds", "iterations"]
                     else ""
                 )
-                for prop in ("min", "max", "mean", "stddev", "iqr", "outliers", "rounds", "iterations")
+                for prop in ("min", "max", "mean", "stddev", "median", "iqr", "outliers", "rounds", "iterations")
             )
             tr.write_line(
                 (" benchmark%(name)s: %(count)s tests, min %(min_rounds)s rounds (of min %(min_time)s),"
@@ -651,7 +703,7 @@ class BenchmarkSession(object):
 
             for bench in benchmarks:
                 tr.write(bench.name.ljust(widths["name"]))
-                for prop in "min", "max", "mean", "stddev", "iqr":
+                for prop in "min", "max", "mean", "stddev", "median", "iqr":
                     tr.write(
                         ALIGNED_NUMBER_FMT.format(bench[prop] * adjustment, widths[prop], "", rpadding),
                         green=bench[prop] == best.get(prop),
@@ -676,7 +728,7 @@ class BenchmarkSession(object):
     def display_compare_row(self, tr, widths, adjustment, bench, compare_to):
         stats = compare_to['stats']
         tr.write("".ljust(widths["name"]))
-        for prop in "min", "max", "mean", "stddev", "iqr":
+        for prop in "min", "max", "mean", "stddev", "median", "iqr":
             new = bench[prop]
             old = stats[prop]
             val = new - old
