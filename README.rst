@@ -262,10 +262,10 @@ pytest-benchmark[aspect]`):
 
 .. sourcecode:: python
 
-    def test_foo(benchmark_weave):
-        with benchmark_weave(Foo.internal, lazy=True):
-            f = Foo()
-            f.run()
+    def test_foo(benchmark):
+        benchmark.weave(Foo.internal, lazy=True):
+        f = Foo()
+        f.run()
 
 
 JSON report
