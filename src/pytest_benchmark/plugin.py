@@ -42,6 +42,7 @@ NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
 ALIGNED_NUMBER_FMT = "{0:>{1},.4f}{2:>{3}}" if sys.version_info[:2] > (2, 6) else "{0:>{1}.4f}{2:>{3}}"
 HISTOGRAM_CURRENT = "now"
 
+
 class PerformanceRegression(Exception):
     pass
 
@@ -631,11 +632,10 @@ class BenchmarkSession(object):
 
                 for label, row in table:
                     plot.add(label,
-                             [row[field] * adjustment for field in 'min', 'q1', 'median', 'q3', 'max'],
+                             [row[field] * adjustment for field in ['min', 'q1', 'median', 'q3', 'max']],
                              stroke_style={'width': 1})
                 plot.render_to_file(str(output_file))
                 self.logger.info("Generated histogram %s" % output_file, bold=True)
-
 
     @staticmethod
     def generate_histogram_table(current, history, sequence):
