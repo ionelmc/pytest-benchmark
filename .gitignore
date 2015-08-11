@@ -60,3 +60,4 @@ docs/_build
 logfile
 logfile.*
 .benchmarks
+*.svg
