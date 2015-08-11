@@ -486,10 +486,9 @@ class BenchmarkSession(object):
                 output_json=output_json
             )
             payload = json.dumps(output_json, indent=4)
-            if self.json:
-                with self.json as fh:
-                    fh.write(payload)
-                    self.logger.info("Wrote benchmark data in %s" % self.json, purple=True)
+            with self.json as fh:
+                fh.write(payload)
+            self.logger.info("Wrote benchmark data in %s" % self.json, purple=True)
 
         if self.save or self.autosave:
             output_json = self.config.hook.pytest_benchmark_generate_json(
@@ -503,19 +502,15 @@ class BenchmarkSession(object):
                 output_json=output_json
             )
             payload = json.dumps(output_json, indent=4)
-            if self.json:
-                with self.json as fh:
-                    fh.write(payload)
-                    self.logger.info("Wrote benchmark data in %s" % self.json, purple=True)
             output_file = None
             if self.save:
                 output_file = self.storage.join("%s_%s.json" % (self.next_num, self.save))
                 assert not output_file.exists()
-                output_file.write_binary(payload)
+                output_file.write(payload)
             elif self.autosave:
                 output_file = self.storage.join("%s_%s.json" % (self.next_num, get_commit_id()))
                 assert not output_file.exists()
-                output_file.write_binary(payload)
+                output_file.write(payload)
             if output_file:
                 self.logger.info("Saved benchmark data in %s" % output_file)
 
@@ -563,7 +558,7 @@ class BenchmarkSession(object):
 
     def check_regressions(self):
         if self.performance_regressions:
-            self.logger.error("Performance has regressed: \n%s" % "\n".join(
+            self.logger.error("Performance has regressed:\n%s" % "\n".join(
                 "\t%s - %s" % line for line in self.performance_regressions
             ))
             raise PerformanceRegression("Performance has regressed.")
@@ -600,6 +595,8 @@ class BenchmarkSession(object):
                 output_file = py.path.local("%s-%s.svg" % (self.histogram, name))
 
                 table = list(self.generate_histogram_table(bench, history, sorted(history)))
+                from pprint import pprint
+                pprint(table)
 
                 unit, adjustment = time_unit(min(
                     row[self.sort]
@@ -850,7 +847,7 @@ def pytest_benchmark_generate_machine_info():
     }
 
 
-def pytest_benchmark_generate_commit_info():
+def pytest_benchmark_generate_commit_info(config):
     return get_commit_info()
 
 
