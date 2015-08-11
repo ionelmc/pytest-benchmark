@@ -39,11 +39,6 @@ from .utils import time_unit
 
 NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
 ALIGNED_NUMBER_FMT = "{0:>{1},.4f}{2:>{3}}" if sys.version_info[:2] > (2, 6) else "{0:>{1}.4f}{2:>{3}}"
-# HISTOGRAM_COLUMNS = "min", "max", "mean", "stddev", "median", "iqr", "q1", "q3"
-# HISTOGRAM_GETTERS = dict(
-#     (field, operator.itemgetter(index))
-#     for index, field in enumerate(HISTOGRAM_COLUMNS)
-# )
 HISTOGRAM_CURRENT = "now"
 
 
