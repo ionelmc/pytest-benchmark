@@ -29,6 +29,7 @@ from .utils import get_commit_id
 from .utils import get_commit_info
 from .utils import get_current_time
 from .utils import load_timer
+from .utils import parse_compare_fail
 from .utils import parse_rounds
 from .utils import parse_save
 from .utils import parse_seconds
@@ -148,6 +149,12 @@ def pytest_addoption(parser):
         "--benchmark-histogram",
         action='append', metavar="FILENAME-PREFIX", nargs="?", default=[], const=prefix,
         help="Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. Default: %r" % prefix
+    )
+    group.addoption(
+        "--benchmark-compare-fail",
+        action='append', metavar="EXPR", nargs="+", default=[], const=prefix, type=parse_compare_fail,
+        help="Fail test if performance regresses according to given EXPR"
+             " (eg: min:5% or mean:0.001 for number of seconds). Can be used multiple times."
     )
     group.addoption(
         "--benchmark-json",
@@ -411,17 +418,26 @@ class BenchmarkSession(object):
             self.skip = True
         if hasattr(config, "slaveinput"):
             self.skip = True
-
         self.only = config.getoption("benchmark_only")
         self.sort = config.getoption("benchmark_sort")
         if self.skip and self.only:
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
         self.benchmarks = []
+        self.group_by = config.getoption("benchmark_group_by")
         self.save = first_or_false(config.getoption("benchmark_save"))
         self.autosave = config.getoption("benchmark_autosave")
+        self.save_data = config.getoption("benchmark_save_data")
+        self.json = config.getoption("benchmark_json")
+
         self.compare = config.getoption("benchmark_compare")
+        self.compare_fail = config.getoption("benchmark_compare_fail")
+        if self.compare_fail and not self.compare:
+            raise pytest.UsageError("--benchmark-compare-fail requires --benchmark-compare.")
+
         self.storage = py.path.local(config.getoption("benchmark_storage"))
         self.storage.ensure(dir=1)
+
+        self.histogram = first_or_false(config.getoption("benchmark_histogram"))
 
         if self.compare:
             files = self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json", sort=True)
@@ -438,10 +454,6 @@ class BenchmarkSession(object):
                 elif len(files) > 1:
                     raise pytest.UsageError("Too many benchmark files matched %r: %s" % (self.compare, files))
                 self.compare, = files
-        self.histogram = first_or_false(config.getoption("benchmark_histogram"))
-        self.json = config.getoption("benchmark_json")
-        self.group_by = config.getoption("benchmark_group_by")
-        self.save_data = config.getoption("benchmark_save_data")
 
     @property
     def next_num(self):
@@ -539,7 +551,13 @@ class BenchmarkSession(object):
         self.handle_saving()
         self.handle_loading()
         self.display_results_table(tr)
+        self.check_regressions()
         self.handle_histogram()
+
+    def check_regressions(self):
+        if self.compare_fail:
+            for check in self.compare_fail:
+                pass
 
     def handle_histogram(self):
         if self.histogram:

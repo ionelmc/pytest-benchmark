@@ -8,6 +8,7 @@ import sys
 import types
 from datetime import datetime
 from decimal import Decimal
+import re
 
 from .compat import PY3
 
@@ -108,6 +109,43 @@ def load_timer(string):
         __import__(mod)
         mod = sys.modules[mod]
         return NameWrapper(getattr(mod, attr))
+
+
+class RegressionCheck(object):
+    def __init__(self, field, threshold):
+        self.field = field
+        self.threshold = threshold
+
+    def fails(self, current, compared):
+        val = self.compute(current, compared)
+        if val > self.threshold:
+            return "Field %s has failed %s: %s > %s" % (
+                self.field, self.__class__.__name__, val, self.threshold
+            )
+
+
+class PercentageRegressionCheck(RegressionCheck):
+    def compute(self, current, compared):
+        return current[self.field] / compared[self.field] * 100 - 100
+
+
+class DifferenceRegressionCheck(RegressionCheck):
+    def compute(self, current, compared):
+        return current[self.field] - compared[self.field]
+
+
+def parse_compare_fail(string,
+                       rex=re.compile('^(?P<field>min|max|mean|median|stddev|iqr):'
+                                      '((?P<percentage>[0-9]?[0-9])%|(?P<difference>[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?))$')):
+    m = rex.match(string)
+    if m:
+        g = m.groupdict()
+        if g['percentage']:
+            return PercentageRegressionCheck(g['field'], int(g['percentage']))
+        elif g['difference']:
+            return DifferenceRegressionCheck(g['field'], float(g['difference']))
+
+    raise argparse.ArgumentTypeError("Could not parse value.")
 
 
 def parse_timer(string):
