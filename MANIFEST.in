@@ -5,7 +5,7 @@ graft ci
 graft tests
 
 include .bumpversion.cfg
-include .coveragerc
+include .coveragerc*
 include .cookiecutterrc
 include .isort.cfg
 include .pylintrc
