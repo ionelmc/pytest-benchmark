@@ -540,7 +540,7 @@ class BenchmarkSession(object):
             self.config.hook.pytest_benchmark_compare_machine_info(config=self.config, benchmarksession=self,
                                                                    machine_info=machine_info,
                                                                    compared_benchmark=compared_benchmark)
-            self.compare_by_name = dict((bench['name'], bench) for bench in compared_benchmark['benchmarks'])
+            # self.compare_by_name = dict((bench['name'], bench) for bench in compared_benchmark['benchmarks'])
             self.compare_by_fullname = dict((bench['fullname'], bench) for bench in compared_benchmark['benchmarks'])
 
             self.logger.info("Comparing against benchmark %s:" % self.compare.basename, bold=True)
@@ -588,7 +588,7 @@ class BenchmarkSession(object):
             for bench_file in self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json"):
                 with bench_file.open('rb') as fh:
                     data = history[bench_file.purebasename] = json.load(fh)
-                    data['by_name'] = dict((bench['name'], bench) for bench in data['benchmarks'])
+                    # data['by_name'] = dict((bench['name'], bench) for bench in data['benchmarks'])
                     data['by_fullname'] = dict((bench['fullname'], bench) for bench in data['benchmarks'])
 
             for bench in self.benchmarks:
@@ -646,10 +646,10 @@ class BenchmarkSession(object):
 
                 if bench['fullname'] == current.fullname:
                     found = True
-                elif bench['name'] == current.name:
-                    found = True
+                # elif bench['name'] == current.name:
+                #     found = True
                 else:
-                    found = False
+                    # found = False
 
                 if found:
                     yield '%s' % name, bench['stats']
@@ -736,8 +736,8 @@ class BenchmarkSession(object):
                     if bench.fullname in self.compare_by_fullname:
                         self.display_compare_row(tr, widths, adjustment, bench,
                                                  self.compare_by_fullname[bench.fullname])
-                    elif bench.name in self.compare_by_name:
-                        self.display_compare_row(tr, widths, adjustment, bench, self.compare_by_name[bench.name])
+                    # elif bench.name in self.compare_by_name:
+                    #     self.display_compare_row(tr, widths, adjustment, bench, self.compare_by_name[bench.name])
 
             tr.write_line("-" * len(labels_line), yellow=True)
             tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
