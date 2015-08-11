@@ -170,7 +170,7 @@ If you need to do some wrapping (like special setup), you can use it as a decora
                         Specify a different path to store the runs (when
                         --benchmark-save or --benchmark-autosave are used).
                         Default: './.benchmarks/Linux-CPython-2.7-64bit'
-  --benchmark-histogram=[FILENAME-PREFIX]
+  --benchmark-histogram=FILENAME-PREFIX
                         Plot graphs of min/max/avg/stddev over time in
                         FILENAME-PREFIX-test_name.svg. Default:
                         'benchmark_20150811_041632'
