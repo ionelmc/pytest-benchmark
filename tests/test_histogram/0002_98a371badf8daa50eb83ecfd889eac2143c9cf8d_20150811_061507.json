@@ -1,0 +1,48 @@
+{
+    "commit_info": {
+        "id": "98a371badf8daa50eb83ecfd889eac2143c9cf8d", 
+        "dirty": false
+    }, 
+    "version": "2.5.0", 
+    "benchmarks": [
+        {
+            "stats": {
+                "q1": 19.806317806243896, 
+                "q3": 20.539742946624756, 
+                "iterations": 1, 
+                "min": 19.529308080673218, 
+                "max": 21.563985109329224, 
+                "median": 19.841557502746582, 
+                "iqr": 0.7334251403808594, 
+                "stddev_outliers": 2, 
+                "stddev": 0.6342083136104069, 
+                "outliers": "2;0", 
+                "iqr_outliers": 0, 
+                "rounds": 10, 
+                "mean": 20.1440749168396
+            }, 
+            "fullname": "tests/test_func/test_perf.py::test_engine", 
+            "group": null, 
+            "name": "test_engine", 
+            "options": {
+                "disable_gc": false, 
+                "warmup": false, 
+                "timer": "time", 
+                "min_rounds": 10, 
+                "max_time": 1.0, 
+                "min_time": 2.5e-05
+            }
+        }
+    ], 
+    "machine_info": {
+        "node": "jenkins", 
+        "machine": "x86_64", 
+        "python_version": "2.7.3", 
+        "release": "3.13.0-53-generic", 
+        "python_compiler": "GCC 4.6.3", 
+        "python_implementation": "CPython", 
+        "processor": "x86_64", 
+        "system": "Linux"
+    }, 
+    "datetime": "2015-08-11T03:15:07.221370"
+}
