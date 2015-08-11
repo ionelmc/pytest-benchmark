@@ -649,7 +649,7 @@ class BenchmarkSession(object):
                 # elif bench['name'] == current.name:
                 #     found = True
                 else:
-                    # found = False
+                    found = False
 
                 if found:
                     yield '%s' % name, bench['stats']
