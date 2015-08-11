@@ -54,7 +54,7 @@ before_install:
   - uname -a
   - lsb_release -a
 install:
-  - pip install tox
+  - pip install -U pip wheel setuptools tox
 script:
   - tox -v
 notifications:
