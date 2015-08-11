@@ -601,7 +601,7 @@ class BenchmarkSession(object):
 
                 unit, adjustment = time_unit(min(
                     row[self.sort]
-                    for label, row in table
+                    for _, row in table
                 ))
 
                 class Style(DefaultStyle):
@@ -614,8 +614,8 @@ class BenchmarkSession(object):
                         else:
                             colors.append('#000000')
 
-                minimum = int(min(row['min'] * adjustment for _, row in table) - 25)
-                maximum = int(max(row['max'] * adjustment for _, row in table) + 25)
+                minimum = int(min(row['min'] * adjustment for _, row in table))
+                maximum = int(max(row['max'] * adjustment for _, row in table) + 1)
                 plot = Plot(
                     x_label_rotation=-90,
                     x_labels=[label for label, _ in table],
