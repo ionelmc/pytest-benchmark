@@ -215,6 +215,17 @@ Glossary
         Stats are computed with rounds, not with iterations. The duration for a round is an average of all the iterations in that round.
 
         See: calibration_ for an explanation of why it's like this.
+    Mean
+        TODO
+    Median
+        TODO
+    IQR
+        InterQuertile Range. This is a different way to measure variance. Good explanation `here
+        <https://www.dataz.io/display/Public/2013/03/20/Describing+Data%3A+Why+median+and+IQR+are+often+better+than+mean+and+standard+deviation>`_
+    StdDev
+        TODO: Standard Deviation
+    Outliers
+        TODO
 
 Features
 ========
