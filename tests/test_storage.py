@@ -118,7 +118,7 @@ class MockSession(BenchmarkSession):
         self.storage = me.dirpath(me.purebasename)
         self.benchmarks = []
         self.sort = u"min"
-        self.compare = self.storage.join('0001_b692275e28a23b5d4aae70f453079ba593e60290_20150811_052350.json')
+        self.compare = '0001'
         self.logger = logging.getLogger(__name__)
         self.options = {
             'min_rounds': 123,

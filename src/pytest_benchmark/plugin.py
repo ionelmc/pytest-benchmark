@@ -23,6 +23,7 @@ from .timers import compute_timer_precision
 from .timers import default_timer
 from .utils import NameWrapper
 from .utils import SecondsDecimal
+from .utils import cached_property
 from .utils import clonefunc
 from .utils import first_or_false
 from .utils import format_dict
@@ -437,29 +438,34 @@ class BenchmarkSession(object):
         self.compare = config.getoption("benchmark_compare")
         self.compare_fail = config.getoption("benchmark_compare_fail")
         self.performance_regressions = []
-        if self.compare_fail and not self.compare:
-            raise pytest.UsageError("--benchmark-compare-fail requires --benchmark-compare.")
+        if self.compare_fail and not self.compare_file:
+            raise pytest.UsageError("--benchmark-compare-fail requires valid --benchmark-compare.")
 
         self.storage = py.path.local(config.getoption("benchmark_storage"))
         self.storage.ensure(dir=1)
 
         self.histogram = first_or_false(config.getoption("benchmark_histogram"))
 
+
+    @cached_property
+    def compare_file(self):
         if self.compare:
             files = self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json", sort=True)
             if not files:
-                raise pytest.UsageError(
-                    "No benchmark files in %r. Expected files matching [0-9][0-9][0-9][0-9]_*.json" % self.storage)
+                self.logger.warn("No benchmark files in %r. Expected files matching [0-9][0-9][0-9][0-9]_*.json" % self.storage)
+
             if self.compare is True:
                 files.sort()
-                self.compare = files[-1]
+                return files[-1]
             else:
                 files = [f for f in files if str(f.basename).startswith(self.compare)]
+                if len(files) == 1:
+                    return files[0]
+
                 if not files:
-                    raise pytest.UsageError("No benchmark files matched %r" % self.compare)
+                    self.logger.warn("No benchmark files matched %r" % self.compare)
                 elif len(files) > 1:
-                    raise pytest.UsageError("Too many benchmark files matched %r: %s" % (self.compare, files))
-                self.compare, = files
+                    self.logger.warn("Too many benchmark files matched %r: %s" % (self.compare, files))
 
     @property
     def next_num(self):
@@ -515,19 +521,19 @@ class BenchmarkSession(object):
                 self.logger.info("Saved benchmark data in %s" % output_file)
 
     def handle_loading(self):
-        if self.compare:
-            with self.compare.open('rU') as fh:
+        if self.compare_file:
+            with self.compare_file.open('rU') as fh:
                 try:
                     compared_benchmark = json.load(fh)
                 except Exception as exc:
-                    self.logger.warn("Failed to load %s: %s" % (self.compare, exc))
+                    self.logger.warn("Failed to load %s: %s" % (self.compare_file, exc))
                     return
 
             if 'version' in compared_benchmark:
                 if StrictVersion(compared_benchmark['version']) > StrictVersion(__version__):
                     self.logger.warn(
                         "Benchmark data from %s was saved with a newer version (%s) than the current version (%s)." % (
-                            self.compare,
+                            self.compare_file,
                             compared_benchmark['version'],
                             __version__,
                         )
@@ -540,7 +546,7 @@ class BenchmarkSession(object):
             # self.compare_by_name = dict((bench['name'], bench) for bench in compared_benchmark['benchmarks'])
             self.compare_by_fullname = dict((bench['fullname'], bench) for bench in compared_benchmark['benchmarks'])
 
-            self.logger.info("Comparing against benchmark %s:" % self.compare.basename, bold=True)
+            self.logger.info("Comparing against benchmark %s:" % self.compare_file.basename, bold=True)
             self.logger.info("| commit info: %s" % format_dict(compared_benchmark['commit_info']))
             self.logger.info("| saved at: %s" % compared_benchmark['datetime'])
             self.logger.info("| saved using pytest-benchmark %s:" % compared_benchmark['version'])
@@ -591,7 +597,7 @@ class BenchmarkSession(object):
                 plot = make_plot(
                     bench_name=bench.fullname,
                     table=table,
-                    compare=self.compare,
+                    compare=self.compare_file,
                     annotations=dict((k, v['name']) for k, v in history.items()),
                     sort=self.sort,
                     current=HISTOGRAM_CURRENT,
@@ -658,7 +664,7 @@ class BenchmarkSession(object):
                     for bench in benchmarks
                 ))
 
-            rpadding = 8 if self.compare else 0
+            rpadding = 8 if self.compare_file else 0
             labels_line = labels["name"].ljust(widths["name"]) + "".join(
                 labels[prop].rjust(widths[prop]) + (
                     " " * rpadding
@@ -692,7 +698,7 @@ class BenchmarkSession(object):
                 for prop in "outliers", "rounds", "iterations":
                     tr.write("{0:>{1}}".format(bench[prop], widths[prop]))
                 tr.write("\n")
-                if self.compare:
+                if self.compare_file:
                     if bench.fullname in self.compare_by_fullname:
                         self.display_compare_row(tr, widths, adjustment, bench,
                                                  self.compare_by_fullname[bench.fullname])
