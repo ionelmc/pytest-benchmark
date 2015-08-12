@@ -45,11 +45,7 @@ ALIGNED_NUMBER_FMT = "{0:>{1},.4f}{2:>{3}}" if sys.version_info[:2] > (2, 6) els
 HISTOGRAM_CURRENT = "now"
 
 
-class PerformanceRegression(Exception):
-    pass
-
-
-class MissingBenchmarkData(Exception):
+class PerformanceRegression(pytest.UsageError):
     pass
 
 
@@ -439,8 +435,6 @@ class BenchmarkSession(object):
         self.storage = py.path.local(config.getoption("benchmark_storage"))
         self.storage.ensure(dir=1)
         self.histogram = first_or_false(config.getoption("benchmark_histogram"))
-        if self.compare_fail and not self.compare_file:
-            raise pytest.UsageError("--benchmark-compare-fail requires valid --benchmark-compare.")
 
     @cached_property
     def compare_file(self):
@@ -562,6 +556,9 @@ class BenchmarkSession(object):
         self.handle_histogram()
 
     def check_regressions(self):
+        if not self.compare_file:
+            raise pytest.UsageError("--benchmark-compare-fail requires valid --benchmark-compare.")
+
         if self.performance_regressions:
             self.logger.error("Performance has regressed:\n%s" % "\n".join(
                 "\t%s - %s" % line for line in self.performance_regressions
