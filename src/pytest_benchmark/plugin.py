@@ -447,8 +447,10 @@ class BenchmarkSession(object):
         if self.compare:
             files = self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json", sort=True)
             if not files:
-                self.logger.warn(
-                    "No benchmark files in %r. Expected files matching [0-9][0-9][0-9][0-9]_*.json" % str(self.storage))
+                self.logger.warn("Can't compare. No benchmark files in %r. Expected files matching [0-9][0-9][0-9][0-9]_*.json."
+                                 " Can't match anything to %r." % (
+                                     str(self.storage),
+                                     self.compare))
                 return
 
             if self.compare is True:
@@ -460,9 +462,10 @@ class BenchmarkSession(object):
                     return files[0]
 
                 if not files:
-                    self.logger.warn("No benchmark files matched %r" % self.compare)
+                    self.logger.warn("Can't compare. No benchmark files matched %r" % self.compare)
                 elif len(files) > 1:
-                    self.logger.warn("Too many benchmark files matched %r: %s" % (self.compare, files))
+                    self.logger.warn("Can't compare. Too many benchmark files matched %r:\n - %s" % (
+                        self.compare, '\n - '.join(map(str, files))))
 
     @property
     def next_num(self):
