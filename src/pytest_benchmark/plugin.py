@@ -566,7 +566,7 @@ class BenchmarkSession(object):
     def handle_histogram(self):
         if self.histogram:
             try:
-                from pygal.graph.box import Box
+                from pygal.graph.box import Box, is_list_like, decorate
                 from pygal.style import DefaultStyle
 
                 class Plot(Box):
@@ -578,13 +578,31 @@ class BenchmarkSession(object):
                                 serie[3],
                                 serie[4],
                                 serie[4]), []
+
+                    def _format(self, x):
+                        sup = super(Box, self)._format
+                        if is_list_like(x):
+                            return 'Min: %s\nQ1: %s\nMedian: %s\nQ3: %s\nMax: %s' % tuple(map(sup, x[1:6]))
+                        else:
+                            return sup(x)
+
+                    def _tooltip_data(self, node, value, x, y, classes=None, xlabel=None):
+                        super(Plot, self)._tooltip_data(node, value, x, y, classes=classes, xlabel=None)
+                        if xlabel in history:
+                            self.svg.node(node, 'desc', class_="x_label").text = history[xlabel]['name']
             except ImportError as exc:
                 raise ImportError(exc.args, "Please install pygal or pytest-benchmark[histogram]")
 
             history = {}
             for bench_file in self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json"):
                 with bench_file.open('rU') as fh:
-                    data = history[bench_file.purebasename] = json.load(fh)
+                    fullname = bench_file.purebasename
+                    if '_' in fullname:
+                        id_, name = fullname.split('_', 1)
+                    else:
+                        id_, name = fullname, ''
+                    data = history[id_] = json.load(fh)
+                    data['name'] = name
                     # data['by_name'] = dict((bench['name'], bench) for bench in data['benchmarks'])
                     data['by_fullname'] = dict((bench['fullname'], bench) for bench in data['benchmarks'])
 
@@ -595,17 +613,17 @@ class BenchmarkSession(object):
                 output_file = py.path.local("%s-%s.svg" % (self.histogram, name))
 
                 table = list(self.generate_histogram_table(bench, history, sorted(history)))
-                from pprint import pprint
-                pprint(table)
 
                 unit, adjustment = time_unit(min(
                     row[self.sort]
-                    for _, row in table
+                    for _, _, row in table
                 ))
 
                 class Style(DefaultStyle):
                     colors = []
-                    for label, row in table:
+                    font_family = 'Consolas, "Deja Vu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace'
+
+                    for label, _, row in table:
                         if label == HISTOGRAM_CURRENT:
                             colors.append(DefaultStyle.colors[0])
                         elif self.compare and str(self.compare.basename).startswith(label):
@@ -613,11 +631,11 @@ class BenchmarkSession(object):
                         else:
                             colors.append('#000000')
 
-                minimum = int(min(row['min'] * adjustment for _, row in table))
-                maximum = int(max(row['max'] * adjustment for _, row in table) + 1)
+                minimum = int(min(row['min'] * adjustment for _, _, row in table))
+                maximum = int(max(row['max'] * adjustment for _, _, row in table) + 1)
                 plot = Plot(
                     x_label_rotation=-90,
-                    x_labels=[label for label, _ in table],
+                    x_labels=[label for label, _, _ in table],
                     show_legend=False,
                     title="Speed in %sseconds of %s" % (unit, bench.fullname),
                     x_title="Trial",
@@ -627,9 +645,16 @@ class BenchmarkSession(object):
                     max_scale=20,
                     range=(minimum, maximum),
                     zero=minimum,
+                    css=[
+                        "file://style.css",
+                        "file://graph.css",
+                        "inline:.axis.x text {text-anchor: middle !important}"
+                    ]
                 )
 
-                for label, row in table:
+                for label, info, row in table:
+                    if info:
+                        label += '\n@' + info
                     plot.add(label,
                              [row[field] * adjustment for field in ['min', 'q1', 'median', 'q3', 'max']],
                              stroke_style={'width': 1})
@@ -640,9 +665,7 @@ class BenchmarkSession(object):
     def generate_histogram_table(current, history, sequence):
         for name in sequence:
             trial = history[name]
-            name, extra = name.split('_', 1)
             for bench in trial['benchmarks']:
-
                 if bench['fullname'] == current.fullname:
                     found = True
                 # elif bench['name'] == current.name:
@@ -651,10 +674,10 @@ class BenchmarkSession(object):
                     found = False
 
                 if found:
-                    yield '%s' % name, bench['stats']
+                    yield '%s' % name, trial['datetime'], bench['stats']
                     break
 
-        yield HISTOGRAM_CURRENT, current.json()
+        yield HISTOGRAM_CURRENT, "", current.json()
 
     def display_results_table(self, tr):
         timer = self.options.get('timer')
