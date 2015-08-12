@@ -433,24 +433,23 @@ class BenchmarkSession(object):
         self.autosave = config.getoption("benchmark_autosave")
         self.save_data = config.getoption("benchmark_save_data")
         self.json = config.getoption("benchmark_json")
-
         self.compare = config.getoption("benchmark_compare")
         self.compare_fail = config.getoption("benchmark_compare_fail")
         self.performance_regressions = []
-        if self.compare_fail and not self.compare_file:
-            raise pytest.UsageError("--benchmark-compare-fail requires valid --benchmark-compare.")
-
         self.storage = py.path.local(config.getoption("benchmark_storage"))
         self.storage.ensure(dir=1)
-
         self.histogram = first_or_false(config.getoption("benchmark_histogram"))
+        if self.compare_fail and not self.compare_file:
+            raise pytest.UsageError("--benchmark-compare-fail requires valid --benchmark-compare.")
 
     @cached_property
     def compare_file(self):
         if self.compare:
             files = self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json", sort=True)
             if not files:
-                self.logger.warn("No benchmark files in %r. Expected files matching [0-9][0-9][0-9][0-9]_*.json" % self.storage)
+                self.logger.warn(
+                    "No benchmark files in %r. Expected files matching [0-9][0-9][0-9][0-9]_*.json" % str(self.storage))
+                return
 
             if self.compare is True:
                 files.sort()
