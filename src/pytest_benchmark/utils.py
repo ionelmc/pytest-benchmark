@@ -13,7 +13,6 @@ from decimal import Decimal
 
 from .compat import PY3
 
-
 try:
     from subprocess import check_output
 except ImportError:

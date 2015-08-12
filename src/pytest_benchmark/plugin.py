@@ -446,7 +446,6 @@ class BenchmarkSession(object):
 
         self.histogram = first_or_false(config.getoption("benchmark_histogram"))
 
-
     @cached_property
     def compare_file(self):
         if self.compare:

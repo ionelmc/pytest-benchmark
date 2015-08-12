@@ -1,10 +1,12 @@
 from pytest_benchmark.utils import time_unit
 
 try:
-    from pygal.graph.box import Box, is_list_like, decorate
+    from pygal.graph.box import Box
+    from pygal.graph.box import is_list_like
     from pygal.style import DefaultStyle
 except ImportError as exc:
     raise ImportError(exc.args, "Please install pygal or pytest-benchmark[histogram]")
+
 
 class Plot(Box):
     def __init__(self, annotations, *args, **kwargs):
