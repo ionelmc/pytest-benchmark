@@ -396,8 +396,7 @@ class Logger(object):
 
 
 class BenchmarkSession(object):
-    compare_by_fullname = None
-    compare_by_name = None
+    compare_mapping = None
 
     def __init__(self, config):
         self.verbose = config.getoption("benchmark_verbose")
@@ -542,8 +541,7 @@ class BenchmarkSession(object):
             self.config.hook.pytest_benchmark_compare_machine_info(config=self.config, benchmarksession=self,
                                                                    machine_info=machine_info,
                                                                    compared_benchmark=compared_benchmark)
-            # self.compare_by_name = dict((bench['name'], bench) for bench in compared_benchmark['benchmarks'])
-            self.compare_by_fullname = dict((bench['fullname'], bench) for bench in compared_benchmark['benchmarks'])
+            self.compare_mapping = dict((bench['fullname'], bench) for bench in compared_benchmark['benchmarks'])
 
             self.logger.info("Comparing against benchmark %s:" % self.compare_file.basename, bold=True)
             self.logger.info("| commit info: %s" % format_dict(compared_benchmark['commit_info']))
@@ -582,8 +580,7 @@ class BenchmarkSession(object):
                         id_, name = fullname, ''
                     data = history[id_] = json.load(fh)
                     data['name'] = name
-                    # data['by_name'] = dict((bench['name'], bench) for bench in data['benchmarks'])
-                    data['by_fullname'] = dict((bench['fullname'], bench) for bench in data['benchmarks'])
+                    data['mapping'] = dict((bench['fullname'], bench) for bench in data['benchmarks'])
 
             for bench in self.benchmarks:
                 name = bench.fullname
@@ -697,12 +694,8 @@ class BenchmarkSession(object):
                 for prop in "outliers", "rounds", "iterations":
                     tr.write("{0:>{1}}".format(bench[prop], widths[prop]))
                 tr.write("\n")
-                if self.compare_file:
-                    if bench.fullname in self.compare_by_fullname:
-                        self.display_compare_row(tr, widths, adjustment, bench,
-                                                 self.compare_by_fullname[bench.fullname])
-                    # elif bench.name in self.compare_by_name:
-                    #     self.display_compare_row(tr, widths, adjustment, bench, self.compare_by_name[bench.name])
+                if self.compare_file and bench.fullname in self.compare_mapping:
+                    self.display_compare_row(tr, widths, adjustment, bench, self.compare_mapping[bench.fullname])
 
             tr.write_line("-" * len(labels_line), yellow=True)
             tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
