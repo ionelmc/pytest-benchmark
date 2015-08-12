@@ -565,33 +565,7 @@ class BenchmarkSession(object):
 
     def handle_histogram(self):
         if self.histogram:
-            try:
-                from pygal.graph.box import Box, is_list_like, decorate
-                from pygal.style import DefaultStyle
-
-                class Plot(Box):
-                    def _box_points(self, serie, _):
-                        return (serie[0],
-                                serie[0],
-                                serie[1],
-                                serie[2],
-                                serie[3],
-                                serie[4],
-                                serie[4]), []
-
-                    def _format(self, x):
-                        sup = super(Box, self)._format
-                        if is_list_like(x):
-                            return 'Min: %s\nQ1: %s\nMedian: %s\nQ3: %s\nMax: %s' % tuple(map(sup, x[1:6]))
-                        else:
-                            return sup(x)
-
-                    def _tooltip_data(self, node, value, x, y, classes=None, xlabel=None):
-                        super(Plot, self)._tooltip_data(node, value, x, y, classes=classes, xlabel=None)
-                        if xlabel in history:
-                            self.svg.node(node, 'desc', class_="x_label").text = history[xlabel]['name']
-            except ImportError as exc:
-                raise ImportError(exc.args, "Please install pygal or pytest-benchmark[histogram]")
+            from .histogram import make_plot
 
             history = {}
             for bench_file in self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json"):
@@ -614,50 +588,14 @@ class BenchmarkSession(object):
 
                 table = list(self.generate_histogram_table(bench, history, sorted(history)))
 
-                unit, adjustment = time_unit(min(
-                    row[self.sort]
-                    for _, _, row in table
-                ))
-
-                class Style(DefaultStyle):
-                    colors = []
-                    font_family = 'Consolas, "Deja Vu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace'
-
-                    for label, _, row in table:
-                        if label == HISTOGRAM_CURRENT:
-                            colors.append(DefaultStyle.colors[0])
-                        elif self.compare and str(self.compare.basename).startswith(label):
-                            colors.append(DefaultStyle.colors[2])
-                        else:
-                            colors.append('#000000')
-
-                minimum = int(min(row['min'] * adjustment for _, _, row in table))
-                maximum = int(max(row['max'] * adjustment for _, _, row in table) + 1)
-                plot = Plot(
-                    x_label_rotation=-90,
-                    x_labels=[label for label, _, _ in table],
-                    show_legend=False,
-                    title="Speed in %sseconds of %s" % (unit, bench.fullname),
-                    x_title="Trial",
-                    y_title="%ss" % unit,
-                    style=Style,
-                    min_scale=20,
-                    max_scale=20,
-                    range=(minimum, maximum),
-                    zero=minimum,
-                    css=[
-                        "file://style.css",
-                        "file://graph.css",
-                        "inline:.axis.x text {text-anchor: middle !important}"
-                    ]
+                plot = make_plot(
+                    bench_name=bench.fullname,
+                    table=table,
+                    compare=self.compare,
+                    annotations=dict((k, v['name']) for k, v in history.items()),
+                    sort=self.sort,
+                    current=HISTOGRAM_CURRENT,
                 )
-
-                for label, info, row in table:
-                    if info:
-                        label += '\n@' + info
-                    plot.add(label,
-                             [row[field] * adjustment for field in ['min', 'q1', 'median', 'q3', 'max']],
-                             stroke_style={'width': 1})
                 plot.render_to_file(str(output_file))
                 self.logger.info("Generated histogram %s" % output_file, bold=True)
 

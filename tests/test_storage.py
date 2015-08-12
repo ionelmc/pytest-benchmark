@@ -278,7 +278,6 @@ def test_save_with_name(sess, tmpdir):
     sess.handle_saving()
     files = tmpdir.listdir()
     assert len(files) == 1
-    print(files[0].read())
     assert json.load(files[0].open('rU')) == SAVE_DATA
 
 
