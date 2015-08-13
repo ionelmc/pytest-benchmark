@@ -556,7 +556,7 @@ class BenchmarkSession(object):
         self.handle_histogram()
 
     def check_regressions(self):
-        if not self.compare_file:
+        if self.compare_fail and not self.compare_file:
             raise pytest.UsageError("--benchmark-compare-fail requires valid --benchmark-compare.")
 
         if self.performance_regressions:
