@@ -593,7 +593,7 @@ class BenchmarkSession(object):
                     bench_name=bench.fullname,
                     table=table,
                     compare=self.compare_file,
-                    annotations=dict((k, v['name']) for k, v in history.items()),
+                    annotations=history,
                     sort=self.sort,
                     current=HISTOGRAM_CURRENT,
                 )
@@ -607,16 +607,14 @@ class BenchmarkSession(object):
             for bench in trial['benchmarks']:
                 if bench['fullname'] == current.fullname:
                     found = True
-                # elif bench['name'] == current.name:
-                #     found = True
                 else:
                     found = False
 
                 if found:
-                    yield '%s' % name, trial['datetime'], bench['stats']
+                    yield '%s' % name, bench['stats']
                     break
 
-        yield HISTOGRAM_CURRENT, "", current.json()
+        yield HISTOGRAM_CURRENT, current.json()
 
     def display_results_table(self, tr):
         timer = self.options.get('timer')

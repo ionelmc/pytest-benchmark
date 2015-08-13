@@ -15,25 +15,25 @@ class Plot(Box):
         self.annotations = annotations
 
     def _box_points(self, serie, _):
-        return (serie[0],
+        return (None,
                 serie[0],
                 serie[1],
                 serie[2],
                 serie[3],
                 serie[4],
-                serie[4]), []
+                serie[5]), []
 
     def _format(self, x):
         sup = super(Box, self)._format
         if is_list_like(x):
-            return 'Min: %s\nQ1: %s\nMedian: %s\nQ3: %s\nMax: %s' % tuple(map(sup, x[1:6]))
+            return 'Min: %s\nQ1: %s\nMedian: %s\nQ3: %s\nMax: %s\nRounds: %s' % tuple(map(sup, x[1:]))
         else:
             return sup(x)
 
     def _tooltip_data(self, node, value, x, y, classes=None, xlabel=None):
         super(Plot, self)._tooltip_data(node, value, x, y, classes=classes, xlabel=None)
         if xlabel in self.annotations:
-            self.svg.node(node, 'desc', class_="x_label").text = self.annotations[xlabel]
+            self.svg.node(node, 'desc', class_="x_label").text = self.annotations[xlabel]['name']
 
 
 def make_plot(bench_name, table, compare, current, annotations, sort):
@@ -41,7 +41,7 @@ def make_plot(bench_name, table, compare, current, annotations, sort):
         colors = []
         font_family = 'Consolas, "Deja Vu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace'
 
-        for label, _, row in table:
+        for label, row in table:
             if label == current:
                 colors.append(DefaultStyle.colors[0])
             elif compare and str(compare.basename).startswith(label):
@@ -51,16 +51,16 @@ def make_plot(bench_name, table, compare, current, annotations, sort):
 
     unit, adjustment = time_unit(min(
         row[sort]
-        for _, _, row in table
+        for _, row in table
     ))
 
-    minimum = int(min(row['min'] * adjustment for _, _, row in table))
-    maximum = int(max(row['max'] * adjustment for _, _, row in table) + 1)
+    minimum = int(min(row['min'] * adjustment for _, row in table))
+    maximum = int(max(row['max'] * adjustment for _, row in table) + 1)
 
     plot = Plot(
         annotations,
         x_label_rotation=-90,
-        x_labels=[label for label, _, _ in table],
+        x_labels=[label for label, _ in table],
         show_legend=False,
         title="Speed in %sseconds of %s" % (unit, bench_name),
         x_title="Trial",
@@ -80,10 +80,10 @@ def make_plot(bench_name, table, compare, current, annotations, sort):
         ],
     )
 
-    for label, info, row in table:
-        if info:
-            label += '\n@' + info
-        plot.add(label,
-                 [row[field] * adjustment for field in ['min', 'q1', 'median', 'q3', 'max']],
-                 stroke_style={'width': 1})
+    for label, row in table:
+        if label in annotations:
+            label += '\n@' + annotations[label]['datetime']
+        serie = [row[field] * adjustment for field in ['min', 'q1', 'median', 'q3', 'max']]
+        serie.append(row['rounds'])
+        plot.add(label, serie)
     return plot
