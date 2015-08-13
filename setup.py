@@ -57,7 +57,7 @@ setup(
     ],
     extras_require={
         "aspect": ["aspectlib"],
-        "histogram": ["pygal"],
+        "histogram": ["pygal", "pygaljs"],
         ":python_version < '3.4' ": ["statistics"]
     },
     entry_points={
