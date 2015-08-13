@@ -131,6 +131,171 @@ def test_slow(benchmark):
     assert 1 == 1
 '''
 
+GROUPING_TEST = '''
+import pytest
+
+@pytest.mark.parametrize("foo", range(2))
+@pytest.mark.benchmark(group="A")
+def test_a(benchmark, foo):
+    benchmark(str)
+
+@pytest.mark.parametrize("foo", range(2))
+@pytest.mark.benchmark(group="B")
+def test_b(benchmark, foo):
+    benchmark(int)
+'''
+
+
+def test_group_by_name(testdir):
+    test_x = testdir.makepyfile(test_x=GROUPING_TEST)
+    test_y = testdir.makepyfile(test_y=GROUPING_TEST)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'name', test_x, test_y)
+    result.stdout.fnmatch_lines([
+        '*', '*', '*', '*', '*',
+        "* benchmark 'test_a[[]0[]]': 2 tests, *",
+        'Name (time in ns)     *',
+        '----------------------*',
+        'test_a[[]0[]]             *',
+        'test_a[[]0[]]             *',
+        '----------------------*',
+        '*',
+        "* benchmark 'test_a[[]1[]]': 2 tests, *",
+        'Name (time in ns)     *',
+        '----------------------*',
+        'test_a[[]1[]]             *',
+        'test_a[[]1[]]             *',
+        '----------------------*',
+        '*',
+        "* benchmark 'test_b[[]0[]]': 2 tests, *",
+        'Name (time in ns)     *',
+        '----------------------*',
+        'test_b[[]0[]]             *',
+        'test_b[[]0[]]             *',
+        '----------------------*',
+        '*',
+        "* benchmark 'test_b[[]1[]]': 2 tests, *",
+        'Name (time in ns)     *',
+        '----------------------*',
+        'test_b[[]1[]]             *',
+        'test_b[[]1[]]             *',
+        '----------------------*',
+    ])
+
+
+def test_group_by_func(testdir):
+    test_x = testdir.makepyfile(test_x=GROUPING_TEST)
+    test_y = testdir.makepyfile(test_y=GROUPING_TEST)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'func', test_x, test_y)
+    result.stdout.fnmatch_lines([
+        '*', '*', '*', '*', '*',
+        "* benchmark 'test_a': 4 tests, *",
+        'Name (time in ns)     *',
+        '----------------------*',
+        'test_a[[]0[]]             *',
+        'test_a[[]1[]]             *',
+        'test_a[[]0[]]             *',
+        'test_a[[]1[]]             *',
+        '----------------------*',
+        '*', '*',
+        "* benchmark 'test_b': 4 tests, *",
+        'Name (time in ns)     *',
+        '----------------------*',
+        'test_b[[]0[]]             *',
+        'test_b[[]1[]]             *',
+        'test_b[[]0[]]             *',
+        'test_b[[]1[]]             *',
+        '----------------------*',
+        '*', '*',
+        '=========================== 8 passed in * seconds ===========================',
+    ])
+
+
+def test_group_by_fullfunc(testdir):
+    test_x = testdir.makepyfile(test_x=GROUPING_TEST)
+    test_y = testdir.makepyfile(test_y=GROUPING_TEST)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'fullfunc', test_x, test_y)
+    result.stdout.fnmatch_lines([
+        '*', '*', '*', '*', '*',
+        " benchmark 'test_x.py::test_a': 2 tests, *",
+        'Name (time in ns) *',
+        '------------------*',
+        'test_a[[]0[]]         *',
+        'test_a[[]1[]]         *',
+        '------------------*',
+        '(*) Outliers: 1 Standard Deviation from M*',
+        '*',
+        " benchmark 'test_x.py::test_b': 2 tests, *",
+        'Name (time in ns) *',
+        '------------------*',
+        'test_b[[]0[]]         *',
+        'test_b[[]1[]]         *',
+        '------------------*',
+        '(*) Outliers: 1 Standard Deviation from M*',
+        '*',
+        " benchmark 'test_y.py::test_a': 2 tests, *",
+        'Name (time in ns) *',
+        '------------------*',
+        'test_a[[]0[]]         *',
+        'test_a[[]1[]]         *',
+        '------------------*',
+        '(*) Outliers: 1 Standard Deviation from M*',
+        '*',
+        " benchmark 'test_y.py::test_b': 2 tests, *",
+        'Name (time in ns) *',
+        '------------------*',
+        'test_b[[]0[]]         *',
+        'test_b[[]1[]]         *',
+        '------------------*',
+        '(*) Outliers: 1 Standard Deviation from M*',
+        '*',
+        '=========================== 8 passed in *',
+    ])
+
+
+def test_group_by_param(testdir):
+    test_x = testdir.makepyfile(test_x=GROUPING_TEST)
+    test_y = testdir.makepyfile(test_y=GROUPING_TEST)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'param', test_x, test_y)
+    result.stdout.fnmatch_lines([
+        '*', '*', '*', '*', '*',
+        "* benchmark '0': 4 tests, *",
+        'Name (time in ns)  *',
+        '-------------------*',
+        'test_a[[]0[]]          *',
+        'test_b[[]0[]]          *',
+        'test_a[[]0[]]          *',
+        'test_b[[]0[]]          *',
+        '-------------------*',
+        '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
+        '',
+        "* benchmark '1': 4 tests, *",
+        'Name (time in ns) *',
+        '------------------*',
+        'test_a[[]1[]]         *',
+        'test_b[[]1[]]         *',
+        'test_a[[]1[]]         *',
+        'test_b[[]1[]]         *',
+        '------------------*',
+        '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
+        '',
+        '=========================== 8 passed in * seconds ===========================',
+    ])
+
+def test_group_by_fullname(testdir):
+    test_x = testdir.makepyfile(test_x=GROUPING_TEST)
+    test_y = testdir.makepyfile(test_y=GROUPING_TEST)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'fullname', test_x, test_y)
+    result.stdout.fnmatch_lines_random([
+        "* benchmark 'test_x.py::test_a[[]0[]]': 1 tests, *",
+        "* benchmark 'test_x.py::test_a[[]1[]]': 1 tests, *",
+        "* benchmark 'test_x.py::test_b[[]0[]]': 1 tests, *",
+        "* benchmark 'test_x.py::test_b[[]1[]]': 1 tests, *",
+        "* benchmark 'test_y.py::test_a[[]0[]]': 1 tests, *",
+        "* benchmark 'test_y.py::test_a[[]1[]]': 1 tests, *",
+        "* benchmark 'test_y.py::test_b[[]0[]]': 1 tests, *",
+        "* benchmark 'test_y.py::test_b[[]1[]]': 1 tests, *",
+        '=========================== 8 passed in * seconds ===========================',
+    ])
 
 def test_conflict_between_only_and_skip(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
