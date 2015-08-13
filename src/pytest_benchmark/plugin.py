@@ -604,20 +604,20 @@ class BenchmarkSession(object):
     def generate_histogram_table(current, history, sequence):
         for name in sequence:
             trial = history[name]
-            for bench in trial['benchmarks']:
-                if bench['fullname'] == current.fullname:
+            for bench in trial["benchmarks"]:
+                if bench["fullname"] == current.fullname:
                     found = True
                 else:
                     found = False
 
                 if found:
-                    yield '%s' % name, bench['stats']
+                    yield "%s" % name, bench["stats"]
                     break
 
         yield HISTOGRAM_CURRENT, current.json()
 
     def display_results_table(self, tr):
-        timer = self.options.get('timer')
+        timer = self.options.get("timer")
         for group, benchmarks in self.config.hook.pytest_benchmark_group_stats(
                 config=self.config,
                 benchmarks=self.benchmarks,
@@ -673,7 +673,7 @@ class BenchmarkSession(object):
                      count=len(benchmarks),
                      name="" if group is None else " %r" % group,
                      timer=timer
-                 )).center(len(labels_line), '-'),
+                 )).center(len(labels_line), "-"),
                 yellow=True,
             )
             tr.write_line(labels_line)
@@ -700,7 +700,7 @@ class BenchmarkSession(object):
             tr.write_line("")
 
     def display_compare_row(self, tr, widths, adjustment, bench, compare_to):
-        stats = compare_to['stats']
+        stats = compare_to["stats"]
 
         if self.compare_fail:
             for check in self.compare_fail:
@@ -717,13 +717,13 @@ class BenchmarkSession(object):
             if val > 0:
                 tr.write(
                     "{0:>{1}} {2:<7}".format("+" + fmt, widths[prop],
-                                             "(%i%%)" % abs(new / old * 100 - 100) if old else 'inf'),
+                                             "(%i%%)" % abs(new / old * 100 - 100) if old else "inf"),
                     red=True
                 )
             elif val < 0:
                 tr.write(
                     "{0:>{1}} {2:<7}".format("-" + fmt, widths[prop],
-                                             "(%i%%)" % abs(new / old * 100 - 100) if old else 'inf'),
+                                             "(%i%%)" % abs(new / old * 100 - 100) if old else "inf"),
                     green=True
                 )
             else:
@@ -735,11 +735,11 @@ class BenchmarkSession(object):
 
 
 def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark):
-    if compared_benchmark['machine_info'] != machine_info:
+    if compared_benchmark["machine_info"] != machine_info:
         benchmarksession.logger.warn(
             "Benchmark machine_info is different. Current: %s VS saved: %s." % (
                 format_dict(machine_info),
-                format_dict(compared_benchmark['machine_info']),
+                format_dict(compared_benchmark["machine_info"]),
             )
         )
 
@@ -763,17 +763,17 @@ def pytest_runtest_call(item, __multicall__):
 def pytest_benchmark_group_stats(config, benchmarks, group_by):
     groups = defaultdict(list)
     for bench in benchmarks:
-        if group_by == 'group':
+        if group_by == "group":
             groups[bench.group].append(bench)
-        elif group_by == 'name':
+        elif group_by == "name":
             groups[bench.name].append(bench)
-        elif group_by == 'func':
-            groups[bench.name.split('[')[0]].append(bench)
-        elif group_by == 'fullfunc':
-            groups[bench.fullname.split('[')[0]].append(bench)
-        elif group_by == 'fullname':
+        elif group_by == "func":
+            groups[bench.name.split("[")[0]].append(bench)
+        elif group_by == "fullfunc":
+            groups[bench.fullname.split("[")[0]].append(bench)
+        elif group_by == "fullname":
             groups[bench.fullname].append(bench)
-        elif group_by == 'param':
+        elif group_by == "param":
             groups[bench.param].append(bench)
         else:
             raise NotImplementedError("Unsupported grouping %r." % group_by)
@@ -816,19 +816,19 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data):
 
     benchmarks_json = []
     output_json = {
-        'machine_info': machine_info,
-        'commit_info': commit_info,
-        'benchmarks': benchmarks_json,
-        'datetime': datetime.utcnow().isoformat(),
-        'version': __version__,
+        "machine_info": machine_info,
+        "commit_info": commit_info,
+        "benchmarks": benchmarks_json,
+        "datetime": datetime.utcnow().isoformat(),
+        "version": __version__,
     }
     for bench in benchmarks:
         benchmarks_json.append({
-            'group': bench.group,
-            'name': bench.name,
-            'fullname': bench.fullname,
-            'stats': dict(bench.json(include_data=include_data), iterations=bench.iterations),
-            'options': dict(
+            "group": bench.group,
+            "name": bench.name,
+            "fullname": bench.fullname,
+            "stats": dict(bench.json(include_data=include_data), iterations=bench.iterations),
+            "options": dict(
                 (k, v.__name__ if callable(v) else v) for k, v in bench.options.items()
             )
         })
@@ -845,8 +845,8 @@ def benchmark(request):
         node = request.node
         marker = node.get_marker("benchmark")
         options = marker.kwargs if marker else {}
-        if 'timer' in options:
-            options['timer'] = NameWrapper(options['timer'])
+        if "timer" in options:
+            options["timer"] = NameWrapper(options["timer"])
         fixture = BenchmarkFixture(
             node,
             add_stats=bs.benchmarks.append,
