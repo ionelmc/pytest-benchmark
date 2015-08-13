@@ -4,7 +4,6 @@ try:
     from pygal.graph.box import Box
     from pygal.graph.box import is_list_like
     from pygal.style import DefaultStyle
-    import pygaljs
 except ImportError as exc:
     raise ImportError(exc.args, "Please install pygal and pygaljs or pytest-benchmark[histogram]")
 
@@ -57,6 +56,17 @@ def make_plot(bench_name, table, compare, current, annotations, sort):
     minimum = int(min(row['min'] * adjustment for _, row in table))
     maximum = int(max(row['max'] * adjustment for _, row in table) + 1)
 
+    try:
+        import pygaljs
+    except ImportError:
+        opts = {}
+    else:
+        opts = {
+            "js": [
+                pygaljs.uri("2.0.x", "pygal-tooltips.js")
+            ]
+        }
+
     plot = Plot(
         annotations,
         x_label_rotation=-90,
@@ -75,9 +85,7 @@ def make_plot(bench_name, table, compare, current, annotations, sort):
             "file://graph.css",
             "inline:.axis.x text {text-anchor: middle !important}"
         ],
-        js=[
-            pygaljs.uri("2.0.x", "pygal-tooltips.js")
-        ],
+        **opts
     )
 
     for label, row in table:
