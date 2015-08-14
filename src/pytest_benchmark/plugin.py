@@ -657,7 +657,7 @@ class BenchmarkSession(object):
                     for bench in benchmarks
                 ))
 
-            rpadding = 8 if self.compare_file else 0
+            rpadding = 12 if self.compare_file else 0
             labels_line = labels["name"].ljust(widths["name"]) + "".join(
                 labels[prop].rjust(widths[prop]) + (
                     " " * rpadding
@@ -714,15 +714,19 @@ class BenchmarkSession(object):
             old = stats[prop]
             val = new - old
             fmt = NUMBER_FMT.format(abs(val * adjustment))
+            percent = abs(new / old * 100 - 100) if old else math.copysign(float("inf"), val)
             if val > 0:
-                tr.write(
-                    "{0:>{1}} {2:<7}".format("+" + fmt, widths[prop],
-                                             "(%i%%)" % abs(new / old * 100 - 100) if old else "inf"),
-                    red=True
-                )
+                if percent > 1000000:
+                    tr.write("{0:>{1}}".format("+" + fmt, widths[prop]), red=True)
+                    if math.isinf(percent):
+                        tr.write(" (infinite%)", red=True, bold=True)
+                    else:
+                        tr.write(" (>1000000%)", red=True, bold=True)
+                else:
+                    tr.write("{0:>{1}} {2:<11}".format("+" + fmt, widths[prop], "(%i%%)" % percent), red=True)
             elif val < 0:
                 tr.write(
-                    "{0:>{1}} {2:<7}".format("-" + fmt, widths[prop],
+                    "{0:>{1}} {2:<11}".format("-" + fmt, widths[prop],
                                              "(%i%%)" % abs(new / old * 100 - 100) if old else "inf"),
                     green=True
                 )
