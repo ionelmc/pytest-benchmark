@@ -1,48 +1,48 @@
 {
     "benchmarks": [
         {
-            "fullname": "tests/test_normal.py::test_xfast_parametrized[0]", 
+            "fullname": "tests/test_normal.py::test_xfast_parametrized[0]",
             "stats": {
-                "stddev": 7.965964948616881e-08, 
-                "iterations": 430, 
-                "rounds": 2653, 
-                "q3": 2.1901241568631903e-07, 
-                "q1": 2.1845795387445495e-07, 
-                "iqr": 5.544618118640839e-10, 
-                "mean": 2.337218507570386e-07, 
-                "stddev_outliers": 90, 
-                "iqr_outliers": 923, 
-                "max": 2.351472544115643e-06, 
-                "outliers": "90;923", 
-                "min": 2.1624010662699853e-07, 
+                "stddev": 7.965964948616881e-08,
+                "iterations": 430,
+                "rounds": 2653,
+                "q3": 2.1901241568631903e-07,
+                "q1": 2.1845795387445495e-07,
+                "iqr": 5.544618118640839e-10,
+                "mean": 2.337218507570386e-07,
+                "stddev_outliers": 90,
+                "iqr_outliers": 923,
+                "max": 2.351472544115643e-06,
+                "outliers": "90;923",
+                "min": 2.1624010662699853e-07,
                 "median": 2.1845795387445495e-07
-            }, 
-            "name": "test_xfast_parametrized[0]", 
-            "group": null, 
+            },
+            "name": "test_xfast_parametrized[0]",
+            "group": null,
             "options": {
-                "timer": "time", 
-                "disable_gc": false, 
-                "min_rounds": 5, 
-                "warmup": false, 
-                "min_time": 2.5e-05, 
+                "timer": "time",
+                "disable_gc": false,
+                "min_rounds": 5,
+                "warmup": false,
+                "min_time": 2.5e-05,
                 "max_time": 1.0
             }
         }
-    ], 
-    "version": "2.5.0", 
+    ],
+    "version": "2.5.0",
     "machine_info": {
-        "processor": "x86_64", 
-        "python_compiler": "GCC 4.6.3", 
-        "release": "3.13.0-55-generic", 
-        "python_implementation": "CPython", 
-        "machine": "x86_64", 
-        "python_version": "2.7.3", 
-        "system": "Linux", 
+        "processor": "x86_64",
+        "python_compiler": "GCC 4.6.3",
+        "release": "3.13.0-55-generic",
+        "python_implementation": "CPython",
+        "machine": "x86_64",
+        "python_version": "2.7.3",
+        "system": "Linux",
         "node": "minibox"
-    }, 
+    },
     "commit_info": {
-        "dirty": true, 
+        "dirty": true,
         "id": "b87b9aae14ff14a7887a6bbaa9731b9a8760555d"
-    }, 
+    },
     "datetime": "2015-08-14T16:03:43.699338"
 }

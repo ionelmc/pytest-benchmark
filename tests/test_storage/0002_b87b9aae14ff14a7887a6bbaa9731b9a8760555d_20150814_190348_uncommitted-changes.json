@@ -1,48 +1,48 @@
 {
-    "version": "2.5.0", 
+    "version": "2.5.0",
     "machine_info": {
-        "node": "minibox", 
-        "system": "Linux", 
-        "python_compiler": "GCC 4.6.3", 
-        "release": "3.13.0-55-generic", 
-        "python_implementation": "CPython", 
-        "python_version": "2.7.3", 
-        "machine": "x86_64", 
+        "node": "minibox",
+        "system": "Linux",
+        "python_compiler": "GCC 4.6.3",
+        "release": "3.13.0-55-generic",
+        "python_implementation": "CPython",
+        "python_version": "2.7.3",
+        "machine": "x86_64",
         "processor": "x86_64"
-    }, 
+    },
     "commit_info": {
-        "id": "b87b9aae14ff14a7887a6bbaa9731b9a8760555d", 
+        "id": "b87b9aae14ff14a7887a6bbaa9731b9a8760555d",
         "dirty": true
-    }, 
+    },
     "benchmarks": [
         {
             "options": {
-                "min_time": 2.5e-05, 
-                "min_rounds": 5, 
-                "disable_gc": false, 
-                "max_time": 1.0, 
-                "warmup": false, 
+                "min_time": 2.5e-05,
+                "min_rounds": 5,
+                "disable_gc": false,
+                "max_time": 1.0,
+                "warmup": false,
                 "timer": "time"
-            }, 
-            "group": null, 
+            },
+            "group": null,
             "stats": {
-                "iterations": 397, 
-                "mean": 2.3738057829538194e-07, 
-                "min": 2.2400536525159398e-07, 
-                "iqr": 3.0027528854101217e-09, 
-                "median": 2.2700811813700408e-07, 
-                "stddev_outliers": 329, 
-                "max": 3.6951877007856778e-06, 
-                "q1": 2.2640756755992207e-07, 
-                "q3": 2.294103204453322e-07, 
-                "iqr_outliers": 1985, 
-                "outliers": "329;1985", 
-                "rounds": 10980, 
-                "stddev": 6.40022447605292e-08
-            }, 
-            "name": "test_xfast_parametrized[0]", 
+                "iterations": 397,
+                "mean": 2.3738057829538194e-07,
+                "min": 2.2400536525159398e-07,
+                "iqr": 0,
+                "median": 2.2700811813700408e-07,
+                "stddev_outliers": 329,
+                "max": 2.351472544115643e-06,
+                "q1": 2.2640756755992207e-07,
+                "q3": 2.294103204453322e-07,
+                "iqr_outliers": 1985,
+                "outliers": "329;1985",
+                "rounds": 10980,
+                "stddev": 0
+            },
+            "name": "test_xfast_parametrized[0]",
             "fullname": "tests/test_normal.py::test_xfast_parametrized[0]"
         }
-    ], 
+    ],
     "datetime": "2015-08-14T16:03:48.342017"
 }
