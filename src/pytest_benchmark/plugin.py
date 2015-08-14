@@ -585,7 +585,7 @@ class BenchmarkSession(object):
                 name = bench.fullname
                 for c in "\/:*?<>|":
                     name = name.replace(c, '_').replace('__', '_')
-                output_file = py.path.local("%s-%s.svg" % (self.histogram, name))
+                output_file = py.path.local("%s-%s.svg" % (self.histogram, name)).ensure()
 
                 table = list(self.generate_histogram_table(bench, history, sorted(history)))
 
