@@ -1,4 +1,5 @@
 import json
+import os
 import logging
 from io import StringIO, BytesIO
 
@@ -12,88 +13,13 @@ from pytest_benchmark.plugin import pytest_benchmark_generate_json
 from pytest_benchmark.plugin import pytest_benchmark_group_stats
 from pytest_benchmark.utils import PercentageRegressionCheck, DifferenceRegressionCheck
 
-SAVE_DATA = {
-    "commit_info": {
-        'foo': 'bar',
-    },
-    "version": "2.5.0",
-    "benchmarks": [
-        {
-            "stats": {
-                'include_data': False,
-                "q1": 19.35233497619629,
-                "q3": 20.36447501182556,
-                "iterations": 1,
-                "min": 19.316043853759766,
-                "max": 21.620103120803833,
-                "median": 19.9351589679718,
-                "iqr": 1.0121400356292725,
-                "stddev_outliers": 2,
-                "stddev": 0.7074680670532808,
-                "outliers": "2;0",
-                "iqr_outliers": 0,
-                "rounds": 10,
-                "mean": 20.049841284751892
-            },
-            "fullname": "tests/test_func/test_perf.py::test_engine",
-            "group": None,
-            "name": "test_engine",
-            "options": {
-                "disable_gc": False,
-                "warmup": False,
-                "timer": "time",
-                "min_rounds": 10,
-                "max_time": 1.0,
-                "min_time": 2.5e-05
-            }
-        }
-    ],
-    "machine_info": {
-        "foo": "bar",
-    },
-    "datetime": "2012-01-14T12:00:01"
-}
-JSON_DATA = {
-    "commit_info": {
-        'foo': 'bar',
-    },
-    "version": "2.5.0",
-    "benchmarks": [
-        {
-            "stats": {
-                'include_data': True,
-                "q1": 19.35233497619629,
-                "q3": 20.36447501182556,
-                "iterations": 1,
-                "min": 19.316043853759766,
-                "max": 21.620103120803833,
-                "median": 19.9351589679718,
-                "iqr": 1.0121400356292725,
-                "stddev_outliers": 2,
-                "stddev": 0.7074680670532808,
-                "outliers": "2;0",
-                "iqr_outliers": 0,
-                "rounds": 10,
-                "mean": 20.049841284751892
-            },
-            "fullname": "tests/test_func/test_perf.py::test_engine",
-            "group": None,
-            "name": "test_engine",
-            "options": {
-                "disable_gc": False,
-                "warmup": False,
-                "timer": "time",
-                "min_rounds": 10,
-                "max_time": 1.0,
-                "min_time": 2.5e-05
-            }
-        }
-    ],
-    "machine_info": {
-        "foo": "bar",
-    },
-    "datetime": "2012-01-14T12:00:01"
-}
+THIS = py.path.local(__file__)
+STORAGE = THIS.dirpath(THIS.purebasename)
+
+SAVE_DATA = json.load(STORAGE.listdir('0030_*.json')[0].open())
+SAVE_DATA["benchmarks"][0]["stats"]["include_data"] = False
+JSON_DATA = json.load(STORAGE.listdir('0030_*.json')[0].open())
+JSON_DATA["benchmarks"][0]["stats"]["include_data"] = True
 
 
 class Namespace(object):
@@ -114,8 +40,7 @@ class TestFriendlyFileLike(BytesIO):
 class MockSession(BenchmarkSession):
     def __init__(self):
         self.histogram = True
-        me = py.path.local(__file__)
-        self.storage = me.dirpath(me.purebasename)
+        self.storage = STORAGE
         self.benchmarks = []
         self.sort = u"min"
         self.compare = '0001'
@@ -190,6 +115,7 @@ def make_logger(sess):
 
 
 def test_rendering(sess):
+    sess.histogram = os.path.join('docs', 'sample')
     sess.handle_histogram()
 
 
@@ -215,6 +141,7 @@ def test_regression_checks(sess):
     ]
     output = make_logger(sess)
     pytest.raises(PerformanceRegression, sess.check_regressions)
+    print(output.getvalue())
     assert output.getvalue() == """Performance has regressed:
 \ttests/test_func/test_perf.py::test_engine - Field stddev has failed PercentageRegressionCheck: 26.572963937 \
 > 5.000000000
@@ -231,30 +158,21 @@ def test_compare(sess):
         write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
         write=lambda text, **opts: output.write(force_text(text)),
     ))
-    assert output.getvalue() == (
-        'Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {'
-        'machine: "x86_64", node: "jenkins", processor: "x86_64", python_compiler: "GCC 4.6.3", '
-        'python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-53-generic", system: "Linux"}.\n'
-        'Comparing against benchmark 0001_b692275e28a23b5d4aae70f453079ba593e60290_20150811_052350.json:\n'
-        '| commit info: {dirty: false, id: "b692275e28a23b5d4aae70f453079ba593e60290"}\n'
-        "| saved at: 2015-08-11T02:23:50.661428\n"
-        "| saved using pytest-benchmark 2.5.0:\n"
-        "-------------------------------------- benchmark: 1 tests, min 123 rounds (of min 234), "
-        "345 max time, timer: None --------------------------------------\n"
-        "Name (time in s)         Min              Max             Mean          StdDev           Median             "
-        "IQR          Outliers(*)  Rounds  Iterations\n"
-        "--------------------------------------------------------------------------------------------------------------"
-        "------------------------------------------\n"
-        "test_engine          19.3160          21.6201          20.0498          0.7075          19.9352          "
-        "1.0121                  2;0      10           1\n"
-        "                     -0.0062 (0%)     +0.6172 (2%)     +0.0157 (0%)    +0.1485 (26%)    +0.0806 (0%)    "
-        "+0.3144 (45%)            4;0      10           1\n"
-        "--------------------------------------------------------------------------------------------------------------"
-        "------------------------------------------\n"
-        "(*) Outliers: 1 Standard Deviation from Mean; "
-        "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.\n"
-        "\n"
-    )
+    print(output.getvalue())
+    assert output.getvalue() == """Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"}.
+Comparing against benchmark 0001_001f2d07786d4f90b406372dba594658a43a2558_20150814_181653_uncommitted-changes.json:
+| commit info: {dirty: true, id: "001f2d07786d4f90b406372dba594658a43a2558"}
+| saved at: 2015-08-14T15:16:53.144088
+| saved using pytest-benchmark 2.5.0:
+------------------------------------------- benchmark: 1 tests, min 123 rounds (of min 234), 345 max time, timer: None -------------------------------------------
+Name (time in ns)                  Min              Max             Mean          StdDev           Median             IQR          Outliers(*)  Rounds  Iterations
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_xfast_parametrized[0]     72.9561          82.9697          75.0167          3.2819          73.9098          2.1458                  2;2      14        1000
+                                    NC          -2.1458 (2%)     -0.3406 (0%)    -0.2748 (7%)          NC         +1.9073 (800%)           2;4      14        1000
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
+
+"""
 
 
 @freeze_time("2012-01-14 12:00:01")

@@ -1,0 +1,48 @@
+{
+    "commit_info": {
+        "id": "b87b9aae14ff14a7887a6bbaa9731b9a8760555d", 
+        "dirty": true
+    }, 
+    "machine_info": {
+        "python_compiler": "GCC 4.6.3", 
+        "python_version": "2.7.3", 
+        "python_implementation": "CPython", 
+        "processor": "x86_64", 
+        "node": "minibox", 
+        "machine": "x86_64", 
+        "system": "Linux", 
+        "release": "3.13.0-55-generic"
+    }, 
+    "version": "2.5.0", 
+    "benchmarks": [
+        {
+            "options": {
+                "warmup": false, 
+                "timer": "time", 
+                "max_time": 1.0, 
+                "disable_gc": false, 
+                "min_time": 2.5e-05, 
+                "min_rounds": 5
+            }, 
+            "group": null, 
+            "fullname": "tests/test_normal.py::test_xfast_parametrized[0]", 
+            "name": "test_xfast_parametrized[0]", 
+            "stats": {
+                "max": 1.9679318613080837e-05, 
+                "iterations": 268, 
+                "iqr_outliers": 1631, 
+                "rounds": 12634, 
+                "median": 2.206261478253265e-07, 
+                "outliers": "100;1631", 
+                "min": 2.197365262615147e-07, 
+                "stddev": 2.525896574652219e-07, 
+                "mean": 2.400895241474113e-07, 
+                "stddev_outliers": 100, 
+                "q3": 2.241846340805737e-07, 
+                "iqr": 4.4481078190590015e-09, 
+                "q1": 2.197365262615147e-07
+            }
+        }
+    ], 
+    "datetime": "2015-08-14T16:03:58.022411"
+}
