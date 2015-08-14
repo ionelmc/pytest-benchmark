@@ -127,7 +127,10 @@ class RegressionCheck(object):
 
 class PercentageRegressionCheck(RegressionCheck):
     def compute(self, current, compared):
-        return current[self.field] / compared[self.field] * 100 - 100
+        val = compared[self.field]
+        if not val:
+            return float("inf")
+        return current[self.field] / val * 100 - 100
 
 
 class DifferenceRegressionCheck(RegressionCheck):
