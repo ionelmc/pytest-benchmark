@@ -365,6 +365,12 @@ I can't avoid using VMs or running other programs. What can I do?
     ``time.process_time`` (Python 3.3+ only) as the timer. Process time `doesn't include sleeping or waiting for I/O
     <https://en.wikipedia.org/wiki/CPU_time>`_.
 
+The histogram doesn't show ``Max`` time. What gives?!
+    The height of the plot is limited to ``Q3+1.5IQR`` because ``Max`` has the nasty tendency to be way higher and making everything else
+    small and undiscerning. For this reason ``Max`` is *plotted outside*.
+
+    Most people don't care about ``Max`` at all so this is fine.
+
 
 
 
