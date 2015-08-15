@@ -304,10 +304,12 @@ Compare mode (``--benchmark-compare``):
 
 Histogram (``--benchmark-histogram``):
 
-.. image:: https://cdn.rawgit.com/ionelmc/pytest-benchmark/94860cc8f47aed7ba4f9c7e1380c2195342613f6/docs/sample-tests_test_normal.py_test_xfast_parametrized%5B0%5D.svg
+.. figure:: https://cdn.rawgit.com/ionelmc/pytest-benchmark/94860cc8f47aed7ba4f9c7e1380c2195342613f6/docs/sample-tests_test_normal.py_test_xfast_parametrized%5B0%5D.svg
     :alt: Histogram sample
 
-
+    The histogram. Click `here
+    <https://cdn.rawgit.com/ionelmc/pytest-benchmark/94860cc8f47aed7ba4f9c7e1380c2195342613f6/docs/sample-tests_test_normal.py_test_xfast_parametrized%5B0%5D.svg>`_
+    to see the plot with tooltips.
 
 Development
 ===========
