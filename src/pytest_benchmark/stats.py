@@ -1,4 +1,5 @@
 from __future__ import division
+from bisect import bisect_left, bisect_right
 
 import statistics
 
@@ -8,7 +9,7 @@ from .utils import cached_property
 class Stats(object):
     fields = (
         "min", "max", "mean", "stddev", "rounds", "median", "iqr", "q1", "q3", "iqr_outliers", "stddev_outliers",
-        "outliers"
+        "outliers", "ld15iqr", "hd15iqr"
     )
 
     def __init__(self):
@@ -64,6 +65,20 @@ class Stats(object):
     @cached_property
     def median(self):
         return statistics.median(self.data)
+
+    @cached_property
+    def ld15iqr(self):
+        """
+        Tukey-style Lowest Datum within 1.5 IQR under Q1.
+        """
+        return self.sorted_data[bisect_left(self.sorted_data, self.q1 - 1.5 * self.iqr)]
+
+    @cached_property
+    def hd15iqr(self):
+        """
+        Tukey-style Highest Datum within 1.5 IQR over Q3.
+        """
+        return self.sorted_data[bisect_right(self.sorted_data, self.q3 + 1.5 * self.iqr)]
 
     @cached_property
     def q1(self):
