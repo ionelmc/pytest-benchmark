@@ -292,8 +292,22 @@ https://pytest-benchmark.readthedocs.org/
 Obligatory screenshot
 =====================
 
+Normal run:
+
 .. image:: https://github.com/ionelmc/pytest-benchmark/raw/master/docs/screenshot.png
     :alt: Screenshot of py.test summary
+
+Compare mode (``--benchmark-compare``):
+
+.. image:: https://github.com/ionelmc/pytest-benchmark/raw/master/docs/screenshot-compare.png
+    :alt: Screenshot of py.test summary in compare mode
+
+Histogram (``--benchmark-histogram``):
+
+.. image:: https://github.com/ionelmc/pytest-benchmark/raw/master/docs/sample-tests_test_normal.py_test_xfast_parametrized[0].svg
+    :alt: Histogram sample
+
+
 
 Development
 ===========
