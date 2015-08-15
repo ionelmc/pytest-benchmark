@@ -221,7 +221,7 @@ Glossary
         TODO
     IQR
         InterQuertile Range. This is a different way to measure variance. Good explanation `here
-        <https://www.dataz.io/display/Public/2013/03/20/Describing+Data%3A+Why+median+and+IQR+are+often+better+than+mean+and+standard+deviation>`_
+        <https://www.dataz.io/display/Public/2013/03/20/Describing+Data%3A+Why+median+and+IQR+are+often+better+than+mean+and+standard+deviation>`__
     StdDev
         TODO: Standard Deviation
     Outliers
@@ -304,12 +304,13 @@ Compare mode (``--benchmark-compare``):
 
 Histogram (``--benchmark-histogram``):
 
-.. figure:: https://cdn.rawgit.com/ionelmc/pytest-benchmark/94860cc8f47aed7ba4f9c7e1380c2195342613f6/docs/sample-tests_test_normal.py_test_xfast_parametrized%5B0%5D.svg
+.. image:: https://cdn.rawgit.com/ionelmc/pytest-benchmark/94860cc8f47aed7ba4f9c7e1380c2195342613f6/docs/sample-tests_test_normal.py_test_xfast_parametrized%5B0%5D.svg
     :alt: Histogram sample
 
-    The histogram. Click `here
-    <https://cdn.rawgit.com/ionelmc/pytest-benchmark/94860cc8f47aed7ba4f9c7e1380c2195342613f6/docs/sample-tests_test_normal.py_test_xfast_parametrized%5B0%5D.svg>`_
-    to see the plot with tooltips.
+..
+
+    Also, it has `nice tooltips
+    <https://cdn.rawgit.com/ionelmc/pytest-benchmark/94860cc8f47aed7ba4f9c7e1380c2195342613f6/docs/sample-tests_test_normal.py_test_xfast_parametrized%5B0%5D.svg>`_.
 
 Development
 ===========
