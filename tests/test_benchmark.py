@@ -36,7 +36,7 @@ def test_help(testdir):
         "                        Disable GC during benchmarks.",
         "  --benchmark-skip      Skip running any benchmarks.",
         "  --benchmark-only      Only run benchmarks.",
-        "  --benchmark-save=[NAME]",
+        "  --benchmark-save=NAME",
         "                        Save the current run into 'STORAGE-PATH/counter-",
         "                        NAME.json'. Default: '*",
         "  --benchmark-autosave  Autosave the current run into 'STORAGE-PATH/counter-",
