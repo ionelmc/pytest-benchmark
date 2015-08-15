@@ -292,17 +292,17 @@ Before comparing different runs it's ideal to make your tests as consistent as p
 To store a run just add ``--benchmark-autosave`` or ``--benchmark-save=some-name`` to your pytest arguments. All the files are
 saved in a path like ``.benchmarks/Linux-CPython-3.4-64bit``.
 
-    * ``--benchmark-autosave`` saves a file like ``0001_c9cca5de6a4c7eb2_20150815_215724.json`` where:
+* ``--benchmark-autosave`` saves a file like ``0001_c9cca5de6a4c7eb2_20150815_215724.json`` where:
 
-      * ``0001`` is an automatically incremented id, much like how django migrations have a number.
-      * ``c9cca5de6a4c7eb2`` is the commit id (if you use Git or Mercurial)
-      * ``20150815_215724`` is the current time
+  * ``0001`` is an automatically incremented id, much like how django migrations have a number.
+  * ``c9cca5de6a4c7eb2`` is the commit id (if you use Git or Mercurial)
+  * ``20150815_215724`` is the current time
 
-      You should add ``--benchmark-autosave`` to ``addopts`` in you pytest configuration so you dont have to specify it all
-      the time.
+  You should add ``--benchmark-autosave`` to ``addopts`` in you pytest configuration so you dont have to specify it all
+  the time.
 
-    * ``--benchmark-name=foobar`` works similarly, but saves a file like ``0001_foobar.json``. It's there in case you want to
-      give specific name to the run.
+* ``--benchmark-name=foobar`` works similarly, but saves a file like ``0001_foobar.json``. It's there in case you want to
+  give specific name to the run.
 
 After you have saved your first run you can compare against it with ``--benchmark-compare=0001``. You will get an additional
 row for each test in the result table, showing the differences.
