@@ -30,12 +30,17 @@ def test_single_item():
     stats = Stats()
     stats.update(1)
     assert stats.mean == 1
+    assert stats.median == 1
+    assert stats.iqr_outliers == 0
+    assert stats.stddev_outliers == 0
     assert stats.min == 1
     assert stats.max == 1
     assert stats.stddev == 0
     assert stats.iqr == 0
     assert stats.rounds == 1
     assert stats.total == 1
+    assert stats.ld15iqr == 1
+    assert stats.hd15iqr == 1
 
 
 def test_iqr():
