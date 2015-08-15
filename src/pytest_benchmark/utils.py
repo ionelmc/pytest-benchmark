@@ -183,8 +183,9 @@ def parse_seconds(string):
 def parse_save(string):
     if not string:
         raise argparse.ArgumentTypeError("Can't be empty.")
-    if any(c in string for c in r"\/:*?<>|"):
-        raise argparse.ArgumentTypeError("Must not contain any of these characters: /:*?<>|\\")
+    illegal = ''.join(c for c in r"\/:*?<>|" if c in string)
+    if illegal:
+        raise argparse.ArgumentTypeError("Must not contain any of these characters: /:*?<>|\\ (it has %r)" % illegal)
     return string
 
 
