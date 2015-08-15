@@ -727,7 +727,7 @@ class BenchmarkSession(object):
             elif val < 0:
                 tr.write(
                     "{0:>{1}} {2:<11}".format("-" + fmt, widths[prop],
-                                             "(%i%%)" % abs(new / old * 100 - 100) if old else "inf"),
+                                              "(%i%%)" % abs(new / old * 100 - 100) if old else "inf"),
                     green=True
                 )
             else:
