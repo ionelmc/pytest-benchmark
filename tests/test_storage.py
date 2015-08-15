@@ -136,16 +136,16 @@ def test_regression_checks(sess):
     print(output.getvalue())
     assert sess.performance_regressions == [
         ('tests/test_normal.py::test_xfast_parametrized[0]',
-         'Field stddev has failed PercentageRegressionCheck: 75.093832852 > 5.000000000'),
+         'Field stddev has failed PercentageRegressionCheck: 23.331641765 > 5.000000000'),
         ('tests/test_normal.py::test_xfast_parametrized[0]',
-         'Field max has failed DifferenceRegressionCheck: 0.000001058 > 0.000001000')
+         'Field max has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000')
     ]
     output = make_logger(sess)
     pytest.raises(PerformanceRegression, sess.check_regressions)
     print(output.getvalue())
     assert output.getvalue() == """Performance has regressed:
-\ttests/test_normal.py::test_xfast_parametrized[0] - Field stddev has failed PercentageRegressionCheck: 75.093832852 > 5.000000000
-\ttests/test_normal.py::test_xfast_parametrized[0] - Field max has failed DifferenceRegressionCheck: 0.000001058 > 0.000001000
+\ttests/test_normal.py::test_xfast_parametrized[0] - Field stddev has failed PercentageRegressionCheck: 23.331641765 > 5.000000000
+\ttests/test_normal.py::test_xfast_parametrized[0] - Field max has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000
 """
 
 
@@ -167,14 +167,14 @@ def test_regression_checks_inf(sess):
         ('tests/test_normal.py::test_xfast_parametrized[0]',
          'Field stddev has failed PercentageRegressionCheck: inf > 5.000000000'),
         ('tests/test_normal.py::test_xfast_parametrized[0]',
-         'Field max has failed DifferenceRegressionCheck: 0.000001058 > 0.000001000')
+         'Field max has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000')
     ]
     output = make_logger(sess)
     pytest.raises(PerformanceRegression, sess.check_regressions)
     print(output.getvalue())
     assert output.getvalue() == """Performance has regressed:
 \ttests/test_normal.py::test_xfast_parametrized[0] - Field stddev has failed PercentageRegressionCheck: inf > 5.000000000
-\ttests/test_normal.py::test_xfast_parametrized[0] - Field max has failed DifferenceRegressionCheck: 0.000001058 > 0.000001000
+\ttests/test_normal.py::test_xfast_parametrized[0] - Field max has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000
 """
 
 
@@ -188,15 +188,15 @@ def test_compare(sess):
     print(output.getvalue())
     assert output.getvalue() == """Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"}.
 Comparing against benchmark 0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted-changes.json:
-| commit info: {dirty: true, id: "b87b9aae14ff14a7887a6bbaa9731b9a8760555d"}
-| saved at: 2015-08-14T16:03:43.699338
+| commit info: {dirty: true, id: "5b78858eb718649a31fb93d8dc96ca2cee41a4cd"}
+| saved at: 2015-08-15T00:01:46.250433
 | saved using pytest-benchmark 2.5.0:
------------------------------------------------------------ benchmark: 1 tests, min 123 rounds (of min 234), 345 max time, timer: None -----------------------------------------------------------
-Name (time in ns)                   Min                     Max                  Mean                StdDev                Median                 IQR              Outliers(*)  Rounds  Iterations
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-test_xfast_parametrized[0]     217.3145              3,409.1575              249.0662              139.4791              220.1664              2.2815                 329;2506   10755         418
-                                +1.0744 (0%)        +1,057.6850 (44%)        +15.3444 (6%)         +59.8195 (75%)         +1.7085 (0%)        +1.7271 (311%)            90;923    2653         430
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------ benchmark: 1 tests, min 123 rounds (of min 234), 345 max time, timer: None ------------------------------------------------------------
+Name (time in ns)                   Min                      Max                  Mean                StdDev                Median                  IQR              Outliers(*)  Rounds  Iterations
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_xfast_parametrized[0]     217.9511              13,290.0380              261.2051              263.9842              220.1638              18.8080                 160;1726    9710         431
+                                +0.6365 (0%)         +1,842.6488 (16%)         -1.0357 (0%)         +49.9400 (23%)         -0.0026 (0%)        -19.4075 (50%)            90;1878    9987         418
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 (*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
 
 """
@@ -213,21 +213,21 @@ def test_compare_2(sess):
     print(output.getvalue())
     assert output.getvalue() == """Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"}.
 Comparing against benchmark 0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes.json:
-| commit info: {dirty: true, id: "b87b9aae14ff14a7887a6bbaa9731b9a8760555d"}
-| saved at: 2015-08-14T16:03:48.342017
+| commit info: {dirty: true, id: "5b78858eb718649a31fb93d8dc96ca2cee41a4cd"}
+| saved at: 2015-08-15T00:01:51.557705
 | saved using pytest-benchmark 2.5.0:
------------------------------------------------------------ benchmark: 1 tests, min 123 rounds (of min 234), 345 max time, timer: None -----------------------------------------------------------
-Name (time in ns)                   Min                     Max                  Mean                StdDev                Median                 IQR              Outliers(*)  Rounds  Iterations
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-test_xfast_parametrized[0]     217.3145              3,409.1575              249.0662              139.4791              220.1664              2.2815                 329;2506   10755         418
-                                -6.6908 (2%)        +1,057.6850 (44%)        +11.6857 (4%)        +139.4791 (infinite%)   -6.8417 (3%)        +2.2815 (infinite%)     329;1985   10980         397
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------ benchmark: 1 tests, min 123 rounds (of min 234), 345 max time, timer: None ------------------------------------------------------------
+Name (time in ns)                   Min                      Max                  Mean                StdDev                Median                  IQR              Outliers(*)  Rounds  Iterations
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_xfast_parametrized[0]     217.9511              13,290.0380              261.2051              263.9842              220.1638              18.8080                 160;1726    9710         431
+                                +1.0483 (0%)         +5,550.7383 (71%)         +7.1466 (2%)        +263.9842 (infinite%)   +0.3535 (0%)         -8.5229 (31%)           235;1688   11009         410
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 (*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
 
 """
 
 
-@freeze_time("2015-08-14T16:06:07.146833")
+@freeze_time("2015-08-15T00:04:18.687119")
 def test_save_json(sess, tmpdir):
     sess.save = False
     sess.autosave = False
@@ -238,7 +238,7 @@ def test_save_json(sess, tmpdir):
     assert json.loads(sess.json.getvalue().decode()) == JSON_DATA
 
 
-@freeze_time("2015-08-14T16:06:07.146833")
+@freeze_time("2015-08-15T00:04:18.687119")
 def test_save_with_name(sess, tmpdir):
     sess.save = 'foobar'
     sess.autosave = True
@@ -251,7 +251,7 @@ def test_save_with_name(sess, tmpdir):
     assert json.load(files[0].open('rU')) == SAVE_DATA
 
 
-@freeze_time("2015-08-14T16:06:07.146833")
+@freeze_time("2015-08-15T00:04:18.687119")
 def test_save_no_name(sess, tmpdir):
     sess.save = True
     sess.autosave = True
@@ -264,7 +264,7 @@ def test_save_no_name(sess, tmpdir):
     assert json.load(files[0].open('rU')) == SAVE_DATA
 
 
-@freeze_time("2015-08-14T16:06:07.146833")
+@freeze_time("2015-08-15T00:04:18.687119")
 def test_autosave(sess, tmpdir):
     sess.save = False
     sess.autosave = True

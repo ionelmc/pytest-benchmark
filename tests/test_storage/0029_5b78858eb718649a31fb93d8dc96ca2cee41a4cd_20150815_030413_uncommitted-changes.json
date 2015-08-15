@@ -11,25 +11,28 @@
         "processor": "x86_64"
     }, 
     "commit_info": {
-        "id": "b87b9aae14ff14a7887a6bbaa9731b9a8760555d", 
+        "id": "5b78858eb718649a31fb93d8dc96ca2cee41a4cd", 
         "dirty": true
     }, 
+    "datetime": "2015-08-15T00:04:13.282283", 
     "benchmarks": [
         {
             "stats": {
-                "median": 2.2016643907464864e-07, 
-                "stddev_outliers": 96, 
-                "max": 2.0968856994044837e-05, 
-                "q1": 2.2016643907464864e-07, 
-                "q3": 2.2244795657801285e-07, 
-                "rounds": 10867, 
-                "stddev": 2.734543611899403e-07, 
-                "min": 2.1731454219544334e-07, 
-                "iterations": 418, 
-                "iqr_outliers": 1903, 
-                "mean": 2.3704467180957618e-07, 
-                "iqr": 2.28151750336422e-09, 
-                "outliers": "96;1903"
+                "median": 2.182136147709216e-07, 
+                "stddev_outliers": 72, 
+                "max": 1.559072776221767e-05, 
+                "q1": 2.1763633007576044e-07, 
+                "q3": 2.3495487093059548e-07, 
+                "rounds": 10895, 
+                "stddev": 3.0343534747680615e-07, 
+                "hd15iqr": 2.615099669080092e-07, 
+                "ld15iqr": 2.1532719129511577e-07, 
+                "iterations": 413, 
+                "iqr_outliers": 1749, 
+                "mean": 2.5172336199924715e-07, 
+                "min": 2.1532719129511577e-07, 
+                "iqr": 1.7318540854835044e-08, 
+                "outliers": "72;1749"
             }, 
             "group": null, 
             "options": {
@@ -43,6 +46,5 @@
             "name": "test_xfast_parametrized[0]", 
             "fullname": "tests/test_normal.py::test_xfast_parametrized[0]"
         }
-    ], 
-    "datetime": "2015-08-14T16:05:42.247780"
+    ]
 }
