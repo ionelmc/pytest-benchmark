@@ -313,7 +313,8 @@ Examples:
 * ``--benchmark-compare-fail=min:5%`` will make the suite fail if ``Min`` is 5% slower for any test.
 * ``--benchmark-compare-fail=mean:0.001`` will make the suite fail if ``Mean`` is 0.001 seconds slower for any test.
 
-You can also get a nice plot with ``--benchmark-histogram``.
+You can also get a nice plot with ``--benchmark-histogram``. The result is a modified Tukey box and wiskers plot where the
+outliers (the small bullets) are ``Min`` and ``Max``.
 
 Documentation
 =============
