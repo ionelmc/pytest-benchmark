@@ -113,16 +113,16 @@ def pytest_addoption(parser):
         action="store_true", default=False,
         help="Only run benchmarks."
     )
-    commit_id = get_commit_id()
     group.addoption(
         "--benchmark-save",
-        action='append', metavar="NAME", nargs="?", default=[], const=commit_id, type=parse_save,
-        help="Save the current run into 'STORAGE-PATH/counter-NAME.json'. Default: %r" % commit_id
+        metavar="NAME", type=parse_save,
+        help="Save the current run into 'STORAGE-PATH/counter-NAME.json'."
     )
+    commit_id = get_commit_id()
     group.addoption(
         "--benchmark-autosave",
-        action="store_true",
-        help="Autosave the current run into 'STORAGE-PATH/counter-commit_id.json",
+        action='store_const', const=commit_id,
+        help="Autosave the current run into 'STORAGE-PATH/counter-%s.json" % commit_id,
     )
     group.addoption(
         "--benchmark-save-data",
@@ -425,7 +425,7 @@ class BenchmarkSession(object):
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
         self.benchmarks = []
         self.group_by = config.getoption("benchmark_group_by")
-        self.save = first_or_false(config.getoption("benchmark_save"))
+        self.save = config.getoption("benchmark_save")
         self.autosave = config.getoption("benchmark_autosave")
         self.save_data = config.getoption("benchmark_save_data")
         self.json = config.getoption("benchmark_json")
@@ -490,7 +490,8 @@ class BenchmarkSession(object):
                 fh.write(json.dumps(output_json, ensure_ascii=True, indent=4).encode())
             self.logger.info("Wrote benchmark data in %s" % self.json, purple=True)
 
-        if self.save or self.autosave:
+        save = self.save or self.autosave
+        if save:
             output_json = self.config.hook.pytest_benchmark_generate_json(
                 config=self.config,
                 benchmarks=self.benchmarks,
@@ -501,18 +502,12 @@ class BenchmarkSession(object):
                 benchmarks=self.benchmarks,
                 output_json=output_json
             )
-            output_file = None
-            if self.save:
-                output_file = self.storage.join("%s_%s.json" % (self.next_num, self.save))
-                assert not output_file.exists()
-            elif self.autosave:
-                output_file = self.storage.join("%s_%s.json" % (self.next_num, get_commit_id()))
-                assert not output_file.exists()
+            output_file = self.storage.join("%s_%s.json" % (self.next_num, save))
+            assert not output_file.exists()
 
-            if output_file:
-                with output_file.open('wb') as fh:
-                    fh.write(json.dumps(output_json, ensure_ascii=True, indent=4).encode())
-                self.logger.info("Saved benchmark data in %s" % output_file)
+            with output_file.open('wb') as fh:
+                fh.write(json.dumps(output_json, ensure_ascii=True, indent=4).encode())
+            self.logger.info("Saved benchmark data in %s" % output_file)
 
     def handle_loading(self):
         if self.compare_file:
