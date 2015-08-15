@@ -289,8 +289,8 @@ Documentation
 
 https://pytest-benchmark.readthedocs.org/
 
-Obligatory screenshot
-=====================
+Obligatory screenshots
+======================
 
 Normal run:
 
