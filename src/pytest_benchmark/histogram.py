@@ -14,18 +14,16 @@ class Plot(Box):
         self.annotations = annotations
 
     def _box_points(self, serie, _):
-        return (None,
-                serie[0],
-                serie[1],
-                serie[2],
-                serie[3],
-                serie[4],
-                serie[5]), []
+        return serie, [serie[0], serie[6]]
 
     def _format(self, x):
         sup = super(Box, self)._format
         if is_list_like(x):
-            return "Min: %s\nQ1: %s\nMedian: %s\nQ3: %s\nMax: %s\nRounds: %s" % tuple(map(sup, x[1:]))
+            return "Min: {0[0]:.4f}\n" \
+                   "Q1-1.5IQR: {0[1]:.4f}\n" \
+                   "Q1: {0[2]:.4f}\nMedian: {0[3]:.4f}\nQ3: {0[4]:.4f}\n" \
+                   "Q3+1.5IQR: {0[5]:.4f}\n" \
+                   "Max: {0[6]:.4f}".format(x[:7])
         else:
             return sup(x)
 
@@ -54,7 +52,10 @@ def make_plot(bench_name, table, compare, current, annotations, sort):
     ))
 
     minimum = int(min(row["min"] * adjustment for _, row in table))
-    maximum = int(max(row["max"] * adjustment for _, row in table) + 1)
+    maximum = int(max(
+        min(row["max"], row["hd15iqr"]) * adjustment
+        for _, row in table
+    ) + 1)
 
     try:
         import pygaljs
@@ -69,6 +70,7 @@ def make_plot(bench_name, table, compare, current, annotations, sort):
 
     plot = Plot(
         annotations,
+        box_mode='tukey',
         x_label_rotation=-90,
         x_labels=[label for label, _ in table],
         show_legend=False,
@@ -83,15 +85,21 @@ def make_plot(bench_name, table, compare, current, annotations, sort):
         css=[
             "file://style.css",
             "file://graph.css",
-            "inline:.axis.x text {text-anchor: middle !important}"
+            """inline:
+                .axis.x text {
+                    text-anchor: middle !important;
+                }
+                .tooltip .value {
+                    font-size: 1em !important;
+                }
+            """
         ],
         **opts
     )
 
     for label, row in table:
         if label in annotations:
-            label += "\n@" + annotations[label]["datetime"]
-        serie = [row[field] * adjustment for field in ["min", "q1", "median", "q3", "max"]]
-        serie.append(row["rounds"])
+            label += "\n@%s - %s rounds" % (annotations[label]["datetime"], row["rounds"])
+        serie = [row[field] * adjustment for field in ["min", "ld15iqr", "q1", "median", "q3", "hd15iqr", "max"]]
         plot.add(label, serie)
     return plot
