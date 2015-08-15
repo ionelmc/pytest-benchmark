@@ -731,7 +731,7 @@ class BenchmarkSession(object):
                     green=True
                 )
             else:
-                tr.write("{0:>{1}}        ".format("NC", widths[prop]), bold=True, black=True)
+                tr.write("{0:>{1}}            ".format("NC", widths[prop]), bold=True, black=True)
 
         for prop in "outliers", "rounds", "iterations":
             tr.write("{0:>{1}}".format(stats[prop], widths[prop]))
