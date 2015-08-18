@@ -83,7 +83,7 @@ function main () {
     InstallPackage $env:PYTHON_HOME "setuptools>=18.0.1"
     InstallPackage $env:PYTHON_HOME wheel
     InstallPackage $env:PYTHON_HOME tox
-    InstallPackage $env:PYTHON_HOME "virtualenv>=12.1.0"
+    InstallPackage $env:PYTHON_HOME "virtualenv>=13.1.0"
 }
 
 main
