@@ -44,7 +44,7 @@ try:
     import ctypes
     import ctypes.util
     from ctypes import byref, POINTER
-except ImportError, err:
+except ImportError as err:
     pass
 else:
     def ctypes_oserror():
