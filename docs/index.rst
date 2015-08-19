@@ -6,13 +6,13 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   readme
    installation
 
    usage
-
+   features
    hooks
    faq
+   glossary
    contributing
    authors
    changelog
