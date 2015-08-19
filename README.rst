@@ -82,8 +82,8 @@ Documentation
 
 `pytest-benchmark.readthedocs.org <http://pytest-benchmark.readthedocs.org/en/stable/>`_
 
-Usage
-=====
+Examples
+========
 
 This plugin provides a `benchmark` fixture. This fixture is a callable object that will benchmark
 any function passed to it.
@@ -109,59 +109,11 @@ You can also pass extra arguments:
 .. code-block:: python
 
     def test_my_stuff(benchmark):
-        # benchmark something
-        result = benchmark(something, 0.02)
-
-If you need to do some wrapping (like special setup), you can use it as a decorator around a wrapper function:
-
-.. code-block:: python
-
-    def test_my_stuff(benchmark):
-        @benchmark
-        def result():
-            # Code to be measured
-            return something(0.0002)
-
-        # Extra code, to verify that the run completed correctly.
-        # Note: this code is not measured.
-        assert result is None
-
-Setting per-test options:
-
-.. code-block:: python
-
-    @pytest.mark.benchmark(
-        group="group-name",
-        min_time=0.1,
-        max_time=0.5,
-        min_rounds=5,
-        timer=time.time,
-        disable_gc=True,
-        warmup=False
-    )
-    def test_my_stuff(benchmark):
-        @benchmark
-        def result():
-            # Code to be measured
-            return time.sleep(0.000001)
-
-        # Extra code, to verify that the run
-        # completed correctly.
-        # Note: this code is not measured.
-        assert result is None
+        result = benchmark(time.sleep, 0.02)
 
 
-
-Features
-========
-
-`pytest-benchmark` has 3 unique features:
-
-* Calibration_.
-* `Regression tracking <file:///W:/osp/pytest-benchmark/dist/docs/features.html#regression-tracking>`_ and JSON exports.
-
-Obligatory screenshots
-======================
+Screenshots
+-----------
 
 Normal run:
 

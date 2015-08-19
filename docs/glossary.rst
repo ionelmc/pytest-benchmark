@@ -8,7 +8,7 @@ Round
 
     Stats are computed with rounds, not with iterations. The duration for a round is an average of all the iterations in that round.
 
-    See: calibration_ for an explanation of why it's like this.
+    See: :doc:`calibration` for an explanation of why it's like this.
 Mean
     TODO
 Median

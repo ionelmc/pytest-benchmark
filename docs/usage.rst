@@ -26,8 +26,7 @@ You can also pass extra arguments:
 .. code-block:: python
 
     def test_my_stuff(benchmark):
-        # benchmark something
-        result = benchmark(something, 0.02)
+        result = benchmark(time.sleep, 0.02)
 
 If you need to do some wrapping (like special setup), you can use it as a decorator around a wrapper function:
 
@@ -133,3 +132,34 @@ You can set per-test options with the ``benchmark`` marker:
         # completed correctly.
         # Note: this code is not measured.
         assert result is None
+
+Patch utilities
+===============
+
+Suppose you want to benchmark an ``internal`` function from a class:
+
+.. sourcecode:: python
+
+    class Foo(object):
+        def __init__(self, arg=0.01):
+            self.arg = arg
+
+        def run(self):
+            self.internal(self.arg)
+
+        def internal(self, duration):
+            time.sleep(duration)
+
+With the ``benchmark`` fixture this is quite hard to test if you don't control the ``Foo`` code or it has very
+complicated construction.
+
+For this there's an experimental ``benchmark_weave`` fixture that can patch stuff using `aspectlib
+<https://github.com/ionelmc/python-aspectlib>`_ (make sure you ``pip install aspectlib`` or ``pip install
+pytest-benchmark[aspect]``):
+
+.. sourcecode:: python
+
+    def test_foo(benchmark):
+        benchmark.weave(Foo.internal, lazy=True):
+        f = Foo()
+        f.run()

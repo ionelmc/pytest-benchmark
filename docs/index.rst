@@ -9,7 +9,9 @@ Contents:
    installation
 
    usage
-   features
+   calibration
+   comparing
+
    hooks
    faq
    glossary
