@@ -206,7 +206,7 @@ def test_group_by_func(testdir):
         'test_b[[]1[]]             *',
         '----------------------*',
         '*', '*',
-        '=========================== 8 passed in * seconds ===========================',
+        '============* 8 passed in * seconds ============*',
     ])
 
 
@@ -248,7 +248,7 @@ def test_group_by_fullfunc(testdir):
         '------------------*',
         '(*) Outliers: 1 Standard Deviation from M*',
         '*',
-        '=========================== 8 passed in *',
+        '============* 8 passed in *',
     ])
 
 
@@ -278,7 +278,7 @@ def test_group_by_param(testdir):
         '------------------*',
         '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
         '',
-        '=========================== 8 passed in * seconds ===========================',
+        '============* 8 passed in * seconds ============*',
     ])
 
 def test_group_by_fullname(testdir):
@@ -294,7 +294,7 @@ def test_group_by_fullname(testdir):
         "* benchmark 'test_y.py::test_a[[]1[]]': 1 tests, *",
         "* benchmark 'test_y.py::test_b[[]0[]]': 1 tests, *",
         "* benchmark 'test_y.py::test_b[[]1[]]': 1 tests, *",
-        '=========================== 8 passed in * seconds ===========================',
+        '============* 8 passed in * seconds ============*',
     ])
 
 def test_conflict_between_only_and_skip(testdir):
