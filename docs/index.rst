@@ -4,16 +4,18 @@ Welcome to pytest-benchmark's documentation!
 Contents:
 
 .. toctree::
-    :maxdepth: 2
+   :maxdepth: 2
 
-    readme
-    installation
-    usage
-    hooks
-    reference/index
-    contributing
-    authors
-    changelog
+   readme
+   installation
+
+   usage
+
+   hooks
+   faq
+   contributing
+   authors
+   changelog
 
 Indices and tables
 ==================
