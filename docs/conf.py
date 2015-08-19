@@ -25,9 +25,7 @@ year = u'2014-2015'
 author = u'Ionel Cristian M\u0103rie\u0219'
 copyright = '{0}, {1}'.format(year, author)
 version = release = u'2.5.0'
-import sphinx_py3doc_enhanced_theme
 html_theme = "sphinx_py3doc_enhanced_theme"
-html_theme_path = [sphinx_py3doc_enhanced_theme.get_html_theme_path()]
 
 
 pygments_style = 'trac'
@@ -40,5 +38,6 @@ html_sidebars = {
 }
 html_short_title = '%s-%s' % (project, version)
 html_theme_options = {
-    'githuburl': 'https://github.com/ionelmc/pytest-benchmark/'
+    'githuburl': 'https://github.com/ionelmc/pytest-benchmark/',
+    'appendcss': 'div.body code.descclassname { display: none }',
 }
