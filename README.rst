@@ -77,6 +77,11 @@ Installation
 
     pip install pytest-benchmark
 
+Documentation
+=============
+
+`pytest-benchmark.readthedocs.org <http://pytest-benchmark.readthedocs.org/en/stable/>`_
+
 Usage
 =====
 
@@ -316,11 +321,6 @@ Examples:
 You can also get a nice plot with ``--benchmark-histogram``. The result is a modified Tukey box and wiskers plot where the
 outliers (the small bullets) are ``Min`` and ``Max``.
 
-Documentation
-=============
-
-https://pytest-benchmark.readthedocs.org/
-
 Obligatory screenshots
 ======================
 
@@ -356,7 +356,7 @@ Credits
 
 * Timing code and ideas taken from: https://bitbucket.org/haypo/misc/src/tip/python/benchmark.py
 
-.. _FAQ:
+.. _FAQ: http://pytest-benchmark.readthedocs.org/en/stable/contributing.html
 
 
 
