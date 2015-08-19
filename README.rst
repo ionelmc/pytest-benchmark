@@ -68,8 +68,6 @@ A ``py.test`` fixture for benchmarking code. It will group the tests into rounds
 
 * Free software: BSD license
 
-.. contents:: Table of Contents
-
 Installation
 ============
 
