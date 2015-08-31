@@ -5,7 +5,7 @@ graft ci
 graft tests
 
 include .bumpversion.cfg
-include .coveragerc*
+include .coveragerc
 include .cookiecutterrc
 include .isort.cfg
 include .pylintrc
@@ -18,4 +18,4 @@ include README.rst
 
 include tox.ini .travis.yml appveyor.yml
 
-global-exclude *.py[cod] __pycache__ *.so
+global-exclude *.py[cod] __pycache__ *.so *.dylib

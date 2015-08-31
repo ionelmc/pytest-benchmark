@@ -9,6 +9,7 @@
 dist
 build
 eggs
+.eggs
 parts
 bin
 var
@@ -17,6 +18,8 @@ develop-eggs
 .installed.cfg
 lib
 lib64
+venv*/
+pyvenv*/
 
 # Installer logs
 pip-log.txt
@@ -24,7 +27,6 @@ pip-log.txt
 # Unit test / coverage reports
 .coverage
 .tox
-.coverage
 .coverage.*
 nosetests.xml
 coverage.xml
@@ -37,8 +39,9 @@ htmlcov
 .mr.developer.cfg
 .project
 .pydevproject
-*.komodoproject
 .idea
+*.iml
+*.komodoproject
 
 # Complexity
 output/*.html
