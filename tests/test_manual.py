@@ -20,6 +20,37 @@ def test_setup(benchmark):
     assert runs == [(1, 2)]
 
 
+def test_args_kwargs(benchmark):
+    runs = []
+
+    def stuff(foo, bar=123):
+        runs.append((foo, bar))
+
+    benchmark.manual(stuff, args=[1], kwargs={"bar": 2})
+    assert runs == [(1, 2)]
+
+
+def test_iterations(benchmark):
+    runs = []
+
+    benchmark.manual(runs.append, args=[1], iterations=10)
+    assert runs == [1] * 11
+
+
+def test_rounds_iterations(benchmark):
+    runs = []
+
+    benchmark.manual(runs.append, args=[1], iterations=10, rounds=15)
+    assert runs == [1] * 151
+
+
+def test_rounds(benchmark):
+    runs = []
+
+    benchmark.manual(runs.append, args=[1], rounds=15)
+    assert runs == [1] * 15
+
+
 def test_setup_many_rounds(benchmark):
     runs = []
 
