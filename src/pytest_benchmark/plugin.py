@@ -186,6 +186,12 @@ class BenchmarkStats(object):
         self.stats = Stats()
         self.options = options
 
+    def __bool__(self):
+        return bool(self.stats)
+
+    def __nonzero__(self):
+        return bool(self.stats)
+
     def __getitem__(self, key):
         try:
             return getattr(self.stats, key)
@@ -475,7 +481,7 @@ class BenchmarkSession(object):
         self.sort = config.getoption("benchmark_sort")
         if self.skip and self.only:
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
-        self.benchmarks = []
+        self._benchmarks = []
         self.group_by = config.getoption("benchmark_group_by")
         self.save = config.getoption("benchmark_save")
         self.autosave = config.getoption("benchmark_autosave")
@@ -487,6 +493,10 @@ class BenchmarkSession(object):
         self.storage = py.path.local(config.getoption("benchmark_storage"))
         self.storage.ensure(dir=1)
         self.histogram = first_or_false(config.getoption("benchmark_histogram"))
+
+    @property
+    def benchmarks(self):
+        return [bench for bench in self._benchmarks if bench]
 
     @cached_property
     def compare_file(self):
@@ -900,7 +910,7 @@ def benchmark(request):
             options["timer"] = NameWrapper(options["timer"])
         fixture = BenchmarkFixture(
             node,
-            add_stats=bs.benchmarks.append,
+            add_stats=bs._benchmarks.append,
             logger=bs.logger,
             **dict(bs.options, **options)
         )

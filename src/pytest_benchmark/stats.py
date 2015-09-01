@@ -15,6 +15,12 @@ class Stats(object):
     def __init__(self):
         self.data = []
 
+    def __bool__(self):
+        return bool(self.data)
+
+    def __nonzero__(self):
+        return bool(self.data)
+
     def update(self, duration):
         self.data.append(duration)
 
