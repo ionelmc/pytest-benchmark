@@ -724,16 +724,14 @@ class BenchmarkSession(object):
                 )
                 for prop in ("min", "max", "mean", "stddev", "median", "iqr", "outliers", "rounds", "iterations")
             )
-            tr.write_line(
-                (" benchmark%(name)s: %(count)s tests, min %(min_rounds)s rounds (of min %(min_time)s),"
-                 " %(max_time)s max time, timer: %(timer)s " % dict(
-                    self.options,
-                    count=len(benchmarks),
-                    name="" if group is None else " %r" % group,
-                    timer=timer
-                )).center(len(labels_line), "-"),
-                yellow=True,
-            )
+            tr.write_line((" benchmark%(name)s: %(count)s tests, min %(min_rounds)s rounds (of min %(min_time)s),"
+                           " %(max_time)s max time, timer: %(timer)s " % dict(
+                               self.options,
+                               count=len(benchmarks),
+                               name="" if group is None else " %r" % group,
+                               timer=timer
+                           )).center(len(labels_line), "-"),
+                          yellow=True)
             tr.write_line(labels_line)
             tr.write_line("-" * len(labels_line), yellow=True)
 
