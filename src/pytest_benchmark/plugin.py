@@ -503,10 +503,11 @@ class BenchmarkSession(object):
         if self.compare:
             files = self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json", sort=True)
             if not files:
-                self.logger.warn("Can't compare. No benchmark files in %r. Expected files matching [0-9][0-9][0-9][0-9]_*.json."
-                                 " Can't match anything to %r." % (
-                                     str(self.storage),
-                                     self.compare))
+                self.logger.warn(
+                    "Can't compare. No benchmark files in %r. Expected files matching [0-9][0-9][0-9][0-9]_*.json."
+                    " Can't match anything to %r." % (
+                        str(self.storage),
+                        self.compare))
                 return
 
             if self.compare is True:
@@ -726,11 +727,11 @@ class BenchmarkSession(object):
             tr.write_line(
                 (" benchmark%(name)s: %(count)s tests, min %(min_rounds)s rounds (of min %(min_time)s),"
                  " %(max_time)s max time, timer: %(timer)s " % dict(
-                     self.options,
-                     count=len(benchmarks),
-                     name="" if group is None else " %r" % group,
-                     timer=timer
-                 )).center(len(labels_line), "-"),
+                    self.options,
+                    count=len(benchmarks),
+                    name="" if group is None else " %r" % group,
+                    timer=timer
+                )).center(len(labels_line), "-"),
                 yellow=True,
             )
             tr.write_line(labels_line)
