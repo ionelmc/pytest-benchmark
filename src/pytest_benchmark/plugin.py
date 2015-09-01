@@ -17,6 +17,7 @@ import py
 import pytest
 
 from . import __version__
+from .compat import INT
 from .compat import XRANGE
 from .stats import Stats
 from .timers import compute_timer_precision
@@ -231,28 +232,33 @@ class BenchmarkFixture(object):
         self._logger = logger
         self._cleanup_callbacks = []
 
-    def __call__(self, function_to_benchmark, *args, **kwargs):
+    def _make_runner(self, function_to_benchmark, args, kwargs):
         def runner(loops_range, timer=self._timer):
-            gcenabled = gc.isenabled()
+            gc_enabled = gc.isenabled()
             if self._disable_gc:
                 gc.disable()
             tracer = sys.gettrace()
             sys.settrace(None)
-            start = timer()
-            for _ in loops_range:
-                function_to_benchmark(*args, **kwargs)
-            end = timer()
-            sys.settrace(tracer)
-            if gcenabled:
-                gc.enable()
-            return end - start
+            try:
+                if loops_range:
+                    start = timer()
+                    for _ in loops_range:
+                        function_to_benchmark(*args, **kwargs)
+                    end = timer()
+                    return end - start
+                else:
+                    start = timer()
+                    result = function_to_benchmark(*args, **kwargs)
+                    end = timer()
+                    return end - start, result
+            finally:
+                sys.settrace(tracer)
+                if gc_enabled:
+                    gc.enable()
 
-        duration, iterations, loops_range = self._calibrate_timer(runner)
+        return runner
 
-        # Choose how many time we must repeat the test
-        rounds = int(math.ceil(self._max_time / duration))
-        rounds = max(rounds, self._min_rounds)
-
+    def _make_stats(self, iterations):
         stats = BenchmarkStats(self, iterations=iterations, options={
             "disable_gc": self._disable_gc,
             "timer": self._timer,
@@ -262,6 +268,18 @@ class BenchmarkFixture(object):
             "warmup": self._warmup,
         })
         self._add_stats(stats)
+        return stats
+
+    def __call__(self, function_to_benchmark, *args, **kwargs):
+        runner = self._make_runner(function_to_benchmark, args, kwargs)
+
+        duration, iterations, loops_range = self._calibrate_timer(runner)
+
+        # Choose how many time we must repeat the test
+        rounds = int(math.ceil(self._max_time / duration))
+        rounds = max(rounds, self._min_rounds)
+
+        stats = self._make_stats(iterations)
 
         self._logger.debug("  Running %s rounds x %s iterations ..." % (rounds, iterations), yellow=True, bold=True)
         run_start = time.time()
@@ -275,6 +293,47 @@ class BenchmarkFixture(object):
         self._logger.debug("  Ran for %ss." % time_format(time.time() - run_start), yellow=True, bold=True)
 
         return function_to_benchmark(*args, **kwargs)
+
+    def manual(self, target, args=(), kwargs=None, setup=None, cleanup=None, rounds=1, iterations=1):
+        if kwargs is None:
+            kwargs = {}
+
+        has_args = bool(args or kwargs)
+
+        if not isinstance(iterations, INT) or iterations < 1:
+            raise ValueError("Must have positive int for `iterations`.")
+
+        if not isinstance(rounds, INT) or rounds < 1:
+            raise ValueError("Must have positive int for `rounds`.")
+
+        if iterations > 1 and (setup or cleanup):
+            raise ValueError("Can't use more than 1 `iterations` with a `setup` or `cleanup` function.")
+
+        stats = self._make_stats(iterations)
+        loops_range = XRANGE(iterations) if iterations > 1 else None
+        for _ in XRANGE(rounds):
+            if setup:
+                maybe_args = setup()
+                if maybe_args:
+                    if has_args:
+                        raise TypeError("Can't use `args` or `kwargs` if `setup` returns the arguments.")
+                    args, kwargs = maybe_args
+            runner = self._make_runner(target, args, kwargs)
+            if loops_range:
+                duration = runner(loops_range)
+            else:
+                duration, result = runner(loops_range)
+            stats.update(duration)
+
+        if loops_range:
+            if setup:
+                maybe_args = setup()
+                if maybe_args:
+                    if has_args:
+                        raise TypeError("Can't use `args` or `kwargs` if `setup` returns the arguments.")
+                    args, kwargs = maybe_args
+            result = target(*args, **kwargs)
+        return result
 
     def weave(self, target, **kwargs):
         try:
