@@ -300,7 +300,7 @@ class BenchmarkFixture(object):
 
         return function_to_benchmark(*args, **kwargs)
 
-    def manual(self, target, args=(), kwargs=None, setup=None, cleanup=None, rounds=1, iterations=1):
+    def manual(self, target, args=(), kwargs=None, setup=None, rounds=1, iterations=1):
         if kwargs is None:
             kwargs = {}
 
@@ -312,8 +312,8 @@ class BenchmarkFixture(object):
         if not isinstance(rounds, INT) or rounds < 1:
             raise ValueError("Must have positive int for `rounds`.")
 
-        if iterations > 1 and (setup or cleanup):
-            raise ValueError("Can't use more than 1 `iterations` with a `setup` or `cleanup` function.")
+        if iterations > 1 and setup:
+            raise ValueError("Can't use more than 1 `iterations` with a `setup` function.")
 
         stats = self._make_stats(iterations)
         loops_range = XRANGE(iterations) if iterations > 1 else None
