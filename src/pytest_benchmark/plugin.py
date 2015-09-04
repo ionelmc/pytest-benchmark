@@ -609,9 +609,10 @@ class BenchmarkSession(object):
         tr.ensure_newline()
         self.handle_saving()
         self.handle_loading()
-        self.display_results_table(tr)
-        self.check_regressions()
-        self.handle_histogram()
+        if self.benchmarks:
+            self.display_results_table(tr)
+            self.check_regressions()
+            self.handle_histogram()
 
     def check_regressions(self):
         if self.compare_fail and not self.compare_file:
@@ -676,6 +677,13 @@ class BenchmarkSession(object):
 
     def display_results_table(self, tr):
         timer = self.options.get("timer")
+        tr.write_line("pytest-benchmark global settings:", yellow=True, bold=True)
+        tr.write_line("    minimum number of rounds: %(min_rounds)s" % self.options, yellow=True, bold=True)
+        tr.write_line("    minimum time per rounds: %(min_time)s" % self.options, yellow=True, bold=True)
+        tr.write_line("    maximum total time per test: %(max_time)s" % self.options, yellow=True, bold=True)
+        tr.write_line("    timer: %(timer)s" % dict(timer=timer), yellow=True, bold=True)
+        tr.write_line("")
+
         for group, benchmarks in self.config.hook.pytest_benchmark_group_stats(
                 config=self.config,
                 benchmarks=self.benchmarks,
@@ -724,14 +732,13 @@ class BenchmarkSession(object):
                 )
                 for prop in ("min", "max", "mean", "stddev", "median", "iqr", "outliers", "rounds", "iterations")
             )
-            tr.write_line((" benchmark%(name)s: %(count)s tests, min %(min_rounds)s rounds (of min %(min_time)s),"
-                           " %(max_time)s max time, timer: %(timer)s " % dict(
-                               self.options,
-                               count=len(benchmarks),
-                               name="" if group is None else " %r" % group,
-                               timer=timer
-                           )).center(len(labels_line), "-"),
-                          yellow=True)
+            tr.write_line(
+                (" benchmark%(name)s: %(count)s tests " % dict(
+                    count=len(benchmarks),
+                    name="" if group is None else " %r" % group,
+                )).center(len(labels_line), "-"),
+                yellow=True,
+            )
             tr.write_line(labels_line)
             tr.write_line("-" * len(labels_line), yellow=True)
 

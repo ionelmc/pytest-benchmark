@@ -195,7 +195,13 @@ def test_compare(sess, LineMatcher):
         '| commit info: {dirty: true, id: "5b78858eb718649a31fb93d8dc96ca2cee41a4cd"}',
         '| saved at: 2015-08-15T00:01:46.250433',
         '| saved using pytest-benchmark 2.5.0:',
-        '------------------------------------------------------------ benchmark: 1 tests, min 123 rounds (of min 234), 345 max time, timer: None -----------------------------------------------------------*',
+        'pytest-benchmark global settings:',
+        '    minimum number of rounds: 123',
+        '    minimum time per rounds: 234',
+        '    maximum total time per test: 345',
+        '    timer: None',
+        '',
+        '---------------------------------------------------------------------------------------- benchmark: 1 tests ----------------------------------------------------------------------------------------',
         'Name (time in ns)                   Min                     *Max                  Mean                StdDev                Median                  IQR              Outliers(*)  Rounds  Iterations',
         '---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*',
         'test_xfast_parametrized[[]0[]]     217.9511              13*290.0380              261.2051              263.9842              220.1638              18.8080                 160;1726    9710         431',
@@ -212,6 +218,7 @@ def test_compare_2(sess, LineMatcher):
     sess.handle_loading()
     sess.display_results_table(Namespace(
         write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
+        section=lambda line, **opts: output.write(force_text(line) + u'\n'),
         write=lambda text, **opts: output.write(force_text(text)),
     ))
     print(output.getvalue())

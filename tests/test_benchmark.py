@@ -104,9 +104,9 @@ def test_xfast(benchmark):
         "test_groups.py::test_slower PASSED",
         "test_groups.py::test_xfast PASSED",
         "*",
-        "* benchmark: 2 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
+        "* benchmark: 2 tests *",
         "*",
-        "* benchmark 'A': 2 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
+        "* benchmark 'A': 2 tests *",
         "*",
         "*====== 5 passed in * seconds ======*",
     ])
@@ -152,28 +152,33 @@ def test_group_by_name(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'name', test_x, test_y)
     result.stdout.fnmatch_lines([
         '*', '*', '*', '*', '*',
-        "* benchmark 'test_a[[]0[]]': 2 tests, *",
+        "pytest-benchmark global settings:",
+        "    minimum number of rounds: *",
+        "    minimum time per rounds: *",
+        "    maximum total time per test: *",
+        "    timer: *",
+        "* benchmark 'test_a[[]0[]]': 2 tests *",
         'Name (time in ?s)     *',
         '----------------------*',
         'test_a[[]0[]]             *',
         'test_a[[]0[]]             *',
         '----------------------*',
         '*',
-        "* benchmark 'test_a[[]1[]]': 2 tests, *",
+        "* benchmark 'test_a[[]1[]]': 2 tests *",
         'Name (time in ?s)     *',
         '----------------------*',
         'test_a[[]1[]]             *',
         'test_a[[]1[]]             *',
         '----------------------*',
         '*',
-        "* benchmark 'test_b[[]0[]]': 2 tests, *",
+        "* benchmark 'test_b[[]0[]]': 2 tests *",
         'Name (time in ?s)     *',
         '----------------------*',
         'test_b[[]0[]]             *',
         'test_b[[]0[]]             *',
         '----------------------*',
         '*',
-        "* benchmark 'test_b[[]1[]]': 2 tests, *",
+        "* benchmark 'test_b[[]1[]]': 2 tests *",
         'Name (time in ?s)     *',
         '----------------------*',
         'test_b[[]1[]]             *',
@@ -188,7 +193,7 @@ def test_group_by_func(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'func', test_x, test_y)
     result.stdout.fnmatch_lines([
         '*', '*', '*', '*', '*',
-        "* benchmark 'test_a': 4 tests, *",
+        "* benchmark 'test_a': 4 tests *",
         'Name (time in ?s)     *',
         '----------------------*',
         'test_a[[]0[]]             *',
@@ -197,7 +202,7 @@ def test_group_by_func(testdir):
         'test_a[[]1[]]             *',
         '----------------------*',
         '*', '*',
-        "* benchmark 'test_b': 4 tests, *",
+        "* benchmark 'test_b': 4 tests *",
         'Name (time in ?s)     *',
         '----------------------*',
         'test_b[[]0[]]             *',
@@ -216,7 +221,7 @@ def test_group_by_fullfunc(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'fullfunc', test_x, test_y)
     result.stdout.fnmatch_lines([
         '*', '*', '*', '*', '*',
-        "* benchmark 'test_x.py::test_a': 2 tests, *",
+        "* benchmark 'test_x.py::test_a': 2 tests *",
         'Name (time in ?s) *',
         '------------------*',
         'test_a[[]0[]]         *',
@@ -224,7 +229,7 @@ def test_group_by_fullfunc(testdir):
         '------------------*',
         '(*) Outliers: 1 Standard Deviation from M*',
         '*',
-        "* benchmark 'test_x.py::test_b': 2 tests, *",
+        "* benchmark 'test_x.py::test_b': 2 tests *",
         'Name (time in ?s) *',
         '------------------*',
         'test_b[[]0[]]         *',
@@ -232,7 +237,7 @@ def test_group_by_fullfunc(testdir):
         '------------------*',
         '(*) Outliers: 1 Standard Deviation from M*',
         '*',
-        "* benchmark 'test_y.py::test_a': 2 tests, *",
+        "* benchmark 'test_y.py::test_a': 2 tests *",
         'Name (time in ?s) *',
         '------------------*',
         'test_a[[]0[]]         *',
@@ -240,7 +245,7 @@ def test_group_by_fullfunc(testdir):
         '------------------*',
         '(*) Outliers: 1 Standard Deviation from M*',
         '*',
-        "* benchmark 'test_y.py::test_b': 2 tests, *",
+        "* benchmark 'test_y.py::test_b': 2 tests *",
         'Name (time in ?s) *',
         '------------------*',
         'test_b[[]0[]]         *',
@@ -258,7 +263,7 @@ def test_group_by_param(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'param', test_x, test_y)
     result.stdout.fnmatch_lines([
         '*', '*', '*', '*', '*',
-        "* benchmark '0': 4 tests, *",
+        "* benchmark '0': 4 tests *",
         'Name (time in ?s)  *',
         '-------------------*',
         'test_a[[]0[]]          *',
@@ -266,9 +271,10 @@ def test_group_by_param(testdir):
         'test_a[[]0[]]          *',
         'test_b[[]0[]]          *',
         '-------------------*',
-        '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
+        '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '
+        'Quartile.',
         '',
-        "* benchmark '1': 4 tests, *",
+        "* benchmark '1': 4 tests *",
         'Name (time in ?s) *',
         '------------------*',
         'test_a[[]1[]]         *',
@@ -276,26 +282,29 @@ def test_group_by_param(testdir):
         'test_a[[]1[]]         *',
         'test_b[[]1[]]         *',
         '------------------*',
-        '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
+        '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '
+        'Quartile.',
         '',
         '============* 8 passed in * seconds ============*',
     ])
+
 
 def test_group_by_fullname(testdir):
     test_x = testdir.makepyfile(test_x=GROUPING_TEST)
     test_y = testdir.makepyfile(test_y=GROUPING_TEST)
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'fullname', test_x, test_y)
     result.stdout.fnmatch_lines_random([
-        "* benchmark 'test_x.py::test_a[[]0[]]': 1 tests, *",
-        "* benchmark 'test_x.py::test_a[[]1[]]': 1 tests, *",
-        "* benchmark 'test_x.py::test_b[[]0[]]': 1 tests, *",
-        "* benchmark 'test_x.py::test_b[[]1[]]': 1 tests, *",
-        "* benchmark 'test_y.py::test_a[[]0[]]': 1 tests, *",
-        "* benchmark 'test_y.py::test_a[[]1[]]': 1 tests, *",
-        "* benchmark 'test_y.py::test_b[[]0[]]': 1 tests, *",
-        "* benchmark 'test_y.py::test_b[[]1[]]': 1 tests, *",
+        "* benchmark 'test_x.py::test_a[[]0[]]': 1 tests *",
+        "* benchmark 'test_x.py::test_a[[]1[]]': 1 tests *",
+        "* benchmark 'test_x.py::test_b[[]0[]]': 1 tests *",
+        "* benchmark 'test_x.py::test_b[[]1[]]': 1 tests *",
+        "* benchmark 'test_y.py::test_a[[]0[]]': 1 tests *",
+        "* benchmark 'test_y.py::test_a[[]1[]]': 1 tests *",
+        "* benchmark 'test_y.py::test_b[[]0[]]': 1 tests *",
+        "* benchmark 'test_y.py::test_b[[]1[]]': 1 tests *",
         '============* 8 passed in * seconds ============*',
     ])
+
 
 def test_conflict_between_only_and_skip(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
@@ -311,7 +320,12 @@ def test_max_time_min_rounds(testdir):
     result.stdout.fnmatch_lines([
         "*collected 3 items",
         "test_max_time_min_rounds.py ...",
-        "* benchmark: 2 tests, min 1 rounds (of min 25.00us), 1.00us max time, timer: *",
+        "pytest-benchmark global settings:",
+        "    minimum number of rounds: 1",
+        "    minimum time per rounds: 25.00us",
+        "    maximum total time per test: 1.00us",
+        "    timer: *",
+        "* benchmark: 2 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
         "test_fast          * 1  *",
@@ -327,7 +341,12 @@ def test_max_time(testdir):
     result.stdout.fnmatch_lines([
         "*collected 3 items",
         "test_max_time.py ...",
-        "* benchmark: 2 tests, min 5 rounds (of min 25.00us), 1.00us max time, timer: *",
+        "pytest-benchmark global settings:",
+        "    minimum number of rounds: 5",
+        "    minimum time per rounds: 25.00us",
+        "    maximum total time per test: 1.00us",
+        "    timer: *",
+        "* benchmark: 2 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
         "test_fast          * 5  *",
@@ -361,7 +380,12 @@ def test_disable_gc(testdir):
     result.stdout.fnmatch_lines([
         "*collected 2 items",
         "test_disable_gc.py ..",
-        "* benchmark: 2 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
+        "pytest-benchmark global settings:",
+        "    minimum number of rounds: *",
+        "    minimum time per rounds: *",
+        "    maximum total time per test: *",
+        "    timer: *",
+        "* benchmark: 2 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
         "test_fast          *",
@@ -377,7 +401,12 @@ def test_custom_timer(testdir):
     result.stdout.fnmatch_lines([
         "*collected 2 items",
         "test_custom_timer.py ..",
-        "* benchmark: 2 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
+        "pytest-benchmark global settings:",
+        "    minimum number of rounds: *",
+        "    minimum time per rounds: *",
+        "    maximum total time per test: *",
+        "    timer: *",
+        "* benchmark: 2 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
         "test_fast          *",
@@ -392,7 +421,8 @@ def test_bogus_timer(testdir):
     result = testdir.runpytest('--benchmark-timer=bogus', test)
     result.stderr.fnmatch_lines([
         "usage: pytest.py [options] [file_or_dir] [file_or_dir] [...]",
-        "pytest.py: error: argument --benchmark-timer: Value for --benchmark-timer must be in dotted form. Eg: 'module.attr'.",
+        "pytest.py: error: argument --benchmark-timer: Value for --benchmark-timer must be in dotted form. Eg: "
+        "'module.attr'.",
     ])
 
 
@@ -402,7 +432,12 @@ def test_sort_by_mean(testdir):
     result.stdout.fnmatch_lines([
         "*collected 2 items",
         "test_sort_by_mean.py ..",
-        "* benchmark: 2 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
+        "pytest-benchmark global settings:",
+        "    minimum number of rounds: *",
+        "    minimum time per rounds: *",
+        "    maximum total time per test: *",
+        "    timer: *",
+        "* benchmark: 2 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
         "test_fast          *",
@@ -417,7 +452,8 @@ def test_bogus_sort(testdir):
     result = testdir.runpytest('--benchmark-sort=bogus', test)
     result.stderr.fnmatch_lines([
         "usage: pytest.py [options] [file_or_dir] [file_or_dir] [...]",
-        "pytest.py: error: argument --benchmark-sort: Value for --benchmark-sort must be one of: 'min', 'max', 'mean' or 'stddev'.",
+        "pytest.py: error: argument --benchmark-sort: Value for --benchmark-sort must be one of: 'min', 'max', "
+        "'mean' or 'stddev'.",
     ])
 
 
@@ -427,7 +463,8 @@ def test_xdist(testdir):
     result = testdir.runpytest('--doctest-modules', '-n', '1', test)
     result.stderr.fnmatch_lines([
         "------*",
-        " WARNING: Benchmarks are automatically skipped because xdist plugin is active.Benchmarks cannot be performed reliably in a parallelized environment.",
+        " WARNING: Benchmarks are automatically skipped because xdist plugin is active.Benchmarks cannot be performed "
+        "reliably in a parallelized environment.",
         "------*",
     ])
 
@@ -523,7 +560,7 @@ def test_ok(benchmark, bad_fixture):
         "*pytest_benchmark/plugin.py:*: in _calibrate_timer",
         "    duration = runner(loops_range)",
         "*pytest_benchmark/plugin.py:*: in runner",
-        "    function_to_benchmark(*args, **kwargs)",
+        "    *",
         "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _*",
 
         "    @benchmark",
@@ -544,7 +581,12 @@ def test_ok(benchmark, bad_fixture):
         "E       assert 1 == 0",
 
         "test_abort_broken.py:18: AssertionError",
-        "* benchmark: 1 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer: *",
+        "pytest-benchmark global settings:",
+        "    minimum number of rounds: *",
+        "    minimum time per rounds: *",
+        "    maximum total time per test: *",
+        "    timer: *",
+        "* benchmark: 1 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
         "test_bad2           *",
@@ -597,7 +639,12 @@ def test_basic(testdir):
         "test_basic.py::test_xfast PASSED",
         "test_basic.py::test_fast PASSED",
         "",
-        "* benchmark: 4 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer:*",
+        "pytest-benchmark global settings:",
+        "    minimum number of rounds: *",
+        "    minimum time per rounds: *",
+        "    maximum total time per test: *",
+        "    timer: *",
+        "* benchmark: 4 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
         "test_slow           *",
@@ -630,7 +677,12 @@ def test_mark_selection(testdir):
     result.stdout.fnmatch_lines([
         "*collected 5 items",
         "test_mark_selection.py::test_xfast PASSED",
-        "* benchmark: 1 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer:*",
+        "pytest-benchmark global settings:",
+        "    minimum number of rounds: *",
+        "    minimum time per rounds: *",
+        "    maximum total time per test: *",
+        "    timer: *",
+        "* benchmark: 1 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
         "test_xfast       *",
@@ -650,7 +702,12 @@ def test_only_benchmarks(testdir):
         "test_only_benchmarks.py::test_slower PASSED",
         "test_only_benchmarks.py::test_xfast PASSED",
         "test_only_benchmarks.py::test_fast PASSED",
-        "* benchmark: 4 tests, min 5 rounds (of min 25.00us), 1.00s max time, timer:*",
+        "pytest-benchmark global settings:",
+        "    minimum number of rounds: *",
+        "    minimum time per rounds: *",
+        "    maximum total time per test: *",
+        "    timer: *",
+        "* benchmark: 4 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
         "test_slow        *",
