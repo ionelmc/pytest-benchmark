@@ -677,7 +677,7 @@ class BenchmarkSession(object):
 
     def display_results_table(self, tr):
         timer = self.options.get("timer")
-        tr.write_line("pytest-benchmark global settings:", yellow=True, bold=True)
+        tr.write_line("Benchmark global settings:", yellow=True, bold=True)
         tr.write_line("    minimum number of rounds: %(min_rounds)s" % self.options, yellow=True, bold=True)
         tr.write_line("    minimum time per rounds: %(min_time)s" % self.options, yellow=True, bold=True)
         tr.write_line("    maximum total time per test: %(max_time)s" % self.options, yellow=True, bold=True)

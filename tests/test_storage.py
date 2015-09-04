@@ -195,7 +195,7 @@ def test_compare(sess, LineMatcher):
         '| commit info: {dirty: true, id: "5b78858eb718649a31fb93d8dc96ca2cee41a4cd"}',
         '| saved at: 2015-08-15T00:01:46.250433',
         '| saved using pytest-benchmark 2.5.0:',
-        'pytest-benchmark global settings:',
+        'Benchmark global settings:',
         '    minimum number of rounds: 123',
         '    minimum time per rounds: 234',
         '    maximum total time per test: 345',

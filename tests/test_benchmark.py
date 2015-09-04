@@ -152,7 +152,7 @@ def test_group_by_name(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'name', test_x, test_y)
     result.stdout.fnmatch_lines([
         '*', '*', '*', '*', '*',
-        "pytest-benchmark global settings:",
+        "Benchmark global settings:",
         "    minimum number of rounds: *",
         "    minimum time per rounds: *",
         "    maximum total time per test: *",
@@ -320,7 +320,7 @@ def test_max_time_min_rounds(testdir):
     result.stdout.fnmatch_lines([
         "*collected 3 items",
         "test_max_time_min_rounds.py ...",
-        "pytest-benchmark global settings:",
+        "Benchmark global settings:",
         "    minimum number of rounds: 1",
         "    minimum time per rounds: 25.00us",
         "    maximum total time per test: 1.00us",
@@ -341,7 +341,7 @@ def test_max_time(testdir):
     result.stdout.fnmatch_lines([
         "*collected 3 items",
         "test_max_time.py ...",
-        "pytest-benchmark global settings:",
+        "Benchmark global settings:",
         "    minimum number of rounds: 5",
         "    minimum time per rounds: 25.00us",
         "    maximum total time per test: 1.00us",
@@ -380,7 +380,7 @@ def test_disable_gc(testdir):
     result.stdout.fnmatch_lines([
         "*collected 2 items",
         "test_disable_gc.py ..",
-        "pytest-benchmark global settings:",
+        "Benchmark global settings:",
         "    minimum number of rounds: *",
         "    minimum time per rounds: *",
         "    maximum total time per test: *",
@@ -401,7 +401,7 @@ def test_custom_timer(testdir):
     result.stdout.fnmatch_lines([
         "*collected 2 items",
         "test_custom_timer.py ..",
-        "pytest-benchmark global settings:",
+        "Benchmark global settings:",
         "    minimum number of rounds: *",
         "    minimum time per rounds: *",
         "    maximum total time per test: *",
@@ -432,7 +432,7 @@ def test_sort_by_mean(testdir):
     result.stdout.fnmatch_lines([
         "*collected 2 items",
         "test_sort_by_mean.py ..",
-        "pytest-benchmark global settings:",
+        "Benchmark global settings:",
         "    minimum number of rounds: *",
         "    minimum time per rounds: *",
         "    maximum total time per test: *",
@@ -581,7 +581,7 @@ def test_ok(benchmark, bad_fixture):
         "E       assert 1 == 0",
 
         "test_abort_broken.py:18: AssertionError",
-        "pytest-benchmark global settings:",
+        "Benchmark global settings:",
         "    minimum number of rounds: *",
         "    minimum time per rounds: *",
         "    maximum total time per test: *",
@@ -639,7 +639,7 @@ def test_basic(testdir):
         "test_basic.py::test_xfast PASSED",
         "test_basic.py::test_fast PASSED",
         "",
-        "pytest-benchmark global settings:",
+        "Benchmark global settings:",
         "    minimum number of rounds: *",
         "    minimum time per rounds: *",
         "    maximum total time per test: *",
@@ -677,7 +677,7 @@ def test_mark_selection(testdir):
     result.stdout.fnmatch_lines([
         "*collected 5 items",
         "test_mark_selection.py::test_xfast PASSED",
-        "pytest-benchmark global settings:",
+        "Benchmark global settings:",
         "    minimum number of rounds: *",
         "    minimum time per rounds: *",
         "    maximum total time per test: *",
@@ -702,7 +702,7 @@ def test_only_benchmarks(testdir):
         "test_only_benchmarks.py::test_slower PASSED",
         "test_only_benchmarks.py::test_xfast PASSED",
         "test_only_benchmarks.py::test_fast PASSED",
-        "pytest-benchmark global settings:",
+        "Benchmark global settings:",
         "    minimum number of rounds: *",
         "    minimum time per rounds: *",
         "    maximum total time per test: *",
