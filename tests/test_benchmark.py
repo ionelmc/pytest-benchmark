@@ -1,8 +1,10 @@
 import json
+import platform
 
 import pytest
 
 pytest_plugins = 'pytester',
+platform
 
 
 def test_help(testdir):
@@ -468,6 +470,7 @@ def test_disable_gc(testdir):
     ])
 
 
+@pytest.mark.skipif("platform.python_implementation() == 'PyPy'")
 def test_custom_timer(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-timer=time.time', test)
