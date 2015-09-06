@@ -235,9 +235,15 @@ def clonefunc(f):
     # first of all, we clone the code object
     try:
         co = f.__code__
-        co2 = types.CodeType(co.co_argcount, co.co_nlocals, co.co_stacksize, co.co_flags, co.co_code,
-                             co.co_consts, co.co_names, co.co_varnames, co.co_filename, co.co_name,
-                             co.co_firstlineno, co.co_lnotab, co.co_freevars, co.co_cellvars)
+        if PY3:
+            co2 = types.CodeType(co.co_argcount, co.co_kwonlyargcount,
+                                 co.co_nlocals, co.co_stacksize, co.co_flags, co.co_code,
+                                 co.co_consts, co.co_names, co.co_varnames, co.co_filename, co.co_name,
+                                 co.co_firstlineno, co.co_lnotab, co.co_freevars, co.co_cellvars)
+        else:
+            co2 = types.CodeType(co.co_argcount, co.co_nlocals, co.co_stacksize, co.co_flags, co.co_code,
+                                 co.co_consts, co.co_names, co.co_varnames, co.co_filename, co.co_name,
+                                 co.co_firstlineno, co.co_lnotab, co.co_freevars, co.co_cellvars)
         #
         # then, we clone the function itself, using the new co2
         return types.FunctionType(co2, f.__globals__, f.__name__, f.__defaults__, f.__closure__)
