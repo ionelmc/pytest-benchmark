@@ -108,7 +108,7 @@ def test_xfast(benchmark):
         "*",
         "* benchmark 'A': 2 tests *",
         "*",
-        "*====== 5 passed in * seconds ======*",
+        "*====== 5 passed * seconds ======*",
     ])
 
 
@@ -211,7 +211,7 @@ def test_group_by_func(testdir):
         'test_b[[]1[]]             *',
         '----------------------*',
         '*', '*',
-        '============* 8 passed in * seconds ============*',
+        '============* 8 passed * seconds ============*',
     ])
 
 
@@ -285,7 +285,7 @@ def test_group_by_param(testdir):
         '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '
         'Quartile.',
         '',
-        '============* 8 passed in * seconds ============*',
+        '============* 8 passed * seconds ============*',
     ])
 
 
@@ -302,7 +302,7 @@ def test_group_by_fullname(testdir):
         "* benchmark 'test_y.py::test_a[[]1[]]': 1 tests *",
         "* benchmark 'test_y.py::test_b[[]0[]]': 1 tests *",
         "* benchmark 'test_y.py::test_b[[]1[]]': 1 tests *",
-        '============* 8 passed in * seconds ============*',
+        '============* 8 passed * seconds ============*',
     ])
 
 
@@ -331,7 +331,7 @@ def test_max_time_min_rounds(testdir):
         "test_fast          * 1  *",
         "test_slow          * 1  *",
         "------*",
-        "*====== 3 passed in * seconds ======*",
+        "*====== 3 passed * seconds ======*",
     ])
 
 
@@ -352,7 +352,7 @@ def test_max_time(testdir):
         "test_fast          * 5  *",
         "test_slow          * 5  *",
         "------*",
-        "*====== 3 passed in * seconds ======*",
+        "*====== 3 passed * seconds ======*",
     ])
 
 
@@ -391,7 +391,7 @@ def test_disable_gc(testdir):
         "test_fast          *",
         "test_slow          *",
         "------*",
-        "*====== 2 passed in * seconds ======*",
+        "*====== 2 passed * seconds ======*",
     ])
 
 
@@ -412,7 +412,7 @@ def test_custom_timer(testdir):
         "test_fast          *",
         "test_slow          *",
         "------*",
-        "*====== 2 passed in * seconds ======*",
+        "*====== 2 passed * seconds ======*",
     ])
 
 
@@ -443,7 +443,7 @@ def test_sort_by_mean(testdir):
         "test_fast          *",
         "test_slow          *",
         "------*",
-        "*====== 2 passed in * seconds ======*",
+        "*====== 2 passed * seconds ======*",
     ])
 
 
