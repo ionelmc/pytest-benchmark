@@ -48,13 +48,13 @@ env:
     - TOXENV=3.4-pytest28-xdist-cover,report,coveralls,codecov
     - TOXENV=pypy-pytest28-xdist-cover,report,coveralls,codecov
 before_install:
-  - python --version
-  - virtualenv --version
-  - pip --version
   - uname -a
   - lsb_release -a
 install:
   - pip install -U pip wheel setuptools tox
+  - python --version
+  - virtualenv --version
+  - pip --version
 script:
   - tox -v
 notifications:
