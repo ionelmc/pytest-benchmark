@@ -51,10 +51,11 @@ before_install:
   - uname -a
   - lsb_release -a
 install:
-  - pip install -U pip wheel setuptools tox
+  - pip install -U pip wheel "setuptools<18.3" tox
   - python --version
   - virtualenv --version
   - pip --version
+  - easy_install --version
 script:
   - tox -v
 notifications:
