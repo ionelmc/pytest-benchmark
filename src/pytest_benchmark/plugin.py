@@ -677,11 +677,11 @@ class BenchmarkSession(object):
 
     def display_results_table(self, tr):
         timer = self.options.get("timer")
-        tr.write_line("Benchmark global settings:", yellow=True, bold=True)
-        tr.write_line("    minimum number of rounds: %(min_rounds)s" % self.options, yellow=True, bold=True)
-        tr.write_line("    minimum time per rounds: %(min_time)s" % self.options, yellow=True, bold=True)
-        tr.write_line("    maximum total time per test: %(max_time)s" % self.options, yellow=True, bold=True)
-        tr.write_line("    timer: %(timer)s" % dict(timer=timer), yellow=True, bold=True)
+        tr.write_line("Benchmark global settings:", yellow=True)
+        tr.write_line("    minimum number of rounds: %(min_rounds)s" % self.options, yellow=True)
+        tr.write_line("    minimum time per rounds: %(min_time)s" % self.options, yellow=True)
+        tr.write_line("    maximum total time per test: %(max_time)s" % self.options, yellow=True)
+        tr.write_line("    timer: %(timer)s" % dict(timer=timer), yellow=True)
         tr.write_line("")
 
         for group, benchmarks in self.config.hook.pytest_benchmark_group_stats(
