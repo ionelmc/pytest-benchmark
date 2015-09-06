@@ -56,6 +56,9 @@ install:
   - virtualenv --version
   - pip --version
   - easy_install --version
+after_failure:
+  - more .tox/log/* | cat
+  - more .tox/*/log/* | cat
 script:
   - tox -v
 notifications:
