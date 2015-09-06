@@ -108,7 +108,7 @@ def test_xfast(benchmark):
         "*",
         "* benchmark 'A': 2 tests *",
         "*",
-        "*====== 5 passed * seconds ======*",
+        "*====== 5 passed* seconds ======*",
     ])
 
 
@@ -211,7 +211,7 @@ def test_group_by_func(testdir):
         'test_b[[]1[]]             *',
         '----------------------*',
         '*', '*',
-        '============* 8 passed * seconds ============*',
+        '============* 8 passed* seconds ============*',
     ])
 
 
@@ -253,7 +253,7 @@ def test_group_by_fullfunc(testdir):
         '------------------*',
         '(*) Outliers: 1 Standard Deviation from M*',
         '*',
-        '============* 8 passed in *',
+        '============* 8 passed* seconds ============*',
     ])
 
 
@@ -285,7 +285,7 @@ def test_group_by_param(testdir):
         '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '
         'Quartile.',
         '',
-        '============* 8 passed * seconds ============*',
+        '============* 8 passed* seconds ============*',
     ])
 
 
@@ -302,7 +302,7 @@ def test_group_by_fullname(testdir):
         "* benchmark 'test_y.py::test_a[[]1[]]': 1 tests *",
         "* benchmark 'test_y.py::test_b[[]0[]]': 1 tests *",
         "* benchmark 'test_y.py::test_b[[]1[]]': 1 tests *",
-        '============* 8 passed * seconds ============*',
+        '============* 8 passed* seconds ============*',
     ])
 
 
@@ -331,7 +331,7 @@ def test_max_time_min_rounds(testdir):
         "test_fast          * 1  *",
         "test_slow          * 1  *",
         "------*",
-        "*====== 3 passed * seconds ======*",
+        "*====== 3 passed* seconds ======*",
     ])
 
 
@@ -352,7 +352,7 @@ def test_max_time(testdir):
         "test_fast          * 5  *",
         "test_slow          * 5  *",
         "------*",
-        "*====== 3 passed * seconds ======*",
+        "*====== 3 passed* seconds ======*",
     ])
 
 
@@ -360,8 +360,8 @@ def test_bogus_max_time(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-max-time=bogus', test)
     result.stderr.fnmatch_lines([
-        "usage: pytest.py [options] [file_or_dir] [file_or_dir] [...]",
-        "pytest.py: error: argument --benchmark-max-time: Invalid decimal value 'bogus': InvalidOperation*",
+        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "py*: error: argument --benchmark-max-time: Invalid decimal value 'bogus': InvalidOperation*",
     ])
 
 
@@ -369,8 +369,8 @@ def test_bogus_min_time(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-min-time=bogus', test)
     result.stderr.fnmatch_lines([
-        "usage: pytest.py [options] [file_or_dir] [file_or_dir] [...]",
-        "pytest.py: error: argument --benchmark-min-time: Invalid decimal value 'bogus': InvalidOperation*",
+        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "py*: error: argument --benchmark-min-time: Invalid decimal value 'bogus': InvalidOperation*",
     ])
 
 
@@ -391,7 +391,7 @@ def test_disable_gc(testdir):
         "test_fast          *",
         "test_slow          *",
         "------*",
-        "*====== 2 passed * seconds ======*",
+        "*====== 2 passed* seconds ======*",
     ])
 
 
@@ -412,7 +412,7 @@ def test_custom_timer(testdir):
         "test_fast          *",
         "test_slow          *",
         "------*",
-        "*====== 2 passed * seconds ======*",
+        "*====== 2 passed* seconds ======*",
     ])
 
 
@@ -420,8 +420,8 @@ def test_bogus_timer(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-timer=bogus', test)
     result.stderr.fnmatch_lines([
-        "usage: pytest.py [options] [file_or_dir] [file_or_dir] [...]",
-        "pytest.py: error: argument --benchmark-timer: Value for --benchmark-timer must be in dotted form. Eg: "
+        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "py*: error: argument --benchmark-timer: Value for --benchmark-timer must be in dotted form. Eg: "
         "'module.attr'.",
     ])
 
@@ -443,7 +443,7 @@ def test_sort_by_mean(testdir):
         "test_fast          *",
         "test_slow          *",
         "------*",
-        "*====== 2 passed * seconds ======*",
+        "*====== 2 passed* seconds ======*",
     ])
 
 
@@ -451,8 +451,8 @@ def test_bogus_sort(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-sort=bogus', test)
     result.stderr.fnmatch_lines([
-        "usage: pytest.py [options] [file_or_dir] [file_or_dir] [...]",
-        "pytest.py: error: argument --benchmark-sort: Value for --benchmark-sort must be one of: 'min', 'max', "
+        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "py*: error: argument --benchmark-sort: Value for --benchmark-sort must be one of: 'min', 'max', "
         "'mean' or 'stddev'.",
     ])
 
@@ -592,7 +592,7 @@ def test_ok(benchmark, bad_fixture):
         "test_bad2           *",
         "------*",
 
-        "*====== 2 failed, 3 error in * seconds ======*",
+        "*====== 2 failed*, 3 error* seconds ======*",
     ])
 
 
@@ -653,7 +653,7 @@ def test_basic(testdir):
         "test_fast           *",
         "------*",
         "",
-        "*====== 5 passed in* seconds ======*",
+        "*====== 5 passed* seconds ======*",
     ])
 
 
@@ -667,7 +667,7 @@ def test_skip(testdir):
         "test_skip.py::test_slower SKIPPED",
         "test_skip.py::test_xfast SKIPPED",
         "test_skip.py::test_fast SKIPPED",
-        "*====== 1 passed, 4 skipped in* seconds ======*",
+        "*====== 1 passed, 4 skipped* seconds ======*",
     ])
 
 
@@ -688,7 +688,7 @@ def test_mark_selection(testdir):
         "test_xfast       *",
         "------*",
         "*====== 4 tests deselected by \"-m 'benchmark'\" ======*",
-        "*====== 1 passed, 4 deselected in* seconds ======*",
+        "*====== 1 passed, 4 deselected* seconds ======*",
     ])
 
 
@@ -715,5 +715,5 @@ def test_only_benchmarks(testdir):
         "test_xfast       *",
         "test_fast        *",
         "------*",
-        "*====== 4 passed, 1 skipped in* seconds ======*",
+        "*====== 4 passed, 1 skipped* seconds ======*",
     ])
