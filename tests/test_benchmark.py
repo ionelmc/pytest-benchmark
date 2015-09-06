@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 pytest_plugins = 'pytester',
@@ -363,6 +365,77 @@ def test_bogus_max_time(testdir):
         "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
         "py*: error: argument --benchmark-max-time: Invalid decimal value 'bogus': InvalidOperation*",
     ])
+
+
+def test_specific_timer(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules',
+                               '--benchmark-timer=pep418.process_time', test)
+    result.stdout.fnmatch_lines([
+        "    timer: *.process_time",
+    ])
+
+
+def test_bad_save(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--doctest-modules', '--benchmark-save=asd:f?', test)
+    result.stderr.fnmatch_lines([
+        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "py*: error: argument --benchmark-save: Must not contain any of these characters: /:*?<>|\\ (it has ':?')",
+    ])
+
+
+def test_bad_rounds(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--doctest-modules', '--benchmark-min-rounds=asd', test)
+    result.stderr.fnmatch_lines([
+        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "py*: error: argument --benchmark-min-rounds: invalid literal for int() with base 10: 'asd'",
+    ])
+
+
+def test_bad_rounds_2(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--doctest-modules', '--benchmark-min-rounds=0', test)
+    result.stderr.fnmatch_lines([
+        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "py*: error: argument --benchmark-min-rounds: Value for --benchmark-rounds must be at least 1.",
+    ])
+
+
+def test_compare(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0001',
+                               '--benchmark-compare-fail=min:0.1', test)
+    result.stderr.fnmatch_lines([
+        "Comparing against benchmark 0001_unversioned_*.json:",
+    ])
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0001',
+                               '--benchmark-compare-fail=min:1%', test)
+    result.stderr.fnmatch_lines([
+        "Comparing against benchmark 0001_unversioned_*.json:",
+    ])
+
+
+def test_save(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--doctest-modules', '--benchmark-save=foobar',
+                               '--benchmark-max-time=0.0001', test)
+    result.stderr.fnmatch_lines([
+        "Saved benchmark data in *",
+    ])
+    json.loads(testdir.tmpdir.join('.benchmarks').listdir()[0].join('0001_foobar.json').read())
+
+
+def test_autosave(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--doctest-modules', '--benchmark-autosave',
+                               '--benchmark-max-time=0.0001', test)
+    result.stderr.fnmatch_lines([
+        "Saved benchmark data in *",
+    ])
+    json.loads(testdir.tmpdir.join('.benchmarks').listdir()[0].listdir('0001_*.json')[0].read())
 
 
 def test_bogus_min_time(testdir):
