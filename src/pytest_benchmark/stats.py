@@ -97,7 +97,11 @@ class Stats(object):
         if len(self.data) == 1:
             return self.data[0]
         else:
-            return self.sorted_data[bisect_right(self.sorted_data, self.q3 + 1.5 * self.iqr)]
+            pos = bisect_right(self.sorted_data, self.q3 + 1.5 * self.iqr)
+            if pos == len(self.data):
+                return self.sorted_data[-1]
+            else:
+                return self.sorted_data[pos]
 
     @cached_property
     def q1(self):

@@ -1,3 +1,5 @@
+from pytest import mark
+
 from pytest_benchmark.stats import Stats
 
 
@@ -41,6 +43,15 @@ def test_single_item():
     assert stats.total == 1
     assert stats.ld15iqr == 1
     assert stats.hd15iqr == 1
+
+
+@mark.parametrize('length', range(1, 10))
+def test_length(length):
+    stats = Stats()
+    for i in range(length):
+        stats.update(1)
+
+    assert stats.as_dict
 
 
 def test_iqr():
