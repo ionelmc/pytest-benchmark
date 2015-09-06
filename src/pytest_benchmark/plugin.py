@@ -199,13 +199,10 @@ class BenchmarkStats(object):
             return getattr(self, key)
 
     def json(self, include_data=True):
-        out = dict(
-            (field, getattr(self.stats, field))
-            for field in self.stats.fields
-        )
         if include_data:
-            out['data'] = self.stats.data
-        return out
+            return dict(self.stats.as_dict, data=self.stats.data)
+        else:
+            return self.stats.as_dict
 
     def update(self, duration):
         self.stats.update(duration / self.iterations)
