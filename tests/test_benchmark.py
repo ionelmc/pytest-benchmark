@@ -369,7 +369,8 @@ def test_bogus_max_time(testdir):
     ])
 
 
-def test_specific_timer(testdir):
+@pytest.mark.skipif("platform.python_implementation() == 'PyPy'")
+def test_pep418_timer(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules',
                                '--benchmark-timer=pep418.process_time', test)
@@ -470,7 +471,6 @@ def test_disable_gc(testdir):
     ])
 
 
-@pytest.mark.skipif("platform.python_implementation() == 'PyPy'")
 def test_custom_timer(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-timer=time.time', test)
