@@ -426,7 +426,7 @@ def test_bad_rounds_2(testdir):
 
 def test_compare(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
-    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
+    testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0001',
                                '--benchmark-compare-fail=min:0.1', test)
     result.stderr.fnmatch_lines([
@@ -436,6 +436,42 @@ def test_compare(testdir):
                                '--benchmark-compare-fail=min:1%', test)
     result.stderr.fnmatch_lines([
         "Comparing against benchmark 0001_unversioned_*.json:",
+    ])
+
+
+def test_compare_non_existing(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0002',
+                               test)
+    result.stderr.fnmatch_lines([
+        " WARNING: Can't compare. No benchmark files matched '0002'",
+    ])
+
+
+def test_compare_too_many(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
+    testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0',
+                               test)
+    result.stderr.fnmatch_lines([
+        " WARNING: Can't compare. Too many benchmark files matched '0':",
+        ' - *0001_unversioned_*.json',
+        ' - *0002_unversioned_*.json',
+    ])
+
+
+def test_verbose(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-verbose',
+                               '-vv', test)
+    result.stderr.fnmatch_lines([
+        "  Timer precision: *s",
+        "  Calibrating to target round *s; will estimate when reaching *s.",
+        "    Measured * iterations: *s.",
+        "  Running * rounds x * iterations ...",
+        "  Ran for *s.",
     ])
 
 
