@@ -40,13 +40,14 @@ pytest-benchmark
     :target: https://landscape.io/github/ionelmc/pytest-benchmark/master
     :alt: Code Quality Status
 
-.. |codacy| image:: https://img.shields.io/codacy/REPLACE_WITH_PROJECT_ID.svg?style=flat
+.. |codacy| image:: https://img.shields.io/codacy/80e2960677c24d5083a802dd57df17dc.svg?style=flat
     :target: https://www.codacy.com/app/ionelmc/pytest-benchmark
     :alt: Codacy Code Quality Status
 
 .. |codeclimate| image:: https://codeclimate.com/github/ionelmc/pytest-benchmark/badges/gpa.svg
    :target: https://codeclimate.com/github/ionelmc/pytest-benchmark
    :alt: CodeClimate Quality Status
+   
 .. |version| image:: https://img.shields.io/pypi/v/pytest-benchmark.svg?style=flat
     :alt: PyPI Package latest release
     :target: https://pypi.python.org/pypi/pytest-benchmark
