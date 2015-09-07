@@ -297,7 +297,7 @@ class BenchmarkFixture(object):
 
         return function_to_benchmark(*args, **kwargs)
 
-    def manual(self, target, args=(), kwargs=None, setup=None, rounds=1, iterations=1):
+    def manual(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
         if kwargs is None:
             kwargs = {}
 
@@ -309,18 +309,32 @@ class BenchmarkFixture(object):
         if not isinstance(rounds, INT) or rounds < 1:
             raise ValueError("Must have positive int for `rounds`.")
 
+        if not isinstance(warmup_rounds, INT) or warmup_rounds < 0:
+            raise ValueError("Must have positive int for `warmup_rounds`.")
+
         if iterations > 1 and setup:
             raise ValueError("Can't use more than 1 `iterations` with a `setup` function.")
 
-        stats = self._make_stats(iterations)
-        loops_range = XRANGE(iterations) if iterations > 1 else None
-        for _ in XRANGE(rounds):
+        def make_arguments(args=args, kwargs=kwargs):
             if setup:
                 maybe_args = setup()
                 if maybe_args:
                     if has_args:
                         raise TypeError("Can't use `args` or `kwargs` if `setup` returns the arguments.")
                     args, kwargs = maybe_args
+            return args, kwargs
+
+        stats = self._make_stats(iterations)
+        loops_range = XRANGE(iterations) if iterations > 1 else None
+        for _ in XRANGE(warmup_rounds):
+            args, kwargs = make_arguments()
+
+            runner = self._make_runner(target, args, kwargs)
+            runner(loops_range)
+
+        for _ in XRANGE(rounds):
+            args, kwargs = make_arguments()
+
             runner = self._make_runner(target, args, kwargs)
             if loops_range:
                 duration = runner(loops_range)
@@ -329,12 +343,7 @@ class BenchmarkFixture(object):
             stats.update(duration)
 
         if loops_range:
-            if setup:
-                maybe_args = setup()
-                if maybe_args:
-                    if has_args:
-                        raise TypeError("Can't use `args` or `kwargs` if `setup` returns the arguments.")
-                    args, kwargs = maybe_args
+            args, kwargs = make_arguments()
             result = target(*args, **kwargs)
         return result
 

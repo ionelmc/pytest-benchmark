@@ -51,6 +51,27 @@ def test_rounds(benchmark):
     assert runs == [1] * 15
 
 
+def test_warmup_rounds(benchmark):
+    runs = []
+
+    benchmark.manual(runs.append, args=[1], warmup_rounds=15, rounds=5)
+    assert runs == [1] * 20
+
+
+def test_rounds_must_be_int(benchmark):
+    runs = []
+
+    raises(ValueError, benchmark.manual, runs.append, args=[1], rounds=0)
+    raises(ValueError, benchmark.manual, runs.append, args=[1], rounds="x")
+    assert runs == []
+
+def test_warmup_rounds_must_be_int(benchmark):
+    runs = []
+
+    raises(ValueError, benchmark.manual, runs.append, args=[1], warmup_rounds=-15)
+    raises(ValueError, benchmark.manual, runs.append, args=[1], warmup_rounds="x")
+    assert runs == []
+
 def test_setup_many_rounds(benchmark):
     runs = []
 
