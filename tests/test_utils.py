@@ -22,6 +22,9 @@ def test_clonefunc_not_function():
 @mark.parametrize('scm', ['git', 'hg'])
 def test_get_commit_info(scm, testdir):
     subprocess.check_call([scm, 'init', '.'])
+    if scm == 'git':
+        subprocess.check_call('git config user.email you@example.com'.split())
+        subprocess.check_call('git config user.name you'.split())
     testdir.makepyfile('asdf')
     subprocess.check_call([scm, 'add', 'test_get_commit_info.py'])
     subprocess.check_call([scm, 'commit', '-m', 'asdf'])
