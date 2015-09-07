@@ -8,7 +8,8 @@ pytest-benchmark
     * - docs
       - |docs|
     * - tests
-      - | |travis| |appveyor| |requires| |coveralls| |codecov| |landscape| |scrutinizer| |codacy| |codeclimate|
+      - | |travis| |appveyor| |requires| |coveralls| |codecov|
+        | |scrutinizer| |codacy| |codeclimate|
     * - package
       - |version| |downloads| |wheel| |supported-versions| |supported-implementations|
 
@@ -47,7 +48,7 @@ pytest-benchmark
 .. |codeclimate| image:: https://codeclimate.com/github/ionelmc/pytest-benchmark/badges/gpa.svg
    :target: https://codeclimate.com/github/ionelmc/pytest-benchmark
    :alt: CodeClimate Quality Status
-   
+
 .. |version| image:: https://img.shields.io/pypi/v/pytest-benchmark.svg?style=flat
     :alt: PyPI Package latest release
     :target: https://pypi.python.org/pypi/pytest-benchmark
