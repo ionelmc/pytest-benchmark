@@ -388,6 +388,24 @@ def test_bad_save(testdir):
     ])
 
 
+def test_bad_save_2(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--doctest-modules', '--benchmark-save=', test)
+    result.stderr.fnmatch_lines([
+        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "py*: error: argument --benchmark-save: Can't be empty.",
+    ])
+
+
+def test_bad_compare_fail(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--doctest-modules', '--benchmark-compare-fail=?', test)
+    result.stderr.fnmatch_lines([
+        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "py*: error: argument --benchmark-compare-fail: Could not parse value.",
+    ])
+
+
 def test_bad_rounds(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-min-rounds=asd', test)
@@ -424,17 +442,31 @@ def test_compare(testdir):
 def test_save(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-save=foobar',
-                               '--benchmark-max-time=0.0001', test)
+                               '--benchmark-max-time=0.0000001', test)
     result.stderr.fnmatch_lines([
         "Saved benchmark data in *",
     ])
     json.loads(testdir.tmpdir.join('.benchmarks').listdir()[0].join('0001_foobar.json').read())
 
 
+def test_histogram(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--doctest-modules', '--benchmark-histogram=foobar',
+                               '--benchmark-max-time=0.0000001', test)
+    result.stderr.fnmatch_lines([
+        "Generated histogram *foobar-test_histogram.py_test_fast.svg",
+        "Generated histogram *foobar-test_histogram.py_test_slow.svg",
+    ])
+    assert [f.basename for f in testdir.tmpdir.listdir("*.svg", sort=True)] == [
+        'foobar-test_histogram.py_test_fast.svg',
+        'foobar-test_histogram.py_test_slow.svg',
+    ]
+
+
 def test_autosave(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-autosave',
-                               '--benchmark-max-time=0.0001', test)
+                               '--benchmark-max-time=0.0000001', test)
     result.stderr.fnmatch_lines([
         "Saved benchmark data in *",
     ])
