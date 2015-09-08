@@ -375,7 +375,7 @@ def test_pep418_timer(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules',
                                '--benchmark-timer=pep418.perf_counter', test)
     result.stdout.fnmatch_lines([
-        "    timer: *.process_time",
+        "    timer: *.perf_counter",
     ])
 
 
