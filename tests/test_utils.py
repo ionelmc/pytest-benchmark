@@ -2,6 +2,8 @@ import subprocess
 from pytest import mark
 from pytest_benchmark.utils import clonefunc, get_commit_info
 
+pytest_plugins = 'pytester',
+
 f1 = lambda a: a
 
 
@@ -25,6 +27,12 @@ def test_get_commit_info(scm, testdir):
     if scm == 'git':
         subprocess.check_call('git config user.email you@example.com'.split())
         subprocess.check_call('git config user.name you'.split())
+    else:
+        testdir.tmpdir.join('.hg', 'hgrc').write("""
+[ui]
+username = you <you@example.com>
+""")
+
     testdir.makepyfile('asdf')
     subprocess.check_call([scm, 'add', 'test_get_commit_info.py'])
     subprocess.check_call([scm, 'commit', '-m', 'asdf'])
