@@ -439,6 +439,21 @@ def test_compare(testdir):
     ])
 
 
+def test_compare_last(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare',
+                               '--benchmark-compare-fail=min:0.1', test)
+    result.stderr.fnmatch_lines([
+        "Comparing against benchmark 0001_unversioned_*.json:",
+    ])
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare',
+                               '--benchmark-compare-fail=min:1%', test)
+    result.stderr.fnmatch_lines([
+        "Comparing against benchmark 0001_unversioned_*.json:",
+    ])
+
+
 def test_compare_non_existing(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
