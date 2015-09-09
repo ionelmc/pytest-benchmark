@@ -541,7 +541,6 @@ class BenchmarkSession(object):
                 return "%04i" % (int(str(f.basename).split('_')[0]) + 1)
             except ValueError:
                 raise
-        return "0001"
 
     def handle_saving(self):
         if self.json:
