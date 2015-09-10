@@ -442,12 +442,12 @@ def test_compare(testdir):
 def test_compare_last(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
-    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare',
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=-',
                                '--benchmark-compare-fail=min:0.1', test)
     result.stderr.fnmatch_lines([
         "Comparing against benchmark 0001_unversioned_*.json:",
     ])
-    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare',
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=-',
                                '--benchmark-compare-fail=min:1%', test)
     result.stderr.fnmatch_lines([
         "Comparing against benchmark 0001_unversioned_*.json:",
@@ -461,6 +461,24 @@ def test_compare_non_existing(testdir):
                                test)
     result.stderr.fnmatch_lines([
         " WARNING: Can't compare. No benchmark files matched '0002'",
+    ])
+
+
+def test_compare_no_files(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', test, '--benchmark-compare=-')
+    result.stderr.fnmatch_lines([
+         " WARNING: Can't compare. No benchmark files in '*'. Expected files matching *.json."
+         " Can't load the previous benchmark."
+    ])
+
+
+def test_compare_no_files_match(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', test, '--benchmark-compare=1')
+    result.stderr.fnmatch_lines([
+         " WARNING: Can't compare. No benchmark files in '*'. Expected files matching *.json."
+         " Can't match anything to '1'."
     ])
 
 

@@ -31,6 +31,7 @@ from .utils import get_commit_id
 from .utils import get_commit_info
 from .utils import get_current_time
 from .utils import load_timer
+from .utils import parse_compare
 from .utils import parse_compare_fail
 from .utils import parse_rounds
 from .utils import parse_save
@@ -132,8 +133,9 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-compare",
-        metavar="NUM", nargs="?", default=[], const=True,
-        help="Compare the current run against run NUM or the latest saved run if unspecified."
+        metavar="NUM", type=parse_compare,
+        help="Compare the current run against run NUM or the latest saved run if unspecified. Use "
+             "'--benchmark-compare=-' to compare against last run."
     )
     group.addoption(
         "--benchmark-compare-fail",
@@ -508,27 +510,29 @@ class BenchmarkSession(object):
     def compare_file(self):
         if self.compare:
             files = self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json", sort=True)
-            if not files:
-                self.logger.warn(
-                    "Can't compare. No benchmark files in %r. Expected files matching [0-9][0-9][0-9][0-9]_*.json."
-                    " Can't match anything to %r." % (
-                        str(self.storage),
-                        self.compare))
-                return
+            if files:
+                if self.compare is True:
+                    files.sort()
+                    return files[-1]
+                else:
+                    files = [f for f in files if str(f.basename).startswith(self.compare)]
+                    if len(files) == 1:
+                        return files[0]
 
-            if self.compare is True:
-                files.sort()
-                return files[-1]
+                    if not files:
+                        self.logger.warn("Can't compare. No benchmark files matched %r" % self.compare)
+                    elif len(files) > 1:
+                        self.logger.warn("Can't compare. Too many benchmark files matched %r:\n - %s" % (
+                            self.compare, '\n - '.join(map(str, files))))
             else:
-                files = [f for f in files if str(f.basename).startswith(self.compare)]
-                if len(files) == 1:
-                    return files[0]
-
-                if not files:
-                    self.logger.warn("Can't compare. No benchmark files matched %r" % self.compare)
-                elif len(files) > 1:
-                    self.logger.warn("Can't compare. Too many benchmark files matched %r:\n - %s" % (
-                        self.compare, '\n - '.join(map(str, files))))
+                msg = "Can't compare. No benchmark files in %r. " \
+                      "Expected files matching [0-9][0-9][0-9][0-9]_*.json." % str(self.storage)
+                if self.compare is True:
+                    msg += " Can't load the previous benchmark."
+                else:
+                    msg += " Can't match anything to %r." % self.compare
+                self.logger.warn(msg)
+                return
 
     @property
     def next_num(self):
