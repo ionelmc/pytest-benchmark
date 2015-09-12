@@ -403,7 +403,6 @@ class BenchmarkFixture(object):
                 ))
 
             self._logger.debug("    Measured %s iterations: %ss." % (loops, format_time(duration)), yellow=True)
-            self._logger.info("%.150fs\n >= \n%.150fs\n == %s" % (duration, min_time, duration >= min_time))
             if duration >= min_time:
                 break
 
