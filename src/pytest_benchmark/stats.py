@@ -1,9 +1,14 @@
 from __future__ import division
-from bisect import bisect_left, bisect_right
 
-import statistics
+from bisect import bisect_left
+from bisect import bisect_right
 
 from .utils import cached_property
+
+try:
+    import statistics
+except ImportError:
+    statistics = None
 
 
 class Stats(object):
@@ -14,6 +19,9 @@ class Stats(object):
 
     def __init__(self):
         self.data = []
+        if not statistics:
+            raise ImportError("Could not import statistics. "
+                              "Please install statistics - pytest-benchmark needs it on Python older than 3.4.")
 
     def __bool__(self):
         return bool(self.data)
