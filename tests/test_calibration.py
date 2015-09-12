@@ -30,6 +30,32 @@ def test_calibrate_slow(benchmark):
     benchmark(partial(time.sleep, 0.00001))
 
 
-@pytest.mark.benchmark(max_time=1)
+MIN = 0.0000001
+
+
+def Timer():
+    t = 0
+    slowmode = False
+    c = 0
+    while 1:
+        slowmode |= bool((yield t))
+        if slowmode:
+            import sys
+            sys.stdout.write('[%s]' % c)
+
+            if 0:
+                t += 74.9
+            else:
+                t += MIN * 100.1
+            c += 1
+        else:
+            t += MIN
+
+
+timer = Timer()
+
+
+@pytest.mark.benchmark(max_time=MIN, min_rounds=1, min_time=MIN, timer=timer.__next__)
 def test_calibrate_very_slow(benchmark):
-    benchmark(partial(time.sleep, 1))
+    benchmark._get_precision(benchmark._timer)
+    benchmark(timer.send, True)
