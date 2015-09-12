@@ -12,6 +12,8 @@ from collections import defaultdict
 from datetime import datetime
 from distutils.version import StrictVersion
 from math import ceil
+from math import copysign
+from math import isinf
 
 import py
 import pytest
@@ -793,11 +795,11 @@ class BenchmarkSession(object):
             old = stats[prop]
             val = new - old
             fmt = NUMBER_FMT.format(abs(val * adjustment))
-            percent = abs(new / old * 100 - 100) if old else math.copysign(float("inf"), val)
+            percent = abs(new / old * 100 - 100) if old else copysign(float("inf"), val)
             if val > 0:
                 if percent > 1000000:
                     tr.write("{0:>{1}}".format("+" + fmt, widths[prop]), red=True)
-                    if math.isinf(percent):
+                    if isinf(percent):
                         tr.write(" (infinite%)", red=True, bold=True)
                     else:
                         tr.write(" (>1000000%)", red=True, bold=True)
