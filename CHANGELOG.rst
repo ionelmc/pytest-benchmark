@@ -30,7 +30,6 @@ Changelog
 
 * Changed the timing code to:
 
-  * Clone the function on PyPy (to avoid respecialization if same function is tested with different arguments).
   * Tracers are automatically disabled when running the test function (like coverage tracers).
   * Fixed an issue with calibration code getting stuck.
 
