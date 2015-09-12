@@ -305,7 +305,7 @@ class BenchmarkFixture(object):
 
         return function_to_benchmark(*args, **kwargs)
 
-    def manual(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
+    def pedantic(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
         if kwargs is None:
             kwargs = {}
 

@@ -34,6 +34,7 @@ Changelog
   * Tracers are automatically disabled when running the test function (like coverage tracers).
   * Fixed an issue with calibration code getting stuck.
 
+* Added `pedantic mode` via ``benchmark.pedantic()``. This mode disables calibration and allows a setup function.
 
 
 2.5.0 (2015-06-20)
