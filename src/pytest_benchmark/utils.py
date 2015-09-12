@@ -35,7 +35,7 @@ class SecondsDecimal(Decimal):
         return float(super(SecondsDecimal, self).__str__())
 
     def __str__(self):
-        return "{0}s".format(time_format(float(super(SecondsDecimal, self).__str__())))
+        return "{0}s".format(format_time(float(super(SecondsDecimal, self).__str__())))
 
     @property
     def as_string(self):
@@ -205,7 +205,7 @@ def time_unit(value):
         return "", 1.
 
 
-def time_format(value):
+def format_time(value):
     unit, adjustment = time_unit(value)
     return "{0:.2f}{1:s}".format(value * adjustment, unit)
 

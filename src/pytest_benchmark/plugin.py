@@ -27,6 +27,7 @@ from .utils import SecondsDecimal
 from .utils import cached_property
 from .utils import first_or_false
 from .utils import format_dict
+from .utils import format_time
 from .utils import get_commit_id
 from .utils import get_commit_info
 from .utils import get_current_time
@@ -38,7 +39,6 @@ from .utils import parse_save
 from .utils import parse_seconds
 from .utils import parse_sort
 from .utils import parse_timer
-from .utils import time_format
 from .utils import time_unit
 
 NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
@@ -295,7 +295,7 @@ class BenchmarkFixture(object):
                 runner(loops_range)
         for _ in XRANGE(rounds):
             stats.update(runner(loops_range))
-        self._logger.debug("  Ran for %ss." % time_format(time.time() - run_start), yellow=True, bold=True)
+        self._logger.debug("  Ran for %ss." % format_time(time.time() - run_start), yellow=True, bold=True)
 
         return function_to_benchmark(*args, **kwargs)
 
@@ -375,9 +375,9 @@ class BenchmarkFixture(object):
         min_time = max(self._min_time, timer_precision * 100)
         min_time_estimate = min_time / 10
         self._logger.debug("")
-        self._logger.debug("  Timer precision: %ss" % time_format(timer_precision), yellow=True, bold=True)
+        self._logger.debug("  Timer precision: %ss" % format_time(timer_precision), yellow=True, bold=True)
         self._logger.debug("  Calibrating to target round %ss; will estimate when reaching %ss." % (
-            time_format(min_time), time_format(min_time_estimate)), yellow=True, bold=True)
+            format_time(min_time), format_time(min_time_estimate)), yellow=True, bold=True)
 
         loops = 1
         while True:
