@@ -32,7 +32,6 @@ from .utils import get_commit_id
 from .utils import get_commit_info
 from .utils import get_current_time
 from .utils import load_timer
-from .utils import parse_compare
 from .utils import parse_compare_fail
 from .utils import parse_rounds
 from .utils import parse_save
@@ -139,9 +138,8 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-compare",
-        metavar="NUM", type=parse_compare,
-        help="Compare the current run against run NUM or the latest saved run if unspecified. Use "
-             "'--benchmark-compare=-' to compare against last run."
+        metavar="NUM", nargs="?", default=[], const=True,
+        help="Compare the current run against run NUM or the latest saved run if unspecified."
     )
     group.addoption(
         "--benchmark-compare-fail",

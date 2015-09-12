@@ -151,11 +151,6 @@ def parse_compare_fail(string,
 
     raise argparse.ArgumentTypeError("Could not parse value.")
 
-def parse_compare(string):
-    if string == '-':
-        return True
-    else:
-        return string
 
 def parse_timer(string):
     return str(load_timer(string))

@@ -54,10 +54,9 @@ def test_help(testdir):
         "                        Use this to make --benchmark-save and --benchmark-",
         "                        autosave include all the timing data, not just the",
         "                        stats.",
-        "  --benchmark-compare=NUM",
+        "  --benchmark-compare=[NUM]",
         "                        Compare the current run against run NUM or the latest",
-        "                        saved run if unspecified. Use '--benchmark-compare=-'",
-        "                        to compare against last run.",
+        "                        saved run if unspecified.",
         "  --benchmark-compare-fail=EXPR=[EXPR=...]",
         "                        Fail test if performance regresses according to given",
         "                        EXPR (eg: min:5% or mean:0.001 for number of seconds).",
@@ -448,12 +447,12 @@ def test_compare(testdir):
 def test_compare_last(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
-    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=-',
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare',
                                '--benchmark-compare-fail=min:0.1', test)
     result.stderr.fnmatch_lines([
         "Comparing against benchmark 0001_unversioned_*.json:",
     ])
-    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=-',
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare',
                                '--benchmark-compare-fail=min:1%', test)
     result.stderr.fnmatch_lines([
         "Comparing against benchmark 0001_unversioned_*.json:",
@@ -472,7 +471,7 @@ def test_compare_non_existing(testdir):
 
 def test_compare_no_files(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
-    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', test, '--benchmark-compare=-')
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', test, '--benchmark-compare')
     result.stderr.fnmatch_lines([
          " WARNING: Can't compare. No benchmark files in '*'. Expected files matching *.json."
          " Can't load the previous benchmark."
