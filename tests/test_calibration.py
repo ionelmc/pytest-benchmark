@@ -30,32 +30,35 @@ def test_calibrate_slow(benchmark):
     benchmark(partial(time.sleep, 0.00001))
 
 
-MIN = 0.0000001
-
-
-def Timer():
+def timer(ratio, step, additive):
     t = 0
     slowmode = False
-    c = 0
     while 1:
-        slowmode |= bool((yield t))
-        if slowmode:
-            import sys
-            sys.stdout.write('[%s]' % c)
-
-            if 0:
-                t += 74.9
-            else:
-                t += MIN * 100.1
-            c += 1
+        if additive:
+            slowmode |= bool((yield t))
         else:
-            t += MIN
+            slowmode = bool((yield t))
+        if slowmode:
+            t += step * ratio
+        else:
+            t += step
 
 
-timer = Timer()
+@pytest.mark.parametrize("minimum", [1, 0.01, 0.000000001, 0.0000000001, 1.000000000000001])
+@pytest.mark.parametrize("skew_ratio", [0, 1, -1])
+@pytest.mark.parametrize("additive", [True, False])
+@pytest.mark.benchmark(max_time=0, min_rounds=1, calibration_precision=100)
+def test_calibrate_stuck(benchmark, minimum, additive, skew_ratio):
+    # if skew_ratio:
+    #     ratio += skew_ratio * SKEW
+    if skew_ratio > 0:
+        ratio = 50 * 1.000000000000001
+    elif skew_ratio < 0:
+        ratio = 50 / 1.000000000000001
+    else:
+        ratio = 50
+    t = timer(ratio, minimum, additive)
+    benchmark._timer = partial(next, t)
+    benchmark._min_time = minimum
+    benchmark(t.send, True)
 
-
-@pytest.mark.benchmark(max_time=MIN, min_rounds=1, min_time=MIN, timer=timer.__next__)
-def test_calibrate_very_slow(benchmark):
-    benchmark._get_precision(benchmark._timer)
-    benchmark(timer.send, True)

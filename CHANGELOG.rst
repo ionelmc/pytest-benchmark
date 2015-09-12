@@ -11,6 +11,8 @@ Changelog
 * Added performance regression checks (the ``--benchmark-compare-fail`` command line argument).
 * Added possibility to group by various parts of test name (the `--benchmark-compare-group-by`` command line argument).
 * Added historical plotting (the ``--benchmark-histogram`` command line argument).
+* Added option to fine tune the calibration (the ``--benchmark-calibration-precision`` command line argument and
+  ``calibration_precision`` marker option).
 
 * Changed ``benchmark_weave`` to no longer be a context manager. Cleanup is performed automatically. *BACKWARDS INCOMPATIBLE*
 * Added ``benchmark.weave`` method (alternative to ``benchmark_weave`` fixture).

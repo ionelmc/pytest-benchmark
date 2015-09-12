@@ -4,7 +4,6 @@ from __future__ import print_function
 import argparse
 import gc
 import json
-import math
 import platform
 import sys
 import time
@@ -12,6 +11,7 @@ import traceback
 from collections import defaultdict
 from datetime import datetime
 from distutils.version import StrictVersion
+from math import ceil
 
 import py
 import pytest
@@ -54,7 +54,7 @@ def pytest_addoption(parser):
     group = parser.getgroup("benchmark")
     group.addoption(
         "--benchmark-min-time",
-        metavar="SECONDS", type=parse_seconds, default="0.000025",
+        metavar="SECONDS", type=parse_seconds, default="0.000005",
         help="Minimum time per round in seconds. Default: %(default)r"
     )
     group.addoption(
@@ -82,6 +82,12 @@ def pytest_addoption(parser):
         "--benchmark-timer",
         metavar="FUNC", type=parse_timer, default=str(NameWrapper(default_timer)),
         help="Timer to use when measuring time. Default: %(default)r"
+    )
+    group.addoption(
+        "--benchmark-calibration-precision",
+        metavar="NUM", type=int, default=10,
+        help="Precision to use when calibrating number of iterations. Precision of 10 will make the timer look 10 times"
+             " more accurate, at a cost of less precise measure of deviations. Default: %(default)r"
     )
     group.addoption(
         "--benchmark-warmup",
@@ -221,7 +227,7 @@ class BenchmarkFixture(object):
             return cls._precisions.setdefault(timer, compute_timer_precision(timer))
 
     def __init__(self, node, disable_gc, timer, min_rounds, min_time, max_time, warmup, warmup_iterations,
-                 add_stats, logger, group=None):
+                 calibration_precision, add_stats, logger, group=None):
         self.name = node.name
         self.fullname = node._nodeid
         self.param = node.callspec.id if hasattr(node, 'callspec') else None
@@ -233,6 +239,7 @@ class BenchmarkFixture(object):
         self._max_time = float(max_time)
         self._min_time = float(min_time)
         self._add_stats = add_stats
+        self._calibration_precision = calibration_precision
         self._warmup = warmup and warmup_iterations
         self._logger = logger
         self._cleanup_callbacks = []
@@ -281,8 +288,9 @@ class BenchmarkFixture(object):
         duration, iterations, loops_range = self._calibrate_timer(runner)
 
         # Choose how many time we must repeat the test
-        rounds = int(math.ceil(self._max_time / duration))
+        rounds = int(ceil(self._max_time / duration))
         rounds = max(rounds, self._min_rounds)
+        rounds = min(rounds, sys.maxsize)
 
         stats = self._make_stats(iterations)
 
@@ -372,8 +380,8 @@ class BenchmarkFixture(object):
 
     def _calibrate_timer(self, runner):
         timer_precision = self._get_precision(self._timer)
-        min_time = max(self._min_time, timer_precision * 100)
-        min_time_estimate = min_time / 10
+        min_time = max(self._min_time, timer_precision * self._calibration_precision)
+        min_time_estimate = min_time * 5 / self._calibration_precision
         self._logger.debug("")
         self._logger.debug("  Timer precision: %ss" % format_time(timer_precision), yellow=True, bold=True)
         self._logger.debug("  Calibrating to target round %ss; will estimate when reaching %ss." % (
@@ -392,17 +400,18 @@ class BenchmarkFixture(object):
                     warmup_rounds += 1
                     warmup_iterations += loops
                 self._logger.debug("    Warmup: %ss (%s x %s iterations)." % (
-                    time_format(time.time() - warmup_start),
+                    format_time(time.time() - warmup_start),
                     warmup_rounds, loops
                 ))
 
-            self._logger.debug("    Measured %s iterations: %ss." % (loops, time_format(duration)), yellow=True)
-            if duration / min_time >= 0.75:
+            self._logger.debug("    Measured %s iterations: %ss." % (loops, format_time(duration)), yellow=True)
+            self._logger.info("%.150fs\n >= \n%.150fs\n == %s" % (duration, min_time, duration >= min_time))
+            if duration >= min_time:
                 break
 
             if duration >= min_time_estimate:
                 # coarse estimation of the number of loops
-                loops = int(round(min_time * loops / duration) + 1)
+                loops = int(ceil(min_time * loops / duration))
                 self._logger.debug("    Estimating %s iterations." % loops, green=True)
                 if loops == 1:
                     # If we got a single loop then bail early - nothing to calibrate if the the
@@ -472,6 +481,7 @@ class BenchmarkSession(object):
             min_rounds=config.getoption("benchmark_min_rounds"),
             max_time=SecondsDecimal(config.getoption("benchmark_max_time")),
             timer=load_timer(config.getoption("benchmark_timer")),
+            calibration_precision=config.getoption("benchmark_calibration_precision"),
             disable_gc=config.getoption("benchmark_disable_gc"),
             warmup=config.getoption("benchmark_warmup"),
             warmup_iterations=config.getoption("benchmark_warmup_iterations"),
@@ -946,7 +956,7 @@ def pytest_runtest_setup(item):
         for name in marker.kwargs:
             if name not in (
                     "max_time", "min_rounds", "min_time", "timer", "group", "disable_gc", "warmup",
-                    "warmup_iterations"):
+                    "warmup_iterations", "calibration_precision"):
                 raise ValueError("benchmark mark can't have %r keyword argument." % name)
 
 

@@ -49,7 +49,7 @@ Commandline options
 ``py.test`` command-line options:
 
   --benchmark-min-time=SECONDS
-                        Minimum time per round in seconds. Default: '0.000025'
+                        Minimum time per round in seconds. Default: '0.000005'
   --benchmark-max-time=SECONDS
                         Maximum time to spend in a benchmark in seconds.
                         Default: '1.0'
@@ -63,7 +63,13 @@ Commandline options
                         'fullname', 'func', 'fullfunc' or 'param'. Default:
                         'group'
   --benchmark-timer=FUNC
-                        Timer to use when measuring time. Default: 'time.time'
+                        Timer to use when measuring time. Default:
+                        'time.perf_counter'
+  --benchmark-calibration-precision=NUM
+                        Precision to use when calibrating number of
+                        iterations. Precision of 10 will make the timer look
+                        10 times more accurate, at a cost of less precise
+                        measure of deviations. Default: 10
   --benchmark-warmup    Activates warmup. Will run the test function up to
                         number of times in the calibration phase. See
                         `--benchmark-warmup-iterations`. Note: Even the warmup
