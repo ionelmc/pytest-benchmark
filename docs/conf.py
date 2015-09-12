@@ -20,13 +20,12 @@ if os.getenv('SPELLCHECK'):
 
 source_suffix = '.rst'
 master_doc = 'index'
-project = u'pytest-benchmark'
-year = u'2014-2015'
-author = u'Ionel Cristian M\u0103rie\u0219'
+project = 'pytest-benchmark'
+year = '2014-2015'
+author = 'Ionel Cristian Mărieș'
 copyright = '{0}, {1}'.format(year, author)
-version = release = u'2.5.0'
+version = release = '2.5.0'
 html_theme = "sphinx_py3doc_enhanced_theme"
-
 
 pygments_style = 'trac'
 templates_path = ['.']
