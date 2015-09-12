@@ -24,7 +24,9 @@ Reference
     :param kwargs: Named arguments to the ``target`` function.
 
     :type  setup: callable
-    :param setup: The setup function can also return the arguments for the function (in case you need to create new arguments every time).
+    :param setup: A function to call right before calling the ``target`` function.
+
+        The setup function can also return the arguments for the function (in case you need to create new arguments every time).
 
         .. sourcecode:: python
 
@@ -51,7 +53,8 @@ Reference
         The default value (``1``) is **unsafe** for benchmarking very fast functions that take under 100μs (100 microseconds).
 
     :type  warmup_rounds: int
-    :param warmup_rounds:
+    :param warmup_rounds: Number of warmup rounds.
+
         Set to non-zero to enable warmup. Warmup will run with the same number of iterations.
 
         Example: if you have ``iteration=5, warmup_rounds=10`` then your function will be called 50 times.
