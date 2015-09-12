@@ -1,12 +1,7 @@
 import json
 import platform
 
-from pytest import mark, importorskip
-
-try:
-    import statistics
-except ImportError:
-    statistics = None
+import pytest
 
 pytest_plugins = 'pytester',
 platform
@@ -379,7 +374,7 @@ def test_bogus_max_time(testdir):
     ])
 
 
-@mark.skipif("platform.python_implementation() == 'PyPy'")
+@pytest.mark.skipif("platform.python_implementation() == 'PyPy'")
 def test_pep418_timer(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules',
@@ -645,7 +640,7 @@ def test_bogus_sort(testdir):
 
 
 def test_xdist(testdir):
-    importorskip('xdist')
+    pytest.importorskip('xdist')
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '-n', '1', test)
     result.stderr.fnmatch_lines([
@@ -903,13 +898,4 @@ def test_only_benchmarks(testdir):
         "test_fast        *",
         "------*",
         "*====== 4 passed, 1 skipped* seconds ======*",
-    ])
-
-
-@mark.skipif("statistics is not None")
-def test_missing_statistics(testdir):
-    test = testdir.makepyfile(SIMPLE_TEST)
-    result = testdir.runpytest('--benchmark-max-time=0.0000001', test)
-    result.stderr.fnmatch_lines([
-        "*Please install statistics - pytest-benchmark needs it on Python older than 3.4.",
     ])
