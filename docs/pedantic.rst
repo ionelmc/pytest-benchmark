@@ -12,33 +12,46 @@ people that know exactly what they need it's called "pedantic".
 Reference
 ---------
 
-Arguments (and defaults):
+.. py:function:: benchmark.pedantic(target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1)
 
-* ``args=()``
-* ``kwargs=None``
-* ``setup=None``
-* ``rounds=1`` - Number of rounds to run.
-* ``warmup_rounds=0`` - Set to non-zero to enable warmup.
+    :type  target: callable
+    :param target: Function to benchmark.
 
-  Warmup will run with the same number of iterations. Eg: if you have ``iteration=5, warmup_rounds=10`` then your
-  function will be called 50 times.
-* ``iterations=1`` - Number of iterations.
+    :type  args: list or tuple
+    :param args: Positional arguments to the ``target`` function.
 
-  In the non-pedantic mode (eg: ``benchmark(stuff, 1, 2, 3, foo='bar')``) the ``iterations``is automatically chosen
-  depending on what timer you have. In other words, be careful in what you chose for this option.
+    :type  kwargs: dict
+    :param kwargs: Named arguments to the ``target`` function.
 
-  The default value (``1``) is **unsafe** for benchmarking very fast functions that take under 100μs (100 microseconds).
+    :type  setup: callable
+    :param setup: The setup function can also return the arguments for the function (in case you need to create new arguments every time).
 
-Using a ``setup`` function
---------------------------
+        .. sourcecode:: python
 
-The setup function can also return the arguments for the function (in case you need to create new arguments every time).
+            def test_with_setup(benchmark):
+                def setup():
+                    # can optionally return a (args, kwargs) tuple
+                    return (1, 2, 3), {'foo': 'bar'}
+                benchmark.pedantic(stuff, setup=setup, rounds=100)
 
-.. sourcecode:: python
+        .. note::
 
-    def test_with_setup(benchmark):
-        benchmark.pedantic(stuff, setup=setup, rounds=100)
+            if you use a ``setup`` function then you cannot use the ``args``, ``kwargs`` and ``iterations`` options.
 
-Note that if you use a ``setup`` function then you cannot use the ``args``, ``kwargs`` and ``iterations`` options.
+    :type  rounds: int
+    :param rounds: Number of rounds to run.
 
+    :type  iterations: int
+    :param iterations:
+        Number of iterations.
 
+        In the non-pedantic mode (eg: ``benchmark(stuff, 1, 2, 3, foo='bar')``) the ``iterations`` is automatically chosen
+        depending on what timer you have. In other words, be careful in what you chose for this option.
+
+        The default value (``1``) is **unsafe** for benchmarking very fast functions that take under 100μs (100 microseconds).
+
+    :type  warmup_rounds: int
+    :param warmup_rounds:
+        Set to non-zero to enable warmup. Warmup will run with the same number of iterations.
+
+        Example: if you have ``iteration=5, warmup_rounds=10`` then your function will be called 50 times.

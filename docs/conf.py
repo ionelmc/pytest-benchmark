@@ -38,5 +38,8 @@ html_sidebars = {
 html_short_title = '%s-%s' % (project, version)
 html_theme_options = {
     'githuburl': 'https://github.com/ionelmc/pytest-benchmark/',
-    'appendcss': 'div.body code.descclassname { display: none }',
+    'appendcss': '''
+        div.body code.descclassname { display: none }
+        div.body #pedantic-mode code.descclassname { display: inline-block }
+    ''',
 }
