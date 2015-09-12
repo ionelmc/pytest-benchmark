@@ -66,7 +66,7 @@ pytest-benchmark
     :target: https://pypi.python.org/pypi/pytest-benchmark
 
 .. |supported-implementations| image:: https://img.shields.io/pypi/implementation/pytest-benchmark.svg?style=flat
-    :alt: Supported imlementations
+    :alt: Supported implementations
     :target: https://pypi.python.org/pypi/pytest-benchmark
 
 .. |scrutinizer| image:: https://img.shields.io/scrutinizer/g/ionelmc/pytest-benchmark/master.svg?style=flat
