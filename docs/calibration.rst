@@ -13,3 +13,6 @@ In other words, a `round` is a set of runs that are averaged together, those res
 result tables. The default settings will try to keep the round small enough (so that you get to see variance), but not too
 small, because then you have the timer calibration issues illustrated above (your test function is faster than or as fast
 as the resolution of the timer).
+
+By default ``pytest-benchmark`` will try to run your function as many times needed to fit a `10 x TIMER_RESOLUTION`
+period. You can fine tune this with the ``--benchmark-min-time`` and ``--benchmark-calibration-precision`` options.

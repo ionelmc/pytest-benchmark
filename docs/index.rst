@@ -10,6 +10,7 @@ Contents:
 
    usage
    calibration
+   pedantic
    comparing
 
    hooks
