@@ -2,8 +2,8 @@
 Changelog
 =========
 
-3.0.0 (?????????)
------------------
+3.0.0a1 (2015-09-13)
+--------------------
 
 * Added JSON report saving (the ``--benchmark-json`` command line arguments).
 * Added benchmark data storage(the ``--benchmark-save`` and ``--benchmark-autosave`` command line arguments).
