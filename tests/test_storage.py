@@ -12,6 +12,7 @@ from pytest_benchmark.plugin import pytest_benchmark_compare_machine_info
 from pytest_benchmark.plugin import pytest_benchmark_generate_json
 from pytest_benchmark.plugin import pytest_benchmark_group_stats
 from pytest_benchmark.utils import PercentageRegressionCheck, DifferenceRegressionCheck
+from pytest_benchmark import plugin
 
 pytest_plugins = "pytester"
 
@@ -245,7 +246,8 @@ def test_compare_2(sess, LineMatcher):
     ])
 
 @freeze_time("2015-08-15T00:04:18.687119")
-def test_save_json(sess, tmpdir):
+def test_save_json(sess, tmpdir, monkeypatch):
+    monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = False
     sess.autosave = False
     sess.json = TestFriendlyFileLike()
@@ -256,7 +258,8 @@ def test_save_json(sess, tmpdir):
 
 
 @freeze_time("2015-08-15T00:04:18.687119")
-def test_save_with_name(sess, tmpdir):
+def test_save_with_name(sess, tmpdir, monkeypatch):
+    monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = 'foobar'
     sess.autosave = True
     sess.json = None
@@ -269,7 +272,8 @@ def test_save_with_name(sess, tmpdir):
 
 
 @freeze_time("2015-08-15T00:04:18.687119")
-def test_save_no_name(sess, tmpdir):
+def test_save_no_name(sess, tmpdir, monkeypatch):
+    monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = True
     sess.autosave = True
     sess.json = None
@@ -282,7 +286,8 @@ def test_save_no_name(sess, tmpdir):
 
 
 @freeze_time("2015-08-15T00:04:18.687119")
-def test_autosave(sess, tmpdir):
+def test_autosave(sess, tmpdir, monkeypatch):
+    monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = False
     sess.autosave = True
     sess.json = None
