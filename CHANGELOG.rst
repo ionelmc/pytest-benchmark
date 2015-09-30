@@ -2,6 +2,11 @@
 Changelog
 =========
 
+3.0.0a2 (2015-09-30)
+--------------------
+
+* Fixed accidental output capturing caused by capturemanager misuse.
+
 3.0.0a1 (2015-09-13)
 --------------------
 
