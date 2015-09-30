@@ -424,41 +424,25 @@ class BenchmarkFixture(object):
 
 class Logger(object):
     def __init__(self, verbose, capman):
-        if capman:
-            capman.suspendcapture(in_=True)
         self.verbose = verbose
         self.term = py.io.TerminalWriter(file=sys.stderr)
-        if capman:
-            capman.resumecapture()
         self.capman = capman
 
     def warn(self, text):
-        if self.capman:
-            self.capman.suspendcapture(in_=True)
         self.term.sep("-", red=True, bold=True)
         self.term.write(" WARNING: ", red=True, bold=True)
         self.term.line(text, red=True)
         self.term.sep("-", red=True, bold=True)
-        if self.capman:
-            self.capman.resumecapture()
 
     def error(self, text):
-        if self.capman:
-            self.capman.suspendcapture(in_=True)
         self.term.sep("-", red=True, bold=True)
         self.term.line(text, red=True, bold=True)
         self.term.sep("-", red=True, bold=True)
-        if self.capman:
-            self.capman.resumecapture()
 
     def info(self, text, **kwargs):
-        if self.capman:
-            self.capman.suspendcapture(in_=True)
         if not kwargs or kwargs == {'bold': True}:
             kwargs['purple'] = True
         self.term.line(text, **kwargs)
-        if self.capman:
-            self.capman.resumecapture()
 
     def debug(self, text, **kwargs):
         if self.verbose:
@@ -831,7 +815,6 @@ def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info
 
 def pytest_runtest_call(item, __multicall__):
     bs = item.config._benchmarksession
-
     fixure = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
     if isinstance(fixure, BenchmarkFixture):
         if bs.skip:
@@ -959,8 +942,8 @@ def pytest_runtest_setup(item):
                 raise ValueError("benchmark mark can't have %r keyword argument." % name)
 
 
-def pytest_configure(config, __multicall__):
-    __multicall__.execute()  # force the other plugins to initialise
+@pytest.mark.trylast  # force the other plugins to initialise, fixes issue with capture not being properly initialised
+def pytest_configure(config):
     config.addinivalue_line("markers", "benchmark: mark a test with custom benchmark settings.")
     config._benchmarksession = BenchmarkSession(config)
     config.pluginmanager.register(config._benchmarksession, "pytest-benchmark")
