@@ -446,7 +446,11 @@ class Logger(object):
 
     def debug(self, text, **kwargs):
         if self.verbose:
+            if self.capman:
+                self.capman.suspendcapture(in_=True)
             self.info(text, **kwargs)
+            if self.capman:
+                self.capman.resumecapture()
 
 
 class BenchmarkSession(object):
