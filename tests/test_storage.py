@@ -136,6 +136,7 @@ def test_regression_checks(sess):
     sess.display_results_table(Namespace(
         write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
         write=lambda text, **opts: output.write(force_text(text)),
+        rewrite=lambda text, **opts: output.write(force_text(text)),
     ))
     print(output.getvalue())
     assert sess.performance_regressions == [
@@ -165,6 +166,7 @@ def test_regression_checks_inf(sess):
     sess.display_results_table(Namespace(
         write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
         write=lambda text, **opts: output.write(force_text(text)),
+        rewrite=lambda text, **opts: output.write(force_text(text)),
     ))
     print(output.getvalue())
     assert sess.performance_regressions == [
@@ -188,6 +190,7 @@ def test_compare(sess, LineMatcher):
     sess.display_results_table(Namespace(
         write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
         write=lambda text, **opts: output.write(force_text(text)),
+        rewrite=lambda text, **opts: output.write(force_text(text)),
     ))
     print(output.getvalue())
     LineMatcher(output.getvalue().splitlines()).fnmatch_lines([
@@ -221,6 +224,7 @@ def test_compare_2(sess, LineMatcher):
         write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
         section=lambda line, **opts: output.write(force_text(line) + u'\n'),
         write=lambda text, **opts: output.write(force_text(text)),
+        rewrite=lambda text, **opts: output.write(force_text(text)),
     ))
     print(output.getvalue())
     LineMatcher(output.getvalue().splitlines()).fnmatch_lines([
