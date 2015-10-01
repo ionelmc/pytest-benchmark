@@ -40,6 +40,7 @@ from .utils import parse_save
 from .utils import parse_seconds
 from .utils import parse_sort
 from .utils import parse_timer
+from .utils import report_progress
 from .utils import time_unit
 
 NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
@@ -429,12 +430,14 @@ class Logger(object):
         self.capman = capman
 
     def warn(self, text):
+        self.term.line("")
         self.term.sep("-", red=True, bold=True)
         self.term.write(" WARNING: ", red=True, bold=True)
         self.term.line(text, red=True)
         self.term.sep("-", red=True, bold=True)
 
     def error(self, text):
+        self.term.line("")
         self.term.sep("-", red=True, bold=True)
         self.term.line(text, red=True, bold=True)
         self.term.sep("-", red=True, bold=True)
@@ -690,19 +693,24 @@ class BenchmarkSession(object):
         tr.write_line("    timer: %(timer)s" % dict(timer=timer), yellow=True)
         tr.write_line("")
 
-        for group, benchmarks in self.config.hook.pytest_benchmark_group_stats(
-                config=self.config,
-                benchmarks=self.benchmarks,
-                group_by=self.group_by
-        ):
+        tr.rewrite("Computing stats ...", black=True, bold=True)
+        groups = self.config.hook.pytest_benchmark_group_stats(
+            config=self.config,
+            benchmarks=self.benchmarks,
+            group_by=self.group_by
+        )
+        for line, (group, benchmarks) in report_progress(groups, tr, "Computing stats ... group {pos}/{total}"):
             worst = {}
             best = {}
             if len(benchmarks) > 1:
-                for prop in "min", "max", "mean", "stddev":
-                    worst[prop] = max(bench[prop] for bench in benchmarks)
-                    best[prop] = min(bench[prop] for bench in benchmarks)
-            for prop in "outliers", "rounds", "iterations":
-                worst[prop] = max(benchmark[prop] for benchmark in benchmarks)
+                for line, prop in report_progress(("min", "max", "mean", "stddev"), tr, "{line}: {value}", line=line):
+                    worst[prop] = max(bench[prop] for _, bench in report_progress(
+                        benchmarks, tr, "{line} ({pos}/{total})", line=line))
+                    best[prop] = min(bench[prop] for _, bench in report_progress(
+                        benchmarks, tr, "{line} ({pos}/{total})", line=line))
+            for line, prop in report_progress(("outliers", "rounds", "iterations"), tr, "{line}: {value}", line=line):
+                worst[prop] = max(benchmark[prop] for _, benchmark in report_progress(
+                    benchmarks, tr, "{line} ({pos}/{total})", line=line))
 
             unit, adjustment = time_unit(best.get(self.sort, benchmarks[0][self.sort]))
             labels = {
@@ -738,6 +746,7 @@ class BenchmarkSession(object):
                 )
                 for prop in ("min", "max", "mean", "stddev", "median", "iqr", "outliers", "rounds", "iterations")
             )
+            tr.rewrite("")
             tr.write_line(
                 (" benchmark%(name)s: %(count)s tests " % dict(
                     count=len(benchmarks),

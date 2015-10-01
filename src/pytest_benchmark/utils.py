@@ -253,3 +253,14 @@ def clonefunc(f):
 
 def format_dict(obj):
     return "{%s}" % ", ".join("%s: %s" % (k, json.dumps(v)) for k, v in sorted(obj.items()))
+
+
+def report_progress(iterable, terminal_reporter, format_string, **kwargs):
+    total = len(iterable)
+
+    def progress_reporting_wrapper():
+        for pos, item in enumerate(iterable):
+            string = format_string.format(pos=pos + 1, total=total, value=item, **kwargs)
+            terminal_reporter.rewrite(string, black=True, bold=True)
+            yield string, item
+    return progress_reporting_wrapper()
