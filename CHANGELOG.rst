@@ -2,6 +2,11 @@
 Changelog
 =========
 
+3.0.0a3 (2015-10-02)
+--------------------
+
+* Added progress indication when computing stats.
+
 3.0.0a2 (2015-09-30)
 --------------------
 
