@@ -2,6 +2,12 @@
 Changelog
 =========
 
+3.0.0a4 (2015-10-08)
+--------------------
+
+* Changed how failures to get commit info are handled: now they are soft failures. Previously it made the whole
+  test suite fail, just because you didn't have ``git/hg`` installed.
+
 3.0.0a3 (2015-10-02)
 --------------------
 
