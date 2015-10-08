@@ -88,6 +88,7 @@ def get_commit_info():
             'error': repr(exc),
         }
 
+
 def get_current_time():
     return datetime.now().strftime("%Y%m%d_%H%M%S")
 
