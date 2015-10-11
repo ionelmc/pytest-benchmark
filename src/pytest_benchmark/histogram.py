@@ -46,10 +46,7 @@ def make_plot(bench_name, table, compare, current, annotations, sort):
             else:
                 colors.append("#000000")
 
-    unit, adjustment = time_unit(min(
-        row[sort]
-        for _, row in table
-    ))
+    unit, adjustment = time_unit(min(row[sort] for _, row in table))
 
     minimum = int(min(row["min"] * adjustment for _, row in table))
     maximum = int(max(
