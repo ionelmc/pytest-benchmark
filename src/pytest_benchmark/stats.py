@@ -1,7 +1,8 @@
 from __future__ import division
-from bisect import bisect_left, bisect_right
 
 import statistics
+from bisect import bisect_left
+from bisect import bisect_right
 
 from .utils import cached_property
 

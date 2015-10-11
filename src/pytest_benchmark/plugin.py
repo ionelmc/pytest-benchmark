@@ -44,10 +44,12 @@ from .utils import report_progress
 from .utils import time_unit
 
 try:
+    import statistics
+except (ImportError, SyntaxError):
+    statistics = False
+    statistics_error = traceback.format_exc()
+else:
     from .stats import Stats
-except ImportError as exc:
-    Stats = False
-    Stats_exc = exc
 
 NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
 ALIGNED_NUMBER_FMT = "{0:>{1},.4f}{2:>{3}}" if sys.version_info[:2] > (2, 6) else "{0:>{1}.4f}{2:>{3}}"
@@ -491,9 +493,9 @@ class BenchmarkSession(object):
             self.skip = True
         if hasattr(config, "slaveinput"):
             self.skip = True
-        if not Stats:
+        if not statistics:
             self.logger.warn(
-                "Benchmarks are automatically skipped because we could not import `statistics`: %r" % Stats_exc
+                "Benchmarks are automatically skipped because we could not import `statistics`\n\n%s" % statistics_error
             )
             self.skip = True
 
