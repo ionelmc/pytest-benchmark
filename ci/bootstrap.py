@@ -41,6 +41,7 @@ if __name__ == "__main__":
     )
 
     tox_environments = [line.strip() for line in subprocess.check_output(['tox', '--listenvs']).splitlines()]
+    tox_environments = [line for line in tox_environments if line not in ['clean', 'report', 'docs', 'check']]
     for name in os.listdir(join("ci", "templates")):
         with open(join(base_path, name), "w") as fh:
             fh.write(jinja.get_template(name).render(tox_environments=tox_environments))

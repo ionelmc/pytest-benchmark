@@ -6,8 +6,6 @@ env:
     LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
   matrix:
     - TOXENV=check
-    - TOXENV=clean
-    - TOXENV=check
     - TOXENV=2.6-pytest28-nodist-cover,coveralls,codecov
     - TOXENV=2.6-pytest28-nodist-nocov
     - TOXENV=2.6-pytest28-xdist-cover,coveralls,codecov
@@ -56,8 +54,6 @@ env:
     - TOXENV=pypy-pytest27-nodist-nocov
     - TOXENV=pypy-pytest27-xdist-cover,coveralls,codecov
     - TOXENV=pypy-pytest27-xdist-nocov
-    - TOXENV=report
-    - TOXENV=docs
 before_install:
   - python --version
   - uname -a
