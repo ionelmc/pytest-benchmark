@@ -14,6 +14,7 @@ from distutils.version import StrictVersion
 from math import ceil
 from math import copysign
 from math import isinf
+import operator
 
 import py
 import pytest
@@ -858,6 +859,8 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
             groups[bench.param].append(bench)
         else:
             raise NotImplementedError("Unsupported grouping %r." % group_by)
+    for grouped_benchmarks in groups.values():
+        grouped_benchmarks.sort(key=operator.attrgetter("fullname" if "full" in group_by else "name"))
     return sorted(groups.items(), key=lambda pair: pair[0] or "")
 
 
