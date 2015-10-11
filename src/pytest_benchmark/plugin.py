@@ -22,7 +22,6 @@ import pytest
 from . import __version__
 from .compat import INT
 from .compat import XRANGE
-from .stats import Stats
 from .timers import compute_timer_precision
 from .timers import default_timer
 from .utils import NameWrapper
@@ -43,6 +42,12 @@ from .utils import parse_sort
 from .utils import parse_timer
 from .utils import report_progress
 from .utils import time_unit
+
+try:
+    from .stats import Stats
+except ImportError as exc:
+    Stats = False
+    Stats_exc = exc
 
 NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
 ALIGNED_NUMBER_FMT = "{0:>{1},.4f}{2:>{3}}" if sys.version_info[:2] > (2, 6) else "{0:>{1}.4f}{2:>{3}}"
@@ -486,6 +491,12 @@ class BenchmarkSession(object):
             self.skip = True
         if hasattr(config, "slaveinput"):
             self.skip = True
+        if not Stats:
+            self.logger.warn(
+                "Benchmarks are automatically skipped because we could not import `statistics`: %r" % Stats_exc
+            )
+            self.skip = True
+
         self.only = config.getoption("benchmark_only")
         self.sort = config.getoption("benchmark_sort")
         if self.skip and self.only:
