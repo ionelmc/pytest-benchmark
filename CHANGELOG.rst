@@ -2,6 +2,13 @@
 Changelog
 =========
 
+3.0.0b1 (2015-10-12)
+--------------------
+
+* Tests are sorted alphabetically in the results table.
+* Failing to import `statistics` doesn't create hard failures anymore. Benchmarks are automatically skipped if import
+  failure occurs. This would happen on Python 3.2 (or earlier Python 3).
+
 3.0.0a4 (2015-10-08)
 --------------------
 
