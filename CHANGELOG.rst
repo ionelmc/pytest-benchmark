@@ -2,7 +2,7 @@
 Changelog
 =========
 
-3.0.0b1 (2015-10-12)
+3.0.0b1 (2015-10-13)
 --------------------
 
 * Tests are sorted alphabetically in the results table.
