@@ -36,10 +36,10 @@ class Namespace(object):
         return self.__dict__[item]
 
 
-class TestFriendlyFileLike(BytesIO):
+class LooseFileLike(BytesIO):
     def close(self):
         value = self.getvalue()
-        super(TestFriendlyFileLike, self).close()
+        super(LooseFileLike, self).close()
         self.getvalue = lambda: value
 
 
@@ -254,7 +254,7 @@ def test_save_json(sess, tmpdir, monkeypatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = False
     sess.autosave = False
-    sess.json = TestFriendlyFileLike()
+    sess.json = LooseFileLike()
     sess.save_data = False
     sess.handle_saving()
     assert tmpdir.listdir() == []
