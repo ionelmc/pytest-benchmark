@@ -17,8 +17,8 @@ from math import isinf
 import operator
 
 import py
-import pytest
 
+import pytest
 from . import __version__
 from .compat import INT
 from .compat import XRANGE
@@ -841,20 +841,26 @@ def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info
             )
         )
 
+if hasattr(pytest, 'hookimpl'):
+    _hookwrapper = pytest.hookimpl(hookwrapper=True)
+else:
+    _hookwrapper = pytest.mark.hookwrapper
 
-def pytest_runtest_call(item, __multicall__):
+
+@_hookwrapper
+def pytest_runtest_call(item):
     bs = item.config._benchmarksession
     fixure = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
     if isinstance(fixure, BenchmarkFixture):
         if bs.skip:
             pytest.skip("Skipping benchmark (--benchmark-skip active).")
         else:
-            __multicall__.execute()
+            yield
     else:
         if bs.only:
             pytest.skip("Skipping non-benchmark (--benchmark-only active).")
         else:
-            __multicall__.execute()
+            yield
 
 
 def pytest_benchmark_group_stats(config, benchmarks, group_by):
