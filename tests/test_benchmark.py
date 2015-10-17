@@ -45,7 +45,7 @@ def test_help(testdir):
         "  --benchmark-verbose   Dump diagnostic and progress information.",
         "  --benchmark-disable-gc",
         "                        Disable GC during benchmarks.",
-        "  --benchmark-skip      Skip running any benchmarks.",
+        "  --benchmark-skip      Skip running any tests that contain benchmarks.",
         "  --benchmark-only      Only run benchmarks.",
         "  --benchmark-save=NAME",
         "                        Save the current run into 'STORAGE-PATH/counter-",
@@ -322,6 +322,15 @@ def test_conflict_between_only_and_skip(testdir):
     result = testdir.runpytest('--benchmark-only', '--benchmark-skip', test)
     result.stderr.fnmatch_lines([
         "ERROR: Can't have both --benchmark-only and --benchmark-skip options."
+    ])
+
+
+def test_conflict_between_only_and_disable(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--benchmark-only', '--benchmark-disable', test)
+    result.stderr.fnmatch_lines([
+        "ERROR: Can't have both --benchmark-only and --benchmark-disable options. Note that --benchmark-disable is "
+        "automatically activated if xdist is on or you're missing the statistics dependency."
     ])
 
 
@@ -647,7 +656,7 @@ def test_xdist(testdir):
     result = testdir.runpytest('--doctest-modules', '-n', '1', test)
     result.stderr.fnmatch_lines([
         "------*",
-        " WARNING: Benchmarks are automatically skipped because xdist plugin is active.Benchmarks cannot be performed "
+        " WARNING: Benchmarks are automatically disabled because xdist plugin is active.Benchmarks cannot be performed "
         "reliably in a parallelized environment.",
         "------*",
     ])
@@ -852,6 +861,20 @@ def test_skip(testdir):
         "test_skip.py::test_xfast SKIPPED",
         "test_skip.py::test_fast SKIPPED",
         "*====== 1 passed, 4 skipped* seconds ======*",
+    ])
+
+
+def test_disable(testdir):
+    test = testdir.makepyfile(BASIC_TEST)
+    result = testdir.runpytest('-vv', '--doctest-modules', '--benchmark-disable', test)
+    result.stdout.fnmatch_lines([
+        "*collected 5 items",
+        "test_disable.py::*test_disable PASSED",
+        "test_disable.py::test_slow PASSED",
+        "test_disable.py::test_slower PASSED",
+        "test_disable.py::test_xfast PASSED",
+        "test_disable.py::test_fast PASSED",
+        "*====== 5 passed * seconds ======*",
     ])
 
 

@@ -125,7 +125,13 @@ def pytest_addoption(parser):
     group.addoption(
         "--benchmark-skip",
         action="store_true", default=False,
-        help="Skip running any benchmarks."
+        help="Skip running any tests that contain benchmarks."
+    )
+    group.addoption(
+        "--benchmark-disable",
+        action="store_true", default=False,
+        help="Disable benchmarks. Benchmarked functions are only ran once and no stats are reported. Use this is you "
+             "want to run the test but don't do any benchmarking."
     )
     group.addoption(
         "--benchmark-only",
@@ -238,9 +244,10 @@ class BenchmarkFixture(object):
             return cls._precisions.setdefault(timer, compute_timer_precision(timer))
 
     def __init__(self, node, disable_gc, timer, min_rounds, min_time, max_time, warmup, warmup_iterations,
-                 calibration_precision, add_stats, logger, group=None):
+                 calibration_precision, add_stats, logger, disable, group=None):
         self.name = node.name
         self.fullname = node._nodeid
+        self.disable = disable
         self.param = node.callspec.id if hasattr(node, 'callspec') else None
         self.group = group
 
@@ -294,28 +301,28 @@ class BenchmarkFixture(object):
         return stats
 
     def __call__(self, function_to_benchmark, *args, **kwargs):
-        runner = self._make_runner(function_to_benchmark, args, kwargs)
+        if not self.disable:
+            runner = self._make_runner(function_to_benchmark, args, kwargs)
 
-        duration, iterations, loops_range = self._calibrate_timer(runner)
+            duration, iterations, loops_range = self._calibrate_timer(runner)
 
-        # Choose how many time we must repeat the test
-        rounds = int(ceil(self._max_time / duration))
-        rounds = max(rounds, self._min_rounds)
-        rounds = min(rounds, sys.maxsize)
+            # Choose how many time we must repeat the test
+            rounds = int(ceil(self._max_time / duration))
+            rounds = max(rounds, self._min_rounds)
+            rounds = min(rounds, sys.maxsize)
 
-        stats = self._make_stats(iterations)
+            stats = self._make_stats(iterations)
 
-        self._logger.debug("  Running %s rounds x %s iterations ..." % (rounds, iterations), yellow=True, bold=True)
-        run_start = time.time()
-        if self._warmup:
-            warmup_rounds = min(rounds, max(1, int(self._warmup / iterations)))
-            self._logger.debug("  Warmup %s rounds x %s iterations ..." % (warmup_rounds, iterations))
-            for _ in XRANGE(warmup_rounds):
-                runner(loops_range)
-        for _ in XRANGE(rounds):
-            stats.update(runner(loops_range))
-        self._logger.debug("  Ran for %ss." % format_time(time.time() - run_start), yellow=True, bold=True)
-
+            self._logger.debug("  Running %s rounds x %s iterations ..." % (rounds, iterations), yellow=True, bold=True)
+            run_start = time.time()
+            if self._warmup:
+                warmup_rounds = min(rounds, max(1, int(self._warmup / iterations)))
+                self._logger.debug("  Warmup %s rounds x %s iterations ..." % (warmup_rounds, iterations))
+                for _ in XRANGE(warmup_rounds):
+                    runner(loops_range)
+            for _ in XRANGE(rounds):
+                stats.update(runner(loops_range))
+            self._logger.debug("  Ran for %ss." % format_time(time.time() - run_start), yellow=True, bold=True)
         return function_to_benchmark(*args, **kwargs)
 
     def pedantic(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
@@ -344,6 +351,10 @@ class BenchmarkFixture(object):
                         raise TypeError("Can't use `args` or `kwargs` if `setup` returns the arguments.")
                     args, kwargs = maybe_args
             return args, kwargs
+
+        if self.disable:
+            args, kwargs = make_arguments()
+            return target(*args, **kwargs)
 
         stats = self._make_stats(iterations)
         loops_range = XRANGE(iterations) if iterations > 1 else None
@@ -487,24 +498,31 @@ class BenchmarkSession(object):
             warmup_iterations=config.getoption("benchmark_warmup_iterations"),
         )
         self.skip = config.getoption("benchmark_skip")
+        self.disable = config.getoption("benchmark_disable")
+
         if config.getoption("dist", "no") != "no" and not self.skip:
             self.logger.warn(
-                "Benchmarks are automatically skipped because xdist plugin is active."
+                "Benchmarks are automatically disabled because xdist plugin is active."
                 "Benchmarks cannot be performed reliably in a parallelized environment.",
             )
-            self.skip = True
+            self.disable = True
         if hasattr(config, "slaveinput"):
-            self.skip = True
+            self.disable = True
         if not statistics:
             self.logger.warn(
-                "Benchmarks are automatically skipped because we could not import `statistics`\n\n%s" % statistics_error
+                "Benchmarks are automatically disabled because we could not import `statistics`\n\n%s" %
+                statistics_error
             )
-            self.skip = True
+            self.disable = True
 
         self.only = config.getoption("benchmark_only")
         self.sort = config.getoption("benchmark_sort")
         if self.skip and self.only:
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
+        if self.disable and self.only:
+            raise pytest.UsageError(
+                "Can't have both --benchmark-only and --benchmark-disable options. Note that --benchmark-disable is "
+                "automatically activated if xdist is on or you're missing the statistics dependency.")
         self._benchmarks = []
         self.group_by = config.getoption("benchmark_group_by")
         self.save = config.getoption("benchmark_save")
@@ -945,7 +963,7 @@ def benchmark(request):
     bs = request.config._benchmarksession
 
     if bs.skip:
-        pytest.skip("Benchmarks are disabled.")
+        pytest.skip("Benchmarks are skipped (--benchmark-skip was used).")
     else:
         node = request.node
         marker = node.get_marker("benchmark")
@@ -956,6 +974,7 @@ def benchmark(request):
             node,
             add_stats=bs._benchmarks.append,
             logger=bs.logger,
+            disable=bs.disable,
             **dict(bs.options, **options)
         )
         request.addfinalizer(fixture._cleanup)

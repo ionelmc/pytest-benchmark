@@ -1,6 +1,14 @@
-
 Changelog
 =========
+
+3.0.0b2 (2015-10-17)
+---------------------
+
+* Add a ``--benchmark-disable`` option. It's automatically activated when xdist is on
+* When xdist is on or `statistics` can't be imported then ``--benchmark-disable`` is automatically activated (instead
+  of ``--benchmark-skip``). *BACKWARDS INCOMPATIBLE*
+* Replace the deprecated ``__multicall__`` with the new hookwrapper system.
+* Improved description for ``--benchmark-max-time``.
 
 3.0.0b1 (2015-10-13)
 --------------------
@@ -37,7 +45,8 @@ Changelog
 * Added option to fine tune the calibration (the ``--benchmark-calibration-precision`` command line argument and
   ``calibration_precision`` marker option).
 
-* Changed ``benchmark_weave`` to no longer be a context manager. Cleanup is performed automatically. *BACKWARDS INCOMPATIBLE*
+* Changed ``benchmark_weave`` to no longer be a context manager. Cleanup is performed automatically. *BACKWARDS
+  INCOMPATIBLE*
 * Added ``benchmark.weave`` method (alternative to ``benchmark_weave`` fixture).
 
 * Added new hooks to allow customization:
