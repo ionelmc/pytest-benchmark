@@ -70,7 +70,9 @@ def pytest_addoption(parser):
     group.addoption(
         "--benchmark-max-time",
         metavar="SECONDS", type=parse_seconds, default="1.0",
-        help="Maximum time to spend in a benchmark in seconds. Default: %(default)r"
+        help="Maximum run time per test - it will be repeated until this total time is reached. It may be "
+             "exceeded if test function is very slow or --benchmark-min-rounds is large (it takes precedence). "
+             "Default: %(default)r"
     )
     group.addoption(
         "--benchmark-min-rounds",

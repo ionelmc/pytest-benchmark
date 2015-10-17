@@ -51,8 +51,10 @@ Commandline options
   --benchmark-min-time=SECONDS
                         Minimum time per round in seconds. Default: '0.000005'
   --benchmark-max-time=SECONDS
-                        Maximum time to spend in a benchmark in seconds.
-                        Default: '1.0'
+                        Maximum run time per test - it will be repeated until
+                        this total time is reached. It may be exceeded if test
+                        function is very slow or --benchmark-min-rounds is
+                        large (it takes precedence). Default: '1.0'
   --benchmark-min-rounds=NUM
                         Minimum rounds, even if total time would exceed
                         `--max-time`. Default: 5
