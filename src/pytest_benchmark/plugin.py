@@ -637,6 +637,7 @@ class BenchmarkSession(object):
 
     def handle_loading(self):
         if self.compare_file:
+            self.compare_name = self.compare_file.basename.split('_')[0]
             with self.compare_file.open('rU') as fh:
                 try:
                     compared_benchmark = json.load(fh)
@@ -782,6 +783,18 @@ class BenchmarkSession(object):
                     len(NUMBER_FMT.format(bench[prop] * adjustment))
                     for bench in benchmarks
                 ))
+            if self.compare_file:
+                for bench in benchmarks:
+                    if bench.fullname in self.compare_mapping:
+                        stats = self.compare_mapping[bench.fullname]["stats"]
+                        for prop in "min", "max", "mean", "stddev", "median", "iqr":
+                            new = bench[prop]
+                            old = stats[prop]
+                            val = new - old
+                            fmt = NUMBER_FMT.format(abs(val * adjustment))
+                            widths[prop] = max(widths[prop], len(fmt) + 1)
+                        for prop in "outliers", "rounds", "iterations":
+                            widths[prop] = max(widths[prop], len(str(stats[prop])) + 1)
 
             rpadding = 12 if self.compare_file else 0
             labels_line = labels["name"].ljust(widths["name"]) + "".join(
@@ -819,9 +832,15 @@ class BenchmarkSession(object):
                     self.display_compare_row(tr, widths, adjustment, bench, self.compare_mapping[bench.fullname])
 
             tr.write_line("-" * len(labels_line), yellow=True)
-            tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
-                          "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
             tr.write_line("")
+        tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
+                      "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
+        if self.compare_file:
+            tr.write_line('(d) Delta to %s: "difference (percent%%)"' % self.compare_name, bold=True, black=True)
+            tr.write_line('            where: difference = current - previous', bold=True, black=True)
+            tr.write_line('                   percent = current / previous * 100 - 100 ', bold=True, black=True)
+
+
 
     def display_compare_row(self, tr, widths, adjustment, bench, compare_to):
         stats = compare_to["stats"]
@@ -832,15 +851,18 @@ class BenchmarkSession(object):
                 if fail:
                     self.performance_regressions.append((bench.fullname, fail))
 
-        tr.write("".ljust(widths["name"]))
+        tr.write(u"(d){0}".format(self.compare_name).ljust(widths["name"]), black=True, bold=True)
         for prop in "min", "max", "mean", "stddev", "median", "iqr":
             new = bench[prop]
             old = stats[prop]
             val = new - old
             fmt = NUMBER_FMT.format(abs(val * adjustment))
-            percent = abs(new / old * 100 - 100) if old else copysign(float("inf"), val)
+            percent = abs(old / new * 100) if new else copysign(float("inf"), val)
+
             if val > 0:
                 if percent > 1000000:
+                    tr.write("{0:>{1}}".format("+" + fmt, widths[prop]), red=True)
+
                     tr.write("{0:>{1}}".format("+" + fmt, widths[prop]), red=True)
                     if isinf(percent):
                         tr.write(" (infinite%)", red=True, bold=True)
@@ -851,7 +873,7 @@ class BenchmarkSession(object):
             elif val < 0:
                 tr.write(
                     "{0:>{1}} {2:<11}".format("-" + fmt, widths[prop],
-                                              "(%i%%)" % abs(new / old * 100 - 100) if old else "inf"),
+                                              "({0}%)".format(abs(int(old / new * 100)) if new else "inf")),
                     green=True
                 )
             else:
