@@ -61,7 +61,23 @@ class PerformanceRegression(pytest.UsageError):
 
 
 def pytest_report_header(config):
-    return "benchmark: %s" % __version__
+    bs = config._benchmarksession
+
+    return ("benchmark: %(version)s (defaults:"
+            " timer=%(timer)s"
+            " disable_gc=%(disable_gc)s"
+            " min_rounds=%(min_rounds)s"
+            " min_time=%(min_time)s"
+            " max_time=%(max_time)s"
+            " calibration_precision=%(calibration_precision)s"
+            " warmup=%(warmup)s"
+            " warmup_iterations=%(warmup_iterations)s"
+            ")") % dict(
+        bs.options,
+        version=__version__,
+        timer=bs.options.get("timer"),
+    )
+
 
 
 def pytest_addoption(parser):
@@ -723,14 +739,6 @@ class BenchmarkSession(object):
         yield HISTOGRAM_CURRENT, current.json()
 
     def display_results_table(self, tr):
-        timer = self.options.get("timer")
-        tr.write_line("Benchmark global settings:", yellow=True)
-        tr.write_line("    minimum number of rounds: %(min_rounds)s" % self.options, yellow=True)
-        tr.write_line("    minimum time per rounds: %(min_time)s" % self.options, yellow=True)
-        tr.write_line("    maximum total time per test: %(max_time)s" % self.options, yellow=True)
-        tr.write_line("    timer: %(timer)s" % dict(timer=timer), yellow=True)
-        tr.write_line("")
-
         tr.rewrite("Computing stats ...", black=True, bold=True)
         groups = self.config.hook.pytest_benchmark_group_stats(
             config=self.config,
