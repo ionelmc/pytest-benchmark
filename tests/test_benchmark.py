@@ -198,7 +198,7 @@ def test_group_by_func(testdir):
     test_y = testdir.makepyfile(test_y=GROUPING_TEST)
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'func', test_x, test_y)
     result.stdout.fnmatch_lines([
-        '*', '*', '*', '*', '*',
+        '*', '*', '*', '*',
         "* benchmark 'test_a': 4 tests *",
         'Name (time in ?s)     *',
         '----------------------*',
@@ -207,7 +207,7 @@ def test_group_by_func(testdir):
         'test_a[[]1[]]             *',
         'test_a[[]1[]]             *',
         '----------------------*',
-        '*', '*',
+        '*',
         "* benchmark 'test_b': 4 tests *",
         'Name (time in ?s)     *',
         '----------------------*',
