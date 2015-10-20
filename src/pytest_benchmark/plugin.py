@@ -60,6 +60,10 @@ class PerformanceRegression(pytest.UsageError):
     pass
 
 
+def pytest_report_header(config):
+    return "benchmark: %s" % __version__
+
+
 def pytest_addoption(parser):
     group = parser.getgroup("benchmark")
     group.addoption(
