@@ -740,6 +740,7 @@ class BenchmarkSession(object):
         yield HISTOGRAM_CURRENT, current.json()
 
     def display_results_table(self, tr):
+        tr.write_line("")
         tr.rewrite("Computing stats ...", black=True, bold=True)
         groups = self.config.hook.pytest_benchmark_group_stats(
             config=self.config,
