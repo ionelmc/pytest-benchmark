@@ -1,6 +1,15 @@
 Changelog
 =========
 
+3.0.0b3 (2015-10-22)
+---------------------
+
+* Changed how comparison is displayed in the result table. Now previous runs are shown as normal runs and names get a
+  special suffix indicating the origin. Eg: "test_foobar (NOW)" or "test_foobar (0123)".
+* Fixed sorting in the result table. Now rows are sorted by the sort column, and then by name.
+* Show the plugin version in the header section.
+* Moved the display of default options in the header section.
+
 3.0.0b2 (2015-10-17)
 ---------------------
 
