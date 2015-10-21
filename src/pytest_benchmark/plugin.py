@@ -78,7 +78,6 @@ def pytest_report_header(config):
     )
 
 
-
 def pytest_addoption(parser):
     group = parser.getgroup("benchmark")
     group.addoption(
