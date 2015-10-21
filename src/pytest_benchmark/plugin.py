@@ -12,7 +12,6 @@ from collections import defaultdict
 from datetime import datetime
 from distutils.version import StrictVersion
 from math import ceil
-from math import copysign
 from math import isinf
 import operator
 
@@ -52,7 +51,7 @@ else:
     from .stats import Stats
 
 NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
-ALIGNED_NUMBER_FMT = "{0:>{1},.4f}{2:>{3}}" if sys.version_info[:2] > (2, 6) else "{0:>{1}.4f}{2:>{3}}"
+ALIGNED_NUMBER_FMT = "{0:>{1},.4f}{2:<{3}}" if sys.version_info[:2] > (2, 6) else "{0:>{1}.4f}{2:<{3}}"
 HISTOGRAM_CURRENT = "now"
 
 
@@ -739,6 +738,24 @@ class BenchmarkSession(object):
 
         yield HISTOGRAM_CURRENT, current.json()
 
+    def apply_compare(self, benchmarks, compare_name, compare_mapping):
+        result = []
+        for bench in benchmarks:
+            if bench.fullname in compare_mapping:
+                stats = compare_mapping[bench.fullname]["stats"]
+                result.extend([
+                    dict(bench.json(include_data=False), name="{0} ({1})".format(bench.name, "NOW")),
+                    dict(stats, name="{0} ({1})".format(bench.name, compare_name)),
+                ])
+                if self.compare_fail:
+                    for check in self.compare_fail:
+                        fail = check.fails(bench, stats)
+                        if fail:
+                            self.performance_regressions.append((bench.fullname, fail))
+            else:
+                result.append(bench)
+        return result
+
     def display_results_table(self, tr):
         tr.write_line("")
         tr.rewrite("Computing stats ...", black=True, bold=True)
@@ -748,14 +765,18 @@ class BenchmarkSession(object):
             group_by=self.group_by
         )
         for line, (group, benchmarks) in report_progress(groups, tr, "Computing stats ... group {pos}/{total}"):
+            if self.compare_file:
+                benchmarks = self.apply_compare(benchmarks, self.compare_name, self.compare_mapping)
+            benchmarks = sorted(benchmarks, key=operator.itemgetter(self.sort))
+
             worst = {}
             best = {}
-            if len(benchmarks) > 1:
-                for line, prop in report_progress(("min", "max", "mean", "stddev"), tr, "{line}: {value}", line=line):
-                    worst[prop] = max(bench[prop] for _, bench in report_progress(
-                        benchmarks, tr, "{line} ({pos}/{total})", line=line))
-                    best[prop] = min(bench[prop] for _, bench in report_progress(
-                        benchmarks, tr, "{line} ({pos}/{total})", line=line))
+            solo = len(benchmarks) == 1
+            for line, prop in report_progress(("min", "max", "mean", "median", "iqr", "stddev"), tr, "{line}: {value}", line=line):
+                worst[prop] = max(bench[prop] for _, bench in report_progress(
+                    benchmarks, tr, "{line} ({pos}/{total})", line=line))
+                best[prop] = min(bench[prop] for _, bench in report_progress(
+                    benchmarks, tr, "{line} ({pos}/{total})", line=line))
             for line, prop in report_progress(("outliers", "rounds", "iterations"), tr, "{line}: {value}", line=line):
                 worst[prop] = max(benchmark[prop] for _, benchmark in report_progress(
                     benchmarks, tr, "{line} ({pos}/{total})", line=line))
@@ -774,7 +795,7 @@ class BenchmarkSession(object):
                 "outliers": "Outliers(*)",
             }
             widths = {
-                "name": 3 + max(len(labels["name"]), max(len(benchmark.name) for benchmark in benchmarks)),
+                "name": 3 + max(len(labels["name"]), max(len(benchmark["name"]) for benchmark in benchmarks)),
                 "rounds": 2 + max(len(labels["rounds"]), len(str(worst["rounds"]))),
                 "iterations": 2 + max(len(labels["iterations"]), len(str(worst["iterations"]))),
                 "outliers": 2 + max(len(labels["outliers"]), len(str(worst["outliers"]))),
@@ -784,20 +805,8 @@ class BenchmarkSession(object):
                     len(NUMBER_FMT.format(bench[prop] * adjustment))
                     for bench in benchmarks
                 ))
-            if self.compare_file:
-                for bench in benchmarks:
-                    if bench.fullname in self.compare_mapping:
-                        stats = self.compare_mapping[bench.fullname]["stats"]
-                        for prop in "min", "max", "mean", "stddev", "median", "iqr":
-                            new = bench[prop]
-                            old = stats[prop]
-                            val = new - old
-                            fmt = NUMBER_FMT.format(abs(val * adjustment))
-                            widths[prop] = max(widths[prop], len(fmt) + 1)
-                        for prop in "outliers", "rounds", "iterations":
-                            widths[prop] = max(widths[prop], len(str(stats[prop])) + 1)
 
-            rpadding = 12 if self.compare_file else 0
+            rpadding = 0 if solo else 8
             labels_line = labels["name"].ljust(widths["name"]) + "".join(
                 labels[prop].rjust(widths[prop]) + (
                     " " * rpadding
@@ -818,71 +827,41 @@ class BenchmarkSession(object):
             tr.write_line("-" * len(labels_line), yellow=True)
 
             for bench in benchmarks:
-                tr.write(bench.name.ljust(widths["name"]))
+                tr.write(bench["name"].ljust(widths["name"]))
                 for prop in "min", "max", "mean", "stddev", "median", "iqr":
                     tr.write(
-                        ALIGNED_NUMBER_FMT.format(bench[prop] * adjustment, widths[prop], "", rpadding),
-                        green=bench[prop] == best.get(prop),
-                        red=bench[prop] == worst.get(prop),
+                        ALIGNED_NUMBER_FMT.format(
+                            bench[prop] * adjustment,
+                            widths[prop],
+                            self.compute_baseline_scale(best[prop], bench[prop], rpadding),
+                            rpadding
+                        ),
+                        green=not solo and bench[prop] == best.get(prop),
+                        red=not solo and bench[prop] == worst.get(prop),
                         bold=True,
                     )
                 for prop in "outliers", "rounds", "iterations":
                     tr.write("{0:>{1}}".format(bench[prop], widths[prop]))
                 tr.write("\n")
-                if self.compare_file and bench.fullname in self.compare_mapping:
-                    self.display_compare_row(tr, widths, adjustment, bench, self.compare_mapping[bench.fullname])
-
             tr.write_line("-" * len(labels_line), yellow=True)
             tr.write_line("")
         tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
                       "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
-        if self.compare_file:
-            tr.write_line('(d) Delta to %s: "difference (percent%%)"' % self.compare_name, bold=True, black=True)
-            tr.write_line('            where: difference = current - previous', bold=True, black=True)
-            tr.write_line('                   percent = current / previous * 100 - 100 ', bold=True, black=True)
 
+    def compute_baseline_scale(self, baseline, value, width):
+        if not width:
+            return ""
+        if value == baseline:
+            return " (1.0)".ljust(width)
 
-
-    def display_compare_row(self, tr, widths, adjustment, bench, compare_to):
-        stats = compare_to["stats"]
-
-        if self.compare_fail:
-            for check in self.compare_fail:
-                fail = check.fails(bench, stats)
-                if fail:
-                    self.performance_regressions.append((bench.fullname, fail))
-
-        tr.write(u"(d){0}".format(self.compare_name).ljust(widths["name"]), black=True, bold=True)
-        for prop in "min", "max", "mean", "stddev", "median", "iqr":
-            new = bench[prop]
-            old = stats[prop]
-            val = new - old
-            fmt = NUMBER_FMT.format(abs(val * adjustment))
-            percent = abs(old / new * 100) if new else copysign(float("inf"), val)
-
-            if val > 0:
-                if percent > 1000000:
-                    tr.write("{0:>{1}}".format("+" + fmt, widths[prop]), red=True)
-
-                    tr.write("{0:>{1}}".format("+" + fmt, widths[prop]), red=True)
-                    if isinf(percent):
-                        tr.write(" (infinite%)", red=True, bold=True)
-                    else:
-                        tr.write(" (>1000000%)", red=True, bold=True)
-                else:
-                    tr.write("{0:>{1}} {2:<11}".format("+" + fmt, widths[prop], "(%i%%)" % percent), red=True)
-            elif val < 0:
-                tr.write(
-                    "{0:>{1}} {2:<11}".format("-" + fmt, widths[prop],
-                                              "({0}%)".format(abs(int(old / new * 100)) if new else "inf")),
-                    green=True
-                )
+        scale = abs(value / baseline) if baseline else float("inf")
+        if scale > 1000:
+            if isinf(scale):
+                return " (inf)".ljust(width)
             else:
-                tr.write("{0:>{1}}            ".format("NC", widths[prop]), bold=True, black=True)
-
-        for prop in "outliers", "rounds", "iterations":
-            tr.write("{0:>{1}}".format(stats[prop], widths[prop]))
-        tr.write("\n")
+                return " (>1000.0)".ljust(width)
+        else:
+            return " ({0:.2f})".format(scale).ljust(width)
 
 
 def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark):
