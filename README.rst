@@ -178,8 +178,7 @@ Histogram (``--benchmark-histogram``):
 
 ..
 
-    Also, it has `nice tooltips
-    <https://cdn.rawgit.com/ionelmc/pytest-benchmark/94860cc8f47aed7ba4f9c7e1380c2195342613f6/docs/sample-tests_test_normal.py_test_xfast_parametrized%5B0%5D.svg>`_.
+    Also, it has `nice tooltips <https://cdn.rawgit.com/ionelmc/pytest-benchmark/master/docs/sample.svg>`_.
 
 Development
 ===========
