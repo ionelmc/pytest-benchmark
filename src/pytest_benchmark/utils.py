@@ -285,5 +285,3 @@ def report_progress(iterable, terminal_reporter, format_string, **kwargs):
             terminal_reporter.rewrite(string, black=True, bold=True)
             yield string, item
     return progress_reporting_wrapper()
-
-
