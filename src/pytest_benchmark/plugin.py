@@ -745,7 +745,9 @@ class BenchmarkSession(object):
             if bench.fullname in compare_mapping:
                 stats = compare_mapping[bench.fullname]["stats"]
                 result.extend([
-                    dict(bench.json(include_data=False), name="{0} ({1})".format(bench.name, "NOW")),
+                    dict(bench.json(include_data=False),
+                         name="{0} ({1})".format(bench.name, "NOW"),
+                         iterations=bench.iterations),
                     dict(stats, name="{0} ({1})".format(bench.name, compare_name)),
                 ])
                 if self.compare_fail:
