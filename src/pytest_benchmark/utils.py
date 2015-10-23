@@ -4,6 +4,7 @@ from __future__ import print_function
 import argparse
 import json
 import os
+import platform
 import re
 import subprocess
 import sys
@@ -93,11 +94,9 @@ def get_current_time():
     return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
-def first_or_false(obj):
+def first_or_value(obj, value):
     if obj:
         value, = obj
-    else:
-        value = False
 
     return value
 
@@ -156,7 +155,19 @@ def parse_compare_fail(string,
         elif g['difference']:
             return DifferenceRegressionCheck(g['field'], float(g['difference']))
 
-    raise argparse.ArgumentTypeError("Could not parse value.")
+    raise argparse.ArgumentTypeError("Could not parse value: %r." % string)
+
+
+def parse_warmup(string):
+    string = string.lower().strip()
+    if string == "auto":
+        return platform.python_implementation() == "PyPy"
+    elif string in ["off", "false", "no"]:
+        return False
+    elif string in ["on", "true", "yes", ""]:
+        return True
+    else:
+        raise argparse.ArgumentTypeError("Could not parse value: %r." % string)
 
 
 def parse_timer(string):
@@ -164,8 +175,11 @@ def parse_timer(string):
 
 
 def parse_sort(string):
+    string = string.lower().strip()
     if string not in ("min", "max", "mean", "stddev"):
-        raise argparse.ArgumentTypeError("Value for --benchmark-sort must be one of: 'min', 'max', 'mean' or 'stddev'.")
+        raise argparse.ArgumentTypeError(
+            "Unacceptable value: %s. "
+            "Value for --benchmark-sort must be one of: 'min', 'max', 'mean' or 'stddev'. " % string)
     return string
 
 
@@ -271,3 +285,5 @@ def report_progress(iterable, terminal_reporter, format_string, **kwargs):
             terminal_reporter.rewrite(string, black=True, bold=True)
             yield string, item
     return progress_reporting_wrapper()
+
+

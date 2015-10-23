@@ -1,6 +1,10 @@
 import subprocess
+
 from pytest import mark
-from pytest_benchmark.utils import clonefunc, get_commit_info
+
+from pytest_benchmark.utils import clonefunc
+from pytest_benchmark.utils import get_commit_info
+from pytest_benchmark.utils import parse_warmup
 
 pytest_plugins = 'pytester',
 
@@ -46,3 +50,14 @@ username = you <you@example.com>
 
     assert out.get('dirty') == True
     assert 'id' in out
+
+
+def test_parse_warmup():
+    assert parse_warmup('yes') == True
+    assert parse_warmup('on') == True
+    assert parse_warmup('true') == True
+    assert parse_warmup('off') == False
+    assert parse_warmup('off') == False
+    assert parse_warmup('no') == False
+    assert parse_warmup('') == True
+    assert parse_warmup('auto') in [True, False]

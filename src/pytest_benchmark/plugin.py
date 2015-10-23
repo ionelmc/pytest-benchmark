@@ -4,6 +4,7 @@ from __future__ import print_function
 import argparse
 import gc
 import json
+import operator
 import platform
 import sys
 import time
@@ -13,7 +14,6 @@ from datetime import datetime
 from distutils.version import StrictVersion
 from math import ceil
 from math import isinf
-import operator
 
 import py
 
@@ -26,7 +26,7 @@ from .timers import default_timer
 from .utils import NameWrapper
 from .utils import SecondsDecimal
 from .utils import cached_property
-from .utils import first_or_false
+from .utils import first_or_value
 from .utils import format_dict
 from .utils import format_time
 from .utils import get_commit_id
@@ -39,6 +39,7 @@ from .utils import parse_save
 from .utils import parse_seconds
 from .utils import parse_sort
 from .utils import parse_timer
+from .utils import parse_warmup
 from .utils import report_progress
 from .utils import time_unit
 
@@ -121,9 +122,11 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-warmup",
-        action="store_true", default=False,
+        metavar="KIND", nargs="?", default=[], const="auto",
+        type=parse_warmup,
         help="Activates warmup. Will run the test function up to number of times in the calibration phase. "
-             "See `--benchmark-warmup-iterations`. Note: Even the warmup phase obeys --benchmark-max-time."
+             "See `--benchmark-warmup-iterations`. Note: Even the warmup phase obeys --benchmark-max-time. "
+             "Available KIND: 'auto', 'off', 'on'. Default: 'auto' (automatically activate on PyPy)."
     )
     group.addoption(
         "--benchmark-warmup-iterations",
@@ -512,7 +515,7 @@ class BenchmarkSession(object):
             timer=load_timer(config.getoption("benchmark_timer")),
             calibration_precision=config.getoption("benchmark_calibration_precision"),
             disable_gc=config.getoption("benchmark_disable_gc"),
-            warmup=config.getoption("benchmark_warmup"),
+            warmup=first_or_value(config.getoption("benchmark_warmup"), False),
             warmup_iterations=config.getoption("benchmark_warmup_iterations"),
         )
         self.skip = config.getoption("benchmark_skip")
@@ -552,7 +555,7 @@ class BenchmarkSession(object):
         self.performance_regressions = []
         self.storage = py.path.local(config.getoption("benchmark_storage"))
         self.storage.ensure(dir=1)
-        self.histogram = first_or_false(config.getoption("benchmark_histogram"))
+        self.histogram = first_or_value(config.getoption("benchmark_histogram"), False)
 
     @property
     def benchmarks(self):

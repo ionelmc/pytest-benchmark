@@ -1,6 +1,12 @@
 Changelog
 =========
 
+3.0.0rc1 (2015-10-25)
+---------------------
+
+* Changed ``--benchmark-warmup`` to take optional value and automatically activate on PyPy (default value is ``auto``).
+  *MAY BE BACKWARDS INCOMPATIBLE*
+
 3.0.0b3 (2015-10-22)
 ---------------------
 

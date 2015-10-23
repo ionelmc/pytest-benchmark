@@ -72,10 +72,13 @@ Commandline options
                         iterations. Precision of 10 will make the timer look
                         10 times more accurate, at a cost of less precise
                         measure of deviations. Default: 10
-  --benchmark-warmup    Activates warmup. Will run the test function up to
+  --benchmark-warmup=KIND
+                        Activates warmup. Will run the test function up to
                         number of times in the calibration phase. See
                         `--benchmark-warmup-iterations`. Note: Even the warmup
-                        phase obeys --benchmark-max-time.
+                        phase obeys --benchmark-max-time. Available KIND:
+                        'auto', 'off', 'on'. Default: 'auto' (automatically
+                        activate on PyPy).
   --benchmark-warmup-iterations=NUM
                         Max number of iterations to run in the warmup phase.
                         Default: 100000
