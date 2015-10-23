@@ -122,8 +122,7 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-warmup",
-        metavar="KIND", nargs="?", default=[], const="auto",
-        type=parse_warmup,
+        metavar="KIND", nargs="?", default=parse_warmup("auto"), type=parse_warmup,
         help="Activates warmup. Will run the test function up to number of times in the calibration phase. "
              "See `--benchmark-warmup-iterations`. Note: Even the warmup phase obeys --benchmark-max-time. "
              "Available KIND: 'auto', 'off', 'on'. Default: 'auto' (automatically activate on PyPy)."
@@ -515,7 +514,7 @@ class BenchmarkSession(object):
             timer=load_timer(config.getoption("benchmark_timer")),
             calibration_precision=config.getoption("benchmark_calibration_precision"),
             disable_gc=config.getoption("benchmark_disable_gc"),
-            warmup=first_or_value(config.getoption("benchmark_warmup"), False),
+            warmup=config.getoption("benchmark_warmup"),
             warmup_iterations=config.getoption("benchmark_warmup_iterations"),
         )
         self.skip = config.getoption("benchmark_skip")
