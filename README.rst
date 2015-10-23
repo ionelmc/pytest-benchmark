@@ -88,37 +88,75 @@ Installation
 Documentation
 =============
 
-`pytest-benchmark.readthedocs.org <http://pytest-benchmark.readthedocs.org/en/stable/>`_
+Available at: `pytest-benchmark.readthedocs.org <http://pytest-benchmark.readthedocs.org/en/stable/>`_.
 
 Examples
 ========
 
-This plugin provides a `benchmark` fixture. This fixture is a callable object that will benchmark
-any function passed to it.
+This plugin provides a `benchmark` fixture. This fixture is a callable object that will benchmark any function passed
+to it.
 
 Example:
 
 .. code-block:: python
 
     def something(duration=0.000001):
-        # Code to be measured
-        return time.sleep(duration)
+        """
+        Function that needs some serious benchmarking.
+        """
+        time.sleep(duration)
+        # You may return anything you want, like the result of a computation
+        return 123
 
     def test_my_stuff(benchmark):
         # benchmark something
         result = benchmark(something)
 
         # Extra code, to verify that the run completed correctly.
-        # Note: this code is not measured.
-        assert result is None
+        # Sometimes you may want to check the result, fast functions
+        # are no good if they return incorrect results :-)
+        assert result == 123
 
 You can also pass extra arguments:
 
 .. code-block:: python
 
     def test_my_stuff(benchmark):
-        result = benchmark(time.sleep, 0.02)
+        benchmark(time.sleep, 0.02)
 
+Or even keyword arguments:
+
+.. code-block:: python
+
+    def test_my_stuff(benchmark):
+        benchmark(time.sleep, duration=0.02)
+
+Another pattern seen in the wild, that is not recommended for micro-benchmarks (very fast code) but may be convenient:
+
+.. code-block:: python
+
+    def test_my_stuff(benchmark):
+        @benchmark
+        def something():  # unnecessary function call
+            time.sleep(0.000001)
+
+A better way is to just benchmark the final function:
+
+.. code-block:: python
+
+    def test_my_stuff(benchmark):
+        benchmark(time.sleep, 0.000001)  # way more accurate results!
+
+If you need to do fine control over how the benchmark is run (like a `setup` function, exact control of `iterations` and
+`rounds`) there's a special mode - pedantic_:
+
+.. code-block:: python
+
+    def my_special_setup():
+        ...
+
+    def test_with_setup(benchmark):
+        benchmark.pedantic(something, setup=my_special_setup, args=(1, 2, 3), kwargs={'foo': 'bar'}, iterations=10, rounds=100)
 
 Screenshots
 -----------
@@ -157,6 +195,7 @@ Credits
 
 .. _FAQ: http://pytest-benchmark.readthedocs.org/en/latest/faq.html
 .. _calibration: http://pytest-benchmark.readthedocs.org/en/latest/features.html#calibration
+.. _pedantic: http://pytest-benchmark.readthedocs.org/en/latest/pedantic.html
 
 
 
