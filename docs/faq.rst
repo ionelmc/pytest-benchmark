@@ -4,16 +4,17 @@ Frequently Asked Questions
 Why is my ``StdDev`` so high?
     There can be few causes for this:
 
-    * Bad isolation. You run other services in your machine that eat up your cpu or you run in a VM and that makes machine
-      performance inconsistent. Ideally you'd avoid such setups, stop all services and applications and use bare metal
-      machines.
+    * Bad isolation. You run other services in your machine that eat up your cpu or you run in a VM and that makes
+      machine performance inconsistent. Ideally you'd avoid such setups, stop all services and applications and use bare
+      metal machines.
 
-    * Bad tests or too much complexity. The function you're testing is doing I/O, using external resources, has side-effects
-      or doing other non-deterministic things. Ideally you'd avoid testing huge chunks of code.
+    * Bad tests or too much complexity. The function you're testing is doing I/O, using external resources, has
+      side-effects or doing other non-deterministic things. Ideally you'd avoid testing huge chunks of code.
 
-      One special situation is PyPy: it's GC and JIT can add unpredictable overhead - you'll see it as huge spikes all over
-      the place. You should make sure that you have a good amount of warmup (using ``--benchmark-warmup``) to prime the JIT as
-      much as possible. Unfortunately not much can be done about GC overhead.
+      One special situation is PyPy: it's GC and JIT can add unpredictable overhead - you'll see it as huge spikes all
+      over the place. You should make sure that you have a good amount of warmup (using ``--benchmark-warmup`` and
+      ``--benchmark-warmup-iterations``) to prime the JIT as much as possible. Unfortunately not much can be done about
+      GC overhead.
 
       If you cannot make your tests more predictable and remove overhead you should look at different stats like: IQR and
       Median. IQR is often `better than StdDev
