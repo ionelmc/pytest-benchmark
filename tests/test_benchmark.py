@@ -401,7 +401,7 @@ def test_bad_compare_fail(testdir):
     result = testdir.runpytest('--doctest-modules', '--benchmark-compare-fail=?', test)
     result.stderr.fnmatch_lines([
         "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
-        "py*: error: argument --benchmark-compare-fail: Could not parse value.",
+        "py*: error: argument --benchmark-compare-fail: Could not parse value: '?'.",
     ])
 
 
@@ -613,8 +613,8 @@ def test_bogus_sort(testdir):
     result = testdir.runpytest('--benchmark-sort=bogus', test)
     result.stderr.fnmatch_lines([
         "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
-        "py*: error: argument --benchmark-sort: Value for --benchmark-sort must be one of: 'min', 'max', "
-        "'mean' or 'stddev'.",
+        "py*: error: argument --benchmark-sort: Unacceptable value: 'bogus'. Value for --benchmark-sort must be one of: 'min', 'max', 'mean' or 'stddev'."
+
     ])
 
 

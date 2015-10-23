@@ -178,8 +178,8 @@ def parse_sort(string):
     string = string.lower().strip()
     if string not in ("min", "max", "mean", "stddev"):
         raise argparse.ArgumentTypeError(
-            "Unacceptable value: %s. "
-            "Value for --benchmark-sort must be one of: 'min', 'max', 'mean' or 'stddev'. " % string)
+            "Unacceptable value: %r. "
+            "Value for --benchmark-sort must be one of: 'min', 'max', 'mean' or 'stddev'." % string)
     return string
 
 
