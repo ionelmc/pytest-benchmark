@@ -24,7 +24,7 @@ project = 'pytest-benchmark'
 year = '2014-2015'
 author = 'Ionel Cristian Mărieș'
 copyright = '{0}, {1}'.format(year, author)
-version = release = '3.0.0b3'
+version = release = '3.0.0rc1'
 html_theme = "sphinx_py3doc_enhanced_theme"
 
 pygments_style = 'trac'
