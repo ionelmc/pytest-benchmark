@@ -6,6 +6,8 @@ Changelog
 
 * Changed ``--benchmark-warmup`` to take optional value and automatically activate on PyPy (default value is ``auto``).
   *MAY BE BACKWARDS INCOMPATIBLE*
+* Removed the version check in compare mode (previously there was a warning if current version is lower than what's in
+  the file).
 
 3.0.0b3 (2015-10-22)
 ---------------------

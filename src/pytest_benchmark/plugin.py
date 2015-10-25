@@ -11,7 +11,6 @@ import time
 import traceback
 from collections import defaultdict
 from datetime import datetime
-from distutils.version import StrictVersion
 from math import ceil
 from math import isinf
 
@@ -645,15 +644,6 @@ class BenchmarkSession(object):
                     self.logger.warn("Failed to load %s: %s" % (self.compare_file, exc))
                     return
 
-            if 'version' in compared_benchmark:
-                if StrictVersion(compared_benchmark['version']) > StrictVersion(__version__):
-                    self.logger.warn(
-                        "Benchmark data from %s was saved with a newer version (%s) than the current version (%s)." % (
-                            self.compare_file,
-                            compared_benchmark['version'],
-                            __version__,
-                        )
-                    )
             machine_info = self.config.hook.pytest_benchmark_generate_machine_info(config=self.config)
             self.config.hook.pytest_benchmark_update_machine_info(config=self.config, machine_info=machine_info)
             self.config.hook.pytest_benchmark_compare_machine_info(config=self.config, benchmarksession=self,
