@@ -28,7 +28,7 @@ from .utils import cached_property
 from .utils import first_or_value
 from .utils import format_dict
 from .utils import format_time
-from .utils import get_commit_id
+from .utils import get_tag
 from .utils import get_commit_info
 from .utils import get_current_time
 from .utils import load_timer
@@ -160,13 +160,13 @@ def pytest_addoption(parser):
     group.addoption(
         "--benchmark-save",
         metavar="NAME", type=parse_save,
-        help="Save the current run into 'STORAGE-PATH/counter-NAME.json'."
+        help="Save the current run into 'STORAGE-PATH/counter_NAME.json'."
     )
-    commit_id = get_commit_id()
+    tag = get_tag()
     group.addoption(
         "--benchmark-autosave",
-        action='store_const', const=commit_id,
-        help="Autosave the current run into 'STORAGE-PATH/counter-%s.json" % commit_id,
+        action='store_const', const=tag,
+        help="Autosave the current run into 'STORAGE-PATH/counter_%s.json" % tag,
     )
     group.addoption(
         "--benchmark-save-data",
@@ -200,7 +200,8 @@ def pytest_addoption(parser):
     group.addoption(
         "--benchmark-histogram",
         action='append', metavar="FILENAME-PREFIX", nargs="?", default=[], const=prefix,
-        help="Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. Default: %r" % prefix
+        help="Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX contains"
+             " slashes ('/') then directories will be created. Default: %r" % prefix
     )
     group.addoption(
         "--benchmark-json",

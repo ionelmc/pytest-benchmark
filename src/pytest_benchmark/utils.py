@@ -56,7 +56,7 @@ class NameWrapper(object):
         return "NameWrapper(%s)" % repr(self.target)
 
 
-def get_commit_id():
+def get_tag():
     info = get_commit_info()
     return '%s_%s%s' % (info['id'], get_current_time(), '_uncommitted-changes' if info['dirty'] else '')
 

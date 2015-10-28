@@ -113,10 +113,11 @@ Commandline options
   --benchmark-only      Only run benchmarks.
   --benchmark-save=NAME
                         Save the current run into 'STORAGE-PATH/counter-
-                        NAME.json'. Default: 'e689af57e7439b9005749d806248897a
-                        d550eab5_20150811_041632_uncommitted-changes'
-  --benchmark-autosave  Autosave the current run into 'STORAGE-PATH/counter-
-                        commit_id.json
+                        NAME.json'. Default: '<commitid>_<date>_<time>_<isdirty>', example:
+                        'e689af57e7439b9005749d806248897ad550eab5_20150811_041632_uncommitted-changes'.
+  --benchmark-autosave  Autosave the current run into 'STORAGE-PATH/<counter>_<commitid>_<date>_<time>_<isdirty>',
+                        example:
+                        'STORAGE-PATH/0123_525685bcd6a51d1ade0be75e2892e713e02dfd19_20151028_221708_uncommitted-changes.json'
   --benchmark-save-data
                         Use this to make --benchmark-save and --benchmark-
                         autosave include all the timing data, not just the
@@ -131,11 +132,14 @@ Commandline options
   --benchmark-storage=STORAGE-PATH
                         Specify a different path to store the runs (when
                         --benchmark-save or --benchmark-autosave are used).
-                        Default: './.benchmarks/Linux-CPython-2.7-64bit'
+                        Default: './.benchmarks/<os>-<pyimplementation>-<pyversion>-<arch>bit',
+                        example: 'Linux-CPython-2.7-64bit'.
   --benchmark-histogram=FILENAME-PREFIX
                         Plot graphs of min/max/avg/stddev over time in
-                        FILENAME-PREFIX-test_name.svg. Default:
-                        'benchmark_20150811_041632'
+                        FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX
+                        contains slashes ('/') then directories will be
+                        created. Default: 'benchmark_<date>_<time>', example:
+                        'benchmark_20150811_041632'.
   --benchmark-json=PATH
                         Dump a JSON report into PATH. Note that this will
                         include the complete data (all the timings, not just
