@@ -1,6 +1,11 @@
 Changelog
 =========
 
+3.0.0 (pending)
+---------------------
+
+* Improved ``--help`` text for ``--benchmark-histogram``, ``--benchmark-save`` and ``--benchmark-autosave``.
+
 3.0.0rc1 (2015-10-25)
 ---------------------
 
