@@ -1026,15 +1026,16 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data):
         "version": __version__,
     }
     for bench in benchmarks:
-        benchmarks_json.append({
-            "group": bench.group,
-            "name": bench.name,
-            "fullname": bench.fullname,
-            "stats": dict(bench.json(include_data=include_data), iterations=bench.iterations),
-            "options": dict(
-                (k, v.__name__ if callable(v) else v) for k, v in bench.options.items()
-            )
-        })
+        if not bench.has_error:
+            benchmarks_json.append({
+                "group": bench.group,
+                "name": bench.name,
+                "fullname": bench.fullname,
+                "stats": dict(bench.json(include_data=include_data), iterations=bench.iterations),
+                "options": dict(
+                    (k, v.__name__ if callable(v) else v) for k, v in bench.options.items()
+                )
+            })
     return output_json
 
 

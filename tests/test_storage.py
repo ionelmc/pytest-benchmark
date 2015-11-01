@@ -5,6 +5,7 @@ from io import StringIO, BytesIO
 
 import py
 import pytest
+
 from freezegun import freeze_time
 
 from pytest_benchmark.plugin import BenchmarkSession, PerformanceRegression
@@ -78,6 +79,7 @@ class MockSession(BenchmarkSession):
                     fullname=bench['fullname'],
                     group=bench['group'],
                     options=bench['options'],
+                    has_error=False,
                     **bench['stats']
                 )
                 for bench in data['benchmarks']
@@ -279,6 +281,28 @@ def test_save_no_name(sess, tmpdir, monkeypatch):
     files = tmpdir.listdir()
     assert len(files) == 1
     assert json.load(files[0].open('rU')) == SAVE_DATA
+
+
+@freeze_time("2015-08-15T00:04:18.687119")
+def test_save_with_error(sess, tmpdir, monkeypatch):
+    monkeypatch.setattr(plugin, '__version__', '2.5.0')
+    sess.save = True
+    sess.autosave = True
+    sess.json = None
+    sess.save_data = False
+    sess.storage = tmpdir
+    for bench in sess.benchmarks:
+        bench.has_error = True
+    sess.handle_saving()
+    files = tmpdir.listdir()
+    assert len(files) == 1
+    assert json.load(files[0].open('rU')) == {
+        'benchmarks': [],
+        'commit_info': {'foo': 'bar'},
+        'datetime': '2015-08-15T00:04:18.687119',
+        'machine_info': {'foo': 'bar'},
+        'version': '2.5.0'
+    }
 
 
 @freeze_time("2015-08-15T00:04:18.687119")
