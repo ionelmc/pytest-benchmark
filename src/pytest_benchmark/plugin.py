@@ -264,7 +264,7 @@ class BenchmarkFixture(object):
             return cls._precisions.setdefault(timer, compute_timer_precision(timer))
 
     def __init__(self, node, disable_gc, timer, min_rounds, min_time, max_time, warmup, warmup_iterations,
-                 calibration_precision, add_stats, logger, disable, group=None):
+                 calibration_precision, add_stats, logger, warner, disable, group=None):
         self.name = node.name
         self.fullname = node._nodeid
         self.disable = disable
@@ -280,6 +280,7 @@ class BenchmarkFixture(object):
         self._calibration_precision = calibration_precision
         self._warmup = warmup and warmup_iterations
         self._logger = logger
+        self._warner = warner
         self._cleanup_callbacks = []
 
     def _make_runner(self, function_to_benchmark, args, kwargs):
@@ -465,17 +466,26 @@ class BenchmarkFixture(object):
 
 
 class Logger(object):
-    def __init__(self, verbose, capman):
+    def __init__(self, verbose, config):
         self.verbose = verbose
         self.term = py.io.TerminalWriter(file=sys.stderr)
-        self.capman = capman
+        self.capman = config.pluginmanager.getplugin("capturemanager")
+        self.pytest_warn = config.warn
 
-    def warn(self, text):
-        self.term.line("")
-        self.term.sep("-", red=True, bold=True)
-        self.term.write(" WARNING: ", red=True, bold=True)
-        self.term.line(text, red=True)
-        self.term.sep("-", red=True, bold=True)
+    def warn(self, code, text, warner=None, suspend=False, **kwargs):
+        if self.verbose:
+            if suspend and self.capman:
+                self.capman.suspendcapture(in_=True)
+            self.term.line("")
+            self.term.sep("-", red=True, bold=True)
+            self.term.write(" WARNING: ", red=True, bold=True)
+            self.term.line(text, red=True)
+            self.term.sep("-", red=True, bold=True)
+            if suspend and self.capman:
+                self.capman.resumecapture()
+        if warner is None:
+            warner = self.pytest_warn
+        warner(code=code, message=text, **kwargs)
 
     def error(self, text):
         self.term.line("")
@@ -502,10 +512,7 @@ class BenchmarkSession(object):
 
     def __init__(self, config):
         self.verbose = config.getoption("benchmark_verbose")
-        self.logger = Logger(
-            self.verbose,
-            config.pluginmanager.getplugin("capturemanager")
-        )
+        self.logger = Logger(self.verbose, config)
         self.config = config
         self.options = dict(
             min_time=SecondsDecimal(config.getoption("benchmark_min_time")),
@@ -522,16 +529,20 @@ class BenchmarkSession(object):
 
         if config.getoption("dist", "no") != "no" and not self.skip:
             self.logger.warn(
+                "BENCHMARK-U2",
                 "Benchmarks are automatically disabled because xdist plugin is active."
                 "Benchmarks cannot be performed reliably in a parallelized environment.",
+                fslocation="::"
             )
             self.disable = True
         if hasattr(config, "slaveinput"):
             self.disable = True
         if not statistics:
             self.logger.warn(
+                "BENCHMARK-U3",
                 "Benchmarks are automatically disabled because we could not import `statistics`\n\n%s" %
-                statistics_error
+                statistics_error,
+                fslocation="::"
             )
             self.disable = True
 
@@ -560,6 +571,10 @@ class BenchmarkSession(object):
     def benchmarks(self):
         return [bench for bench in self._benchmarks if bench]
 
+    @property
+    def storage_fslocation(self):
+        return self.storage.relto(os.getcwd())
+
     @cached_property
     def compare_file(self):
         if self.compare:
@@ -574,18 +589,24 @@ class BenchmarkSession(object):
                         return files[0]
 
                     if not files:
-                        self.logger.warn("Can't compare. No benchmark files matched %r" % self.compare)
+                        self.logger.warn("BENCHMARK-C1", "Can't compare. No benchmark files matched %r" % self.compare,
+                                         fslocation=self.storage_fslocation)
                     elif len(files) > 1:
-                        self.logger.warn("Can't compare. Too many benchmark files matched %r:\n - %s" % (
-                            self.compare, '\n - '.join(map(str, files))))
+                        self.logger.warn(
+                            "BENCHMARK-C2", "Can't compare. Too many benchmark files matched %r:\n - %s" % (
+                                self.compare, '\n - '.join(map(str, files))
+                            ),
+                            fslocation=self.storage_fslocation)
             else:
                 msg = "Can't compare. No benchmark files in %r. " \
                       "Expected files matching [0-9][0-9][0-9][0-9]_*.json." % str(self.storage)
                 if self.compare is True:
                     msg += " Can't load the previous benchmark."
+                    code = "BENCHMARK-C3"
                 else:
                     msg += " Can't match anything to %r." % self.compare
-                self.logger.warn(msg)
+                    code = "BENCHMARK-C4"
+                self.logger.warn(code, msg, fslocation=self.storage_fslocation)
                 return
 
     @property
@@ -642,7 +663,8 @@ class BenchmarkSession(object):
                 try:
                     compared_benchmark = json.load(fh)
                 except Exception as exc:
-                    self.logger.warn("Failed to load %s: %s" % (self.compare_file, exc))
+                    self.logger.warn("BENCHMARK-C5", "Failed to load %s: %s" % (self.compare_file, exc),
+                                     fslocation=self.storage_fslocation)
                     return
 
             machine_info = self.config.hook.pytest_benchmark_generate_machine_info(config=self.config)
@@ -861,10 +883,12 @@ class BenchmarkSession(object):
 def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark):
     if compared_benchmark["machine_info"] != machine_info:
         benchmarksession.logger.warn(
+            "BENCHMARK-C6",
             "Benchmark machine_info is different. Current: %s VS saved: %s." % (
                 format_dict(machine_info),
                 format_dict(compared_benchmark["machine_info"]),
-            )
+            ),
+            benchmarksession.storage_fslocation
         )
 
 if hasattr(pytest, 'hookimpl'):
@@ -982,6 +1006,7 @@ def benchmark(request):
             node,
             add_stats=bs._benchmarks.append,
             logger=bs.logger,
+            warner=request.node.warn,
             disable=bs.disable,
             **dict(bs.options, **options)
         )
