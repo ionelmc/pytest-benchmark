@@ -3,7 +3,6 @@ from __future__ import print_function
 
 import argparse
 import gc
-import inspect
 import json
 import operator
 import os
@@ -518,7 +517,10 @@ class Logger(object):
         self.term = py.io.TerminalWriter(file=sys.stderr)
         self.capman = config.pluginmanager.getplugin("capturemanager")
         self.pytest_warn = config.warn
-        self.pytest_warn_has_fslocation = 'fslocation' in inspect.getcallargs(config.warn, None, None)
+        try:
+            self.pytest_warn_has_fslocation = 'fslocation' in config.warn.func_code.co_varnames
+        except AttributeError:
+            self.pytest_warn_has_fslocation = False
 
     def warn(self, code, text, warner=None, suspend=False, fslocation=None):
         if self.verbose:
