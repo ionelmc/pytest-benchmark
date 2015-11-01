@@ -622,7 +622,17 @@ def test_bogus_sort(testdir):
 def test_xdist(testdir):
     pytest.importorskip('xdist')
     test = testdir.makepyfile(SIMPLE_TEST)
-    result = testdir.runpytest('--doctest-modules', '-n', '1', test)
+    result = testdir.runpytest('--doctest-modules', '-n', '1', '-rw', test)
+    result.stdout.fnmatch_lines([
+        "WBENCHMARK-U2 :: Benchmarks are automatically disabled because xdist plugin is active.Benchmarks cannot be "
+        "performed reliably in a parallelized environment.",
+    ])
+
+
+def test_xdist_verbose(testdir):
+    pytest.importorskip('xdist')
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--doctest-modules', '-n', '1', '--benchmark-verbose', test)
     result.stderr.fnmatch_lines([
         "------*",
         " WARNING: Benchmarks are automatically disabled because xdist plugin is active.Benchmarks cannot be performed "
