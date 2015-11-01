@@ -235,6 +235,7 @@ class BenchmarkStats(object):
         self.iterations = iterations
         self.stats = Stats()
         self.options = options
+        self.fixture = fixture
 
     def __bool__(self):
         return bool(self.stats)
@@ -242,11 +243,21 @@ class BenchmarkStats(object):
     def __nonzero__(self):
         return bool(self.stats)
 
+    def get(self, key, default=None):
+        try:
+            return getattr(self.stats, key)
+        except AttributeError:
+            return getattr(self, key, default)
+
     def __getitem__(self, key):
         try:
             return getattr(self.stats, key)
         except AttributeError:
             return getattr(self, key)
+
+    @property
+    def has_error(self):
+        return self.fixture.has_error
 
     def json(self, include_data=True):
         if include_data:
@@ -331,10 +342,9 @@ class BenchmarkFixture(object):
 
     def __call__(self, function_to_benchmark, *args, **kwargs):
         if self._mode:
+            self.has_error = True
             raise FixtureAlreadyUsed(
                 "Fixture can only be used once. Previously it was used in %s mode." % self._mode)
-            self.has_error = True
-            return
         try:
             self._mode = 'benchmark(...)'
             return self._raw(function_to_benchmark, *args, **kwargs)
@@ -344,10 +354,9 @@ class BenchmarkFixture(object):
 
     def pedantic(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
         if self._mode:
+            self.has_error = True
             raise FixtureAlreadyUsed(
                 "Fixture can only be used once. Previously it was used in %s mode." % self._mode)
-            self.has_error = True
-            return
         try:
             self._mode = 'benchmark.pedantic(...)'
             return self._raw_pedantic(target, args=args, kwargs=kwargs, setup=setup, rounds=rounds,
@@ -735,7 +744,7 @@ class BenchmarkSession(object):
 
         if self.performance_regressions:
             self.logger.error("Performance has regressed:\n%s" % "\n".join(
-                "\t%s - %s" % line for line in self.performance_regressions
+                "\t%s - %s" % line for          line in self.performance_regressions
             ))
             raise PerformanceRegression("Performance has regressed.")
 
@@ -881,7 +890,8 @@ class BenchmarkSession(object):
             tr.write_line("-" * len(labels_line), yellow=True)
 
             for bench in benchmarks:
-                tr.write(bench["name"].ljust(widths["name"]))
+                has_error = bench.get("has_error")
+                tr.write(bench["name"].ljust(widths["name"]), red=has_error, invert=has_error)
                 for prop in "min", "max", "mean", "stddev", "median", "iqr":
                     tr.write(
                         ALIGNED_NUMBER_FMT.format(
