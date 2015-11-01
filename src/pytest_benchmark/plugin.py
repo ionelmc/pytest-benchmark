@@ -936,7 +936,7 @@ def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info
                 format_dict(machine_info),
                 format_dict(compared_benchmark["machine_info"]),
             ),
-            benchmarksession.storage_fslocation
+            fslocation=benchmarksession.storage_fslocation
         )
 
 if hasattr(pytest, 'hookimpl'):
