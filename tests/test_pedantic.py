@@ -1,4 +1,6 @@
+from pytest import mark
 from pytest import raises
+
 
 
 def test_single(benchmark):
@@ -58,19 +60,19 @@ def test_warmup_rounds(benchmark):
     assert runs == [1] * 20
 
 
-def test_rounds_must_be_int(benchmark):
+@mark.parametrize("value", [0, "x"])
+def test_rounds_must_be_int(benchmark, value):
     runs = []
-
-    raises(ValueError, benchmark.pedantic, runs.append, args=[1], rounds=0)
-    raises(ValueError, benchmark.pedantic, runs.append, args=[1], rounds="x")
+    raises(ValueError, benchmark.pedantic, runs.append, args=[1], rounds=value)
     assert runs == []
 
-def test_warmup_rounds_must_be_int(benchmark):
-    runs = []
 
-    raises(ValueError, benchmark.pedantic, runs.append, args=[1], warmup_rounds=-15)
-    raises(ValueError, benchmark.pedantic, runs.append, args=[1], warmup_rounds="x")
+@mark.parametrize("value", [-15, "x"])
+def test_warmup_rounds_must_be_int(benchmark, value):
+    runs = []
+    raises(ValueError, benchmark.pedantic, runs.append, args=[1], warmup_rounds=value)
     assert runs == []
+
 
 def test_setup_many_rounds(benchmark):
     runs = []
@@ -112,7 +114,6 @@ def test_cant_use_setup_with_many_iterations(benchmark):
     raises(ValueError, benchmark.pedantic, None, setup=lambda: None, iterations=2)
 
 
-def test_iterations_must_be_positive_int(benchmark):
-    raises(ValueError, benchmark.pedantic, None, setup=lambda: None, iterations=0)
-    raises(ValueError, benchmark.pedantic, None, setup=lambda: None, iterations=-1)
-    raises(ValueError, benchmark.pedantic, None, setup=lambda: None, iterations="asdf")
+@mark.parametrize("value", [0, -1, "asdf"])
+def test_iterations_must_be_positive_int(benchmark, value):
+    raises(ValueError, benchmark.pedantic, None, setup=lambda: None, iterations=value)
