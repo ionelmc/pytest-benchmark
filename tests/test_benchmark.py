@@ -311,6 +311,23 @@ def test_group_by_fullname(testdir):
     ])
 
 
+def test_double_use(testdir):
+    test = testdir.makepyfile('''
+def test_a(benchmark):
+    benchmark(lambda: None)
+    benchmark.pedantic(lambda: None)
+
+def test_b(benchmark):
+    benchmark.pedantic(lambda: None)
+    benchmark(lambda: None)
+''')
+    result = testdir.runpytest(test, '--tb=line')
+    result.stdout.fnmatch_lines([
+        '* pytest_benchmark.plugin.FixtureAlreadyUsed: Fixture can only be used once. Previously it was used in benchmark(...) mode.',
+        '* pytest_benchmark.plugin.FixtureAlreadyUsed: Fixture can only be used once. Previously it was used in benchmark.pedantic(...) mode.',
+    ])
+
+
 def test_conflict_between_only_and_skip(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-only', '--benchmark-skip', test)
