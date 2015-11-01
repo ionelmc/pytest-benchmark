@@ -76,6 +76,17 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data):
     .. warning::
 
         Improperly customizing this may cause breakage if ``--benchmark-compare`` or ``--benchmark-histogram`` are used.
+
+    By default, ``pytest_benchmark_generate_json`` strips benchmarks that have errors from the output. To prevent this,
+    implement the hook like this:
+
+    .. sourcecode:: python
+
+        @pytest.mark.hookwrapper
+        def pytest_benchmark_generate_json(config, benchmarks, include_data):
+            for bench in benchmarks:
+                bench.has_error = False
+            yield
     """
     pass
 

@@ -5,6 +5,15 @@ Changelog
 ---------------------
 
 * Improved ``--help`` text for ``--benchmark-histogram``, ``--benchmark-save`` and ``--benchmark-autosave``.
+* Benchmarks that raised exceptions during test now have special highlighting in result table (red background).
+* Benchmarks that raised exceptions are not included in the saved data anymore (you can still get the old behavior back
+  by implementing ``pytest_benchmark_generate_json`` in your ``conftest.py``).
+* The plugin will use pytest's warning system for warnings. There are 2 categories: ``WBENCHMARK-C`` (compare mode
+  issues) and ``WBENCHMARK-U`` (usage issues).
+* The red warnings are only shown if ``--benchmark-verbose`` is used. They still will be always be shown in the
+  pytest-warnings section.
+* Using the benchmark fixture more than one time is disallowed (will raise exception).
+* Not using the benchmark fixutre (but requiring it) will issue a warning (``WBENCHMARK-U1``).
 
 3.0.0rc1 (2015-10-25)
 ---------------------
