@@ -2,6 +2,7 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
+from functools import partial
 import gc
 import json
 import operator
@@ -516,7 +517,7 @@ class Logger(object):
         self.verbose = verbose
         self.term = py.io.TerminalWriter(file=sys.stderr)
         self.capman = config.pluginmanager.getplugin("capturemanager")
-        self.pytest_warn = config.warn
+        self.pytest_warn = partial(config.hook.pytest_logwarning, nodeid=None)
 
     def warn(self, code, text, warner=None, suspend=False, **kwargs):
         if self.verbose:
