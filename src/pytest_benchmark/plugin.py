@@ -301,7 +301,6 @@ class BenchmarkFixture(object):
         self._cleanup_callbacks = []
         self._mode = None
 
-
     def _make_runner(self, function_to_benchmark, args, kwargs):
         def runner(loops_range, timer=self._timer):
             gc_enabled = gc.isenabled()
@@ -744,7 +743,7 @@ class BenchmarkSession(object):
 
         if self.performance_regressions:
             self.logger.error("Performance has regressed:\n%s" % "\n".join(
-                "\t%s - %s" % line for          line in self.performance_regressions
+                "\t%s - %s" % line for line in self.performance_regressions
             ))
             raise PerformanceRegression("Performance has regressed.")
 
