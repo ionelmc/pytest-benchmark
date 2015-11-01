@@ -323,8 +323,8 @@ def test_b(benchmark):
 ''')
     result = testdir.runpytest(test, '--tb=line')
     result.stdout.fnmatch_lines([
-        '* pytest_benchmark.plugin.FixtureAlreadyUsed: Fixture can only be used once. Previously it was used in benchmark(...) mode.',
-        '* pytest_benchmark.plugin.FixtureAlreadyUsed: Fixture can only be used once. Previously it was used in benchmark.pedantic(...) mode.',
+        '*FixtureAlreadyUsed: Fixture can only be used once. Previously it was used in benchmark(...) mode.',
+        '*FixtureAlreadyUsed: Fixture can only be used once. Previously it was used in benchmark.pedantic(...) mode.',
     ])
 
 
