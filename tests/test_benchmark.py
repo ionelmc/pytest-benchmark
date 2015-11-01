@@ -477,7 +477,7 @@ def test_compare_non_existing(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0002', '-rw',
                                test)
     result.stdout.fnmatch_lines([
-        "WBENCHMARK-C1 .benchmarks* Can't compare. No benchmark files matched '0002'",
+        "WBENCHMARK-C1 * Can't compare. No benchmark files matched '0002'",
     ])
 
 
@@ -496,7 +496,7 @@ def test_compare_no_files(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '-rw',
                                test, '--benchmark-compare')
     result.stdout.fnmatch_lines([
-         "WBENCHMARK-C3 .benchmarks* Can't compare. No benchmark files in '*'. Expected files matching *.json."
+         "WBENCHMARK-C3 * Can't compare. No benchmark files in '*'. Expected files matching *.json."
          " Can't load the previous benchmark."
     ])
 
@@ -516,7 +516,7 @@ def test_compare_no_files_match(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '-rw',
                                test, '--benchmark-compare=1')
     result.stdout.fnmatch_lines([
-        "WBENCHMARK-C4 .benchmarks* Can't compare. No benchmark files in '*'. Expected files matching *.json."
+        "WBENCHMARK-C4 * Can't compare. No benchmark files in '*'. Expected files matching *.json."
          " Can't match anything to '1'."
     ])
 
@@ -538,7 +538,7 @@ def test_compare_too_many(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0', '-rw',
                                test)
     result.stdout.fnmatch_lines([
-        "WBENCHMARK-C2 .benchmarks* Can't compare. Too many benchmark files matched '0':",
+        "WBENCHMARK-C2 * Can't compare. Too many benchmark files matched '0':",
         ' - *0001_unversioned_*.json',
         ' - *0002_unversioned_*.json',
     ])

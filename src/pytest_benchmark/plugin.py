@@ -2,8 +2,8 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
-from functools import partial
 import gc
+import inspect
 import json
 import operator
 import os
@@ -30,9 +30,9 @@ from .utils import cached_property
 from .utils import first_or_value
 from .utils import format_dict
 from .utils import format_time
-from .utils import get_tag
 from .utils import get_commit_info
 from .utils import get_current_time
+from .utils import get_tag
 from .utils import load_timer
 from .utils import parse_compare_fail
 from .utils import parse_rounds
@@ -517,9 +517,10 @@ class Logger(object):
         self.verbose = verbose
         self.term = py.io.TerminalWriter(file=sys.stderr)
         self.capman = config.pluginmanager.getplugin("capturemanager")
-        self.pytest_warn = partial(config.hook.pytest_logwarning, nodeid=None)
+        self.pytest_warn = config.warn
+        self.pytest_warn_has_fslocation = 'fslocation' in inspect.getcallargs(config.warn, None, None)
 
-    def warn(self, code, text, warner=None, suspend=False, **kwargs):
+    def warn(self, code, text, warner=None, suspend=False, fslocation=None):
         if self.verbose:
             if suspend and self.capman:
                 self.capman.suspendcapture(in_=True)
@@ -532,7 +533,10 @@ class Logger(object):
                 self.capman.resumecapture()
         if warner is None:
             warner = self.pytest_warn
-        warner(code=code, message=text, **kwargs)
+        if fslocation and self.pytest_warn_has_fslocation:
+            warner(code=code, message=text, fslocation=fslocation)
+        else:
+            warner(code=code, message=text)
 
     def error(self, text):
         self.term.line("")
