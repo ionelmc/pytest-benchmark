@@ -5,6 +5,7 @@ import argparse
 import gc
 import json
 import operator
+import os
 import platform
 import sys
 import time
@@ -15,8 +16,8 @@ from math import ceil
 from math import isinf
 
 import py
-
 import pytest
+
 from . import __version__
 from .compat import INT
 from .compat import XRANGE
@@ -56,6 +57,10 @@ HISTOGRAM_CURRENT = "now"
 
 
 class PerformanceRegression(pytest.UsageError):
+    pass
+
+
+class FixtureAlreadyUsed(Exception):
     pass
 
 
@@ -270,6 +275,7 @@ class BenchmarkFixture(object):
         self.disable = disable
         self.param = node.callspec.id if hasattr(node, 'callspec') else None
         self.group = group
+        self.has_error = False
 
         self._disable_gc = disable_gc
         self._timer = timer.target
@@ -282,6 +288,8 @@ class BenchmarkFixture(object):
         self._logger = logger
         self._warner = warner
         self._cleanup_callbacks = []
+        self._mode = None
+
 
     def _make_runner(self, function_to_benchmark, args, kwargs):
         def runner(loops_range, timer=self._timer):
@@ -322,6 +330,33 @@ class BenchmarkFixture(object):
         return stats
 
     def __call__(self, function_to_benchmark, *args, **kwargs):
+        if self._mode:
+            raise FixtureAlreadyUsed(
+                "Fixture can only be used once. Previously it was used in %s mode." % self._mode)
+            self.has_error = True
+            return
+        try:
+            self._mode = 'benchmark(...)'
+            return self._raw(function_to_benchmark, *args, **kwargs)
+        except Exception:
+            self.has_error = True
+            raise
+
+    def pedantic(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
+        if self._mode:
+            raise FixtureAlreadyUsed(
+                "Fixture can only be used once. Previously it was used in %s mode." % self._mode)
+            self.has_error = True
+            return
+        try:
+            self._mode = 'benchmark.pedantic(...)'
+            return self._raw_pedantic(target, args=args, kwargs=kwargs, setup=setup, rounds=rounds,
+                                      warmup_rounds=warmup_rounds, iterations=iterations)
+        except Exception:
+            self.has_error = True
+            raise
+
+    def _raw(self, function_to_benchmark, *args, **kwargs):
         if not self.disable:
             runner = self._make_runner(function_to_benchmark, args, kwargs)
 
@@ -346,7 +381,7 @@ class BenchmarkFixture(object):
             self._logger.debug("  Ran for %ss." % format_time(time.time() - run_start), yellow=True, bold=True)
         return function_to_benchmark(*args, **kwargs)
 
-    def pedantic(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
+    def _raw_pedantic(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
         if kwargs is None:
             kwargs = {}
 
