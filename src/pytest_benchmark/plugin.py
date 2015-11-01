@@ -455,6 +455,9 @@ class BenchmarkFixture(object):
         while self._cleanup_callbacks:
             callback = self._cleanup_callbacks.pop()
             callback()
+        if not self._mode:
+            self._logger.warn("BENCHMARK-U1", "Benchmark fixture was not used at all in this test!",
+                              warner=self._warner, suspend=True)
 
     def _calibrate_timer(self, runner):
         timer_precision = self._get_precision(self._timer)
