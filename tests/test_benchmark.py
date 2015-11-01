@@ -686,7 +686,7 @@ def test_xdist(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '-n', '1', '-rw', test)
     result.stdout.fnmatch_lines([
-        "WBENCHMARK-U2 :: Benchmarks are automatically disabled because xdist plugin is active.Benchmarks cannot be "
+        "WBENCHMARK-U2 * Benchmarks are automatically disabled because xdist plugin is active.Benchmarks cannot be "
         "performed reliably in a parallelized environment.",
     ])
 
