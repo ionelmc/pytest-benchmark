@@ -1,8 +1,8 @@
 Changelog
 =========
 
-3.0.0 (pending)
----------------------
+3.0.0 (2015-08-11)
+------------------
 
 * Improved ``--help`` text for ``--benchmark-histogram``, ``--benchmark-save`` and ``--benchmark-autosave``.
 * Benchmarks that raised exceptions during test now have special highlighting in result table (red background).
