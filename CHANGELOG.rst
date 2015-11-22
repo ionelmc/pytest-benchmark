@@ -1,7 +1,7 @@
 Changelog
 =========
 
-3.0.0 (2015-08-11)
+3.0.0 (2015-11-08)
 ------------------
 
 * Improved ``--help`` text for ``--benchmark-histogram``, ``--benchmark-save`` and ``--benchmark-autosave``.
@@ -13,7 +13,7 @@ Changelog
 * The red warnings are only shown if ``--benchmark-verbose`` is used. They still will be always be shown in the
   pytest-warnings section.
 * Using the benchmark fixture more than one time is disallowed (will raise exception).
-* Not using the benchmark fixutre (but requiring it) will issue a warning (``WBENCHMARK-U1``).
+* Not using the benchmark fixture (but requiring it) will issue a warning (``WBENCHMARK-U1``).
 
 3.0.0rc1 (2015-10-25)
 ---------------------
