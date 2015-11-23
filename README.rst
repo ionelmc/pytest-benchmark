@@ -73,8 +73,9 @@ pytest-benchmark
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/ionelmc/pytest-benchmark/
 
-A ``py.test`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen
-timer. See calibration_ and FAQ_.
+
+A ``py.test`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer. See calibration_
+and FAQ_.
 
 * Free software: BSD license
 

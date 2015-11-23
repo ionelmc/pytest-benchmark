@@ -10,6 +10,7 @@ environment:
       PYTHON_HOME: C:\Python27
       PYTHON_VERSION: '2.7'
       PYTHON_ARCH: '32'
+
 {% for env in tox_environments %}{% if env.startswith(('2.6', '2.7', '3.3', '3.4', '3.5')) %}
     - TOXENV: '{{ env }}{% if 'cover' in env %},codecov{% endif %}'
       TOXPYTHON: C:\Python{{ env.split('-')[0].replace('.', '') }}\python.exe
@@ -28,6 +29,7 @@ environment:
       PYTHON_ARCH: '64'
 
 {% endif %}{% endfor %}
+
 init:
   - ps: echo $env:TOXENV
   - ps: ls C:\Python*
@@ -39,6 +41,7 @@ install:
   - '%PYTHON_HOME%\Scripts\tox --version'
 test_script:
   - '%WITH_COMPILER% %PYTHON_HOME%\Scripts\tox'
+
 on_failure:
   - ps: dir "env:"
   - ps: get-content .tox\*\log\*

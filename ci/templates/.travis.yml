@@ -3,13 +3,16 @@ python: '3.5'
 sudo: false
 env:
   global:
-    LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
+    - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
+    - SEGFAULT_SIGNALS=all
   matrix:
     - TOXENV=check
+
 {% for env in tox_environments %}
     - TOXENV={{ env }}{% if 'cover' in env %},coveralls,codecov{% endif %}
 
 {% endfor %}
+
 before_install:
   - python --version
   - uname -a
@@ -25,6 +28,11 @@ script:
 after_failure:
   - more .tox/log/* | cat
   - more .tox/*/log/* | cat
+before_cache:
+  - rm -rf $HOME/.cache/pip/log
+cache:
+  directories:
+    - $HOME/.cache/pip
 notifications:
   email:
     on_success: never

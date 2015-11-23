@@ -11,7 +11,7 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'sphinxcontrib.napoleon'
+    'sphinx.ext.napoleon'
 ]
 if os.getenv('SPELLCHECK'):
     extensions += 'sphinxcontrib.spelling',
@@ -25,7 +25,16 @@ year = '2014-2015'
 author = 'Ionel Cristian Mărieș'
 copyright = '{0}, {1}'.format(year, author)
 version = release = '3.0.0'
+import sphinx_py3doc_enhanced_theme
 html_theme = "sphinx_py3doc_enhanced_theme"
+html_theme_path = [sphinx_py3doc_enhanced_theme.get_html_theme_path()]
+html_theme_options = {
+    'githuburl': 'https://github.com/ionelmc/pytest-benchmark/',
+    'appendcss': '''
+        div.body code.descclassname { display: none }
+        div.body #pedantic-mode code.descclassname { display: inline-block }
+    ''',
+}
 
 pygments_style = 'trac'
 templates_path = ['.']
@@ -36,10 +45,3 @@ html_sidebars = {
    '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html'],
 }
 html_short_title = '%s-%s' % (project, version)
-html_theme_options = {
-    'githuburl': 'https://github.com/ionelmc/pytest-benchmark/',
-    'appendcss': '''
-        div.body code.descclassname { display: none }
-        div.body #pedantic-mode code.descclassname { display: inline-block }
-    ''',
-}
