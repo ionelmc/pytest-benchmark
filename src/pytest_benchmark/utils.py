@@ -182,6 +182,17 @@ def parse_sort(string):
             "Value for --benchmark-sort must be one of: 'min', 'max', 'mean' or 'stddev'." % string)
     return string
 
+def parse_columns(string):
+    allowed_columns = ["min", "max", "mean", "stddev", "median", "iqr",
+                       "outliers", "rounds", "iterations"]
+    columns = map(str.strip, string.lower().split(','))
+    invalid = set(columns) - set(allowed_columns)
+    if invalid:
+        # there are extra items in columns!
+        msg = "Invalid column name(s): %s. " % ', '.join(invalid)
+        msg += "The only valid column names are: %s" % ', '.join(allowed_columns)
+        raise argparse.ArgumentTypeError(msg)
+    return columns
 
 def parse_rounds(string):
     try:
