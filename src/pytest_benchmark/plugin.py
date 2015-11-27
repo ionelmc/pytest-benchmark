@@ -237,6 +237,7 @@ class BenchmarkStats(object):
         self.fullname = fixture.fullname
         self.group = fixture.group
         self.param = fixture.param
+        self.params = fixture.params
 
         self.iterations = iterations
         self.stats = Stats()
@@ -290,7 +291,12 @@ class BenchmarkFixture(object):
         self.name = node.name
         self.fullname = node._nodeid
         self.disable = disable
-        self.param = node.callspec.id if hasattr(node, 'callspec') else None
+        if hasattr(node, 'callspec'):
+            self.param = node.callspec.id
+            self.params = node.callspec.params
+        else:
+            self.param = None
+            self.params = None
         self.group = group
         self.has_error = False
 
@@ -1053,6 +1059,7 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data):
                 "group": bench.group,
                 "name": bench.name,
                 "fullname": bench.fullname,
+                "params": bench.params,
                 "stats": dict(bench.json(include_data=include_data), iterations=bench.iterations),
                 "options": dict(
                     (k, v.__name__ if callable(v) else v) for k, v in bench.options.items()
