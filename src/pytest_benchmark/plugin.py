@@ -882,7 +882,6 @@ class BenchmarkSession(object):
                     for bench in benchmarks
                 ))
 
-
             rpadding = 0 if solo else 10
             labels_line = labels["name"].ljust(widths["name"]) + "".join(
                 labels[prop].rjust(widths[prop]) + (
