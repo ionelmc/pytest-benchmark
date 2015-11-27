@@ -186,7 +186,7 @@ def parse_sort(string):
 def parse_columns(string):
     allowed_columns = ["min", "max", "mean", "stddev", "median", "iqr",
                        "outliers", "rounds", "iterations"]
-    columns = map(str.strip, string.lower().split(','))
+    columns = [str.strip(s) for s in string.lower().split(',')]
     invalid = set(columns) - set(allowed_columns)
     if invalid:
         # there are extra items in columns!
