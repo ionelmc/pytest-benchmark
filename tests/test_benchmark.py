@@ -955,8 +955,4 @@ def test_columns(testdir):
         "* benchmark: 2 tests *",
         "Name (time in ?s) * Max * Iterations * Min *",
         "------*",
-        "test_fast          * 1  *",
-        "test_slow          * 1  *",
-        "------*",
-        "*====== 3 passed* seconds ======*",
     ])
