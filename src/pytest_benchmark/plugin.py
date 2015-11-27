@@ -607,6 +607,7 @@ class BenchmarkSession(object):
 
         self.only = config.getoption("benchmark_only")
         self.sort = config.getoption("benchmark_sort")
+        self.columns = config.getoption("benchmark_columns")
         if self.skip and self.only:
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
         if self.disable and self.only:
@@ -834,7 +835,6 @@ class BenchmarkSession(object):
     def display_results_table(self, tr):
         tr.write_line("")
         tr.rewrite("Computing stats ...", black=True, bold=True)
-        columns = self.config.getoption('benchmark_columns')
         groups = self.config.hook.pytest_benchmark_group_stats(
             config=self.config,
             benchmarks=self.benchmarks,
@@ -890,7 +890,7 @@ class BenchmarkSession(object):
                     if prop not in ["outliers", "rounds", "iterations"]
                     else ""
                 )
-                for prop in columns
+                for prop in self.columns
             )
             tr.rewrite("")
             tr.write_line(
@@ -906,7 +906,7 @@ class BenchmarkSession(object):
             for bench in benchmarks:
                 has_error = bench.get("has_error")
                 tr.write(bench["name"].ljust(widths["name"]), red=has_error, invert=has_error)
-                for prop in columns:
+                for prop in self.columns:
                     if prop in ("min", "max", "mean", "stddev", "median", "iqr"):
                         tr.write(
                             ALIGNED_NUMBER_FMT.format(
