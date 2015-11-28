@@ -1,3 +1,4 @@
+import distutils.spawn
 import subprocess
 import argparse
 
@@ -30,6 +31,8 @@ def test_clonefunc_not_function():
 
 @mark.parametrize('scm', ['git', 'hg'])
 def test_get_commit_info(scm, testdir):
+    if not distutils.spawn.find_executable(scm):
+        pytest.skip("%r not availabe on $PATH")
     subprocess.check_call([scm, 'init', '.'])
     if scm == 'git':
         subprocess.check_call('git config user.email you@example.com'.split())
