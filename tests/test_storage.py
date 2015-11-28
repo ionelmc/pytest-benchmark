@@ -202,7 +202,7 @@ def test_compare_1(sess, LineMatcher):
     ))
     print(output.getvalue())
     LineMatcher(output.getvalue().splitlines()).fnmatch_lines([
-        'BENCHMARK-C6: Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"}. {\'fslocation\': \'tests/test_storage\'}',
+        'BENCHMARK-C6: Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"}. {\'fslocation\': \'tests*test_storage\'}',
         'Comparing against benchmark 0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted-changes.json:',
         '| commit info: {dirty: true, id: "5b78858eb718649a31fb93d8dc96ca2cee41a4cd"}',
         '| saved at: 2015-08-15T00:01:46.250433',
@@ -230,7 +230,7 @@ def test_compare_2(sess, LineMatcher):
     ))
     print(output.getvalue())
     LineMatcher(output.getvalue().splitlines()).fnmatch_lines([
-        'BENCHMARK-C6: Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"}. {\'fslocation\': \'tests/test_storage\'}',
+        'BENCHMARK-C6: Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"}. {\'fslocation\': \'tests*test_storage\'}',
         'Comparing against benchmark 0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes.json:',
         '| commit info: {dirty: true, id: "5b78858eb718649a31fb93d8dc96ca2cee41a4cd"}',
         '| saved at: 2015-08-15T00:01:51.557705',
