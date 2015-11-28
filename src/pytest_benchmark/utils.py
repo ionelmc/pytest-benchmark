@@ -183,6 +183,19 @@ def parse_sort(string):
     return string
 
 
+def parse_columns(string):
+    allowed_columns = ["min", "max", "mean", "stddev", "median", "iqr",
+                       "outliers", "rounds", "iterations"]
+    columns = [str.strip(s) for s in string.lower().split(',')]
+    invalid = set(columns) - set(allowed_columns)
+    if invalid:
+        # there are extra items in columns!
+        msg = "Invalid column name(s): %s. " % ', '.join(invalid)
+        msg += "The only valid column names are: %s" % ', '.join(allowed_columns)
+        raise argparse.ArgumentTypeError(msg)
+    return columns
+
+
 def parse_rounds(string):
     try:
         value = int(string)

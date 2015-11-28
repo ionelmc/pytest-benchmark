@@ -945,3 +945,14 @@ def test_only_benchmarks(testdir):
         "------*",
         "*====== 4 passed, 1 skipped* seconds ======*",
     ])
+
+def test_columns(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--doctest-modules', '--benchmark-columns=max,iterations,min', test)
+    result.stdout.fnmatch_lines([
+        "*collected 3 items",
+        "test_columns.py ...",
+        "* benchmark: 2 tests *",
+        "Name (time in ?s) * Max * Iterations * Min *",
+        "------*",
+    ])

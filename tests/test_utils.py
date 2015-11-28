@@ -1,10 +1,13 @@
 import subprocess
+import argparse
 
+import pytest
 from pytest import mark
 
 from pytest_benchmark.utils import clonefunc
 from pytest_benchmark.utils import get_commit_info
 from pytest_benchmark.utils import parse_warmup
+from pytest_benchmark.utils import parse_columns
 
 pytest_plugins = 'pytester',
 
@@ -61,3 +64,9 @@ def test_parse_warmup():
     assert parse_warmup('no') == False
     assert parse_warmup('') == True
     assert parse_warmup('auto') in [True, False]
+
+def test_parse_columns():
+    assert parse_columns('min,max') == ['min', 'max']
+    assert parse_columns('MIN, max  ') == ['min', 'max']
+    with pytest.raises(argparse.ArgumentTypeError):
+        parse_columns('min,max,x')

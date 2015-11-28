@@ -38,6 +38,7 @@ from .utils import parse_rounds
 from .utils import parse_save
 from .utils import parse_seconds
 from .utils import parse_sort
+from .utils import parse_columns
 from .utils import parse_timer
 from .utils import parse_warmup
 from .utils import report_progress
@@ -113,6 +114,11 @@ def pytest_addoption(parser):
         help="How to group tests. Can be one of: 'group', 'name', 'fullname', 'func', 'fullfunc' or 'param'."
              " Default: %(default)r"
     )
+    group.addoption(
+        "--benchmark-columns",
+        metavar="LABELS", type=parse_columns,
+        default="min, max, mean, stddev, median, iqr, outliers, rounds, iterations",
+        help='Comma-separated list of columns to show in the result table. Default: "%(default)s"')
     group.addoption(
         "--benchmark-timer",
         metavar="FUNC", type=parse_timer, default=str(NameWrapper(default_timer)),
@@ -601,6 +607,7 @@ class BenchmarkSession(object):
 
         self.only = config.getoption("benchmark_only")
         self.sort = config.getoption("benchmark_sort")
+        self.columns = config.getoption("benchmark_columns")
         if self.skip and self.only:
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
         if self.disable and self.only:
@@ -882,7 +889,7 @@ class BenchmarkSession(object):
                     if prop not in ["outliers", "rounds", "iterations"]
                     else ""
                 )
-                for prop in ("min", "max", "mean", "stddev", "median", "iqr", "outliers", "rounds", "iterations")
+                for prop in self.columns
             )
             tr.rewrite("")
             tr.write_line(
@@ -898,20 +905,21 @@ class BenchmarkSession(object):
             for bench in benchmarks:
                 has_error = bench.get("has_error")
                 tr.write(bench["name"].ljust(widths["name"]), red=has_error, invert=has_error)
-                for prop in "min", "max", "mean", "stddev", "median", "iqr":
-                    tr.write(
-                        ALIGNED_NUMBER_FMT.format(
-                            bench[prop] * adjustment,
-                            widths[prop],
-                            self.compute_baseline_scale(best[prop], bench[prop], rpadding),
-                            rpadding
-                        ),
-                        green=not solo and bench[prop] == best.get(prop),
-                        red=not solo and bench[prop] == worst.get(prop),
-                        bold=True,
-                    )
-                for prop in "outliers", "rounds", "iterations":
-                    tr.write("{0:>{1}}".format(bench[prop], widths[prop]))
+                for prop in self.columns:
+                    if prop in ("min", "max", "mean", "stddev", "median", "iqr"):
+                        tr.write(
+                            ALIGNED_NUMBER_FMT.format(
+                                bench[prop] * adjustment,
+                                widths[prop],
+                                self.compute_baseline_scale(best[prop], bench[prop], rpadding),
+                                rpadding
+                            ),
+                            green=not solo and bench[prop] == best.get(prop),
+                            red=not solo and bench[prop] == worst.get(prop),
+                            bold=True,
+                        )
+                    else:
+                        tr.write("{0:>{1}}".format(bench[prop], widths[prop]))
                 tr.write("\n")
             tr.write_line("-" * len(labels_line), yellow=True)
             tr.write_line("")
