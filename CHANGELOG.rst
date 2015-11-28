@@ -2,6 +2,12 @@
 Changelog
 =========
 
+3.1.0 (unreleased)
+------------------
+
+* Added ``--benchmark-colums`` command line option. It selects what columns are displayed in the result table. Contributed by
+  Antonio Cuni in `PR#34 <https://github.com/ionelmc/pytest-benchmark/pull/34>`_.
+
 3.0.0 (2015-11-08)
 ------------------
 
@@ -68,7 +74,8 @@ Changelog
 3.0.0a1 (2015-09-13)
 --------------------
 
-* Added JSON report saving (the ``--benchmark-json`` command line arguments).
+* Added JSON report saving (the ``--benchmark-json`` command line arguments). Based on initial work from Dave Collins in
+  `PR#8 <https://github.com/ionelmc/pytest-benchmark/pull/8>`_.
 * Added benchmark data storage(the ``--benchmark-save`` and ``--benchmark-autosave`` command line arguments).
 * Added comparison to previous runs (the ``--benchmark-compare`` command line argument).
 * Added performance regression checks (the ``--benchmark-compare-fail`` command line argument).
@@ -156,5 +163,5 @@ Changelog
 ? (?)
 -----
 
-* Readme and styling fixes (contributed by Marc Abramowitz)
+* Readme and styling fixes. Contributed by Marc Abramowitz in `PR#4 <https://github.com/ionelmc/pytest-benchmark/pull/4>`_.
 * Lots of wild changes.
