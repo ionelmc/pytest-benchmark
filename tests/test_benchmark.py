@@ -160,6 +160,23 @@ def test_b(benchmark, foo):
     benchmark(int)
 '''
 
+GROUPING_PARAMS_TEST = '''
+import pytest
+
+@pytest.mark.parametrize("bar", ["bar1", "bar2"])
+@pytest.mark.parametrize("foo", ["foo1", "foo2"])
+@pytest.mark.benchmark(group="A")
+def test_a(benchmark, foo, bar):
+    benchmark(str)
+
+
+@pytest.mark.parametrize("bar", ["bar1", "bar2"])
+@pytest.mark.parametrize("foo", ["foo1", "foo2"])
+@pytest.mark.benchmark(group="B")
+def test_b(benchmark, foo, bar):
+    benchmark(int)
+'''
+
 
 def test_group_by_name(testdir):
     test_x = testdir.makepyfile(test_x=GROUPING_TEST)
@@ -264,7 +281,7 @@ def test_group_by_fullfunc(testdir):
     ])
 
 
-def test_group_by_param(testdir):
+def test_group_by_param_all(testdir):
     test_x = testdir.makepyfile(test_x=GROUPING_TEST)
     test_y = testdir.makepyfile(test_y=GROUPING_TEST)
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'param', test_x, test_y)
@@ -286,6 +303,34 @@ def test_group_by_param(testdir):
         'test_*[[]1[]]         *',
         'test_*[[]1[]]         *',
         'test_*[[]1[]]         *',
+        '------------------*',
+        '',
+        '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '
+        'Quartile.',
+        '============* 8 passed* seconds ============*',
+    ])
+
+def test_group_by_param_select(testdir):
+    test_x = testdir.makepyfile(test_x=GROUPING_PARAMS_TEST)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'param:foo', test_x)
+    result.stdout.fnmatch_lines([
+        '*', '*', '*', '*', '*',
+        "* benchmark 'foo1': 4 tests *",
+        'Name (time in ?s)  *',
+        '-------------------*',
+        'test_*[[]foo1-*[]]    *',
+        'test_*[[]foo1-*[]]    *',
+        'test_*[[]foo1-*[]]    *',
+        'test_*[[]foo1-*[]]    *',
+        '-------------------*',
+        '',
+        "* benchmark 'foo2': 4 tests *",
+        'Name (time in ?s) *',
+        '------------------*',
+        'test_*[[]foo2-*[]]    *',
+        'test_*[[]foo2-*[]]    *',
+        'test_*[[]foo2-*[]]    *',
+        'test_*[[]foo2-*[]]    *',
         '------------------*',
         '',
         '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '

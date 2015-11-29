@@ -111,7 +111,8 @@ def pytest_addoption(parser):
     group.addoption(
         "--benchmark-group-by",
         metavar="LABEL", default="group",
-        help="How to group tests. Can be one of: 'group', 'name', 'fullname', 'func', 'fullfunc' or 'param'."
+        help="How to group tests. Can be one of: 'group', 'name', 'fullname', 'func', 'fullfunc', "
+             "'param' or 'param:NAME', where NAME is the name passed to @pytest.parametrize."
              " Default: %(default)r"
     )
     group.addoption(
@@ -996,8 +997,13 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
             groups[bench.fullname].append(bench)
         elif group_by == "param":
             groups[bench.param].append(bench)
+        elif group_by.startswith("param:"):
+            param_name = group_by[len("param:"):]
+            param_value = bench.params[param_name]
+            groups[param_value].append(bench)
         else:
             raise NotImplementedError("Unsupported grouping %r." % group_by)
+    #
     for grouped_benchmarks in groups.values():
         grouped_benchmarks.sort(key=operator.attrgetter("fullname" if "full" in group_by else "name"))
     return sorted(groups.items(), key=lambda pair: pair[0] or "")
