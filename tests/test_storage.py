@@ -82,6 +82,7 @@ class MockSession(BenchmarkSession):
                     group=bench['group'],
                     options=bench['options'],
                     has_error=False,
+                    params=None,
                     **bench['stats']
                 )
                 for bench in data['benchmarks']

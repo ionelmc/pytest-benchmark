@@ -2,7 +2,8 @@
     "benchmarks": [
         {
             "name": "test_xfast_parametrized[0]", 
-            "group": null, 
+            "group": null,
+            "params": null,
             "stats": {
                 "rounds": 9710, 
                 "iqr_outliers": 1726, 
