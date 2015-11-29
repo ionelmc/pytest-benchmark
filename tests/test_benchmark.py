@@ -312,25 +312,28 @@ def test_group_by_param_all(testdir):
 
 def test_group_by_param_select(testdir):
     test_x = testdir.makepyfile(test_x=GROUPING_PARAMS_TEST)
-    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'param:foo', test_x)
+    result = testdir.runpytest('--benchmark-max-time=0.0000001',
+                               '--benchmark-group-by', 'param:foo',
+                               '--benchmark-sort', 'fullname',
+                               test_x)
     result.stdout.fnmatch_lines([
         '*', '*', '*', '*', '*',
         "* benchmark 'foo1': 4 tests *",
         'Name (time in ?s)  *',
         '-------------------*',
-        'test_*[[]foo1-*[]]    *',
-        'test_*[[]foo1-*[]]    *',
-        'test_*[[]foo1-*[]]    *',
-        'test_*[[]foo1-*[]]    *',
+        'test_a[[]foo1-bar1[]]    *',
+        'test_a[[]foo1-bar2[]]    *',
+        'test_b[[]foo1-bar1[]]    *',
+        'test_b[[]foo1-bar2[]]    *',
         '-------------------*',
         '',
         "* benchmark 'foo2': 4 tests *",
         'Name (time in ?s) *',
         '------------------*',
-        'test_*[[]foo2-*[]]    *',
-        'test_*[[]foo2-*[]]    *',
-        'test_*[[]foo2-*[]]    *',
-        'test_*[[]foo2-*[]]    *',
+        'test_a[[]foo2-bar1[]]    *',
+        'test_a[[]foo2-bar2[]]    *',
+        'test_b[[]foo2-bar1[]]    *',
+        'test_b[[]foo2-bar2[]]    *',
         '------------------*',
         '',
         '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '

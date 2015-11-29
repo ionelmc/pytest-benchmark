@@ -106,7 +106,8 @@ def pytest_addoption(parser):
     group.addoption(
         "--benchmark-sort",
         metavar="COL", type=parse_sort, default="min",
-        help="Column to sort on. Can be one of: 'min', 'max', 'mean' or 'stddev'. Default: %(default)r"
+        help="Column to sort on. Can be one of: 'min', 'max', 'mean', 'stddev', "
+             "'name', 'fullname'. Default: %(default)r"
     )
     group.addoption(
         "--benchmark-group-by",
@@ -614,6 +615,7 @@ class BenchmarkSession(object):
 
         self.only = config.getoption("benchmark_only")
         self.sort = config.getoption("benchmark_sort")
+        self.sort = "fullname"
         self.columns = config.getoption("benchmark_columns")
         if self.skip and self.only:
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
@@ -864,7 +866,10 @@ class BenchmarkSession(object):
                 worst[prop] = max(benchmark[prop] for _, benchmark in report_progress(
                     benchmarks, tr, "{line} ({pos}/{total})", line=line))
 
-            unit, adjustment = time_unit(best.get(self.sort, benchmarks[0][self.sort]))
+            time_unit_key = self.sort
+            if self.sort in ("name", "fullname"):
+                time_unit_key = "min"
+            unit, adjustment = time_unit(best.get(self.sort, benchmarks[0][time_unit_key]))
             labels = {
                 "name": "Name (time in %ss)" % unit,
                 "min": "Min",
@@ -1007,7 +1012,6 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
     for grouped_benchmarks in groups.values():
         grouped_benchmarks.sort(key=operator.attrgetter("fullname" if "full" in group_by else "name"))
     return sorted(groups.items(), key=lambda pair: pair[0] or "")
-
 
 def pytest_terminal_summary(terminalreporter):
     try:
