@@ -26,7 +26,7 @@ Changelog
 ---------------------
 
 * Changed ``--benchmark-warmup`` to take optional value and automatically activate on PyPy (default value is ``auto``).
-  *MAY BE BACKWARDS INCOMPATIBLE*
+  **MAY BE BACKWARDS INCOMPATIBLE**
 * Removed the version check in compare mode (previously there was a warning if current version is lower than what's in
   the file).
 
@@ -44,7 +44,7 @@ Changelog
 
 * Add a ``--benchmark-disable`` option. It's automatically activated when xdist is on
 * When xdist is on or `statistics` can't be imported then ``--benchmark-disable`` is automatically activated (instead
-  of ``--benchmark-skip``). *BACKWARDS INCOMPATIBLE*
+  of ``--benchmark-skip``). **BACKWARDS INCOMPATIBLE**
 * Replace the deprecated ``__multicall__`` with the new hookwrapper system.
 * Improved description for ``--benchmark-max-time``.
 
@@ -84,8 +84,8 @@ Changelog
 * Added option to fine tune the calibration (the ``--benchmark-calibration-precision`` command line argument and
   ``calibration_precision`` marker option).
 
-* Changed ``benchmark_weave`` to no longer be a context manager. Cleanup is performed automatically. *BACKWARDS
-  INCOMPATIBLE*
+* Changed ``benchmark_weave`` to no longer be a context manager. Cleanup is performed automatically. 
+  **BACKWARDS INCOMPATIBLE**
 * Added ``benchmark.weave`` method (alternative to ``benchmark_weave`` fixture).
 
 * Added new hooks to allow customization:
@@ -152,7 +152,7 @@ Changelog
 2.0.0 (2014-12-19)
 ------------------
 
-* Replace the context-manager based API with a simple callback interface. *BACKWARDS INCOMPATIBLE*
+* Replace the context-manager based API with a simple callback interface. **BACKWARDS INCOMPATIBLE**
 * Implement timer calibration for precise measurements.
 
 1.0.0 (2014-12-15)
