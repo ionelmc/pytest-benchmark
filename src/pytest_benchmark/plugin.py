@@ -615,7 +615,6 @@ class BenchmarkSession(object):
 
         self.only = config.getoption("benchmark_only")
         self.sort = config.getoption("benchmark_sort")
-        self.sort = "fullname"
         self.columns = config.getoption("benchmark_columns")
         if self.skip and self.only:
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
