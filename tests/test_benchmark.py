@@ -725,7 +725,7 @@ def test_bogus_sort(testdir):
     result = testdir.runpytest('--benchmark-sort=bogus', test)
     result.stderr.fnmatch_lines([
         "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
-        "py*: error: argument --benchmark-sort: Unacceptable value: 'bogus'. Value for --benchmark-sort must be one of: 'min', 'max', 'mean' or 'stddev'."
+        "py*: error: argument --benchmark-sort: Unacceptable value: 'bogus'. Value for --benchmark-sort must be one of: 'min', 'max', 'mean', 'stddev', 'name', 'fullname'."
 
     ])
 
