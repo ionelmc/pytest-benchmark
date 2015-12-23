@@ -1012,6 +1012,7 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
         grouped_benchmarks.sort(key=operator.attrgetter("fullname" if "full" in group_by else "name"))
     return sorted(groups.items(), key=lambda pair: pair[0] or "")
 
+
 def pytest_terminal_summary(terminalreporter):
     try:
         terminalreporter.config._benchmarksession.display(terminalreporter)
