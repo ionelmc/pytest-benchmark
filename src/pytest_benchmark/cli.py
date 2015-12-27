@@ -1,8 +1,3 @@
-"""
-
-py.test-benchmark
-
-"""
 import argparse
 
 from .plugin import add_display_options
@@ -26,9 +21,15 @@ class CommandArgumentParser(argparse.ArgumentParser):
                                                     **kwargs)
         self.add_argument(
             '-h', '--help',
-            action='store_true', help='Display help and exit.'
+            nargs='?', action=HelpAction, help='Display help and exit.'
         )
-        self.add_command('help', description='Display help and exit.').add_argument('command', nargs='?', action=HelpAction)
+        self.add_command(
+            'help',
+            description='Display help and exit.'
+        ).add_argument(
+            'command',
+            nargs='?', action=HelpAction
+        )
 
     @property
     def epilog(self):
@@ -41,27 +42,24 @@ class CommandArgumentParser(argparse.ArgumentParser):
     def add_command(self, name, **opts):
         if self.commands is None:
             self.commands = self.add_subparsers(
-                title='commands', dest='command', help='', parser_class=argparse.ArgumentParser
+                title='commands', dest='command', metavar='COMMAND', help='', parser_class=argparse.ArgumentParser
             )
             self.commands_dispatch = {}
 
         command = self.commands.add_parser(name, formatter_class=argparse.RawDescriptionHelpFormatter, **opts)
-        # command.add_argument(
-        #     '-h', '--help',
-        #     action='store_true', help='Show this help message and exit.'
-        # )
         self.commands_dispatch[name] = command
         return command
 
     def parse_args(self):
         args = super(CommandArgumentParser, self).parse_args()
         print(args)
-        if args.help:
-            if args.command:
+        if args.command:
+            if args.help:
                 return super(CommandArgumentParser, self).parse_args([args.command, '--help'])
-            else:
-                self.print_help()
-                self.exit()
+        else:
+            self.error('the following arguments are required: COMMAND (choose from %s)' % ', '.join(
+                map(repr, self.commands.choices)))
+        return args
 
 
 def main():
