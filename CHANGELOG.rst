@@ -6,7 +6,11 @@ Changelog
 ------------------
 
 * Added ``--benchmark-colums`` command line option. It selects what columns are displayed in the result table. Contributed by
-  Antonio Cuni in `PR#34 <https://github.com/ionelmc/pytest-benchmark/pull/34>`_.
+  Antonio Cuni in `#34 <https://github.com/ionelmc/pytest-benchmark/pull/34>`_.
+* Added support for grouping by specific test parametrization (``--benchmark-group-by=param:NAME`` where ``NAME`` is your
+  param name). Contributed by Antonio Cuni in `#37 <https://github.com/ionelmc/pytest-benchmark/pull/37>`_.
+* Added support for `name` or `fullname` in ``--benchmark-sort``.
+  Contributed by Antonio Cuni in `#37 <https://github.com/ionelmc/pytest-benchmark/pull/37>`_.
 
 3.0.0 (2015-11-08)
 ------------------
@@ -75,7 +79,7 @@ Changelog
 --------------------
 
 * Added JSON report saving (the ``--benchmark-json`` command line arguments). Based on initial work from Dave Collins in
-  `PR#8 <https://github.com/ionelmc/pytest-benchmark/pull/8>`_.
+  `#8 <https://github.com/ionelmc/pytest-benchmark/pull/8>`_.
 * Added benchmark data storage(the ``--benchmark-save`` and ``--benchmark-autosave`` command line arguments).
 * Added comparison to previous runs (the ``--benchmark-compare`` command line argument).
 * Added performance regression checks (the ``--benchmark-compare-fail`` command line argument).
@@ -84,7 +88,7 @@ Changelog
 * Added option to fine tune the calibration (the ``--benchmark-calibration-precision`` command line argument and
   ``calibration_precision`` marker option).
 
-* Changed ``benchmark_weave`` to no longer be a context manager. Cleanup is performed automatically. 
+* Changed ``benchmark_weave`` to no longer be a context manager. Cleanup is performed automatically.
   **BACKWARDS INCOMPATIBLE**
 * Added ``benchmark.weave`` method (alternative to ``benchmark_weave`` fixture).
 
@@ -163,5 +167,5 @@ Changelog
 ? (?)
 -----
 
-* Readme and styling fixes. Contributed by Marc Abramowitz in `PR#4 <https://github.com/ionelmc/pytest-benchmark/pull/4>`_.
+* Readme and styling fixes. Contributed by Marc Abramowitz in `#4 <https://github.com/ionelmc/pytest-benchmark/pull/4>`_.
 * Lots of wild changes.
