@@ -1,11 +1,12 @@
 import json
-import os
 import logging
-from io import StringIO, BytesIO
+import os
+import sys
+from io import BytesIO
+from io import StringIO
 
 import py
 import pytest
-
 from freezegun import freeze_time
 
 from pytest_benchmark.plugin import BenchmarkSession, PerformanceRegression
@@ -159,6 +160,8 @@ def test_regression_checks(sess):
 """
 
 
+@pytest.mark.skipif(sys.version_info[:2] < (2, 7),
+                    reason="Something weird going on, see: https://bugs.python.org/issue4482")
 def test_regression_checks_inf(sess):
     output = make_logger(sess)
     sess.compare = '0002'
