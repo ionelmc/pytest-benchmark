@@ -69,6 +69,9 @@ setup(
     entry_points={
         'pytest11': [
             'benchmark = pytest_benchmark.plugin'
+        ],
+        'console_scripts': [
+            'py.test-benchmark = pytest_benchmark.cli:main'
         ]
     }
 

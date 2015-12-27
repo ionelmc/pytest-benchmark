@@ -84,6 +84,46 @@ def pytest_report_header(config):
     )
 
 
+def add_display_options(addoption):
+    addoption(
+        "--benchmark-sort",
+        metavar="COL", type=parse_sort, default="min",
+        help="Column to sort on. Can be one of: 'min', 'max', 'mean', 'stddev', "
+             "'name', 'fullname'. Default: %(default)r"
+    )
+    addoption(
+        "--benchmark-group-by",
+        metavar="LABEL", default="group",
+        help="How to group tests. Can be one of: 'group', 'name', 'fullname', 'func', 'fullfunc', "
+             "'param' or 'param:NAME', where NAME is the name passed to @pytest.parametrize."
+             " Default: %(default)r"
+    )
+    addoption(
+        "--benchmark-columns",
+        metavar="LABELS", type=parse_columns,
+        default="min, max, mean, stddev, median, iqr, outliers, rounds, iterations",
+        help='Comma-separated list of columns to show in the result table. Default: "%(default)s"'
+    )
+    addoption(
+        "--benchmark-storage",
+        metavar="STORAGE-PATH", default="./.benchmarks/%s-%s-%s-%s" % (
+            platform.system(),
+            platform.python_implementation(),
+            ".".join(platform.python_version_tuple()[:2]),
+            platform.architecture()[0]
+        ),
+        help="Specify a different path to store the runs (when --benchmark-save or --benchmark-autosave are used). "
+             "Default: %(default)r",
+    )
+    prefix = "benchmark_%s" % get_current_time()
+    addoption(
+        "--benchmark-histogram",
+        action='append', metavar="FILENAME-PREFIX", nargs="?", default=[], const=prefix,
+        help="Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX contains"
+             " slashes ('/') then directories will be created. Default: %r" % prefix
+    )
+
+
 def pytest_addoption(parser):
     group = parser.getgroup("benchmark")
     group.addoption(
@@ -103,24 +143,6 @@ def pytest_addoption(parser):
         metavar="NUM", type=parse_rounds, default=5,
         help="Minimum rounds, even if total time would exceed `--max-time`. Default: %(default)r"
     )
-    group.addoption(
-        "--benchmark-sort",
-        metavar="COL", type=parse_sort, default="min",
-        help="Column to sort on. Can be one of: 'min', 'max', 'mean', 'stddev', "
-             "'name', 'fullname'. Default: %(default)r"
-    )
-    group.addoption(
-        "--benchmark-group-by",
-        metavar="LABEL", default="group",
-        help="How to group tests. Can be one of: 'group', 'name', 'fullname', 'func', 'fullfunc', "
-             "'param' or 'param:NAME', where NAME is the name passed to @pytest.parametrize."
-             " Default: %(default)r"
-    )
-    group.addoption(
-        "--benchmark-columns",
-        metavar="LABELS", type=parse_columns,
-        default="min, max, mean, stddev, median, iqr, outliers, rounds, iterations",
-        help='Comma-separated list of columns to show in the result table. Default: "%(default)s"')
     group.addoption(
         "--benchmark-timer",
         metavar="FUNC", type=parse_timer, default=str(NameWrapper(default_timer)),
@@ -188,6 +210,12 @@ def pytest_addoption(parser):
              " not just the stats.",
     )
     group.addoption(
+        "--benchmark-json",
+        metavar="PATH", type=argparse.FileType('wb'),
+        help="Dump a JSON report into PATH. "
+             "Note that this will include the complete data (all the timings, not just the stats)."
+    )
+    group.addoption(
         "--benchmark-compare",
         metavar="NUM", nargs="?", default=[], const=True,
         help="Compare the current run against run NUM or the latest saved run if unspecified."
@@ -198,30 +226,7 @@ def pytest_addoption(parser):
         help="Fail test if performance regresses according to given EXPR"
              " (eg: min:5%% or mean:0.001 for number of seconds). Can be used multiple times."
     )
-    group.addoption(
-        "--benchmark-storage",
-        metavar="STORAGE-PATH", default="./.benchmarks/%s-%s-%s-%s" % (
-            platform.system(),
-            platform.python_implementation(),
-            ".".join(platform.python_version_tuple()[:2]),
-            platform.architecture()[0]
-        ),
-        help="Specify a different path to store the runs (when --benchmark-save or --benchmark-autosave are used). "
-             "Default: %(default)r",
-    )
-    prefix = "benchmark_%s" % get_current_time()
-    group.addoption(
-        "--benchmark-histogram",
-        action='append', metavar="FILENAME-PREFIX", nargs="?", default=[], const=prefix,
-        help="Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX contains"
-             " slashes ('/') then directories will be created. Default: %r" % prefix
-    )
-    group.addoption(
-        "--benchmark-json",
-        metavar="PATH", type=argparse.FileType('wb'),
-        help="Dump a JSON report into PATH. "
-             "Note that this will include the complete data (all the timings, not just the stats)."
-    )
+    add_display_options(group.addoption)
 
 
 def pytest_addhooks(pluginmanager):
