@@ -106,12 +106,14 @@ def pytest_addoption(parser):
     group.addoption(
         "--benchmark-sort",
         metavar="COL", type=parse_sort, default="min",
-        help="Column to sort on. Can be one of: 'min', 'max', 'mean' or 'stddev'. Default: %(default)r"
+        help="Column to sort on. Can be one of: 'min', 'max', 'mean', 'stddev', "
+             "'name', 'fullname'. Default: %(default)r"
     )
     group.addoption(
         "--benchmark-group-by",
         metavar="LABEL", default="group",
-        help="How to group tests. Can be one of: 'group', 'name', 'fullname', 'func', 'fullfunc' or 'param'."
+        help="How to group tests. Can be one of: 'group', 'name', 'fullname', 'func', 'fullfunc', "
+             "'param' or 'param:NAME', where NAME is the name passed to @pytest.parametrize."
              " Default: %(default)r"
     )
     group.addoption(
@@ -237,6 +239,7 @@ class BenchmarkStats(object):
         self.fullname = fixture.fullname
         self.group = fixture.group
         self.param = fixture.param
+        self.params = fixture.params
 
         self.iterations = iterations
         self.stats = Stats()
@@ -290,7 +293,12 @@ class BenchmarkFixture(object):
         self.name = node.name
         self.fullname = node._nodeid
         self.disable = disable
-        self.param = node.callspec.id if hasattr(node, 'callspec') else None
+        if hasattr(node, 'callspec'):
+            self.param = node.callspec.id
+            self.params = node.callspec.params
+        else:
+            self.param = None
+            self.params = None
         self.group = group
         self.has_error = False
 
@@ -857,7 +865,10 @@ class BenchmarkSession(object):
                 worst[prop] = max(benchmark[prop] for _, benchmark in report_progress(
                     benchmarks, tr, "{line} ({pos}/{total})", line=line))
 
-            unit, adjustment = time_unit(best.get(self.sort, benchmarks[0][self.sort]))
+            time_unit_key = self.sort
+            if self.sort in ("name", "fullname"):
+                time_unit_key = "min"
+            unit, adjustment = time_unit(best.get(self.sort, benchmarks[0][time_unit_key]))
             labels = {
                 "name": "Name (time in %ss)" % unit,
                 "min": "Min",
@@ -990,8 +1001,13 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
             groups[bench.fullname].append(bench)
         elif group_by == "param":
             groups[bench.param].append(bench)
+        elif group_by.startswith("param:"):
+            param_name = group_by[len("param:"):]
+            param_value = bench.params[param_name]
+            groups[param_value].append(bench)
         else:
             raise NotImplementedError("Unsupported grouping %r." % group_by)
+    #
     for grouped_benchmarks in groups.values():
         grouped_benchmarks.sort(key=operator.attrgetter("fullname" if "full" in group_by else "name"))
     return sorted(groups.items(), key=lambda pair: pair[0] or "")
@@ -1053,6 +1069,7 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data):
                 "group": bench.group,
                 "name": bench.name,
                 "fullname": bench.fullname,
+                "params": bench.params,
                 "stats": dict(bench.json(include_data=include_data), iterations=bench.iterations),
                 "options": dict(
                     (k, v.__name__ if callable(v) else v) for k, v in bench.options.items()

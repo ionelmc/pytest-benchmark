@@ -176,10 +176,11 @@ def parse_timer(string):
 
 def parse_sort(string):
     string = string.lower().strip()
-    if string not in ("min", "max", "mean", "stddev"):
+    if string not in ("min", "max", "mean", "stddev", "name", "fullname"):
         raise argparse.ArgumentTypeError(
             "Unacceptable value: %r. "
-            "Value for --benchmark-sort must be one of: 'min', 'max', 'mean' or 'stddev'." % string)
+            "Value for --benchmark-sort must be one of: 'min', 'max', 'mean', "
+            "'stddev', 'name', 'fullname'." % string)
     return string
 
 
