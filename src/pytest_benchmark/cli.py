@@ -1,6 +1,6 @@
 import argparse
 
-from .plugin import add_display_options
+from .plugin import add_display_options, add_global_options, add_histogram_options
 
 
 class HelpAction(argparse.Action):
@@ -61,13 +61,24 @@ class CommandArgumentParser(argparse.ArgumentParser):
         return args
 
 
+def strip_prefix(callback, force_argument=False):
+    def add_argument(dest, **kwargs):
+        if not dest.startswith('--benchmark-'):
+            raise RuntimeError("Bad argument %s with options %s" % (dest, kwargs))
+        callback(dest[12:] if force_argument else '--' + dest[12:], **kwargs)
+
+    return add_argument
+
+
 def main():
     parser = CommandArgumentParser('py.test-benchmark', description="pytest_benchmark's management commands.")
+    add_global_options(strip_prefix(parser.add_argument))
 
     parser.add_command(
         'list',
         description='List saved runs.',
     )
+
     display_command = parser.add_command(
         'compare',
         description='Compare saved runs.',
@@ -85,7 +96,17 @@ def main():
     pytest-benchmark compare /foo/bar/0001_abc.json /lorem/ipsum/0001_sir_dolor.json
 
         Loads runs from exactly those files.''')
-    add_display_options(display_command.add_argument)
-    display_command.add_argument('run', nargs='+', help='Glob to match stored runs.')
+    add_display_options(strip_prefix(display_command.add_argument))
+    display_command.add_argument(
+        'run',
+        nargs='?', help='Glob to match stored runs. If not specified all runs are loaded.'
+    )
+
+    histogram_command = parser.add_command(
+        'histogram',
+        description='Plot runs.',
+    )
+    add_histogram_options(strip_prefix(histogram_command.add_argument, force_argument=True))
+
     args = parser.parse_args()
     print(args)

@@ -33,12 +33,12 @@ from .utils import get_commit_info
 from .utils import get_current_time
 from .utils import get_tag
 from .utils import load_timer
+from .utils import parse_columns
 from .utils import parse_compare_fail
 from .utils import parse_rounds
 from .utils import parse_save
 from .utils import parse_seconds
 from .utils import parse_sort
-from .utils import parse_columns
 from .utils import parse_timer
 from .utils import parse_warmup
 from .utils import report_progress
@@ -104,6 +104,9 @@ def add_display_options(addoption):
         default="min, max, mean, stddev, median, iqr, outliers, rounds, iterations",
         help='Comma-separated list of columns to show in the result table. Default: "%(default)s"'
     )
+
+
+def add_global_options(addoption):
     addoption(
         "--benchmark-storage",
         metavar="STORAGE-PATH", default="./.benchmarks/%s-%s-%s-%s" % (
@@ -115,6 +118,9 @@ def add_display_options(addoption):
         help="Specify a different path to store the runs (when --benchmark-save or --benchmark-autosave are used). "
              "Default: %(default)r",
     )
+
+
+def add_histogram_options(addoption):
     prefix = "benchmark_%s" % get_current_time()
     addoption(
         "--benchmark-histogram",
@@ -226,7 +232,9 @@ def pytest_addoption(parser):
         help="Fail test if performance regresses according to given EXPR"
              " (eg: min:5%% or mean:0.001 for number of seconds). Can be used multiple times."
     )
+    add_global_options(group.addoption)
     add_display_options(group.addoption)
+    add_histogram_options(group.addoption)
 
 
 def pytest_addhooks(pluginmanager):
