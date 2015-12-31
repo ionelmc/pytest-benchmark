@@ -21,6 +21,7 @@ class CommandArgumentParser(argparse.ArgumentParser):
                                                     **kwargs)
         self.add_argument(
             '-h', '--help',
+            metavar='COMMAND',
             nargs='?', action=HelpAction, help='Display help and exit.'
         )
         self.add_command(
@@ -31,32 +32,30 @@ class CommandArgumentParser(argparse.ArgumentParser):
             nargs='?', action=HelpAction
         )
 
-    @property
-    def epilog(self):
-        return '\n'.join('  %-20s %s' % (name, parser.description) for name, parser in self.commands_dispatch.items())
-
-    @epilog.setter
-    def epilog(self, value):
-        pass
-
     def add_command(self, name, **opts):
         if self.commands is None:
             self.commands = self.add_subparsers(
-                title='commands', dest='command', metavar='COMMAND', help='', parser_class=argparse.ArgumentParser
+                title='commands', dest='command', parser_class=argparse.ArgumentParser
             )
             self.commands_dispatch = {}
+        if 'description' in opts and 'help' not in opts:
+            opts['help'] = opts['description']
 
-        command = self.commands.add_parser(name, formatter_class=argparse.RawDescriptionHelpFormatter, **opts)
+        command = self.commands.add_parser(
+            name, formatter_class=argparse.RawDescriptionHelpFormatter, **opts
+        )
         self.commands_dispatch[name] = command
         return command
 
     def parse_args(self):
         args = super(CommandArgumentParser, self).parse_args()
-        print(args)
-        if args.command:
-            if args.help:
+        if args.help:
+            if args.command:
                 return super(CommandArgumentParser, self).parse_args([args.command, '--help'])
-        else:
+            else:
+                self.print_help()
+                self.exit()
+        elif not args.command:
             self.error('the following arguments are required: COMMAND (choose from %s)' % ', '.join(
                 map(repr, self.commands.choices)))
         return args
