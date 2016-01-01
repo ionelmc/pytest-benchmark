@@ -41,7 +41,7 @@ def make_plot(bench_name, table, compare, current, annotations, sort):
         for label, row in table:
             if label == current:
                 colors.append(DefaultStyle.colors[0])
-            elif compare and str(compare.basename).startswith(label):
+            elif compare and str(compare.name).startswith(label):
                 colors.append(DefaultStyle.colors[2])
             else:
                 colors.append("#000000")
