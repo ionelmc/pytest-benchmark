@@ -13,7 +13,8 @@ from pytest_benchmark.plugin import BenchmarkSession, PerformanceRegression
 from pytest_benchmark.plugin import pytest_benchmark_compare_machine_info
 from pytest_benchmark.plugin import pytest_benchmark_generate_json
 from pytest_benchmark.plugin import pytest_benchmark_group_stats
-from pytest_benchmark.utils import PercentageRegressionCheck, DifferenceRegressionCheck
+from pytest_benchmark.storage import Storage
+from pytest_benchmark.utils import PercentageRegressionCheck, DifferenceRegressionCheck, get_platform
 from pytest_benchmark import plugin
 
 pytest_plugins = "pytester"
@@ -48,7 +49,7 @@ class LooseFileLike(BytesIO):
 class MockSession(BenchmarkSession):
     def __init__(self):
         self.histogram = True
-        self.storage = STORAGE
+        self.storage = Storage(str(STORAGE), default_platform=get_platform())
         self._benchmarks = []
         self.sort = u"min"
         self.compare = '0001'
@@ -72,7 +73,7 @@ class MockSession(BenchmarkSession):
         self.group_by = 'group'
         self.columns = ['min', 'max', 'mean', 'stddev', 'median', 'iqr',
                         'outliers', 'rounds', 'iterations']
-        for bench_file in reversed(self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json", sort=True)):
+        for bench_file in reversed(self.storage.query("[0-9][0-9][0-9][0-9]_*")):
             with bench_file.open('rU') as fh:
                 data = json.load(fh)
             self._benchmarks.extend(

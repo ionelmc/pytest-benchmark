@@ -61,6 +61,15 @@ def get_tag():
     return '%s_%s%s' % (info['id'], get_current_time(), '_uncommitted-changes' if info['dirty'] else '')
 
 
+def get_platform():
+    "%s-%s-%s-%s" % (
+        platform.system(),
+        platform.python_implementation(),
+        ".".join(platform.python_version_tuple()[:2]),
+        platform.architecture()[0]
+    )
+
+
 def get_commit_info():
     dirty = False
     commit = 'unversioned'

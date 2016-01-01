@@ -18,12 +18,13 @@ from math import isinf
 import py
 import pytest
 
+from pytest_benchmark.storage import Storage
 from . import __version__
 from .compat import INT
 from .compat import XRANGE
 from .timers import compute_timer_precision
 from .timers import default_timer
-from .utils import NameWrapper
+from .utils import NameWrapper, get_platform
 from .utils import SecondsDecimal
 from .utils import cached_property
 from .utils import first_or_value
@@ -109,12 +110,7 @@ def add_display_options(addoption):
 def add_global_options(addoption):
     addoption(
         "--benchmark-storage",
-        metavar="STORAGE-PATH", default="./.benchmarks/%s-%s-%s-%s" % (
-            platform.system(),
-            platform.python_implementation(),
-            ".".join(platform.python_version_tuple()[:2]),
-            platform.architecture()[0]
-        ),
+        metavar="STORAGE-PATH", default="./.benchmarks",
         help="Specify a different path to store the runs (when --benchmark-save or --benchmark-autosave are used). "
              "Default: %(default)r",
     )
@@ -644,41 +640,25 @@ class BenchmarkSession(object):
         self.compare = config.getoption("benchmark_compare")
         self.compare_fail = config.getoption("benchmark_compare_fail")
         self.performance_regressions = []
-        self.storage = py.path.local(config.getoption("benchmark_storage"))
-        self.storage.ensure(dir=1)
+        self.storage = Storage(config.getoption("benchmark_storage"), default_platform=get_platform())
         self.histogram = first_or_value(config.getoption("benchmark_histogram"), False)
 
     @property
     def benchmarks(self):
         return [bench for bench in self._benchmarks if bench]
 
-    @property
-    def storage_fslocation(self):
-        return self.storage.relto(os.getcwd())
-
     @cached_property
     def compare_file(self):
         if self.compare:
-            files = self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json", sort=True)
-            if files:
-                if self.compare is True:
-                    files.sort()
-                    return files[-1]
-                else:
-                    files = [f for f in files if str(f.basename).startswith(self.compare)]
-                    if len(files) == 1:
-                        return files[0]
-
-                    if not files:
-                        self.logger.warn("BENCHMARK-C1", "Can't compare. No benchmark files matched %r" % self.compare,
-                                         fslocation=self.storage_fslocation)
-                    elif len(files) > 1:
-                        self.logger.warn(
-                            "BENCHMARK-C2", "Can't compare. Too many benchmark files matched %r:\n - %s" % (
-                                self.compare, '\n - '.join(map(str, files))
-                            ),
-                            fslocation=self.storage_fslocation)
+            if self.compare is True:
+                files = self.storage.query('[0-9][0-9][0-9][0-9]_')[-1:]
             else:
+                files = self.storage.query(self.compare)
+
+            if len(files) == 1:
+                return files[0]
+
+            if not files:
                 msg = "Can't compare. No benchmark files in %r. " \
                       "Expected files matching [0-9][0-9][0-9][0-9]_*.json." % str(self.storage)
                 if self.compare is True:
@@ -686,19 +666,24 @@ class BenchmarkSession(object):
                     code = "BENCHMARK-C3"
                 else:
                     msg += " Can't match anything to %r." % self.compare
-                    code = "BENCHMARK-C4"
-                self.logger.warn(code, msg, fslocation=self.storage_fslocation)
-                return
+                    code = "BENCHMARK-C1"
+                self.logger.warn(code, msg, fslocation=self.storage.location)
+            elif len(files) > 1:
+                self.logger.warn(
+                    "BENCHMARK-C2", "Can't compare. Too many benchmark files matched %r:\n - %s" % (
+                        self.compare, '\n - '.join(map(str, files))
+                    ),
+                    fslocation=self.storage.location)
 
     @property
     def next_num(self):
-        files = self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json")
+        files = self.storage.query("[0-9][0-9][0-9][0-9]_*")
         files.sort(reverse=True)
         if not files:
             return "0001"
         for f in files:
             try:
-                return "%04i" % (int(str(f.basename).split('_')[0]) + 1)
+                return "%04i" % (int(str(f.name).split('_')[0]) + 1)
             except ValueError:
                 raise
 
@@ -730,7 +715,7 @@ class BenchmarkSession(object):
                 benchmarks=self.benchmarks,
                 output_json=output_json
             )
-            output_file = self.storage.join("%s_%s.json" % (self.next_num, save))
+            output_file = self.storage.get("%s_%s.json" % (self.next_num, save))
             assert not output_file.exists()
 
             with output_file.open('wb') as fh:
@@ -739,13 +724,13 @@ class BenchmarkSession(object):
 
     def handle_loading(self):
         if self.compare_file:
-            self.compare_name = self.compare_file.basename.split('_')[0]
+            self.compare_name = self.compare_file.name.split('_')[0]
             with self.compare_file.open('rU') as fh:
                 try:
                     compared_benchmark = json.load(fh)
                 except Exception as exc:
                     self.logger.warn("BENCHMARK-C5", "Failed to load %s: %s" % (self.compare_file, exc),
-                                     fslocation=self.storage_fslocation)
+                                     fslocation=self.storage.location)
                     return
 
             machine_info = self.config.hook.pytest_benchmark_generate_machine_info(config=self.config)
@@ -755,7 +740,7 @@ class BenchmarkSession(object):
                                                                    compared_benchmark=compared_benchmark)
             self.compare_mapping = dict((bench['fullname'], bench) for bench in compared_benchmark['benchmarks'])
 
-            self.logger.info("Comparing against benchmark %s:" % self.compare_file.basename, bold=True)
+            self.logger.info("Comparing against benchmark %s:" % self.compare_file.name, bold=True)
             self.logger.info("| commit info: %s" % format_dict(compared_benchmark['commit_info']))
             self.logger.info("| saved at: %s" % compared_benchmark['datetime'])
             self.logger.info("| saved using pytest-benchmark %s:" % compared_benchmark['version'])
@@ -787,9 +772,9 @@ class BenchmarkSession(object):
             from .histogram import make_plot
 
             history = {}
-            for bench_file in self.storage.listdir("[0-9][0-9][0-9][0-9]_*.json"):
+            for bench_file in self.storage.query("[0-9][0-9][0-9][0-9]_*"):
                 with bench_file.open('rU') as fh:
-                    fullname = bench_file.purebasename
+                    fullname = bench_file.stem
                     if '_' in fullname:
                         id_, name = fullname.split('_', 1)
                     else:
@@ -974,7 +959,7 @@ def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info
                 format_dict(machine_info),
                 format_dict(compared_benchmark["machine_info"]),
             ),
-            fslocation=benchmarksession.storage_fslocation
+            fslocation=benchmarksession.storage.location
         )
 
 if hasattr(pytest, 'hookimpl'):
