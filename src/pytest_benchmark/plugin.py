@@ -5,7 +5,6 @@ import argparse
 import gc
 import json
 import operator
-import os
 import platform
 import sys
 import time
@@ -240,6 +239,19 @@ def pytest_addhooks(pluginmanager):
     if method is None:
         method = pluginmanager.addhooks
     method(hookspec)
+
+
+class HookShim(object):
+    def __init__(self, config):
+        self.config = config
+
+    def __getattr__(self, item):
+        hook = getattr(self.config.hook, item)
+
+        def config_injected_hook(**kwargs):
+            return hook(config=self.config, **kwargs)
+
+        return config_injected_hook
 
 
 class BenchmarkStats(object):
@@ -535,11 +547,15 @@ class BenchmarkFixture(object):
 
 
 class Logger(object):
-    def __init__(self, verbose, config):
+    def __init__(self, verbose, config=None):
         self.verbose = verbose
         self.term = py.io.TerminalWriter(file=sys.stderr)
-        self.capman = config.pluginmanager.getplugin("capturemanager")
-        self.pytest_warn = config.warn
+        if config:
+            self.capman = config.pluginmanager.getplugin("capturemanager")
+            self.pytest_warn = config.warn
+        else:
+            self.capman = None
+            self.pytest_warn = lambda **kawargs: None
         try:
             self.pytest_warn_has_fslocation = 'fslocation' in config.warn.func_code.co_varnames
         except AttributeError:
@@ -590,6 +606,8 @@ class BenchmarkSession(object):
         self.verbose = config.getoption("benchmark_verbose")
         self.logger = Logger(self.verbose, config)
         self.config = config
+        self.hooks = HookShim(config)
+
         self.options = dict(
             min_time=SecondsDecimal(config.getoption("benchmark_min_time")),
             min_rounds=config.getoption("benchmark_min_rounds"),
@@ -689,13 +707,11 @@ class BenchmarkSession(object):
 
     def handle_saving(self):
         if self.json:
-            output_json = self.config.hook.pytest_benchmark_generate_json(
-                config=self.config,
+            output_json = self.hooks.pytest_benchmark_generate_json(
                 benchmarks=self.benchmarks,
                 include_data=True
             )
-            self.config.hook.pytest_benchmark_update_json(
-                config=self.config,
+            self.hooks.pytest_benchmark_update_json(
                 benchmarks=self.benchmarks,
                 output_json=output_json
             )
@@ -705,13 +721,11 @@ class BenchmarkSession(object):
 
         save = self.save or self.autosave
         if save:
-            output_json = self.config.hook.pytest_benchmark_generate_json(
-                config=self.config,
+            output_json = self.hooks.pytest_benchmark_generate_json(
                 benchmarks=self.benchmarks,
                 include_data=self.save_data
             )
-            self.config.hook.pytest_benchmark_update_json(
-                config=self.config,
+            self.hooks.pytest_benchmark_update_json(
                 benchmarks=self.benchmarks,
                 output_json=output_json
             )
@@ -733,9 +747,9 @@ class BenchmarkSession(object):
                                      fslocation=self.storage.location)
                     return
 
-            machine_info = self.config.hook.pytest_benchmark_generate_machine_info(config=self.config)
-            self.config.hook.pytest_benchmark_update_machine_info(config=self.config, machine_info=machine_info)
-            self.config.hook.pytest_benchmark_compare_machine_info(config=self.config, benchmarksession=self,
+            machine_info = self.hooks.pytest_benchmark_generate_machine_info()
+            self.hooks.pytest_benchmark_update_machine_info(machine_info=machine_info)
+            self.hooks.pytest_benchmark_compare_machine_info(benchmarksession=self,
                                                                    machine_info=machine_info,
                                                                    compared_benchmark=compared_benchmark)
             self.compare_mapping = dict((bench['fullname'], bench) for bench in compared_benchmark['benchmarks'])
@@ -841,8 +855,7 @@ class BenchmarkSession(object):
     def display_results_table(self, tr):
         tr.write_line("")
         tr.rewrite("Computing stats ...", black=True, bold=True)
-        groups = self.config.hook.pytest_benchmark_group_stats(
-            config=self.config,
+        groups = self.hooks.pytest_benchmark_group_stats(
             benchmarks=self.benchmarks,
             group_by=self.group_by
         )
