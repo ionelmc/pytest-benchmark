@@ -62,7 +62,7 @@ def get_tag():
 
 
 def get_machine_id():
-    "%s-%s-%s-%s" % (
+    return "%s-%s-%s-%s" % (
         platform.system(),
         platform.python_implementation(),
         ".".join(platform.python_version_tuple()[:2]),
@@ -108,6 +108,18 @@ def first_or_value(obj, value):
         value, = obj
 
     return value
+
+
+def short_filename(path, machine_id):
+    parts = []
+    last = len(path.parts) - 1
+    for pos, part in enumerate(path.parts):
+        if not pos and part == machine_id:
+            continue
+        if pos == last:
+            part = part.split('_')[0]
+        parts.append(part)
+    return '/'.join(parts)
 
 
 def load_timer(string):

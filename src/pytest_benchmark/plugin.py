@@ -23,7 +23,7 @@ from .compat import INT
 from .compat import XRANGE
 from .timers import compute_timer_precision
 from .timers import default_timer
-from .utils import NameWrapper, get_machine_id
+from .utils import NameWrapper, get_machine_id, short_filename
 from .utils import SecondsDecimal
 from .utils import first_or_value
 from .utils import format_dict
@@ -742,6 +742,12 @@ class BenchmarkSession(object):
                 )
                 self.logger.info("Comparing against benchmark %s" % path)
 
+        for current in self.benchmarks:
+            current.compared = {}
+            for path, compared_mapping in self.compared_mapping.items():
+                if current.fullname in compared_mapping:
+                    current.compared[path] = compared_mapping[current.fullname]
+
     def display(self, tr):
         if not self.benchmarks:
             return
@@ -766,19 +772,10 @@ class BenchmarkSession(object):
 
     def handle_histogram(self):
         if self.histogram:
-            from .histogram import make_plot
+            if not self.compared_mapping:
+                raise pytest.UsageError("--benchmark-compare-fail requires valid --benchmark-compare.")
 
-            history = {}
-            for bench_file in self.storage.query("[0-9][0-9][0-9][0-9]_*"):
-                with bench_file.open('rU') as fh:
-                    fullname = bench_file.stem
-                    if '_' in fullname:
-                        id_, name = fullname.split('_', 1)
-                    else:
-                        id_, name = fullname, ''
-                    data = history[id_] = json.load(fh)
-                    data['name'] = name
-                    data['mapping'] = dict((bench['fullname'], bench) for bench in data['benchmarks'])
+            from .histogram import make_plot
 
             for bench in self.benchmarks:
                 name = bench.fullname
@@ -786,7 +783,7 @@ class BenchmarkSession(object):
                     name = name.replace(c, '_').replace('__', '_')
                 output_file = py.path.local("%s-%s.svg" % (self.histogram, name)).ensure()
 
-                table = list(self.generate_histogram_table(bench, history, sorted(history)))
+                matched_data = list(self.generate_histogram_table(bench, history, sorted(history)))
 
                 plot = make_plot(
                     bench_name=bench.fullname,
@@ -799,42 +796,27 @@ class BenchmarkSession(object):
                 plot.render_to_file(str(output_file))
                 self.logger.info("Generated histogram %s" % output_file, bold=True)
 
-    @staticmethod
-    def generate_histogram_table(current, history, sequence):
-        for name in sequence:
-            trial = history[name]
-            for bench in trial["benchmarks"]:
-                if bench["fullname"] == current.fullname:
-                    found = True
-                else:
-                    found = False
-
-                if found:
-                    yield "%s" % name, bench["stats"]
-                    break
+    def generate_histogram_table(self, current, history, sequence):
+        for path, benchmark_mapping in history.item():
+            if current.fullname in benchmark_mapping:
+                yield short_filename(path, self.machine_id), benchmark_mapping[current.fullname]
 
         yield HISTOGRAM_CURRENT, current.json()
 
     def apply_compare(self, benchmarks):
         result = []
         for bench in benchmarks:
-            is_compared = False
+            for path, compared in bench.compared.items():
+                name = short_filename(path, self.machine_id)
+                stats = compared["stats"]
 
-            for path, compared_mapping in self.compared_mapping.items():
-                parts = list(path.parts)
-                parts[-1] = parts[-1].split('_')[0]
-                name = '/'.join(p for p in parts if p != self.machine_id)
-
-                if bench.fullname in compared_mapping:
-                    stats = compared_mapping[bench.fullname]["stats"]
-                    result.append(dict(stats, name="{0} ({1})".format(bench.name, name)))
-                    is_compared = True
-                    if self.compare_fail:
-                        for check in self.compare_fail:
-                            fail = check.fails(bench, stats)
-                            if fail:
-                                self.performance_regressions.append((bench.fullname, fail))
-            if is_compared:
+                result.append(dict(stats, name="{0} ({1})".format(bench.name, name)))
+                if self.compare_fail:
+                    for check in self.compare_fail:
+                        fail = check.fails(bench, stats)
+                        if fail:
+                            self.performance_regressions.append((bench.fullname, fail))
+            if bench.compared:
                 result.append(
                     dict(bench.json(include_data=False),
                          name="{0} (NOW)".format(bench.name),
