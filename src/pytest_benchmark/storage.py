@@ -1,15 +1,22 @@
+import json
+import operator
 import os
 from itertools import chain
 from pathlib import Path
 
+from . import plugin
+
 
 class Storage(object):
-    def __init__(self, path, default_platform=None):
+    def __init__(self, path, logger, default_platform=None, hooks=plugin):
         self.path = Path(path)
         self.default_platform = default_platform
         if not self.path.exists():
             self.path.mkdir(parents=True)
         self.path = self.path.resolve()
+        self.hooks = hooks
+        self.logger = logger
+        self._cache = {}
 
     def __str__(self):
         return str(self.path)
@@ -47,4 +54,23 @@ class Storage(object):
             for file in path.glob(filename_glob)
         ), (
             file for file in self.path.glob(filename_glob)
-        )))
+        )), key=lambda file: (file.name, file.parent))
+
+    def load(self, globish):
+        result = []
+        for file in self.query(globish):
+            if file in self._cache:
+                data = self._cache[file]
+            else:
+                with file.open('rU') as fh:
+                    try:
+                        data = json.load(fh)
+                    except Exception as exc:
+                        self.logger.warn("BENCHMARK-C5",
+                                         "Failed to load %s: %s" % (file, exc), fslocation=self.location)
+                        continue
+                self._cache[file] = data
+
+            result.append((file.relative_to(self.path), data))
+        return result
+

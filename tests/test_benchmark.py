@@ -580,32 +580,6 @@ def test_compare_no_files_match_verbose(testdir):
     ])
 
 
-def test_compare_too_many(testdir):
-    test = testdir.makepyfile(SIMPLE_TEST)
-    testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
-    testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
-    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0', '-rw',
-                               test)
-    result.stdout.fnmatch_lines([
-        "WBENCHMARK-C2 * Can't compare. Too many benchmark files matched '0':",
-        ' - *0001_unversioned_*.json',
-        ' - *0002_unversioned_*.json',
-    ])
-
-
-def test_compare_too_many_verbose(testdir):
-    test = testdir.makepyfile(SIMPLE_TEST)
-    testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
-    testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
-    result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0',
-                               '--benchmark-verbose', test)
-    result.stderr.fnmatch_lines([
-        " WARNING: Can't compare. Too many benchmark files matched '0':",
-        ' - *0001_unversioned_*.json',
-        ' - *0002_unversioned_*.json',
-    ])
-
-
 def test_verbose(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-verbose',

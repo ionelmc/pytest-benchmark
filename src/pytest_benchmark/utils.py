@@ -61,7 +61,7 @@ def get_tag():
     return '%s_%s%s' % (info['id'], get_current_time(), '_uncommitted-changes' if info['dirty'] else '')
 
 
-def get_platform():
+def get_machine_id():
     "%s-%s-%s-%s" % (
         platform.system(),
         platform.python_implementation(),
