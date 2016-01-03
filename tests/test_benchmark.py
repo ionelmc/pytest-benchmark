@@ -549,7 +549,7 @@ def test_compare_no_files(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '-rw',
                                test, '--benchmark-compare')
     result.stdout.fnmatch_lines([
-         "WBENCHMARK-C3 * Can't compare. No benchmark files in '*'. Expected files matching *.json."
+         "WBENCHMARK-C2 * Can't compare. No benchmark files in '*'."
          " Can't load the previous benchmark."
     ])
 
@@ -559,7 +559,7 @@ def test_compare_no_files_verbose(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules',
                                test, '--benchmark-compare', '--benchmark-verbose')
     result.stderr.fnmatch_lines([
-        " WARNING: Can't compare. No benchmark files in '*'. Expected files matching *.json."
+        " WARNING: Can't compare. No benchmark files in '*'."
         " Can't load the previous benchmark."
     ])
 
@@ -569,8 +569,7 @@ def test_compare_no_files_match(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '-rw',
                                test, '--benchmark-compare=1')
     result.stdout.fnmatch_lines([
-        "WBENCHMARK-C1 * Can't compare. No benchmark files in '*'. Expected files matching *.json."
-         " Can't match anything to '1'."
+        "WBENCHMARK-C1 * Can't compare. No benchmark files in '*' match '1'."
     ])
 
 
@@ -579,8 +578,7 @@ def test_compare_no_files_match_verbose(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules',
                                test, '--benchmark-compare=1', '--benchmark-verbose')
     result.stderr.fnmatch_lines([
-        " WARNING: Can't compare. No benchmark files in '*'. Expected files matching *.json."
-        " Can't match anything to '1'."
+        " WARNING: Can't compare. No benchmark files in '*' match '1'."
     ])
 
 
@@ -612,12 +610,10 @@ def test_histogram(testdir):
     result = testdir.runpytest('--doctest-modules', '--benchmark-histogram=foobar',
                                '--benchmark-max-time=0.0000001', test)
     result.stderr.fnmatch_lines([
-        "Generated histogram *foobar-test_histogram.py_test_fast.svg",
-        "Generated histogram *foobar-test_histogram.py_test_slow.svg",
+        "Generated histogram *foobar.svg",
     ])
     assert [f.basename for f in testdir.tmpdir.listdir("*.svg", sort=True)] == [
-        'foobar-test_histogram.py_test_fast.svg',
-        'foobar-test_histogram.py_test_slow.svg',
+        'foobar.svg',
     ]
 
 
