@@ -11,6 +11,7 @@ import sys
 import types
 from datetime import datetime
 from decimal import Decimal
+from functools import partial
 
 from .compat import PY3
 
@@ -278,6 +279,16 @@ class cached_property(object):
             return self
         value = obj.__dict__[self.func.__name__] = self.func(obj)
         return value
+
+
+def funcname(f):
+    try:
+        if isinstance(f, partial):
+            return f.func.__name__
+        else:
+            return f.__name__
+    except AttributeError:
+        return str(f)
 
 
 def clonefunc(f):

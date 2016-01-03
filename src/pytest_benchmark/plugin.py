@@ -29,6 +29,7 @@ from .utils import annotate_source
 from .utils import first_or_value
 from .utils import format_dict
 from .utils import format_time
+from .utils import funcname
 from .utils import get_commit_info
 from .utils import get_current_time
 from .utils import get_machine_id
@@ -104,7 +105,7 @@ def add_display_options(addoption):
         "--benchmark-columns",
         metavar="LABELS", type=parse_columns,
         default="min, max, mean, stddev, median, iqr, outliers, rounds, iterations",
-        help='Comma-separated list of columns to show in the result table. Default: "%(default)s"'
+        help='Comma-separated list of columns to show in the result table. Default: %(default)r'
     )
 
 
@@ -299,7 +300,7 @@ class BenchmarkStats(object):
             "params": self.params,
             "param": self.param,
             "options": dict(
-                (k, v.__name__ if callable(v) else v) for k, v in self.options.items()
+                (k, funcname(v) if callable(v) else v) for k, v in self.options.items()
             )
         }
         if stats:
