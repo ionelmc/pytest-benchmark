@@ -500,12 +500,12 @@ def test_compare(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0001',
                                '--benchmark-compare-fail=min:0.1', test)
     result.stderr.fnmatch_lines([
-        "Comparing against benchmark 0001_unversioned_*.json:",
+        "Comparing against benchmark *0001_unversioned_*.json",
     ])
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0001',
                                '--benchmark-compare-fail=min:1%', test)
     result.stderr.fnmatch_lines([
-        "Comparing against benchmark 0001_unversioned_*.json:",
+        "Comparing against benchmark *0001_unversioned_*.json",
     ])
 
 
