@@ -35,21 +35,16 @@ class Plot(Box):
             self.svg.node(node, 'desc', class_="x_label").text = self.annotations[xlabel]["name"]
 
 
-def make_plot(name, table, current, annotations, title, adjustment):
+def make_plot(benchmarks, title, adjustment):
     class Style(DefaultStyle):
-        colors = []
+        colors = ["#000000" if row["path"] else DefaultStyle.colors[0]
+                  for row in benchmarks]
         font_family = 'Consolas, "Deja Vu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace'
 
-        for label, row in table:
-            if label == current:
-                colors.append(DefaultStyle.colors[0])
-            else:
-                colors.append("#000000")
-
-    minimum = int(min(row["min"] * adjustment for _, row in table))
+    minimum = int(min(row["min"] * adjustment for row in benchmarks))
     maximum = int(max(
         min(row["max"], row["hd15iqr"]) * adjustment
-        for _, row in table
+        for row in benchmarks
     ) + 1)
 
     try:
@@ -64,10 +59,10 @@ def make_plot(name, table, current, annotations, title, adjustment):
         }
 
     plot = Plot(
-        annotations,
+        benchmarks,
         box_mode='tukey',
         x_label_rotation=-90,
-        x_labels=[_["source"] for label, _ in table],
+        x_labels=[row["source"] for row in benchmarks],
         show_legend=False,
         title=title,
         x_title="Trial",
@@ -82,9 +77,6 @@ def make_plot(name, table, current, annotations, title, adjustment):
             "file://style.css",
             "file://graph.css",
             """inline:
-                .axis.x text {
-                    xtext-anchor: middle !important;
-                }
                 .tooltip .value {
                     font-size: 1em !important;
                 }
@@ -93,11 +85,10 @@ def make_plot(name, table, current, annotations, title, adjustment):
         **opts
     )
 
-    for label, row in table:
-        if label in annotations:
-            label += "\n@%s - %s rounds" % (annotations[label]["datetime"], row["rounds"])
+    for row in benchmarks:
+        label = "%s\n%s rounds" % (row["path"], row["rounds"])
         serie = [row[field] * adjustment for field in ["min", "ld15iqr", "q1", "median", "q3", "hd15iqr", "max"]]
-        plot.add(row["source"], serie)
+        plot.add(label, serie)
     return plot
 
 
@@ -110,17 +101,9 @@ def make_histogram(output_prefix, name, benchmarks, unit, adjustment):
         title = "Speed in %s" % TIME_UNITS[unit]
 
     output_file = py.path.local(path).ensure()
-    current = None
-    table = list(enumerate(benchmarks))
-    for pos, bench in table:
-        if bench["path"] is None:
-            current = pos
 
     plot = make_plot(
-        name=name,
-        table=table,
-        current=current,
-        annotations=benchmarks,
+        benchmarks=benchmarks,
         title=title,
         adjustment=adjustment,
     )
