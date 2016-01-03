@@ -10,16 +10,16 @@ except ImportError as exc:
     raise ImportError(exc.args, "Please install pygal and pygaljs or pytest-benchmark[histogram]")
 
 
-class Plot(Box):
+class CustomBox(Box):
     def __init__(self, annotations, *args, **kwargs):
-        super(Plot, self).__init__(*args, **kwargs)
+        super(CustomBox, self).__init__(*args, **kwargs)
         self.annotations = annotations
 
     def _box_points(self, serie, _):
         return serie, [serie[0], serie[6]]
 
     def _format(self, x):
-        sup = super(Box, self)._format
+        sup = super(CustomBox, self)._format
         if is_list_like(x):
             return "Min: {0[0]:.4f}\n" \
                    "Q1-1.5IQR: {0[1]:.4f}\n" \
@@ -31,7 +31,7 @@ class Plot(Box):
             return sup(x)
 
     def _tooltip_data(self, node, value, x, y, classes=None, xlabel=None):
-        super(Plot, self)._tooltip_data(node, value, x, y, classes=classes, xlabel=None)
+        super(CustomBox, self)._tooltip_data(node, value, x, y, classes=classes, xlabel=None)
         if xlabel in self.annotations:
             self.svg.node(node, 'desc', class_="x_label").text = self.annotations[xlabel]["name"]
 
@@ -59,7 +59,7 @@ def make_plot(benchmarks, title, adjustment):
             ]
         }
 
-    plot = Plot(
+    plot = CustomBox(
         benchmarks,
         box_mode='tukey',
         x_label_rotation=-90,
