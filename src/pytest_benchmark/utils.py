@@ -1,3 +1,4 @@
+# encoding: utf-8
 from __future__ import division
 from __future__ import print_function
 
@@ -30,6 +31,13 @@ except ImportError:
                 cmd = popenargs[0]
             raise subprocess.CalledProcessError(retcode, cmd)
         return output
+
+TIME_UNITS = {
+    "": "Seconds",
+    "m": "Miliseconds (ms)",
+    "u": u"Microseconds (us/µs)",
+    "n": "Nanoseconds (ns)"
+}
 
 
 class SecondsDecimal(Decimal):
@@ -255,13 +263,6 @@ def time_unit(value):
         return "m", 1e3
     else:
         return "", 1.
-
-TIME_UNITS = {
-    "": "Seconds",
-    "m": "Miliseconds (ms)",
-    "u": "Microseconds (us/µs)",
-    "n": "Nanoseconds (ns)"
-}
 
 
 def format_time(value):
