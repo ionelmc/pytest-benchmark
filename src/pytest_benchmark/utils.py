@@ -1,4 +1,3 @@
-# encoding: utf-8
 from __future__ import division
 from __future__ import print_function
 
@@ -35,7 +34,7 @@ except ImportError:
 TIME_UNITS = {
     "": "Seconds",
     "m": "Miliseconds (ms)",
-    "u": u"Microseconds (us/µs)",
+    "u": "Microseconds (us)",
     "n": "Nanoseconds (ns)"
 }
 

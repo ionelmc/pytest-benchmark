@@ -90,10 +90,10 @@ def make_plot(benchmarks, title, adjustment):
 def make_histogram(output_prefix, name, benchmarks, unit, adjustment):
     if name:
         path = "{0}-{1}.svg".format(output_prefix, slugify(name))
-        title = u"Speed in {0} of {1}".format(TIME_UNITS[unit], name)
+        title = "Speed in {0} of {1}".format(TIME_UNITS[unit], name)
     else:
         path = "{0}.svg".format(output_prefix)
-        title = u"Speed in {0}".format(TIME_UNITS[unit])
+        title = "Speed in {0}".format(TIME_UNITS[unit])
 
     output_file = py.path.local(path).ensure()
 
