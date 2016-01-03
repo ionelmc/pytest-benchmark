@@ -24,7 +24,7 @@ from .compat import INT
 from .compat import XRANGE
 from .timers import compute_timer_precision
 from .timers import default_timer
-from .utils import NameWrapper
+from .utils import NameWrapper, annotate_source
 from .utils import SecondsDecimal
 from .utils import cached_property
 from .utils import first_or_value
@@ -72,16 +72,16 @@ class FixtureAlreadyUsed(Exception):
 def pytest_report_header(config):
     bs = config._benchmarksession
 
-    return ("benchmark: %(version)s (defaults:"
-            " timer=%(timer)s"
-            " disable_gc=%(disable_gc)s"
-            " min_rounds=%(min_rounds)s"
-            " min_time=%(min_time)s"
-            " max_time=%(max_time)s"
-            " calibration_precision=%(calibration_precision)s"
-            " warmup=%(warmup)s"
-            " warmup_iterations=%(warmup_iterations)s"
-            ")") % dict(
+    return ("benchmark: {version} (defaults:"
+            " timer={timer}"
+            " disable_gc={0[disable_gc]}"
+            " min_rounds={0[min_rounds]}"
+            " min_time={0[min_time]}"
+            " max_time={0[max_time]}"
+            " calibration_precision={0[calibration_precision]}"
+            " warmup={0[warmup]}"
+            " warmup_iterations={0[warmup_iterations]}"
+            ")").format(
         bs.options,
         version=__version__,
         timer=bs.options.get("timer"),

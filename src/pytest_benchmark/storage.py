@@ -40,8 +40,8 @@ class Storage(object):
 
         parts = candidate.parts
         if len(parts) > 2:
-            raise ValueError("%s isn't an existing file or acceptable glob. "
-                             "Expected 'platform-glob/filename-glob' or 'filename-glob'.")
+            raise ValueError("{0!r} isn't an existing file or acceptable glob. "
+                             "Expected 'platform-glob/filename-glob' or 'filename-glob'.".format(globish))
         elif len(parts) == 2:
             platform_glob, filename_glob = parts
         else:
@@ -68,7 +68,7 @@ class Storage(object):
                         data = json.load(fh)
                     except Exception as exc:
                         self.logger.warn("BENCHMARK-C5",
-                                         "Failed to load %s: %s" % (file, exc), fslocation=self.location)
+                                         "Failed to load {0}: {1}".format(file, exc), fslocation=self.location)
                         continue
                 self._cache[file] = data
 
