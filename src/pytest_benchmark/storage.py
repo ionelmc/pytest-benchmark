@@ -8,9 +8,9 @@ from pytest_benchmark.utils import short_filename
 
 
 class Storage(object):
-    def __init__(self, path, logger, default_platform=None):
+    def __init__(self, path, logger, default_machine_id=None):
         self.path = Path(path)
-        self.default_platform = default_platform
+        self.default_machine_id = default_machine_id
         if not self.path.exists():
             self.path.mkdir(parents=True)
         self.path = self.path.resolve()
@@ -25,7 +25,7 @@ class Storage(object):
         return str(self.path.relative_to(os.getcwd()))
 
     def get(self, name):
-        path = self.path.joinpath(self.default_platform) if self.default_platform else self.path
+        path = self.path.joinpath(self.default_machine_id) if self.default_machine_id else self.path
         if not path.exists():
             path.mkdir(parents=True)
         return path.joinpath(name)
@@ -42,7 +42,7 @@ class Storage(object):
         elif len(parts) == 2:
             platform_glob, filename_glob = parts
         else:
-            platform_glob = self.default_platform or '*'
+            platform_glob = self.default_machine_id or '*'
             filename_glob, = parts or ['']
 
         filename_glob = filename_glob.rstrip('*') + '*.json'

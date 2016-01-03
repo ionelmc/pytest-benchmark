@@ -681,7 +681,7 @@ class BenchmarkSession(object):
         self.compare_fail = config.getoption("benchmark_compare_fail")
 
         self.storage = Storage(config.getoption("benchmark_storage"),
-                               default_platform=self.machine_id, logger=self.logger)
+                               default_machine_id=self.machine_id, logger=self.logger)
         self.histogram = first_or_value(config.getoption("benchmark_histogram"), False)
 
     def prepare_benchmarks(self):
