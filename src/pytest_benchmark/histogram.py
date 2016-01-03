@@ -25,7 +25,8 @@ class Plot(Box):
                    "Q1-1.5IQR: {0[1]:.4f}\n" \
                    "Q1: {0[2]:.4f}\nMedian: {0[3]:.4f}\nQ3: {0[4]:.4f}\n" \
                    "Q3+1.5IQR: {0[5]:.4f}\n" \
-                   "Max: {0[6]:.4f}".format(x[:7])
+                   "Max: {0[6]:.4f}\n\n" \
+                   "{0[7]:d} rounds".format(x[:8])
         else:
             return sup(x)
 
@@ -88,6 +89,7 @@ def make_plot(benchmarks, title, adjustment):
     for row in benchmarks:
         label = "%s\n%s rounds" % (row["path"], row["rounds"])
         serie = [row[field] * adjustment for field in ["min", "ld15iqr", "q1", "median", "q3", "hd15iqr", "max"]]
+        serie.append(row["rounds"])
         plot.add(label, serie)
     return plot
 
