@@ -1,6 +1,7 @@
 import py
 
-from pytest_benchmark.utils import slugify, TIME_UNITS
+from .utils import TIME_UNITS
+from .utils import slugify
 
 try:
     from pygal.graph.box import Box
