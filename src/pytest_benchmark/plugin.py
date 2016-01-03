@@ -628,7 +628,6 @@ class BenchmarkSession(object):
         self.machine_info = self.hooks.pytest_benchmark_generate_machine_info()
         self.hooks.pytest_benchmark_update_machine_info(machine_info=self.machine_info)
 
-
         self.options = dict(
             min_time=SecondsDecimal(config.getoption("benchmark_min_time")),
             min_rounds=config.getoption("benchmark_min_rounds"),
@@ -758,9 +757,9 @@ class BenchmarkSession(object):
         self.compared_mapping = {}
         if self.compare:
             if self.compare is True:
-                compared_benchmarks = self.storage.load('[0-9][0-9][0-9][0-9]_')[-1:]
+                compared_benchmarks = list(self.storage.load('[0-9][0-9][0-9][0-9]_'))[-1:]
             else:
-                compared_benchmarks = self.storage.load(self.compare)
+                compared_benchmarks = list(self.storage.load(self.compare))
 
             if not compared_benchmarks:
                 msg = "Can't compare. No benchmark files in %r. " \

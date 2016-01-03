@@ -3,6 +3,7 @@ import os
 from itertools import chain
 from pathlib import Path
 
+from pytest_benchmark.utils import short_filename
 from . import plugin
 
 
@@ -56,7 +57,6 @@ class Storage(object):
         )), key=lambda file: (file.name, file.parent))
 
     def load(self, globish):
-        result = []
         for file in self.query(globish):
             if file in self._cache:
                 data = self._cache[file]
@@ -70,6 +70,17 @@ class Storage(object):
                         continue
                 self._cache[file] = data
 
-            result.append((file.relative_to(self.path), data))
-        return result
+            yield file.relative_to(self.path), data
 
+    def load_benchmarks(self, globish):
+        for path, data in self.load(globish):
+            source = short_filename(path)
+
+            for bench in data['benchmarks']:
+                yield dict(
+                    bench["stats"],
+                    name="{0} ({1})".format(bench.name, source),
+                    fullname="{0} ({1})".format(bench.fullname, source),
+                    path=str(path),
+                    source=source,
+                )
