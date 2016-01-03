@@ -288,7 +288,7 @@ class BenchmarkStats(object):
     def has_error(self):
         return self.fixture.has_error
 
-    def as_dict(self, include_data=True, flat=False):
+    def as_dict(self, include_data=True, flat=False, stats=True):
         result = {
             "group": self.group,
             "name": self.name,
@@ -299,14 +299,15 @@ class BenchmarkStats(object):
                 (k, v.__name__ if callable(v) else v) for k, v in self.options.items()
             )
         }
-        stats = self.stats.as_dict()
-        if include_data:
-            stats["data"] = self.stats.data
-        stats["iterations"] = self.iterations
-        if flat:
-            result.update(stats)
-        else:
-            result["stats"] = stats
+        if stats:
+            stats = self.stats.as_dict()
+            if include_data:
+                stats["data"] = self.stats.data
+            stats["iterations"] = self.iterations
+            if flat:
+                result.update(stats)
+            else:
+                result["stats"] = stats
         return result
 
     def update(self, duration):
@@ -688,22 +689,19 @@ class BenchmarkSession(object):
                 for path, compared_mapping in self.compared_mapping.items():
                     if bench.fullname in compared_mapping:
                         compared = compared_mapping[bench.fullname]
-                        name = short_filename(path, self.machine_id)
-                        stats = compared["stats"]
-                        yield dict(stats, name="{0} ({1})".format(bench.name, name))
+                        flat_bench = bench.as_dict(include_data=False, stats=False)
+                        flat_bench.update(compared["stats"])
+                        flat_bench["name"] = "{0} ({1})".format(bench.name, short_filename(path, self.machine_id))
+                        yield flat_bench
                         if self.compare_fail:
                             for check in self.compare_fail:
-                                fail = check.fails(bench, stats)
+                                fail = check.fails(bench, flat_bench)
                                 if fail:
                                     self.performance_regressions.append((bench.fullname, fail))
+                flat_bench = bench.as_dict(include_data=False, flat=True)
                 if compared:
-                    yield dict(bench.json(include_data=False),
-                               name="{0} (NOW)".format(bench.name),
-                               group
-                               iterations=bench.iterations)
-
-                else:
-                    yield bench
+                    flat_bench["name"] = "{0} (NOW)".format(bench["name"])
+                yield flat_bench
 
     @property
     def next_num(self):
@@ -833,29 +831,6 @@ class BenchmarkSession(object):
                 yield short_filename(path, self.machine_id), benchmark_mapping[current.fullname]
 
         yield HISTOGRAM_CURRENT, current.json()
-
-    def apply_compare(self, benchmarks):
-        result = []
-        for bench in benchmarks:
-            for path, compared in bench.compared.items():
-                name = short_filename(path, self.machine_id)
-                stats = compared["stats"]
-
-                result.append(dict(stats, name="{0} ({1})".format(bench.name, name)))
-                if self.compare_fail:
-                    for check in self.compare_fail:
-                        fail = check.fails(bench, stats)
-                        if fail:
-                            self.performance_regressions.append((bench.fullname, fail))
-            if bench.compared:
-                result.append(
-                    dict(bench.json(include_data=False),
-                         name="{0} (NOW)".format(bench.name),
-                         iterations=bench.iterations)
-                )
-            else:
-                result.append(bench)
-        return result
 
     def display_results_table(self, tr):
         tr.write_line("")
@@ -1023,7 +998,7 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
             raise NotImplementedError("Unsupported grouping %r." % group_by)
     #
     for grouped_benchmarks in groups.values():
-        grouped_benchmarks.sort(key=operator.attrgetter("fullname" if "full" in group_by else "name"))
+        grouped_benchmarks.sort(key=operator.itemgetter("fullname" if "full" in group_by else "name"))
     return sorted(groups.items(), key=lambda pair: pair[0] or "")
 
 
