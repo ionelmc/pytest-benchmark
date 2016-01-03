@@ -18,18 +18,21 @@ import py
 import pytest
 
 from pytest_benchmark.storage import Storage
+
 from . import __version__
 from .compat import INT
 from .compat import XRANGE
 from .timers import compute_timer_precision
 from .timers import default_timer
-from .utils import NameWrapper, get_machine_id, short_filename, cached_property, slugify
+from .utils import NameWrapper
 from .utils import SecondsDecimal
+from .utils import cached_property
 from .utils import first_or_value
 from .utils import format_dict
 from .utils import format_time
 from .utils import get_commit_info
 from .utils import get_current_time
+from .utils import get_machine_id
 from .utils import get_tag
 from .utils import load_timer
 from .utils import parse_columns
@@ -41,6 +44,8 @@ from .utils import parse_sort
 from .utils import parse_timer
 from .utils import parse_warmup
 from .utils import report_progress
+from .utils import short_filename
+from .utils import slugify
 from .utils import time_unit
 
 try:
