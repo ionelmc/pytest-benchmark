@@ -333,3 +333,9 @@ def slugify(name):
     for c in "\/:*?<>|":
         name = name.replace(c, '_').replace('__', '_')
     return name
+
+
+def annotate_source(bench, source):
+    bench["name"] = "{0} ({1})".format(bench["name"], source)
+    bench["fullname"] = "{0} ({1})".format(bench["fullname"], source)
+    bench["source"] = source

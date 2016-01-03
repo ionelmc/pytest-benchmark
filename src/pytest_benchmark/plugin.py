@@ -696,11 +696,8 @@ class BenchmarkSession(object):
                         source = short_filename(path, self.machine_id)
                         flat_bench = bench.as_dict(include_data=False, stats=False)
                         flat_bench.update(compared["stats"])
-                        flat_bench["name"] = "{0} ({1})".format(bench.name, source)
-                        flat_bench["fullname"] = "{0} ({1})".format(bench.fullname, source)
                         flat_bench["path"] = str(path)
-                        flat_bench["source"] = source
-
+                        annotate_source(flat_bench, source)
                         if self.compare_fail:
                             for check in self.compare_fail:
                                 fail = check.fails(bench, flat_bench)
@@ -708,11 +705,9 @@ class BenchmarkSession(object):
                                     self.performance_regressions.append((flat_bench["fullname"], fail))
                         yield flat_bench
                 flat_bench = bench.as_dict(include_data=False, flat=True)
+                flat_bench["path"] = None
                 if compared:
-                    flat_bench["name"] = "{0} (NOW)".format(bench["name"])
-                    flat_bench["fullname"] = "{0} (NOW)".format(bench["fullname"])
-                    flat_bench["source"] = "NOW"
-                    flat_bench["path"] = None
+                    annotate_source(flat_bench, "NOW")
                 yield flat_bench
 
     @property
