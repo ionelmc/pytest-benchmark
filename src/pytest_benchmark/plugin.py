@@ -12,11 +12,11 @@ import traceback
 from collections import defaultdict
 from datetime import datetime
 from math import ceil
-from math import isinf
 
 import py
 import pytest
 
+from pytest_benchmark.table import ResultsTable
 from . import __version__
 from .compat import INT
 from .compat import XRANGE
@@ -43,9 +43,7 @@ from .utils import parse_seconds
 from .utils import parse_sort
 from .utils import parse_timer
 from .utils import parse_warmup
-from .utils import report_progress
 from .utils import short_filename
-from .utils import time_unit
 
 try:
     import statistics
@@ -54,10 +52,6 @@ except (ImportError, SyntaxError):
     statistics_error = traceback.format_exc()
 else:
     from .stats import Stats
-
-NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
-ALIGNED_NUMBER_FMT = "{0:>{1},.4f}{2:<{3}}" if sys.version_info[:2] > (2, 6) else "{0:>{1}.4f}{2:<{3}}"
-HISTOGRAM_CURRENT = "now"
 
 
 class PerformanceRegression(pytest.UsageError):
@@ -107,6 +101,13 @@ def add_display_options(addoption):
         default="min, max, mean, stddev, median, iqr, outliers, rounds, iterations",
         help='Comma-separated list of columns to show in the result table. Default: %(default)r'
     )
+    prefix = "benchmark_%s" % get_current_time()
+    addoption(
+        "--benchmark-histogram",
+        action='append', metavar="FILENAME-PREFIX", nargs="?", default=[], const=prefix,
+        help="Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX contains"
+             " slashes ('/') then directories will be created. Default: %r" % prefix
+    )
 
 
 def add_global_options(addoption):
@@ -116,15 +117,10 @@ def add_global_options(addoption):
         help="Specify a different path to store the runs (when --benchmark-save or --benchmark-autosave are used). "
              "Default: %(default)r",
     )
-
-
-def add_histogram_options(addoption):
-    prefix = "benchmark_%s" % get_current_time()
     addoption(
-        "--benchmark-histogram",
-        action='append', metavar="FILENAME-PREFIX", nargs="?", default=[], const=prefix,
-        help="Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX contains"
-             " slashes ('/') then directories will be created. Default: %r" % prefix
+        "--benchmark-verbose",
+        action="store_true", default=False,
+        help="Dump diagnostic and progress information."
     )
 
 
@@ -169,11 +165,6 @@ def pytest_addoption(parser):
         "--benchmark-warmup-iterations",
         metavar="NUM", type=int, default=100000,
         help="Max number of iterations to run in the warmup phase. Default: %(default)r"
-    )
-    group.addoption(
-        "--benchmark-verbose",
-        action="store_true", default=False,
-        help="Dump diagnostic and progress information."
     )
     group.addoption(
         "--benchmark-disable-gc",
@@ -232,7 +223,6 @@ def pytest_addoption(parser):
     )
     add_global_options(group.addoption)
     add_display_options(group.addoption)
-    add_histogram_options(group.addoption)
 
 
 def pytest_addhooks(pluginmanager):
@@ -794,7 +784,13 @@ class BenchmarkSession(object):
             return
 
         tr.ensure_newline()
-        self.display_results_table(tr)
+        results_table = ResultsTable(
+            columns=self.columns,
+            sort=self.sort,
+            histogram=self.histogram,
+            logger=self.logger
+        )
+        results_table.display(tr, self.groups)
         self.check_regressions()
 
     def check_regressions(self):
@@ -806,122 +802,6 @@ class BenchmarkSession(object):
                 "\t%s - %s" % line for line in self.performance_regressions
             ))
             raise PerformanceRegression("Performance has regressed.")
-
-    def display_results_table(self, tr):
-        tr.write_line("")
-        tr.rewrite("Computing stats ...", black=True, bold=True)
-        for line, (group, benchmarks) in report_progress(self.groups, tr, "Computing stats ... group {pos}/{total}"):
-            benchmarks = sorted(benchmarks, key=operator.itemgetter(self.sort))
-
-            worst = {}
-            best = {}
-            solo = len(benchmarks) == 1
-            for line, prop in report_progress(("min", "max", "mean", "median", "iqr", "stddev"), tr, "{line}: {value}", line=line):
-                worst[prop] = max(bench[prop] for _, bench in report_progress(
-                    benchmarks, tr, "{line} ({pos}/{total})", line=line))
-                best[prop] = min(bench[prop] for _, bench in report_progress(
-                    benchmarks, tr, "{line} ({pos}/{total})", line=line))
-            for line, prop in report_progress(("outliers", "rounds", "iterations"), tr, "{line}: {value}", line=line):
-                worst[prop] = max(benchmark[prop] for _, benchmark in report_progress(
-                    benchmarks, tr, "{line} ({pos}/{total})", line=line))
-
-            time_unit_key = self.sort
-            if self.sort in ("name", "fullname"):
-                time_unit_key = "min"
-            unit, adjustment = time_unit(best.get(self.sort, benchmarks[0][time_unit_key]))
-            labels = {
-                "name": "Name (time in %ss)" % unit,
-                "min": "Min",
-                "max": "Max",
-                "mean": "Mean",
-                "stddev": "StdDev",
-                "rounds": "Rounds",
-                "iterations": "Iterations",
-                "iqr": "IQR",
-                "median": "Median",
-                "outliers": "Outliers(*)",
-            }
-            widths = {
-                "name": 3 + max(len(labels["name"]), max(len(benchmark["name"]) for benchmark in benchmarks)),
-                "rounds": 2 + max(len(labels["rounds"]), len(str(worst["rounds"]))),
-                "iterations": 2 + max(len(labels["iterations"]), len(str(worst["iterations"]))),
-                "outliers": 2 + max(len(labels["outliers"]), len(str(worst["outliers"]))),
-            }
-            for prop in "min", "max", "mean", "stddev", "median", "iqr":
-                widths[prop] = 2 + max(len(labels[prop]), max(
-                    len(NUMBER_FMT.format(bench[prop] * adjustment))
-                    for bench in benchmarks
-                ))
-
-            rpadding = 0 if solo else 10
-            labels_line = labels["name"].ljust(widths["name"]) + "".join(
-                labels[prop].rjust(widths[prop]) + (
-                    " " * rpadding
-                    if prop not in ["outliers", "rounds", "iterations"]
-                    else ""
-                )
-                for prop in self.columns
-            )
-            tr.rewrite("")
-            tr.write_line(
-                (" benchmark%(name)s: %(count)s tests " % dict(
-                    count=len(benchmarks),
-                    name="" if group is None else " %r" % group,
-                )).center(len(labels_line), "-"),
-                yellow=True,
-            )
-            tr.write_line(labels_line)
-            tr.write_line("-" * len(labels_line), yellow=True)
-
-            for bench in benchmarks:
-                has_error = bench.get("has_error")
-                tr.write(bench["name"].ljust(widths["name"]), red=has_error, invert=has_error)
-                for prop in self.columns:
-                    if prop in ("min", "max", "mean", "stddev", "median", "iqr"):
-                        tr.write(
-                            ALIGNED_NUMBER_FMT.format(
-                                bench[prop] * adjustment,
-                                widths[prop],
-                                self.compute_baseline_scale(best[prop], bench[prop], rpadding),
-                                rpadding
-                            ),
-                            green=not solo and bench[prop] == best.get(prop),
-                            red=not solo and bench[prop] == worst.get(prop),
-                            bold=True,
-                        )
-                    else:
-                        tr.write("{0:>{1}}".format(bench[prop], widths[prop]))
-                tr.write("\n")
-            tr.write_line("-" * len(labels_line), yellow=True)
-            tr.write_line("")
-            if self.histogram:
-                from .histogram import make_histogram
-
-                if len(benchmarks) > 50:
-                    self.logger.warn("BENCHMARK-H1",
-                                     "Group {0!r} has too many benchmarks. Only plotting 50 benchmarks.".format(group))
-                    benchmarks = benchmarks[:50]
-
-                output_file = make_histogram(self.histogram, group, benchmarks, unit, adjustment)
-                self.logger.info("Generated histogram %s" % output_file, bold=True)
-
-        tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
-                      "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
-
-    def compute_baseline_scale(self, baseline, value, width):
-        if not width:
-            return ""
-        if value == baseline:
-            return " (1.0)".ljust(width)
-
-        scale = abs(value / baseline) if baseline else float("inf")
-        if scale > 1000:
-            if isinf(scale):
-                return " (inf)".ljust(width)
-            else:
-                return " (>1000.0)".ljust(width)
-        else:
-            return " ({0:.2f})".format(scale).ljust(width)
 
 
 def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark):

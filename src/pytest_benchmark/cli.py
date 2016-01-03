@@ -1,6 +1,14 @@
 import argparse
 
-from .plugin import add_display_options, add_global_options, add_histogram_options
+import py
+
+from . import plugin
+from .plugin import Logger
+from .plugin import add_display_options
+from .plugin import add_global_options
+from .storage import Storage
+from .table import ResultsTable
+from .utils import first_or_value
 
 
 class HelpAction(argparse.Action):
@@ -98,15 +106,52 @@ def main():
         Loads runs from exactly those files.''')
     add_display_options(strip_prefix(display_command.add_argument))
     display_command.add_argument(
-        'run',
-        nargs='?', help='Glob to match stored runs. If not specified all runs are loaded.'
+        'glob_or_file',
+        nargs='*', help='Glob or exact path for json files. If not specified all runs are loaded.'
     )
-
-    histogram_command = parser.add_command(
-        'histogram',
-        description='Plot runs.',
-    )
-    add_histogram_options(strip_prefix(histogram_command.add_argument, force_argument=True))
-
     args = parser.parse_args()
+    logger = Logger(args.verbose)
+    storage = Storage(args.storage, logger)
     print(args)
+    if args.command == 'list':
+        for file in storage.query():
+            print(file)
+    elif args.command == 'compare':
+        results_table = ResultsTable(args.columns, args.sort, first_or_value(args.histogram, False), logger)
+        groups = plugin.pytest_benchmark_group_stats(
+            benchmarks=storage.load_benchmarks(*args.glob_or_file),
+            group_by=args.group_by,
+            config=None,
+        )
+        results_table.display(TerminalReporter(), groups)
+
+
+class TerminalReporter(object):
+    def __init__(self):
+        self._tw = py.io.TerminalWriter()
+
+    def ensure_newline(self):
+        self._tw.line()
+
+    def write(self, content, **markup):
+        self._tw.write(content, **markup)
+
+    def write_line(self, line, **markup):
+        if not py.builtin._istext(line):
+            line = py.builtin.text(line, errors="replace")
+        self.ensure_newline()
+        self._tw.line(line, **markup)
+
+    def rewrite(self, line, **markup):
+        line = str(line)
+        self._tw.write("\r" + line, **markup)
+
+    def write_sep(self, sep, title=None, **markup):
+        self.ensure_newline()
+        self._tw.sep(sep, title, **markup)
+
+    def section(self, title, sep="=", **kw):
+        self._tw.sep(sep, title, **kw)
+
+    def line(self, msg, **kw):
+        self._tw.line(msg, **kw)
