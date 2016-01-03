@@ -43,7 +43,7 @@ class ResultsTable(object):
                 time_unit_key = "min"
             unit, adjustment = time_unit(best.get(self.sort, benchmarks[0][time_unit_key]))
             labels = {
-                "name": "Name (time in %ss)" % unit,
+                "display:name": "Name (time in {0}s)".format(unit),
                 "min": "Min",
                 "max": "Max",
                 "mean": "Mean",
@@ -55,7 +55,7 @@ class ResultsTable(object):
                 "outliers": "Outliers(*)",
             }
             widths = {
-                "name": 3 + max(len(labels["name"]), max(len(benchmark["name"]) for benchmark in benchmarks)),
+                "display:name": 3 + max(len(labels["display:name"]), max(len(benchmark["display:name"]) for benchmark in benchmarks)),
                 "rounds": 2 + max(len(labels["rounds"]), len(str(worst["rounds"]))),
                 "iterations": 2 + max(len(labels["iterations"]), len(str(worst["iterations"]))),
                 "outliers": 2 + max(len(labels["outliers"]), len(str(worst["outliers"]))),
@@ -67,7 +67,7 @@ class ResultsTable(object):
                 ))
 
             rpadding = 0 if solo else 10
-            labels_line = labels["name"].ljust(widths["name"]) + "".join(
+            labels_line = labels["display:name"].ljust(widths["display:name"]) + "".join(
                 labels[prop].rjust(widths[prop]) + (
                     " " * rpadding
                     if prop not in ["outliers", "rounds", "iterations"]
@@ -77,10 +77,10 @@ class ResultsTable(object):
             )
             tr.rewrite("")
             tr.write_line(
-                (" benchmark%(name)s: %(count)s tests " % dict(
+                " benchmark{name}: {count} tests ".format(
                     count=len(benchmarks),
-                    name="" if group is None else " %r" % group,
-                )).center(len(labels_line), "-"),
+                    name="" if group is None else " {0!r}".format(group),
+                ).center(len(labels_line), "-"),
                 yellow=True,
             )
             tr.write_line(labels_line)
@@ -88,7 +88,7 @@ class ResultsTable(object):
 
             for bench in benchmarks:
                 has_error = bench.get("has_error")
-                tr.write(bench["name"].ljust(widths["name"]), red=has_error, invert=has_error)
+                tr.write(bench["display:name"].ljust(widths["display:name"]), red=has_error, invert=has_error)
                 for prop in self.columns:
                     if prop in ("min", "max", "mean", "stddev", "median", "iqr"):
                         tr.write(
@@ -116,7 +116,7 @@ class ResultsTable(object):
                     benchmarks = benchmarks[:50]
 
                 output_file = make_histogram(self.histogram, group, benchmarks, unit, adjustment)
-                self.logger.info("Generated histogram %s" % output_file, bold=True)
+                self.logger.info("Generated histogram {0}".format(output_file), bold=True)
 
         tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
                       "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
