@@ -620,6 +620,7 @@ class Logger(object):
 
 class BenchmarkSession(object):
     compared_mapping = None
+    groups = None
 
     def __init__(self, config):
         self.verbose = config.getoption("benchmark_verbose")
@@ -761,13 +762,12 @@ class BenchmarkSession(object):
                 compared_benchmarks = list(self.storage.load(self.compare))
 
             if not compared_benchmarks:
-                msg = "Can't compare. No benchmark files in %r. " \
-                      "Expected files matching [0-9][0-9][0-9][0-9]_*.json." % str(self.storage)
+                msg = "Can't compare. No benchmark files in %r" % str(self.storage)
                 if self.compare is True:
-                    msg += " Can't load the previous benchmark."
+                    msg += ". Can't load the previous benchmark."
                     code = "BENCHMARK-C2"
                 else:
-                    msg += " Can't match anything to %r." % self.compare
+                    msg += " match %r." % self.compare
                     code = "BENCHMARK-C1"
                 self.logger.warn(code, msg, fslocation=self.storage.location)
 
@@ -781,18 +781,21 @@ class BenchmarkSession(object):
                 )
                 self.logger.info("Comparing against benchmark %s" % path)
 
-
+    def finish(self):
+        self.handle_saving()
+        self.handle_loading()
+        self.groups = self.hooks.pytest_benchmark_group_stats(
+            benchmarks=self.prepare_benchmarks(),
+            group_by=self.group_by
+        )
 
     def display(self, tr):
-        if not self.benchmarks:
+        if not self.groups:
             return
 
         tr.ensure_newline()
-        self.handle_saving()
-        self.handle_loading()
-        if self.benchmarks:
-            self.display_results_table(tr)
-            self.check_regressions()
+        self.display_results_table(tr)
+        self.check_regressions()
 
     def check_regressions(self):
         if self.compare_fail and not self.compared_mapping:
@@ -807,11 +810,7 @@ class BenchmarkSession(object):
     def display_results_table(self, tr):
         tr.write_line("")
         tr.rewrite("Computing stats ...", black=True, bold=True)
-        groups = self.hooks.pytest_benchmark_group_stats(
-            benchmarks=self.prepare_benchmarks(),
-            group_by=self.group_by
-        )
-        for line, (group, benchmarks) in report_progress(groups, tr, "Computing stats ... group {pos}/{total}"):
+        for line, (group, benchmarks) in report_progress(self.groups, tr, "Computing stats ... group {pos}/{total}"):
             benchmarks = sorted(benchmarks, key=operator.itemgetter(self.sort))
 
             worst = {}
@@ -983,6 +982,12 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
     for grouped_benchmarks in groups.values():
         grouped_benchmarks.sort(key=operator.itemgetter("fullname" if "full" in group_by else "name"))
     return sorted(groups.items(), key=lambda pair: pair[0] or "")
+
+
+@_hookwrapper
+def pytest_sessionfinish(session, exitstatus):
+    session.config._benchmarksession.finish()
+    yield
 
 
 def pytest_terminal_summary(terminalreporter):
