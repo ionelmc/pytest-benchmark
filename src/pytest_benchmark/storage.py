@@ -4,7 +4,7 @@ from itertools import chain
 
 from pathlib import Path
 
-from pytest_benchmark.utils import short_filename
+from .utils import short_filename, annotate_source
 
 
 class Storage(object):
@@ -30,37 +30,48 @@ class Storage(object):
             path.mkdir(parents=True)
         return path.joinpath(name)
 
-    def query(self, globish):
-        candidate = Path(globish)
-        if candidate.is_file():
-            return [candidate]
+    def query(self, *globs_or_files):
+        files = []
+        globs = []
+        if not globs_or_files:
+            globs_or_files = "*",
 
-        parts = candidate.parts
-        if len(parts) > 2:
-            raise ValueError("{0!r} isn't an existing file or acceptable glob. "
-                             "Expected 'platform-glob/filename-glob' or 'filename-glob'.".format(globish))
-        elif len(parts) == 2:
-            platform_glob, filename_glob = parts
-        else:
-            platform_glob = self.default_machine_id or '*'
-            filename_glob, = parts or ['']
+        for globish in globs_or_files:
+            candidate = Path(globish)
+            if candidate.is_file():
+                files.append(candidate)
 
-        filename_glob = filename_glob.rstrip('*') + '*.json'
+            parts = candidate.parts
+            if len(parts) > 2:
+                raise ValueError("{0!r} isn't an existing file or acceptable glob. "
+                                 "Expected 'platform-glob/filename-glob' or 'filename-glob'.".format(globish))
+            elif len(parts) == 2:
+                platform_glob, filename_glob = parts
+            else:
+                platform_glob = self.default_machine_id or "*"
+                filename_glob, = parts or ['']
 
-        return sorted(chain((
-            file
-            for path in self.path.glob(platform_glob)
-            for file in path.glob(filename_glob)
-        ), (
-            file for file in self.path.glob(filename_glob)
-        )), key=lambda file: (file.name, file.parent))
+            filename_glob = filename_glob.rstrip("*") + "*.json"
+            globs.append((platform_glob, filename_glob))
 
-    def load(self, globish):
-        for file in self.query(globish):
+        return sorted(chain(
+            files,
+            (
+                file
+                for platform_glob, filename_glob in globs
+                for path in self.path.glob(platform_glob)
+                for file in path.glob(filename_glob)
+            ), (
+                file for file in self.path.glob(filename_glob)
+            )
+        ), key=lambda file: (file.name, file.parent))
+
+    def load(self, *globs_or_files):
+        for file in self.query(*globs_or_files):
             if file in self._cache:
                 data = self._cache[file]
             else:
-                with file.open('rU') as fh:
+                with file.open("rU") as fh:
                     try:
                         data = json.load(fh)
                     except Exception as exc:
@@ -71,15 +82,11 @@ class Storage(object):
 
             yield file.relative_to(self.path), data
 
-    def load_benchmarks(self, globish):
-        for path, data in self.load(globish):
+    def load_benchmarks(self, *globs_or_files):
+        for path, data in self.load(*globs_or_files):
             source = short_filename(path)
 
-            for bench in data['benchmarks']:
-                yield dict(
-                    bench["stats"],
-                    name="{0} ({1})".format(bench.name, source),
-                    fullname="{0} ({1})".format(bench.fullname, source),
-                    path=str(path),
-                    source=source,
-                )
+            for bench in data["benchmarks"]:
+                bench.update(bench.pop("stats"))
+                bench['path'] = str(path)
+                yield annotate_source(bench, source)
