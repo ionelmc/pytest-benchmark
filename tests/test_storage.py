@@ -9,13 +9,16 @@ import py
 import pytest
 from freezegun import freeze_time
 
-from pytest_benchmark.plugin import BenchmarkSession, PerformanceRegression
+from pytest_benchmark import plugin
+from pytest_benchmark.plugin import BenchmarkSession
+from pytest_benchmark.plugin import PerformanceRegression
 from pytest_benchmark.plugin import pytest_benchmark_compare_machine_info
 from pytest_benchmark.plugin import pytest_benchmark_generate_json
 from pytest_benchmark.plugin import pytest_benchmark_group_stats
 from pytest_benchmark.storage import Storage
-from pytest_benchmark.utils import PercentageRegressionCheck, DifferenceRegressionCheck, get_platform
-from pytest_benchmark import plugin
+from pytest_benchmark.utils import DifferenceRegressionCheck
+from pytest_benchmark.utils import PercentageRegressionCheck
+from pytest_benchmark.utils import get_machine_id
 
 pytest_plugins = "pytester"
 
@@ -49,7 +52,7 @@ class LooseFileLike(BytesIO):
 class MockSession(BenchmarkSession):
     def __init__(self):
         self.histogram = True
-        self.storage = Storage(str(STORAGE), default_platform=get_platform())
+        self.storage = Storage(str(STORAGE), default_machine_id=get_machine_id())
         self.benchmarks = []
         self.sort = u"min"
         self.compare = '0001'
