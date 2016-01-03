@@ -110,17 +110,15 @@ def first_or_value(obj, value):
     return value
 
 
-def short_filename(path, machine_id):
+def short_filename(path, machine_id=None):
     parts = []
     last = len(path.parts) - 1
-    print(path)
     for pos, part in enumerate(path.parts):
         if not pos and part == machine_id:
             continue
         if pos == last:
             part = part.split('_')[0]
         parts.append(part)
-    print(parts)
     return '/'.join(parts)
 
 
