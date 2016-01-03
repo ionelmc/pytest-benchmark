@@ -899,6 +899,11 @@ class BenchmarkSession(object):
             if self.histogram:
                 from .histogram import make_histogram
 
+                if len(benchmarks) > 50:
+                    self.logger.warn("BENCHMARK-H1",
+                                     "Group {0!r} has too many benchmarks. Only plotting 50 benchmarks.".format(group))
+                    benchmarks = benchmarks[:50]
+
                 output_file = make_histogram(self.histogram, group, benchmarks, unit, adjustment)
                 self.logger.info("Generated histogram %s" % output_file, bold=True)
 
