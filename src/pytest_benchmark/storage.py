@@ -6,17 +6,14 @@ from pathlib import Path
 
 from pytest_benchmark.utils import short_filename
 
-from . import plugin
-
 
 class Storage(object):
-    def __init__(self, path, logger, default_platform=None, hooks=plugin):
+    def __init__(self, path, logger, default_platform=None):
         self.path = Path(path)
         self.default_platform = default_platform
         if not self.path.exists():
             self.path.mkdir(parents=True)
         self.path = self.path.resolve()
-        self.hooks = hooks
         self.logger = logger
         self._cache = {}
 
