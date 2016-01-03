@@ -17,16 +17,15 @@ from math import isinf
 import py
 import pytest
 
-from pytest_benchmark.storage import Storage
-
 from . import __version__
 from .compat import INT
 from .compat import XRANGE
+from .storage import Storage
 from .timers import compute_timer_precision
 from .timers import default_timer
-from .utils import NameWrapper, annotate_source
+from .utils import NameWrapper
 from .utils import SecondsDecimal
-from .utils import cached_property
+from .utils import annotate_source
 from .utils import first_or_value
 from .utils import format_dict
 from .utils import format_time
@@ -45,7 +44,6 @@ from .utils import parse_timer
 from .utils import parse_warmup
 from .utils import report_progress
 from .utils import short_filename
-from .utils import slugify
 from .utils import time_unit
 
 try:
