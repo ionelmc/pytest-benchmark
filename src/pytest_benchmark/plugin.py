@@ -975,7 +975,7 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
             groups[bench["param"]].append(bench)
         elif group_by.startswith("param:"):
             param_name = group_by[len("param:"):]
-            param_value = bench.params[param_name]
+            param_value = bench["params"][param_name]
             groups[param_value].append(bench)
         else:
             raise NotImplementedError("Unsupported grouping %r." % group_by)
