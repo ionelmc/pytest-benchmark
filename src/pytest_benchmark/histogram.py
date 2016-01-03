@@ -12,10 +12,6 @@ except ImportError as exc:
 
 
 class CustomBox(Box):
-    def __init__(self, annotations, *args, **kwargs):
-        super(CustomBox, self).__init__(*args, **kwargs)
-        self.annotations = annotations
-
     def _box_points(self, serie, _):
         return serie, [serie[0], serie[6]]
 
@@ -59,11 +55,9 @@ def make_plot(benchmarks, title, adjustment):
         }
 
     plot = CustomBox(
-        benchmarks,
         box_mode='tukey',
-        x_label_rotation=-70,
-        x_labels=benchmarks,
-        x_value_formatter="{0[name]}".format,
+        x_label_rotation=-90,
+        x_labels=["{0[name]}".format(row) for row in benchmarks],
         show_legend=False,
         title=title,
         x_title="Trial",
