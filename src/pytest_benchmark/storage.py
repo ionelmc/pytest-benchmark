@@ -1,9 +1,11 @@
 import json
 import os
 from itertools import chain
+
 from pathlib import Path
 
 from pytest_benchmark.utils import short_filename
+
 from . import plugin
 
 
