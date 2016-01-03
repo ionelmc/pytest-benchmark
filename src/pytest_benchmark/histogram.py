@@ -1,4 +1,6 @@
-from pytest_benchmark.utils import time_unit
+import py
+
+from pytest_benchmark.utils import slugify, TIME_UNITS
 
 try:
     from pygal.graph.box import Box
@@ -33,7 +35,7 @@ class Plot(Box):
             self.svg.node(node, 'desc', class_="x_label").text = self.annotations[xlabel]["name"]
 
 
-def make_plot(bench_name, table, compare, current, annotations, sort):
+def make_plot(name, table, current, annotations, title, adjustment):
     class Style(DefaultStyle):
         colors = []
         font_family = 'Consolas, "Deja Vu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace'
@@ -41,12 +43,8 @@ def make_plot(bench_name, table, compare, current, annotations, sort):
         for label, row in table:
             if label == current:
                 colors.append(DefaultStyle.colors[0])
-            elif compare and str(compare.name).startswith(label):
-                colors.append(DefaultStyle.colors[2])
             else:
                 colors.append("#000000")
-
-    unit, adjustment = time_unit(min(row[sort] for _, row in table))
 
     minimum = int(min(row["min"] * adjustment for _, row in table))
     maximum = int(max(
@@ -69,14 +67,15 @@ def make_plot(bench_name, table, compare, current, annotations, sort):
         annotations,
         box_mode='tukey',
         x_label_rotation=-90,
-        x_labels=[label for label, _ in table],
+        x_labels=[_["source"] for label, _ in table],
         show_legend=False,
-        title="Speed in %sseconds of %s" % (unit, bench_name),
+        title=title,
         x_title="Trial",
-        y_title="%ss" % unit,
+        y_title="Duration",
         style=Style,
         min_scale=20,
         max_scale=20,
+        truncate_label=50,
         range=(minimum, maximum),
         zero=minimum,
         css=[
@@ -84,7 +83,7 @@ def make_plot(bench_name, table, compare, current, annotations, sort):
             "file://graph.css",
             """inline:
                 .axis.x text {
-                    text-anchor: middle !important;
+                    xtext-anchor: middle !important;
                 }
                 .tooltip .value {
                     font-size: 1em !important;
@@ -98,5 +97,32 @@ def make_plot(bench_name, table, compare, current, annotations, sort):
         if label in annotations:
             label += "\n@%s - %s rounds" % (annotations[label]["datetime"], row["rounds"])
         serie = [row[field] * adjustment for field in ["min", "ld15iqr", "q1", "median", "q3", "hd15iqr", "max"]]
-        plot.add(label, serie)
+        plot.add(row["source"], serie)
     return plot
+
+
+def make_histogram(output_prefix, name, benchmarks, unit, adjustment):
+    if name:
+        path = "%s-%s.svg" % (output_prefix, slugify(name))
+        title = "Speed in %s of %s" % (TIME_UNITS[unit], name),
+    else:
+        path = "%s.svg" % output_prefix
+        title = "Speed in %s" % TIME_UNITS[unit]
+
+    output_file = py.path.local(path).ensure()
+    current = None
+    table = list(enumerate(benchmarks))
+    for pos, bench in table:
+        if bench["path"] is None:
+            current = pos
+
+    plot = make_plot(
+        name=name,
+        table=table,
+        current=current,
+        annotations=benchmarks,
+        title=title,
+        adjustment=adjustment,
+    )
+    output_file.write_text(plot.render(is_unicode=True), encoding="utf-8")
+    return output_file

@@ -23,7 +23,7 @@ from .compat import INT
 from .compat import XRANGE
 from .timers import compute_timer_precision
 from .timers import default_timer
-from .utils import NameWrapper, get_machine_id, short_filename, cached_property
+from .utils import NameWrapper, get_machine_id, short_filename, cached_property, slugify
 from .utils import SecondsDecimal
 from .utils import first_or_value
 from .utils import format_dict
@@ -694,7 +694,9 @@ class BenchmarkSession(object):
                         flat_bench.update(compared["stats"])
                         flat_bench["name"] = "{0} ({1})".format(bench.name, source)
                         flat_bench["fullname"] = "{0} ({1})".format(bench.fullname, source)
+                        flat_bench["path"] = str(path)
                         flat_bench["source"] = source
+
                         if self.compare_fail:
                             for check in self.compare_fail:
                                 fail = check.fails(bench, flat_bench)
@@ -706,6 +708,7 @@ class BenchmarkSession(object):
                     flat_bench["name"] = "{0} (NOW)".format(bench["name"])
                     flat_bench["fullname"] = "{0} (NOW)".format(bench["fullname"])
                     flat_bench["source"] = "NOW"
+                    flat_bench["path"] = None
                 yield flat_bench
 
     @property
@@ -792,7 +795,6 @@ class BenchmarkSession(object):
         if self.benchmarks:
             self.display_results_table(tr)
             self.check_regressions()
-            self.handle_histogram()
 
     def check_regressions(self):
         if self.compare_fail and not self.compared_mapping:
@@ -803,39 +805,6 @@ class BenchmarkSession(object):
                 "\t%s - %s" % line for line in self.performance_regressions
             ))
             raise PerformanceRegression("Performance has regressed.")
-
-    def handle_histogram(self):
-        if self.histogram:
-            if not self.compared_mapping:
-                raise pytest.UsageError("--benchmark-compare-fail requires valid --benchmark-compare.")
-
-            from .histogram import make_plot
-
-            for bench in self.benchmarks:
-                name = bench.fullname
-                for c in "\/:*?<>|":
-                    name = name.replace(c, '_').replace('__', '_')
-                output_file = py.path.local("%s-%s.svg" % (self.histogram, name)).ensure()
-
-                matched_data = list(self.generate_histogram_table(bench, history, sorted(history)))
-
-                plot = make_plot(
-                    bench_name=bench.fullname,
-                    table=table,
-                    compare=self.compare_file,
-                    annotations=history,
-                    sort=self.sort,
-                    current=HISTOGRAM_CURRENT,
-                )
-                plot.render_to_file(str(output_file))
-                self.logger.info("Generated histogram %s" % output_file, bold=True)
-
-    def generate_histogram_table(self, current, history, sequence):
-        for path, benchmark_mapping in history.item():
-            if current.fullname in benchmark_mapping:
-                yield short_filename(path, self.machine_id), benchmark_mapping[current.fullname]
-
-        yield HISTOGRAM_CURRENT, current.json()
 
     def display_results_table(self, tr):
         tr.write_line("")
@@ -928,6 +897,12 @@ class BenchmarkSession(object):
                 tr.write("\n")
             tr.write_line("-" * len(labels_line), yellow=True)
             tr.write_line("")
+            if self.histogram:
+                from .histogram import make_histogram
+
+                output_file = make_histogram(self.histogram, group, benchmarks, unit, adjustment)
+                self.logger.info("Generated histogram %s" % output_file, bold=True)
+
         tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
                       "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
 

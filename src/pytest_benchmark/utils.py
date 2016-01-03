@@ -113,12 +113,14 @@ def first_or_value(obj, value):
 def short_filename(path, machine_id):
     parts = []
     last = len(path.parts) - 1
+    print(path)
     for pos, part in enumerate(path.parts):
         if not pos and part == machine_id:
             continue
         if pos == last:
             part = part.split('_')[0]
         parts.append(part)
+    print(parts)
     return '/'.join(parts)
 
 
@@ -255,6 +257,13 @@ def time_unit(value):
     else:
         return "", 1.
 
+TIME_UNITS = {
+    "": "Seconds",
+    "m": "Miliseconds (ms)",
+    "u": "Microseconds (us/µs)",
+    "n": "Nanoseconds (ns)"
+}
+
 
 def format_time(value):
     unit, adjustment = time_unit(value)
@@ -320,3 +329,9 @@ def report_progress(iterable, terminal_reporter, format_string, **kwargs):
             terminal_reporter.rewrite(string, black=True, bold=True)
             yield string, item
     return progress_reporting_wrapper()
+
+
+def slugify(name):
+    for c in "\/:*?<>|":
+        name = name.replace(c, '_').replace('__', '_')
+    return name
