@@ -75,6 +75,9 @@ def make_plot(benchmarks, title, adjustment):
                 .tooltip .value {
                     font-size: 1em !important;
                 }
+                .axis text {
+                    font-size: 9px !important;
+                }
             """
         ],
         **opts

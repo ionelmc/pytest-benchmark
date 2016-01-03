@@ -110,10 +110,10 @@ class ResultsTable(object):
             if self.histogram:
                 from .histogram import make_histogram
 
-                if len(benchmarks) > 50:
+                if len(benchmarks) > 75:
                     self.logger.warn("BENCHMARK-H1",
                                      "Group {0!r} has too many benchmarks. Only plotting 50 benchmarks.".format(group))
-                    benchmarks = benchmarks[:50]
+                    benchmarks = benchmarks[:75]
 
                 output_file = make_histogram(self.histogram, group, benchmarks, unit, adjustment)
                 self.logger.info("Generated histogram {0}".format(output_file), bold=True)
