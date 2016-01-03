@@ -51,7 +51,7 @@ def test_length(length):
     for i in range(length):
         stats.update(1)
 
-    assert stats.as_dict
+    assert stats.as_dict()
 
 
 def test_iqr():

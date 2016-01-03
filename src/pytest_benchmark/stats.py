@@ -22,7 +22,6 @@ class Stats(object):
     def __nonzero__(self):
         return bool(self.data)
 
-    @cached_property
     def as_dict(self):
         return dict(
             (field, getattr(self, field))

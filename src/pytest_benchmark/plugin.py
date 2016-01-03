@@ -288,11 +288,26 @@ class BenchmarkStats(object):
     def has_error(self):
         return self.fixture.has_error
 
-    def json(self, include_data=True):
+    def as_dict(self, include_data=True, flat=False):
+        result = {
+            "group": self.group,
+            "name": self.name,
+            "fullname": self.fullname,
+            "params": self.params,
+            "param": self.param,
+            "options": dict(
+                (k, v.__name__ if callable(v) else v) for k, v in self.options.items()
+            )
+        }
+        stats = self.stats.as_dict()
         if include_data:
-            return dict(self.stats.as_dict, data=self.stats.data)
+            stats["data"] = self.stats.data
+        stats["iterations"] = self.iterations
+        if flat:
+            result.update(stats)
         else:
-            return self.stats.as_dict
+            result["stats"] = stats
+        return result
 
     def update(self, duration):
         self.stats.update(duration / self.iterations)
@@ -1049,16 +1064,7 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data):
     }
     for bench in benchmarks:
         if not bench.has_error:
-            benchmarks_json.append({
-                "group": bench.group,
-                "name": bench.name,
-                "fullname": bench.fullname,
-                "params": bench.params,
-                "stats": dict(bench.json(include_data=include_data), iterations=bench.iterations),
-                "options": dict(
-                    (k, v.__name__ if callable(v) else v) for k, v in bench.options.items()
-                )
-            })
+            benchmarks_json.append(bench.as_dict(include_data=include_data))
     return output_json
 
 
