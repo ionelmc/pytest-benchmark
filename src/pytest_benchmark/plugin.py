@@ -23,7 +23,7 @@ from .compat import INT
 from .compat import XRANGE
 from .timers import compute_timer_precision
 from .timers import default_timer
-from .utils import NameWrapper, get_machine_id, short_filename
+from .utils import NameWrapper, get_machine_id, short_filename, cached_property
 from .utils import SecondsDecimal
 from .utils import first_or_value
 from .utils import format_dict
@@ -622,6 +622,7 @@ class BenchmarkSession(object):
         self.config = config
         self.hooks = HookShim(config)
         self.performance_regressions = []
+        self.benchmarks = []
         self.machine_id = get_machine_id()
         self.machine_info = self.hooks.pytest_benchmark_generate_machine_info()
         self.hooks.pytest_benchmark_update_machine_info(machine_info=self.machine_info)
@@ -668,7 +669,6 @@ class BenchmarkSession(object):
             raise pytest.UsageError(
                 "Can't have both --benchmark-only and --benchmark-disable options. Note that --benchmark-disable is "
                 "automatically activated if xdist is on or you're missing the statistics dependency.")
-        self._benchmarks = []
         self.group_by = config.getoption("benchmark_group_by")
         self.save = config.getoption("benchmark_save")
         self.autosave = config.getoption("benchmark_autosave")
@@ -681,9 +681,29 @@ class BenchmarkSession(object):
                                default_platform=self.machine_id, logger=self.logger)
         self.histogram = first_or_value(config.getoption("benchmark_histogram"), False)
 
-    @property
-    def benchmarks(self):
-        return [bench for bench in self._benchmarks if bench]
+    def prepare_benchmarks(self):
+        for bench in self.benchmarks:
+            if bench:
+                compared = False
+                for path, compared_mapping in self.compared_mapping.items():
+                    if bench.fullname in compared_mapping:
+                        compared = compared_mapping[bench.fullname]
+                        name = short_filename(path, self.machine_id)
+                        stats = compared["stats"]
+                        yield dict(stats, name="{0} ({1})".format(bench.name, name))
+                        if self.compare_fail:
+                            for check in self.compare_fail:
+                                fail = check.fails(bench, stats)
+                                if fail:
+                                    self.performance_regressions.append((bench.fullname, fail))
+                if compared:
+                    yield dict(bench.json(include_data=False),
+                               name="{0} (NOW)".format(bench.name),
+                               group
+                               iterations=bench.iterations)
+
+                else:
+                    yield bench
 
     @property
     def next_num(self):
@@ -757,11 +777,7 @@ class BenchmarkSession(object):
                 )
                 self.logger.info("Comparing against benchmark %s" % path)
 
-        for current in self.benchmarks:
-            current.compared = {}
-            for path, compared_mapping in self.compared_mapping.items():
-                if current.fullname in compared_mapping:
-                    current.compared[path] = compared_mapping[current.fullname]
+
 
     def display(self, tr):
         if not self.benchmarks:
@@ -845,11 +861,10 @@ class BenchmarkSession(object):
         tr.write_line("")
         tr.rewrite("Computing stats ...", black=True, bold=True)
         groups = self.hooks.pytest_benchmark_group_stats(
-            benchmarks=self.benchmarks,
+            benchmarks=self.prepare_benchmarks(),
             group_by=self.group_by
         )
         for line, (group, benchmarks) in report_progress(groups, tr, "Computing stats ... group {pos}/{total}"):
-            benchmarks = self.apply_compare(benchmarks)
             benchmarks = sorted(benchmarks, key=operator.itemgetter(self.sort))
 
             worst = {}
@@ -989,17 +1004,17 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
     groups = defaultdict(list)
     for bench in benchmarks:
         if group_by == "group":
-            groups[bench.group].append(bench)
+            groups[bench["group"]].append(bench)
         elif group_by == "name":
-            groups[bench.name].append(bench)
+            groups[bench["name"]].append(bench)
         elif group_by == "func":
-            groups[bench.name.split("[")[0]].append(bench)
+            groups[bench["name"].split("[")[0]].append(bench)
         elif group_by == "fullfunc":
-            groups[bench.fullname.split("[")[0]].append(bench)
+            groups[bench["fullname"].split("[")[0]].append(bench)
         elif group_by == "fullname":
-            groups[bench.fullname].append(bench)
+            groups[bench["fullname"]].append(bench)
         elif group_by == "param":
-            groups[bench.param].append(bench)
+            groups[bench["param"]].append(bench)
         elif group_by.startswith("param:"):
             param_name = group_by[len("param:"):]
             param_value = bench.params[param_name]
@@ -1082,7 +1097,7 @@ def benchmark(request):
             options["timer"] = NameWrapper(options["timer"])
         fixture = BenchmarkFixture(
             node,
-            add_stats=bs._benchmarks.append,
+            add_stats=bs.benchmarks.append,
             logger=bs.logger,
             warner=request.node.warn,
             disable=bs.disable,

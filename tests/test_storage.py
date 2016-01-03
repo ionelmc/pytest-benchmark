@@ -50,7 +50,7 @@ class MockSession(BenchmarkSession):
     def __init__(self):
         self.histogram = True
         self.storage = Storage(str(STORAGE), default_platform=get_platform())
-        self._benchmarks = []
+        self.benchmarks = []
         self.sort = u"min"
         self.compare = '0001'
         self.logger = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ class MockSession(BenchmarkSession):
         for bench_file in reversed(self.storage.query("[0-9][0-9][0-9][0-9]_*")):
             with bench_file.open('rU') as fh:
                 data = json.load(fh)
-            self._benchmarks.extend(
+            self.benchmarks.extend(
                 Namespace(
                     json=lambda include_data=False: dict(bench['stats'], include_data=include_data),
                     name=bench['name'],
