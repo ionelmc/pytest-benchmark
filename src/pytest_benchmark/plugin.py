@@ -693,16 +693,18 @@ class BenchmarkSession(object):
                         flat_bench = bench.as_dict(include_data=False, stats=False)
                         flat_bench.update(compared["stats"])
                         flat_bench["name"] = "{0} ({1})".format(bench.name, source)
+                        flat_bench["fullname"] = "{0} ({1})".format(bench.fullname, source)
                         flat_bench["source"] = source
                         if self.compare_fail:
                             for check in self.compare_fail:
                                 fail = check.fails(bench, flat_bench)
                                 if fail:
-                                    self.performance_regressions.append((bench.fullname, fail))
+                                    self.performance_regressions.append((flat_bench["fullname"], fail))
                         yield flat_bench
                 flat_bench = bench.as_dict(include_data=False, flat=True)
                 if compared:
                     flat_bench["name"] = "{0} (NOW)".format(bench["name"])
+                    flat_bench["fullname"] = "{0} (NOW)".format(bench["fullname"])
                     flat_bench["source"] = "NOW"
                 yield flat_bench
 

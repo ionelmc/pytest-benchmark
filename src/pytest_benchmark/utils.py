@@ -147,7 +147,7 @@ class RegressionCheck(object):
     def fails(self, current, compared):
         val = self.compute(current, compared)
         if val > self.threshold:
-            return "Field %s has failed %s: %.9f > %.9f" % (
+            return "Field %r has failed %s: %.9f > %.9f" % (
                 self.field, self.__class__.__name__, val, self.threshold
             )
 
