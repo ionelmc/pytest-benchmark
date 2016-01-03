@@ -341,7 +341,7 @@ def report_progress(iterable, terminal_reporter, format_string, **kwargs):
 
 
 def slugify(name):
-    for c in "\/:*?<>|":
+    for c in "\/:*?<>| ":
         name = name.replace(c, '_').replace('__', '_')
     return name
 
