@@ -4,13 +4,25 @@ from __future__ import print_function
 import gc
 import sys
 import time
+import traceback
 from math import ceil
 
 from .compat import INT
 from .compat import XRANGE
-from .stats import BenchmarkStats
 from .timers import compute_timer_precision
 from .utils import format_time
+
+try:
+    import statistics
+except (ImportError, SyntaxError):
+    statistics_error = traceback.format_exc()
+    statistics = None
+else:
+    from .stats import BenchmarkStats
+
+
+class FixtureAlreadyUsed(Exception):
+    pass
 
 
 class BenchmarkFixture(object):

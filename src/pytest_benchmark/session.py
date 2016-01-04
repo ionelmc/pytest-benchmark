@@ -2,10 +2,11 @@ from __future__ import division
 from __future__ import print_function
 
 import json
-import traceback
 
 import pytest
 
+from .fixture import statistics
+from .fixture import statistics_error
 from .logger import Logger
 from .storage import Storage
 from .table import ResultsTable
@@ -15,14 +16,6 @@ from .utils import first_or_value
 from .utils import get_machine_id
 from .utils import load_timer
 from .utils import short_filename
-
-try:
-    import statistics
-except (ImportError, SyntaxError):
-    statistics = False
-    statistics_error = traceback.format_exc()
-else:
-    from .stats import Stats
 
 
 class PerformanceRegression(pytest.UsageError):

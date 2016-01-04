@@ -30,18 +30,6 @@ from .utils import parse_sort
 from .utils import parse_timer
 from .utils import parse_warmup
 
-try:
-    import statistics
-except (ImportError, SyntaxError):
-    statistics = False
-    statistics_error = traceback.format_exc()
-else:
-    from .stats import Stats
-
-
-class FixtureAlreadyUsed(Exception):
-    pass
-
 
 def pytest_report_header(config):
     bs = config._benchmarksession
@@ -213,8 +201,6 @@ def pytest_addhooks(pluginmanager):
     if method is None:
         method = pluginmanager.addhooks
     method(hookspec)
-
-
 
 
 def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark):
