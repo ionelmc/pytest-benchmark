@@ -4,18 +4,18 @@ import os
 import sys
 from io import BytesIO
 from io import StringIO
-from pathlib import Path
 
 import py
 import pytest
 from freezegun import freeze_time
+from pathlib import Path
 
 from pytest_benchmark import plugin
 from pytest_benchmark.plugin import BenchmarkSession
-from pytest_benchmark.plugin import PerformanceRegression
 from pytest_benchmark.plugin import pytest_benchmark_compare_machine_info
 from pytest_benchmark.plugin import pytest_benchmark_generate_json
 from pytest_benchmark.plugin import pytest_benchmark_group_stats
+from pytest_benchmark.session import PerformanceRegression
 from pytest_benchmark.storage import Storage
 from pytest_benchmark.utils import DifferenceRegressionCheck
 from pytest_benchmark.utils import PercentageRegressionCheck

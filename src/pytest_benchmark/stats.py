@@ -1,10 +1,12 @@
 from __future__ import division
+from __future__ import print_function
 
 import statistics
 from bisect import bisect_left
 from bisect import bisect_right
 
 from .utils import cached_property
+from .utils import funcname
 
 
 class Stats(object):
@@ -157,3 +159,64 @@ class Stats(object):
     @cached_property
     def outliers(self):
         return "%s;%s" % (self.stddev_outliers, self.iqr_outliers)
+
+
+class BenchmarkStats(object):
+    def __init__(self, fixture, iterations, options):
+        self.name = fixture.name
+        self.fullname = fixture.fullname
+        self.group = fixture.group
+        self.param = fixture.param
+        self.params = fixture.params
+
+        self.iterations = iterations
+        self.stats = Stats()
+        self.options = options
+        self.fixture = fixture
+
+    def __bool__(self):
+        return bool(self.stats)
+
+    def __nonzero__(self):
+        return bool(self.stats)
+
+    def get(self, key, default=None):
+        try:
+            return getattr(self.stats, key)
+        except AttributeError:
+            return getattr(self, key, default)
+
+    def __getitem__(self, key):
+        try:
+            return getattr(self.stats, key)
+        except AttributeError:
+            return getattr(self, key)
+
+    @property
+    def has_error(self):
+        return self.fixture.has_error
+
+    def as_dict(self, include_data=True, flat=False, stats=True):
+        result = {
+            "group": self.group,
+            "name": self.name,
+            "fullname": self.fullname,
+            "params": self.params,
+            "param": self.param,
+            "options": dict(
+                (k, funcname(v) if callable(v) else v) for k, v in self.options.items()
+            )
+        }
+        if stats:
+            stats = self.stats.as_dict()
+            if include_data:
+                stats["data"] = self.stats.data
+            stats["iterations"] = self.iterations
+            if flat:
+                result.update(stats)
+            else:
+                result["stats"] = stats
+        return result
+
+    def update(self, duration):
+        self.stats.update(duration / self.iterations)
