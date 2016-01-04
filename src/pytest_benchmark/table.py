@@ -95,7 +95,7 @@ class ResultsTable(object):
                             ALIGNED_NUMBER_FMT.format(
                                 bench[prop] * adjustment,
                                 widths[prop],
-                                self.compute_baseline_scale(best[prop], bench[prop], rpadding),
+                                compute_baseline_scale(best[prop], bench[prop], rpadding),
                                 rpadding
                             ),
                             green=not solo and bench[prop] == best.get(prop),
@@ -121,17 +121,18 @@ class ResultsTable(object):
         tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
                       "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
 
-    def compute_baseline_scale(self, baseline, value, width):
-        if not width:
-            return ""
-        if value == baseline:
-            return " (1.0)".ljust(width)
 
-        scale = abs(value / baseline) if baseline else float("inf")
-        if scale > 1000:
-            if isinf(scale):
-                return " (inf)".ljust(width)
-            else:
-                return " (>1000.0)".ljust(width)
+def compute_baseline_scale(baseline, value, width):
+    if not width:
+        return ""
+    if value == baseline:
+        return " (1.0)".ljust(width)
+
+    scale = abs(value / baseline) if baseline else float("inf")
+    if scale > 1000:
+        if isinf(scale):
+            return " (inf)".ljust(width)
         else:
-            return " ({0:.2f})".format(scale).ljust(width)
+            return " (>1000.0)".ljust(width)
+    else:
+        return " ({0:.2f})".format(scale).ljust(width)
