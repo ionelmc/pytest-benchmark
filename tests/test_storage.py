@@ -4,6 +4,7 @@ import os
 import sys
 from io import BytesIO
 from io import StringIO
+from pathlib import Path
 
 import py
 import pytest
@@ -27,9 +28,7 @@ THIS = py.path.local(__file__)
 STORAGE = THIS.dirpath(THIS.purebasename)
 
 SAVE_DATA = json.load(STORAGE.listdir('0030_*.json')[0].open())
-SAVE_DATA["benchmarks"][0]["stats"]["include_data"] = False
 JSON_DATA = json.load(STORAGE.listdir('0030_*.json')[0].open())
-JSON_DATA["benchmarks"][0]["stats"]["include_data"] = True
 SAVE_DATA["machine_info"] = JSON_DATA["machine_info"] = {'foo': 'bar'}
 SAVE_DATA["commit_info"] = JSON_DATA["commit_info"] = {'foo': 'bar'}
 
@@ -52,11 +51,15 @@ class LooseFileLike(BytesIO):
 class MockSession(BenchmarkSession):
     def __init__(self):
         self.histogram = True
-        self.storage = Storage(str(STORAGE), default_machine_id=get_machine_id())
+        self.storage = Storage(str(STORAGE), default_machine_id=get_machine_id(), logger=None)
         self.benchmarks = []
+        self.performance_regressions = []
         self.sort = u"min"
         self.compare = '0001'
         self.logger = logging.getLogger(__name__)
+        self.machine_id = "FoobarOS"
+        self.machine_info = {'foo': 'bar'}
+        self.save = self.autosave = self.json = False
         self.options = {
             'min_rounds': 123,
             'min_time': 234,
@@ -81,7 +84,8 @@ class MockSession(BenchmarkSession):
                 data = json.load(fh)
             self.benchmarks.extend(
                 Namespace(
-                    json=lambda include_data=False: dict(bench['stats'], include_data=include_data),
+                    as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench:
+                    dict(_bench, **_bench["stats"]) if flat else _bench,
                     name=bench['name'],
                     fullname=bench['fullname'],
                     group=bench['group'],
@@ -131,8 +135,15 @@ def make_logger(sess):
 
 
 def test_rendering(sess):
+    output = make_logger(sess)
     sess.histogram = os.path.join('docs', 'sample')
-    sess.handle_histogram()
+    sess.finish()
+    sess.display(Namespace(
+        ensure_newline=lambda: None,
+        write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
+        write=lambda text, **opts: output.write(force_text(text)),
+        rewrite=lambda text, **opts: output.write(force_text(text)),
+    ))
 
 
 def test_regression_checks(sess):
@@ -143,7 +154,9 @@ def test_regression_checks(sess):
         PercentageRegressionCheck("stddev", 5),
         DifferenceRegressionCheck("max", 0.000001)
     ]
-    sess.display_results_table(Namespace(
+    sess.finish()
+    pytest.raises(PerformanceRegression, sess.display, Namespace(
+        ensure_newline=lambda: None,
         write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
         write=lambda text, **opts: output.write(force_text(text)),
         rewrite=lambda text, **opts: output.write(force_text(text)),
@@ -151,16 +164,16 @@ def test_regression_checks(sess):
     print(output.getvalue())
     assert sess.performance_regressions == [
         ('tests/test_normal.py::test_xfast_parametrized[0]',
-         'Field stddev has failed PercentageRegressionCheck: 23.331641765 > 5.000000000'),
+         "Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000"),
         ('tests/test_normal.py::test_xfast_parametrized[0]',
-         'Field max has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000')
+         "Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000")
     ]
     output = make_logger(sess)
     pytest.raises(PerformanceRegression, sess.check_regressions)
     print(output.getvalue())
     assert output.getvalue() == """Performance has regressed:
-\ttests/test_normal.py::test_xfast_parametrized[0] - Field stddev has failed PercentageRegressionCheck: 23.331641765 > 5.000000000
-\ttests/test_normal.py::test_xfast_parametrized[0] - Field max has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000
+\ttests/test_normal.py::test_xfast_parametrized[0] - Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000
+\ttests/test_normal.py::test_xfast_parametrized[0] - Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000
 """
 
 
@@ -175,7 +188,9 @@ def test_regression_checks_inf(sess):
         PercentageRegressionCheck("stddev", 5),
         DifferenceRegressionCheck("max", 0.000001)
     ]
-    sess.display_results_table(Namespace(
+    sess.finish()
+    pytest.raises(PerformanceRegression, sess.display, Namespace(
+        ensure_newline=lambda: None,
         write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
         write=lambda text, **opts: output.write(force_text(text)),
         rewrite=lambda text, **opts: output.write(force_text(text)),
@@ -183,16 +198,16 @@ def test_regression_checks_inf(sess):
     print(output.getvalue())
     assert sess.performance_regressions == [
         ('tests/test_normal.py::test_xfast_parametrized[0]',
-         'Field stddev has failed PercentageRegressionCheck: inf > 5.000000000'),
+         "Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000"),
         ('tests/test_normal.py::test_xfast_parametrized[0]',
-         'Field max has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000')
+         "Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000")
     ]
     output = make_logger(sess)
     pytest.raises(PerformanceRegression, sess.check_regressions)
     print(output.getvalue())
     assert output.getvalue() == """Performance has regressed:
-\ttests/test_normal.py::test_xfast_parametrized[0] - Field stddev has failed PercentageRegressionCheck: inf > 5.000000000
-\ttests/test_normal.py::test_xfast_parametrized[0] - Field max has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000
+\ttests/test_normal.py::test_xfast_parametrized[0] - Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000
+\ttests/test_normal.py::test_xfast_parametrized[0] - Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000
 """
 
 # @pytest.fixture
@@ -203,7 +218,9 @@ def test_regression_checks_inf(sess):
 def test_compare_1(sess, LineMatcher):
     output = make_logger(sess)
     sess.handle_loading()
-    sess.display_results_table(Namespace(
+    sess.finish()
+    sess.display(Namespace(
+        ensure_newline=lambda: None,
         write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
         write=lambda text, **opts: output.write(force_text(text)),
         rewrite=lambda text, **opts: output.write(force_text(text)),
@@ -211,10 +228,8 @@ def test_compare_1(sess, LineMatcher):
     print(output.getvalue())
     LineMatcher(output.getvalue().splitlines()).fnmatch_lines([
         'BENCHMARK-C6: Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"}. {\'fslocation\': \'tests*test_storage\'}',
-        'Comparing against benchmark 0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted-changes.json:',
-        '| commit info: {dirty: true, id: "5b78858eb718649a31fb93d8dc96ca2cee41a4cd"}',
-        '| saved at: 2015-08-15T00:01:46.250433',
-        '| saved using pytest-benchmark 2.5.0:',
+        'Comparing against benchmark 0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted'
+        '-changes.json',
         '',
         '*------------------------------------------------------------------------ benchmark: 2 tests -----------------------------------------------------------------------*',
         'Name (time in ns)                          Min                 *Max                Mean              StdDev              Median                IQR            Outliers(*)  Rounds  Iterations',
@@ -230,7 +245,9 @@ def test_compare_2(sess, LineMatcher):
     output = make_logger(sess)
     sess.compare = '0002'
     sess.handle_loading()
-    sess.display_results_table(Namespace(
+    sess.finish()
+    sess.display(Namespace(
+        ensure_newline=lambda: None,
         write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
         section=lambda line, **opts: output.write(force_text(line) + u'\n'),
         write=lambda text, **opts: output.write(force_text(text)),
@@ -239,10 +256,7 @@ def test_compare_2(sess, LineMatcher):
     print(output.getvalue())
     LineMatcher(output.getvalue().splitlines()).fnmatch_lines([
         'BENCHMARK-C6: Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"}. {\'fslocation\': \'tests*test_storage\'}',
-        'Comparing against benchmark 0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes.json:',
-        '| commit info: {dirty: true, id: "5b78858eb718649a31fb93d8dc96ca2cee41a4cd"}',
-        '| saved at: 2015-08-15T00:01:51.557705',
-        '| saved using pytest-benchmark 2.5.0:',
+        'Comparing against benchmark 0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes.json',
         '',
         '*------------------------------------------------------------------------ benchmark: 2 tests -----------------------------------------------------------------------*',
         'Name (time in ns)                          Min                 *Max                Mean              StdDev              Median                IQR            Outliers(*)  Rounds  Iterations',
@@ -272,9 +286,9 @@ def test_save_with_name(sess, tmpdir, monkeypatch):
     sess.autosave = True
     sess.json = None
     sess.save_data = False
-    sess.storage = tmpdir
+    sess.storage.path = Path(str(tmpdir))
     sess.handle_saving()
-    files = tmpdir.listdir()
+    files = list(Path(str(tmpdir)).rglob('*.json'))
     assert len(files) == 1
     assert json.load(files[0].open('rU')) == SAVE_DATA
 
@@ -286,9 +300,9 @@ def test_save_no_name(sess, tmpdir, monkeypatch):
     sess.autosave = True
     sess.json = None
     sess.save_data = False
-    sess.storage = tmpdir
+    sess.storage.path = Path(str(tmpdir))
     sess.handle_saving()
-    files = tmpdir.listdir()
+    files = list(Path(str(tmpdir)).rglob('*.json'))
     assert len(files) == 1
     assert json.load(files[0].open('rU')) == SAVE_DATA
 
@@ -300,11 +314,11 @@ def test_save_with_error(sess, tmpdir, monkeypatch):
     sess.autosave = True
     sess.json = None
     sess.save_data = False
-    sess.storage = tmpdir
+    sess.storage.path = Path(str(tmpdir))
     for bench in sess.benchmarks:
         bench.has_error = True
     sess.handle_saving()
-    files = tmpdir.listdir()
+    files = list(Path(str(tmpdir)).rglob('*.json'))
     assert len(files) == 1
     assert json.load(files[0].open('rU')) == {
         'benchmarks': [],
@@ -322,8 +336,8 @@ def test_autosave(sess, tmpdir, monkeypatch):
     sess.autosave = True
     sess.json = None
     sess.save_data = False
-    sess.storage = tmpdir
+    sess.storage.path = Path(str(tmpdir))
     sess.handle_saving()
-    files = tmpdir.listdir()
+    files = list(Path(str(tmpdir)).rglob('*.json'))
     assert len(files) == 1
     assert json.load(files[0].open('rU')) == SAVE_DATA
