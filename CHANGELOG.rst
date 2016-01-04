@@ -11,6 +11,20 @@ Changelog
   param name). Contributed by Antonio Cuni in `#37 <https://github.com/ionelmc/pytest-benchmark/pull/37>`_.
 * Added support for `name` or `fullname` in ``--benchmark-sort``.
   Contributed by Antonio Cuni in `#37 <https://github.com/ionelmc/pytest-benchmark/pull/37>`_.
+* Changed signature for ``pytest_benchmark_generate_json`` hook to take 2 new arguments: ``machine_info`` and ``commit_info``.
+* Changed `--benchmark-histogram`` to plot groups instead of name-matching runs.
+* Changed `--benchmark-histogram`` to plot exactly what you compared against. Now it's ``1:1`` with the compare feature.
+* Changed `--benchmark-compare`` to allow globs. You can compare against all the previous runs now.
+* Added a command line tool to compare previous data: ``py.test-benchmark``. It has two commands:
+
+  * ``list`` - Lists all the available files.
+  * ``compare`` - Displays result tables. Takes optional arguments:
+
+    * ``--sort=COL``
+    * ``--group-by=LABEL``
+    * ``--columns=LABELS``
+    * ``--histogram=[FILENAME-PREFIX]``
+
 
 3.0.0 (2015-11-08)
 ------------------
