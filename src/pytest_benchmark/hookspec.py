@@ -69,7 +69,7 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
     pass
 
 
-def pytest_benchmark_generate_json(config, benchmarks, include_data):
+def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_info, commit_info):
     """
     You should read pytest-benchmark's code if you really need to wholly customize the json.
 
@@ -83,7 +83,7 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data):
     .. sourcecode:: python
 
         @pytest.mark.hookwrapper
-        def pytest_benchmark_generate_json(config, benchmarks, include_data):
+        def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_info, commit_info):
             for bench in benchmarks:
                 bench.has_error = False
             yield

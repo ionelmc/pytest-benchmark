@@ -702,11 +702,18 @@ class BenchmarkSession(object):
                 raise
 
     def handle_saving(self):
+        save = self.save or self.autosave
+        if save or self.json:
+            commit_info = self.config.hook.pytest_benchmark_generate_commit_info(config=self.config)
+            self.config.hook.pytest_benchmark_update_commit_info(config=self.config, commit_info=commit_info)
+
         if self.json:
             output_json = self.config.hook.pytest_benchmark_generate_json(
                 config=self.config,
                 benchmarks=self.benchmarks,
                 include_data=True,
+                machine_info=self.machine_info,
+                commit_info=commit_info,
             )
             self.config.hook.pytest_benchmark_update_json(
                 config=self.config,
@@ -717,12 +724,13 @@ class BenchmarkSession(object):
                 fh.write(json.dumps(output_json, ensure_ascii=True, indent=4).encode())
             self.logger.info("Wrote benchmark data in %s" % self.json, purple=True)
 
-        save = self.save or self.autosave
         if save:
             output_json = self.config.hook.pytest_benchmark_generate_json(
                 config=self.config,
                 benchmarks=self.benchmarks,
                 include_data=self.save_data,
+                machine_info=self.machine_info,
+                commit_info=commit_info,
             )
             self.config.hook.pytest_benchmark_update_json(
                 config=self.config,
@@ -755,7 +763,6 @@ class BenchmarkSession(object):
                 self.logger.warn(code, msg, fslocation=self.storage.location)
 
             for path, compared_benchmark in compared_benchmarks:
-
                 self.config.hook.pytest_benchmark_compare_machine_info(
                     config=self.config,
                     benchmarksession=self,
@@ -902,13 +909,7 @@ def pytest_benchmark_generate_commit_info(config):
     return get_commit_info()
 
 
-def pytest_benchmark_generate_json(config, benchmarks, include_data):
-    machine_info = config.hook.pytest_benchmark_generate_machine_info(config=config)
-    config.hook.pytest_benchmark_update_machine_info(config=config, machine_info=machine_info)
-
-    commit_info = config.hook.pytest_benchmark_generate_commit_info(config=config)
-    config.hook.pytest_benchmark_update_commit_info(config=config, commit_info=commit_info)
-
+def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_info, commit_info):
     benchmarks_json = []
     output_json = {
         "machine_info": machine_info,
