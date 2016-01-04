@@ -3,7 +3,7 @@ import argparse
 import py
 
 from . import plugin
-from .plugin import Logger
+from .logger import Logger
 from .plugin import add_display_options
 from .plugin import add_global_options
 from .storage import Storage
