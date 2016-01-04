@@ -18,6 +18,7 @@ except (ImportError, SyntaxError):
     statistics_error = traceback.format_exc()
     statistics = None
 else:
+    statistics_error = None
     from .stats import BenchmarkStats
 
 
