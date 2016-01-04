@@ -85,7 +85,7 @@ class MockSession(BenchmarkSession):
             self.benchmarks.extend(
                 Namespace(
                     as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench:
-                    dict(_bench, **_bench["stats"]) if flat else _bench,
+                        dict(_bench, **_bench["stats"]) if flat else dict(_bench),
                     name=bench['name'],
                     fullname=bench['fullname'],
                     group=bench['group'],
@@ -137,6 +137,8 @@ def make_logger(sess):
 def test_rendering(sess):
     output = make_logger(sess)
     sess.histogram = os.path.join('docs', 'sample')
+    sess.compare = '*/*'
+    sess.sort = 'name'
     sess.finish()
     sess.display(Namespace(
         ensure_newline=lambda: None,

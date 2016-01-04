@@ -255,20 +255,27 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
     for bench in benchmarks:
         if group_by == "group":
             groups[bench["group"]].append(bench)
+
         elif group_by == "name":
-            groups[bench["name"]].append(bench)
+            groups[bench["canonical_name"]].append(bench)
+
         elif group_by == "func":
-            groups[bench["name"].split("[")[0]].append(bench)
-        elif group_by == "fullfunc":
-            groups[bench["fullname"].split("[")[0]].append(bench)
+            groups[bench["canonical_name"].split("[")[0]].append(bench)
+
         elif group_by == "fullname":
-            groups[bench["fullname"]].append(bench)
+            groups[bench["canonical_fullname"]].append(bench)
+
+        elif group_by == "fullfunc":
+            groups[bench["canonical_fullname"].split("[")[0]].append(bench)
+
         elif group_by == "param":
             groups[bench["param"]].append(bench)
+
         elif group_by.startswith("param:"):
             param_name = group_by[len("param:"):]
             param_value = bench["params"][param_name]
             groups[param_value].append(bench)
+
         else:
             raise NotImplementedError("Unsupported grouping %r." % group_by)
     #

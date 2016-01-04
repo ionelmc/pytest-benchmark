@@ -53,11 +53,11 @@ def make_plot(benchmarks, title, adjustment):
                 pygaljs.uri("2.0.x", "pygal-tooltips.js")
             ]
         }
-
+    print(["{0[name]}".format(row) for row in benchmarks])
     plot = CustomBox(
         box_mode='tukey',
         x_label_rotation=-90,
-        x_labels=["{0[display-name]}".format(row) for row in benchmarks],
+        x_labels=["{0[name]}".format(row) for row in benchmarks],
         show_legend=False,
         title=title,
         x_title="Trial",
@@ -86,7 +86,7 @@ def make_plot(benchmarks, title, adjustment):
     for row in benchmarks:
         serie = [row[field] * adjustment for field in ["min", "ld15iqr", "q1", "median", "q3", "hd15iqr", "max"]]
         serie.append(row["path"])
-        plot.add("{0[display-fullname]} - {0[rounds]} rounds".format(row), serie)
+        plot.add("{0[fullname]} - {0[rounds]} rounds".format(row), serie)
     return plot
 
 
