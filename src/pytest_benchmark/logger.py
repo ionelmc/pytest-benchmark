@@ -15,7 +15,7 @@ class Logger(object):
             self.pytest_warn = config.warn
         else:
             self.capman = None
-            self.pytest_warn = lambda **kawargs: None
+            self.pytest_warn = lambda **kwargs: None
         try:
             self.pytest_warn_has_fslocation = 'fslocation' in config.warn.func_code.co_varnames
         except AttributeError:
