@@ -14,6 +14,7 @@ import pytest
 from . import __version__
 from .fixture import BenchmarkFixture
 from .session import BenchmarkSession
+from .session import PerformanceRegression
 from .timers import default_timer
 from .utils import NameWrapper
 from .utils import format_dict
@@ -36,7 +37,6 @@ except (ImportError, SyntaxError):
     statistics_error = traceback.format_exc()
 else:
     from .stats import Stats
-
 
 
 class FixtureAlreadyUsed(Exception):
