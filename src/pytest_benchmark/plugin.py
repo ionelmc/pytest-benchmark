@@ -234,19 +234,6 @@ def pytest_addhooks(pluginmanager):
     method(hookspec)
 
 
-class HookShim(object):
-    def __init__(self, config):
-        self.config = config
-
-    def __getattr__(self, item):
-        hook = getattr(self.config.hook, item)
-
-        def config_injected_hook(**kwargs):
-            return hook(config=self.config, **kwargs)
-
-        return config_injected_hook
-
-
 class BenchmarkStats(object):
     def __init__(self, fixture, iterations, options):
         self.name = fixture.name
@@ -616,12 +603,14 @@ class BenchmarkSession(object):
         self.verbose = config.getoption("benchmark_verbose")
         self.logger = Logger(self.verbose, config)
         self.config = config
-        self.hooks = HookShim(config)
         self.performance_regressions = []
         self.benchmarks = []
         self.machine_id = get_machine_id()
-        self.machine_info = self.hooks.pytest_benchmark_generate_machine_info()
-        self.hooks.pytest_benchmark_update_machine_info(machine_info=self.machine_info)
+        self.machine_info = config.hook.pytest_benchmark_generate_machine_info(config=self.config)
+        self.config.hook.pytest_benchmark_update_machine_info(
+            config=self.config,
+            machine_info=self.machine_info
+        )
 
         self.options = dict(
             min_time=SecondsDecimal(config.getoption("benchmark_min_time")),
@@ -714,13 +703,15 @@ class BenchmarkSession(object):
 
     def handle_saving(self):
         if self.json:
-            output_json = self.hooks.pytest_benchmark_generate_json(
+            output_json = self.config.hook.pytest_benchmark_generate_json(
+                config=self.config,
                 benchmarks=self.benchmarks,
-                include_data=True
+                include_data=True,
             )
-            self.hooks.pytest_benchmark_update_json(
+            self.config.hook.pytest_benchmark_update_json(
+                config=self.config,
                 benchmarks=self.benchmarks,
-                output_json=output_json
+                output_json=output_json,
             )
             with self.json as fh:
                 fh.write(json.dumps(output_json, ensure_ascii=True, indent=4).encode())
@@ -728,13 +719,15 @@ class BenchmarkSession(object):
 
         save = self.save or self.autosave
         if save:
-            output_json = self.hooks.pytest_benchmark_generate_json(
+            output_json = self.config.hook.pytest_benchmark_generate_json(
+                config=self.config,
                 benchmarks=self.benchmarks,
-                include_data=self.save_data
+                include_data=self.save_data,
             )
-            self.hooks.pytest_benchmark_update_json(
+            self.config.hook.pytest_benchmark_update_json(
+                config=self.config,
                 benchmarks=self.benchmarks,
-                output_json=output_json
+                output_json=output_json,
             )
             output_file = self.storage.get("%s_%s.json" % (self.next_num, save))
             assert not output_file.exists()
@@ -763,9 +756,12 @@ class BenchmarkSession(object):
 
             for path, compared_benchmark in compared_benchmarks:
 
-                self.hooks.pytest_benchmark_compare_machine_info(benchmarksession=self,
-                                                                 machine_info=self.machine_info,
-                                                                 compared_benchmark=compared_benchmark)
+                self.config.hook.pytest_benchmark_compare_machine_info(
+                    config=self.config,
+                    benchmarksession=self,
+                    machine_info=self.machine_info,
+                    compared_benchmark=compared_benchmark,
+                )
                 self.compared_mapping[path] = dict(
                     (bench['fullname'], bench) for bench in compared_benchmark['benchmarks']
                 )
@@ -774,7 +770,8 @@ class BenchmarkSession(object):
     def finish(self):
         self.handle_saving()
         self.handle_loading()
-        self.groups = self.hooks.pytest_benchmark_group_stats(
+        self.groups = self.config.hook.pytest_benchmark_group_stats(
+            config=self.config,
             benchmarks=self.prepare_benchmarks(),
             group_by=self.group_by
         )
