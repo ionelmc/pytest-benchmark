@@ -347,7 +347,7 @@ def slugify(name):
 
 
 def annotate_source(bench, source):
-    bench["display:name"] = "{0} ({1})".format(bench["name"], source)
-    bench["display:fullname"] = "{0} ({1})".format(bench["fullname"], source)
+    bench["display-name"] = "{0} ({1})".format(bench["name"], source)
+    bench["display-fullname"] = "{0} ({1})".format(bench["fullname"], source)
     bench["source"] = source
     return bench

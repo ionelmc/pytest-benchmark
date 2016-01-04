@@ -43,7 +43,7 @@ class ResultsTable(object):
                 time_unit_key = "min"
             unit, adjustment = time_unit(best.get(self.sort, benchmarks[0][time_unit_key]))
             labels = {
-                "display:name": "Name (time in {0}s)".format(unit),
+                "display-name": "Name (time in {0}s)".format(unit),
                 "min": "Min",
                 "max": "Max",
                 "mean": "Mean",
@@ -55,7 +55,7 @@ class ResultsTable(object):
                 "outliers": "Outliers(*)",
             }
             widths = {
-                "display:name": 3 + max(len(labels["display:name"]), max(len(benchmark["display:name"]) for benchmark in benchmarks)),
+                "display-name": 3 + max(len(labels["display-name"]), max(len(benchmark["display-name"]) for benchmark in benchmarks)),
                 "rounds": 2 + max(len(labels["rounds"]), len(str(worst["rounds"]))),
                 "iterations": 2 + max(len(labels["iterations"]), len(str(worst["iterations"]))),
                 "outliers": 2 + max(len(labels["outliers"]), len(str(worst["outliers"]))),
@@ -67,7 +67,7 @@ class ResultsTable(object):
                 ))
 
             rpadding = 0 if solo else 10
-            labels_line = labels["display:name"].ljust(widths["display:name"]) + "".join(
+            labels_line = labels["display-name"].ljust(widths["display-name"]) + "".join(
                 labels[prop].rjust(widths[prop]) + (
                     " " * rpadding
                     if prop not in ["outliers", "rounds", "iterations"]
@@ -88,7 +88,7 @@ class ResultsTable(object):
 
             for bench in benchmarks:
                 has_error = bench.get("has_error")
-                tr.write(bench["display:name"].ljust(widths["display:name"]), red=has_error, invert=has_error)
+                tr.write(bench["display-name"].ljust(widths["display-name"]), red=has_error, invert=has_error)
                 for prop in self.columns:
                     if prop in ("min", "max", "mean", "stddev", "median", "iqr"):
                         tr.write(
