@@ -112,8 +112,7 @@ class BenchmarkSession(object):
                         yield flat_bench
                 flat_bench = bench.as_dict(include_data=False, flat=True)
                 flat_bench["path"] = None
-                if compared:
-                    annotate_source(flat_bench, "NOW")
+                annotate_source(flat_bench, compared and "NOW")
                 yield flat_bench
 
     @property
