@@ -803,7 +803,7 @@ def test_ok(benchmark, bad_fixture):
         "*====== FAILURES ======*",
         "*______ test_bad ______*",
 
-        "benchmark = <pytest_benchmark.plugin.BenchmarkFixture object at *>",
+        "benchmark = <pytest_benchmark.*.BenchmarkFixture object at *>",
 
         "    def test_bad(benchmark):",
         ">       @benchmark",
@@ -811,12 +811,7 @@ def test_ok(benchmark, bad_fixture):
 
         "test_abort_broken.py:*",
         "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _*",
-        "*pytest_benchmark/plugin.py:*: in __call__",
-        "    duration, iterations, loops_range = self._calibrate_timer(runner)",
-        "*pytest_benchmark/plugin.py:*: in _calibrate_timer",
-        "    duration = runner(loops_range)",
-        "*pytest_benchmark/plugin.py:*: in runner",
-        "    *",
+        "*",
         "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _*",
 
         "    @benchmark",
@@ -827,7 +822,7 @@ def test_ok(benchmark, bad_fixture):
         "test_abort_broken.py:11: Exception",
         "*______ test_bad2 ______*",
 
-        "benchmark = <pytest_benchmark.plugin.BenchmarkFixture object at *>",
+        "benchmark = <pytest_benchmark.*.BenchmarkFixture object at *>",
 
         "    def test_bad2(benchmark):",
         "        @benchmark",
