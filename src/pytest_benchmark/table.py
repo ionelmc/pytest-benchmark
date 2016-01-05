@@ -120,7 +120,7 @@ class ResultsTable(object):
                 self.logger.info("Generated histogram {0}".format(output_file), bold=True)
 
         tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
-                      "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.", bold=True, black=True)
+                      "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.")
 
 
 def compute_baseline_scale(baseline, value, width):
