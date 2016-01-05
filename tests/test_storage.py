@@ -165,17 +165,17 @@ def test_regression_checks(sess):
     ))
     print(output.getvalue())
     assert sess.performance_regressions == [
-        ('tests/test_normal.py::test_xfast_parametrized[0]',
+        ('tests/test_normal.py::test_xfast_parametrized[0] (0001)',
          "Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000"),
-        ('tests/test_normal.py::test_xfast_parametrized[0]',
+        ('tests/test_normal.py::test_xfast_parametrized[0] (0001)',
          "Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000")
     ]
     output = make_logger(sess)
     pytest.raises(PerformanceRegression, sess.check_regressions)
     print(output.getvalue())
     assert output.getvalue() == """Performance has regressed:
-\ttests/test_normal.py::test_xfast_parametrized[0] - Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000
-\ttests/test_normal.py::test_xfast_parametrized[0] - Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000
+\ttests/test_normal.py::test_xfast_parametrized[0] (0001) - Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000
+\ttests/test_normal.py::test_xfast_parametrized[0] (0001) - Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000
 """
 
 
@@ -199,17 +199,17 @@ def test_regression_checks_inf(sess):
     ))
     print(output.getvalue())
     assert sess.performance_regressions == [
-        ('tests/test_normal.py::test_xfast_parametrized[0]',
+        ('tests/test_normal.py::test_xfast_parametrized[0] (0002)',
          "Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000"),
-        ('tests/test_normal.py::test_xfast_parametrized[0]',
+        ('tests/test_normal.py::test_xfast_parametrized[0] (0002)',
          "Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000")
     ]
     output = make_logger(sess)
     pytest.raises(PerformanceRegression, sess.check_regressions)
     print(output.getvalue())
     assert output.getvalue() == """Performance has regressed:
-\ttests/test_normal.py::test_xfast_parametrized[0] - Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000
-\ttests/test_normal.py::test_xfast_parametrized[0] - Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000
+\ttests/test_normal.py::test_xfast_parametrized[0] (0002) - Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000
+\ttests/test_normal.py::test_xfast_parametrized[0] (0002) - Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000
 """
 
 # @pytest.fixture
