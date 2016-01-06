@@ -208,11 +208,13 @@ class BenchmarkSession(object):
     def finish(self):
         self.handle_saving()
         self.handle_loading()
-        self.groups = self.config.hook.pytest_benchmark_group_stats(
-            config=self.config,
-            benchmarks=self.prepare_benchmarks(),
-            group_by=self.group_by
-        )
+        prepared_benchmarks = list(self.prepare_benchmarks())
+        if prepared_benchmarks:
+            self.groups = self.config.hook.pytest_benchmark_group_stats(
+                config=self.config,
+                benchmarks=self.prepare_benchmarks(),
+                group_by=self.group_by
+            )
 
     def display(self, tr):
         if not self.groups:
