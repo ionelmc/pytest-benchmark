@@ -212,7 +212,7 @@ class BenchmarkSession(object):
         if prepared_benchmarks:
             self.groups = self.config.hook.pytest_benchmark_group_stats(
                 config=self.config,
-                benchmarks=self.prepare_benchmarks(),
+                benchmarks=prepared_benchmarks,
                 group_by=self.group_by
             )
 
