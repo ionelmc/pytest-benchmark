@@ -12,6 +12,7 @@ from .storage import Storage
 from .table import ResultsTable
 from .utils import SecondsDecimal
 from .utils import annotate_source
+from .utils import cached_property
 from .utils import first_or_value
 from .utils import get_machine_id
 from .utils import load_timer
@@ -33,11 +34,6 @@ class BenchmarkSession(object):
         self.performance_regressions = []
         self.benchmarks = []
         self.machine_id = get_machine_id()
-        self.machine_info = config.hook.pytest_benchmark_generate_machine_info(config=self.config)
-        self.config.hook.pytest_benchmark_update_machine_info(
-            config=self.config,
-            machine_info=self.machine_info
-        )
 
         self.options = dict(
             min_time=SecondsDecimal(config.getoption("benchmark_min_time")),
@@ -91,6 +87,15 @@ class BenchmarkSession(object):
         self.storage = Storage(config.getoption("benchmark_storage"),
                                default_machine_id=self.machine_id, logger=self.logger)
         self.histogram = first_or_value(config.getoption("benchmark_histogram"), False)
+
+    @cached_property
+    def machine_info(self):
+        obj = self.config.hook.pytest_benchmark_generate_machine_info(config=self.config)
+        self.config.hook.pytest_benchmark_update_machine_info(
+            config=self.config,
+            machine_info=obj
+        )
+        return obj
 
     def prepare_benchmarks(self):
         for bench in self.benchmarks:
