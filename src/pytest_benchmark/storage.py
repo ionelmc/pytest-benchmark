@@ -38,8 +38,13 @@ class Storage(object):
 
         for globish in globs_or_files:
             candidate = Path(globish)
-            if candidate.is_file():
+            try:
+                is_file = candidate.is_file()
+            except OSError:
+                is_file = False
+            if is_file:
                 files.append(candidate)
+                continue
 
             parts = candidate.parts
             if len(parts) > 2:
