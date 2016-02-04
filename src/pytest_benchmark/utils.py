@@ -349,6 +349,11 @@ def report_progress(iterable, terminal_reporter, format_string, **kwargs):
     return progress_reporting_wrapper()
 
 
+def report_noprogress(iterable, *args, **kwargs):
+    for pos, item in enumerate(iterable):
+        yield "", item
+
+
 def slugify(name):
     for c in "\/:*?<>| ":
         name = name.replace(c, '_').replace('__', '_')

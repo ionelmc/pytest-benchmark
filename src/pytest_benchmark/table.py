@@ -19,23 +19,23 @@ class ResultsTable(object):
         self.histogram = histogram
         self.logger = logger
 
-    def display(self, tr, groups):
+    def display(self, tr, groups, progress_reporter=report_progress):
         tr.write_line("")
         tr.rewrite("Computing stats ...", black=True, bold=True)
-        for line, (group, benchmarks) in report_progress(groups, tr, "Computing stats ... group {pos}/{total}"):
+        for line, (group, benchmarks) in progress_reporter(groups, tr, "Computing stats ... group {pos}/{total}"):
             benchmarks = sorted(benchmarks, key=operator.itemgetter(self.sort))
 
             worst = {}
             best = {}
             solo = len(benchmarks) == 1
-            for line, prop in report_progress(("min", "max", "mean", "median", "iqr", "stddev"), tr, "{line}: {value}",
+            for line, prop in progress_reporter(("min", "max", "mean", "median", "iqr", "stddev"), tr, "{line}: {value}",
                                               line=line):
-                worst[prop] = max(bench[prop] for _, bench in report_progress(
+                worst[prop] = max(bench[prop] for _, bench in progress_reporter(
                     benchmarks, tr, "{line} ({pos}/{total})", line=line))
-                best[prop] = min(bench[prop] for _, bench in report_progress(
+                best[prop] = min(bench[prop] for _, bench in progress_reporter(
                     benchmarks, tr, "{line} ({pos}/{total})", line=line))
-            for line, prop in report_progress(("outliers", "rounds", "iterations"), tr, "{line}: {value}", line=line):
-                worst[prop] = max(benchmark[prop] for _, benchmark in report_progress(
+            for line, prop in progress_reporter(("outliers", "rounds", "iterations"), tr, "{line}: {value}", line=line):
+                worst[prop] = max(benchmark[prop] for _, benchmark in progress_reporter(
                     benchmarks, tr, "{line} ({pos}/{total})", line=line))
 
             time_unit_key = self.sort
