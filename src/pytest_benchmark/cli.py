@@ -118,7 +118,13 @@ def main():
             print(file)
     elif args.command == 'compare':
         results_table = ResultsTable(args.columns, args.sort, first_or_value(args.histogram, False), logger)
-        groups = plugin.pytest_benchmark_group_stats(
+        conftest = py.path.local('conftest.py')
+        if conftest.check():
+            conftest = conftest.pyimport()
+        else:
+            conftest = None
+
+        groups = getattr(conftest, 'pytest_benchmark_group_stats', plugin.pytest_benchmark_group_stats)(
             benchmarks=storage.load_benchmarks(*args.glob_or_file),
             group_by=args.group_by,
             config=None,
