@@ -9,6 +9,7 @@ from .plugin import add_global_options
 from .storage import Storage
 from .table import ResultsTable
 from .utils import first_or_value
+from .utils import report_noprogress
 
 
 class HelpAction(argparse.Action):
@@ -129,7 +130,7 @@ def main():
             group_by=args.group_by,
             config=None,
         )
-        results_table.display(TerminalReporter(), groups)
+        results_table.display(TerminalReporter(), groups, progress_reporter=report_noprogress)
 
 
 class TerminalReporter(object):
