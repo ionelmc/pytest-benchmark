@@ -329,6 +329,15 @@ def format_dict(obj):
     return "{%s}" % ", ".join("%s: %s" % (k, json.dumps(v)) for k, v in sorted(obj.items()))
 
 
+class SafeJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        return "UNSERIALIZABLE[%r]" % o
+
+
+def safe_dumps(obj, **kwargs):
+    return json.dumps(obj, cls=SafeJSONEncoder, **kwargs)
+
+
 def report_progress(iterable, terminal_reporter, format_string, **kwargs):
     total = len(iterable)
 

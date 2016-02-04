@@ -1,8 +1,6 @@
 from __future__ import division
 from __future__ import print_function
 
-import json
-
 import pytest
 
 from .fixture import statistics
@@ -16,6 +14,7 @@ from .utils import cached_property
 from .utils import first_or_value
 from .utils import get_machine_id
 from .utils import load_timer
+from .utils import safe_dumps
 from .utils import short_filename
 
 
@@ -152,7 +151,7 @@ class BenchmarkSession(object):
                 output_json=output_json,
             )
             with self.json as fh:
-                fh.write(json.dumps(output_json, ensure_ascii=True, indent=4).encode())
+                fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())
             self.logger.info("Wrote benchmark data in %s" % self.json, purple=True)
 
         if save:
@@ -172,7 +171,7 @@ class BenchmarkSession(object):
             assert not output_file.exists()
 
             with output_file.open('wb') as fh:
-                fh.write(json.dumps(output_json, ensure_ascii=True, indent=4).encode())
+                fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())
             self.logger.info("Saved benchmark data in %s" % output_file)
 
     def handle_loading(self):
