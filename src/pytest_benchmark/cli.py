@@ -137,7 +137,7 @@ class TerminalReporter(object):
         self._tw = py.io.TerminalWriter()
 
     def ensure_newline(self):
-        self._tw.line()
+        pass
 
     def write(self, content, **markup):
         self._tw.write(content, **markup)
@@ -145,7 +145,6 @@ class TerminalReporter(object):
     def write_line(self, line, **markup):
         if not py.builtin._istext(line):
             line = py.builtin.text(line, errors="replace")
-        self.ensure_newline()
         self._tw.line(line, **markup)
 
     def rewrite(self, line, **markup):
@@ -153,7 +152,6 @@ class TerminalReporter(object):
         self._tw.write("\r" + line, **markup)
 
     def write_sep(self, sep, title=None, **markup):
-        self.ensure_newline()
         self._tw.sep(sep, title, **markup)
 
     def section(self, title, sep="=", **kw):
