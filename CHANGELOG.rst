@@ -15,6 +15,8 @@ Changelog
 * Changed `--benchmark-histogram`` to plot groups instead of name-matching runs.
 * Changed `--benchmark-histogram`` to plot exactly what you compared against. Now it's ``1:1`` with the compare feature.
 * Changed `--benchmark-compare`` to allow globs. You can compare against all the previous runs now.
+* Changed `--benchmark-group-by`` to allow multiple values separated by comma.
+  Example: ``--benchmark-group-by=param:foo,param:bar``
 * Added a command line tool to compare previous data: ``py.test-benchmark``. It has two commands:
 
   * ``list`` - Lists all the available files.

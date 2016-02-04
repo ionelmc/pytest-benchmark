@@ -239,32 +239,27 @@ def pytest_runtest_call(item):
 def pytest_benchmark_group_stats(config, benchmarks, group_by):
     groups = defaultdict(list)
     for bench in benchmarks:
-        if group_by == "group":
-            groups[bench["group"]].append(bench)
+        key = ()
+        for grouping in group_by.split(','):
+            if grouping == "group":
+                key += bench["group"],
+            elif grouping == "name":
+                key += bench["canonical_name"],
+            elif grouping == "func":
+                key += bench["canonical_name"].split("[")[0],
+            elif grouping == "fullname":
+                key += bench["canonical_fullname"],
+            elif grouping == "fullfunc":
+                key += bench["canonical_fullname"].split("[")[0],
+            elif grouping == "param":
+                key += bench["param"],
+            elif grouping.startswith("param:"):
+                param_name = grouping[len("param:"):]
+                key += '%s=%s' % (param_name, bench["params"][param_name]),
+            else:
+                raise NotImplementedError("Unsupported grouping %r." % group_by)
+        groups[' '.join(map(str, key))].append(bench)
 
-        elif group_by == "name":
-            groups[bench["canonical_name"]].append(bench)
-
-        elif group_by == "func":
-            groups[bench["canonical_name"].split("[")[0]].append(bench)
-
-        elif group_by == "fullname":
-            groups[bench["canonical_fullname"]].append(bench)
-
-        elif group_by == "fullfunc":
-            groups[bench["canonical_fullname"].split("[")[0]].append(bench)
-
-        elif group_by == "param":
-            groups[bench["param"]].append(bench)
-
-        elif group_by.startswith("param:"):
-            param_name = group_by[len("param:"):]
-            param_value = bench["params"][param_name]
-            groups[param_value].append(bench)
-
-        else:
-            raise NotImplementedError("Unsupported grouping %r." % group_by)
-    #
     for grouped_benchmarks in groups.values():
         grouped_benchmarks.sort(key=operator.itemgetter("fullname" if "full" in group_by else "name"))
     return sorted(groups.items(), key=lambda pair: pair[0] or "")
