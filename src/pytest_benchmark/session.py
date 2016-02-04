@@ -133,7 +133,7 @@ class BenchmarkSession(object):
                 raise
 
     def handle_saving(self):
-        save = self.save or self.autosave
+        save = self.benchmarks and self.save or self.autosave
         if save or self.json:
             commit_info = self.config.hook.pytest_benchmark_generate_commit_info(config=self.config)
             self.config.hook.pytest_benchmark_update_commit_info(config=self.config, commit_info=commit_info)
