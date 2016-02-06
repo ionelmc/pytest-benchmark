@@ -258,7 +258,7 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
                 key += '%s=%s' % (param_name, bench["params"][param_name]),
             else:
                 raise NotImplementedError("Unsupported grouping %r." % group_by)
-        groups[' '.join(map(str, key))].append(bench)
+        groups[' '.join(str(p) for p in key if p) or None].append(bench)
 
     for grouped_benchmarks in groups.values():
         grouped_benchmarks.sort(key=operator.itemgetter("fullname" if "full" in group_by else "name"))
