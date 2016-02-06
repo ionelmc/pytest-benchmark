@@ -28,8 +28,8 @@ class ResultsTable(object):
             worst = {}
             best = {}
             solo = len(benchmarks) == 1
-            for line, prop in progress_reporter(("min", "max", "mean", "median", "iqr", "stddev"), tr, "{line}: {value}",
-                                              line=line):
+            for line, prop in progress_reporter(("min", "max", "mean", "median", "iqr", "stddev"),
+                                                tr, "{line}: {value}", line=line):
                 worst[prop] = max(bench[prop] for _, bench in progress_reporter(
                     benchmarks, tr, "{line} ({pos}/{total})", line=line))
                 best[prop] = min(bench[prop] for _, bench in progress_reporter(
