@@ -1,15 +1,17 @@
 language: python
-python: '3.5'
 sudo: false
 env:
   global:
     - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
     - SEGFAULT_SIGNALS=all
-  matrix:
-    - TOXENV=check
+matrix:
+  include:
+    - python: 3.5
+      env: TOXENV=check
 
 {% for env in tox_environments %}
-    - TOXENV={{ env }}{% if 'cover' in env %},coveralls,codecov{% endif %}
+    - python: {{ env.split('-')[0] }}
+      env: TOXENV={{ env }}{% if 'cover' in env %},coveralls,codecov{% endif %}
 
 {% endfor %}
 
