@@ -127,7 +127,7 @@ before_install:
   - uname -a
   - lsb_release -a
 install:
-  - pip install -U tox virtualenv setuptools wheel
+  - pip install -U tox setuptools wheel $(python -V |& grep -q 'Python 3.2' && echo 'pip<8.0 virtualenv<14.0')
   - virtualenv --version
   - easy_install --version
   - pip --version
