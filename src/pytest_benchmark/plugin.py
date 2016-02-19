@@ -50,44 +50,57 @@ def pytest_report_header(config):
     )
 
 
-def add_display_options(addoption):
+def add_display_options(addoption, prefix="benchmark-"):
     addoption(
-        "--benchmark-sort",
+        "--{0}sort".format(prefix),
         metavar="COL", type=parse_sort, default="min",
         help="Column to sort on. Can be one of: 'min', 'max', 'mean', 'stddev', "
              "'name', 'fullname'. Default: %(default)r"
     )
     addoption(
-        "--benchmark-group-by",
+        "--{0}group-by".format(prefix),
         metavar="LABEL", default="group",
         help="How to group tests. Can be one of: 'group', 'name', 'fullname', 'func', 'fullfunc', "
              "'param' or 'param:NAME', where NAME is the name passed to @pytest.parametrize."
              " Default: %(default)r"
     )
     addoption(
-        "--benchmark-columns",
+        "--{0}columns".format(prefix),
         metavar="LABELS", type=parse_columns,
         default="min, max, mean, stddev, median, iqr, outliers, rounds, iterations",
         help='Comma-separated list of columns to show in the result table. Default: %(default)r'
     )
+
+
+def add_histogram_options(addoption, name="benchmark-histogram"):
     prefix = "benchmark_%s" % get_current_time()
     addoption(
-        "--benchmark-histogram",
-        action='append', metavar="FILENAME-PREFIX", nargs="?", default=[], const=prefix,
+        "--{0}".format(name),
+        action="append", metavar="FILENAME-PREFIX", nargs="?", default=[], const=prefix,
         help="Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX contains"
              " slashes ('/') then directories will be created. Default: %r" % prefix
     )
 
 
-def add_global_options(addoption):
+def add_csv_options(addoption, name="benchmark-csv"):
+    prefix = "benchmark_%s" % get_current_time()
     addoption(
-        "--benchmark-storage",
+        "--{0}".format(name),
+        action="append", metavar="FILENAME", nargs="?", default=[], const=prefix,
+        help="Save a csv report. If FILENAME contains"
+             " slashes ('/') then directories will be created. Default: %r" % prefix
+    )
+
+
+def add_global_options(addoption, prefix="benchmark-"):
+    addoption(
+        "--{0}storage".format(prefix),
         metavar="STORAGE-PATH", default="./.benchmarks",
         help="Specify a different path to store the runs (when --benchmark-save or --benchmark-autosave are used). "
              "Default: %(default)r",
     )
     addoption(
-        "--benchmark-verbose",
+        "--{0}verbose".format(prefix),
         action="store_true", default=False,
         help="Dump diagnostic and progress information."
     )
@@ -192,6 +205,7 @@ def pytest_addoption(parser):
     )
     add_global_options(group.addoption)
     add_display_options(group.addoption)
+    add_histogram_options(group.addoption)
 
 
 def pytest_addhooks(pluginmanager):
