@@ -7,7 +7,7 @@ from .fixture import statistics
 from .fixture import statistics_error
 from .logger import Logger
 from .storage import Storage
-from .table import ResultsTable
+from .table import TableResults
 from .utils import SecondsDecimal
 from .utils import annotate_source
 from .utils import cached_property
@@ -220,7 +220,7 @@ class BenchmarkSession(object):
             return
 
         tr.ensure_newline()
-        results_table = ResultsTable(
+        results_table = TableResults(
             columns=self.columns,
             sort=self.sort,
             histogram=self.histogram,
