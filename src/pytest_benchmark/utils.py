@@ -37,6 +37,7 @@ TIME_UNITS = {
     "u": "Microseconds (us)",
     "n": "Nanoseconds (ns)"
 }
+ALLOWED_COLUMNS = ["min", "max", "mean", "stddev", "median", "iqr", "outliers", "rounds", "iterations"]
 
 
 class SecondsDecimal(Decimal):
@@ -214,14 +215,12 @@ def parse_sort(string):
 
 
 def parse_columns(string):
-    allowed_columns = ["min", "max", "mean", "stddev", "median", "iqr",
-                       "outliers", "rounds", "iterations"]
     columns = [str.strip(s) for s in string.lower().split(',')]
-    invalid = set(columns) - set(allowed_columns)
+    invalid = set(columns) - set(ALLOWED_COLUMNS)
     if invalid:
         # there are extra items in columns!
         msg = "Invalid column name(s): %s. " % ', '.join(invalid)
-        msg += "The only valid column names are: %s" % ', '.join(allowed_columns)
+        msg += "The only valid column names are: %s" % ', '.join(ALLOWED_COLUMNS)
         raise argparse.ArgumentTypeError(msg)
     return columns
 
