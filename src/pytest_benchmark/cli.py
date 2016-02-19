@@ -70,13 +70,6 @@ class CommandArgumentParser(argparse.ArgumentParser):
         return args
 
 
-def strip_prefix(callback, force_argument=False):
-    def add_argument(dest, **kwargs):
-        if not dest.startswith('--benchmark-'):
-            raise RuntimeError("Bad argument %s with options %s" % (dest, kwargs))
-        callback(dest[12:] if force_argument else '--' + dest[12:], **kwargs)
-
-    return add_argument
 
 
 def main():
