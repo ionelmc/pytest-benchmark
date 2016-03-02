@@ -194,7 +194,7 @@ Credits
 * Timing code and ideas taken from: https://bitbucket.org/haypo/misc/src/tip/python/benchmark.py
 
 .. _FAQ: http://pytest-benchmark.readthedocs.org/en/latest/faq.html
-.. _calibration: http://pytest-benchmark.readthedocs.org/en/latest/features.html#calibration
+.. _calibration: http://pytest-benchmark.readthedocs.org/en/latest/calibration.html
 .. _pedantic: http://pytest-benchmark.readthedocs.org/en/latest/pedantic.html
 
 
