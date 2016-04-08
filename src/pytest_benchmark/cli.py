@@ -1,5 +1,4 @@
 import argparse
-import sys
 
 import py
 
@@ -154,14 +153,11 @@ def main():
         groups = load(storage, args.glob_or_file, args.group_by)
 
         results_table.display(TerminalReporter(), groups, progress_reporter=report_noprogress)
-        if args.csv == 'csv':
-            results_csv = CSVResults(args.columns, args.sort)
-            filename = first_or_value(args.csv, None)
-            if filename:
-                with py.path.local(filename).open('w', ensure=True) as stream:
-                    results_csv.render(stream, groups)
-            else:
-                results_csv.render(sys.stdout, groups)
+        if args.csv:
+            results_csv = CSVResults(args.columns, args.sort, logger)
+            output_file, = args.csv
+
+            results_csv.render(output_file, groups)
     else:
         parser.error("Unknown command {0!r}".format(args.command))
 
