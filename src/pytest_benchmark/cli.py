@@ -151,17 +151,8 @@ def main():
             print(file)
     elif args.command == 'compare':
         results_table = TableResults(args.columns, args.sort, first_or_value(args.histogram, False), logger)
-        conftest = py.path.local('conftest.py')
-        if conftest.check():
-            conftest = conftest.pyimport()
-        else:
-            conftest = None
+        groups = load(storage, args.glob_or_file, args.group_by)
 
-        groups = getattr(conftest, 'pytest_benchmark_group_stats', plugin.pytest_benchmark_group_stats)(
-            benchmarks=storage.load_benchmarks(*args.glob_or_file),
-            group_by=args.group_by,
-            config=None,
-        )
         results_table.display(TerminalReporter(), groups, progress_reporter=report_noprogress)
         if args.csv == 'csv':
             results_csv = CSVResults(args.columns, args.sort)
