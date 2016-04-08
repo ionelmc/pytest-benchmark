@@ -88,8 +88,13 @@ class Storage(object):
             yield file.relative_to(self.path), data
 
     def load_benchmarks(self, *globs_or_files):
-        for path, data in self.load(*globs_or_files):
-            source = short_filename(path)
+        sources = [
+            (short_filename(path), path, data)
+            for path, data in self.load(*globs_or_files)
+        ]
+        common = len(os.path.commonprefix([src for src, _, _ in sources])) if sources else 0
+        for source, path, data in sources:
+            source = source[common:]
 
             for bench in data["benchmarks"]:
                 bench.update(bench.pop("stats"))
