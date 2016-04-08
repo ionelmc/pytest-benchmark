@@ -117,7 +117,7 @@ class TableResults(object):
 
                 output_file = make_histogram(self.histogram, group, benchmarks, unit, adjustment)
 
-                self.logger.info("Generated histogram {0}".format(output_file), bold=True)
+                self.logger.info("Generated histogram: {0}".format(output_file), bold=True)
 
         tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
                       "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.")
