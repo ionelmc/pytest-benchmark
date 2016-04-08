@@ -1,15 +1,32 @@
 import argparse
+import sys
 
 import py
 
+from pytest_benchmark.csv import CSVResults
 from . import plugin
 from .logger import Logger
-from .plugin import add_display_options
+from .plugin import add_display_options, add_histogram_options, add_csv_options
 from .plugin import add_global_options
 from .storage import Storage
-from .table import ResultsTable
+from .table import TableResults
 from .utils import first_or_value
 from .utils import report_noprogress
+
+COMPARE_HELP = '''examples:
+
+    pytest-benchmark {0} 'Linux-CPython-3.5-64bit/*'
+
+        Loads all benchmarks ran with that interpreter. Note the special quoting that disables your shell's glob
+        expansion.
+
+    pytest-benchmark {0} 0001
+
+        Loads first run from all the interpreters.
+
+    pytest-benchmark {0} /foo/bar/0001_abc.json /lorem/ipsum/0001_sir_dolor.json
+
+        Loads runs from exactly those files.'''
 
 
 class HelpAction(argparse.Action):
@@ -70,18 +87,20 @@ class CommandArgumentParser(argparse.ArgumentParser):
         return args
 
 
-
-
-def main():
-    parser = CommandArgumentParser('py.test-benchmark', description="pytest_benchmark's management commands.")
-    add_global_options(strip_prefix(parser.add_argument))
-
-    parser.add_command(
-        'list',
-        description='List saved runs.',
+def add_glob_or_file(addoption):
+    addoption(
+        'glob_or_file',
+        nargs='*', help='Glob or exact path for json files. If not specified all runs are loaded.'
     )
 
-    display_command = parser.add_command(
+
+def make_parser():
+    parser = CommandArgumentParser('py.test-benchmark', description="pytest_benchmark's management commands.")
+    add_global_options(parser.add_argument, prefix="")
+
+    parser.add_command('list', description='List saved runs.')
+
+    compare_command = parser.add_command(
         'compare',
         description='Compare saved runs.',
         epilog='''examples:
@@ -98,20 +117,40 @@ def main():
     pytest-benchmark compare /foo/bar/0001_abc.json /lorem/ipsum/0001_sir_dolor.json
 
         Loads runs from exactly those files.''')
-    add_display_options(strip_prefix(display_command.add_argument))
-    display_command.add_argument(
-        'glob_or_file',
-        nargs='*', help='Glob or exact path for json files. If not specified all runs are loaded.'
+    add_display_options(compare_command.add_argument, prefix="")
+    add_histogram_options(compare_command.add_argument, prefix="")
+    add_glob_or_file(compare_command.add_argument)
+    add_csv_options(compare_command.add_argument, prefix="")
+
+    return parser
+
+
+def load(storage, glob_or_file, group_by):
+    conftest = py.path.local('conftest.py')
+    if conftest.check():
+        conftest = conftest.pyimport()
+    else:
+        conftest = None
+
+    groups = getattr(conftest, 'pytest_benchmark_group_stats', plugin.pytest_benchmark_group_stats)(
+        benchmarks=storage.load_benchmarks(*glob_or_file),
+        group_by=group_by,
+        config=None,
     )
+    return groups
+
+
+def main():
+    parser = make_parser()
     args = parser.parse_args()
     logger = Logger(args.verbose)
     storage = Storage(args.storage, logger)
-    print(args)
+
     if args.command == 'list':
         for file in storage.query():
             print(file)
     elif args.command == 'compare':
-        results_table = ResultsTable(args.columns, args.sort, first_or_value(args.histogram, False), logger)
+        results_table = TableResults(args.columns, args.sort, first_or_value(args.histogram, False), logger)
         conftest = py.path.local('conftest.py')
         if conftest.check():
             conftest = conftest.pyimport()
@@ -124,6 +163,16 @@ def main():
             config=None,
         )
         results_table.display(TerminalReporter(), groups, progress_reporter=report_noprogress)
+        if args.csv == 'csv':
+            results_csv = CSVResults(args.columns, args.sort)
+            filename = first_or_value(args.csv, None)
+            if filename:
+                with py.path.local(filename).open('w', ensure=True) as stream:
+                    results_csv.render(stream, groups)
+            else:
+                results_csv.render(sys.stdout, groups)
+    else:
+        parser.error("Unknown command {0!r}".format(args.command))
 
 
 class TerminalReporter(object):

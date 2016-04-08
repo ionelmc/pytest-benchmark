@@ -1,3 +1,5 @@
+import operator
+
 import py
 
 from .utils import TIME_UNITS
@@ -107,3 +109,24 @@ def make_histogram(output_prefix, name, benchmarks, unit, adjustment):
     )
     plot.render_to_file(str(output_file))
     return output_file
+
+class HistogramResults(object):
+    def __init__(self, logger):
+        self.logger = logger
+
+    def display(self, tr, groups):
+        for group, benchmarks in groups:
+            benchmarks = sorted(benchmarks, key=operator.itemgetter(self.sort))
+
+            if len(benchmarks) > 75:
+                self.logger.warn("BENCHMARK-H1",
+                                 "Group {0!r} has too many benchmarks. Only plotting 50 benchmarks.".format(group))
+                benchmarks = benchmarks[:75]
+
+            output_file = make_histogram(self.histogram, group, benchmarks, unit, adjustment)
+
+            self.logger.info("Generated histogram {0}".format(output_file), bold=True)
+
+        tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
+                      "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.")
+
