@@ -126,7 +126,7 @@ def short_filename(path, machine_id=None):
         if not pos and part == machine_id:
             continue
         if pos == last:
-            part = part.split('_')[0]
+            part = part.rsplit('.', 1)[0]
         parts.append(part)
     return '/'.join(parts)
 
