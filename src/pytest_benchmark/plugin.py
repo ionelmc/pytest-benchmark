@@ -72,23 +72,23 @@ def add_display_options(addoption, prefix="benchmark-"):
     )
 
 
-def add_histogram_options(addoption, name="benchmark-histogram"):
-    prefix = "benchmark_%s" % get_current_time()
+def add_histogram_options(addoption, prefix="benchmark-"):
+    filename_prefix = "benchmark_%s" % get_current_time()
     addoption(
-        "--{0}".format(name),
-        action="append", metavar="FILENAME-PREFIX", nargs="?", default=[], const=prefix,
+        "--{0}histogram".format(prefix),
+        action="append", metavar="FILENAME-PREFIX", nargs="?", default=[], const=filename_prefix,
         help="Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX contains"
-             " slashes ('/') then directories will be created. Default: %r" % prefix
+             " slashes ('/') then directories will be created. Default: %r" % filename_prefix
     )
 
 
-def add_csv_options(addoption, name="benchmark-csv"):
-    prefix = "benchmark_%s" % get_current_time()
+def add_csv_options(addoption, prefix="benchmark-"):
+    filename_prefix = "benchmark_%s" % get_current_time()
     addoption(
-        "--{0}".format(name),
-        action="append", metavar="FILENAME", nargs="?", default=[], const=prefix,
+        "--{0}csv".format(prefix),
+        action="append", metavar="FILENAME", nargs="?", default=[], const=filename_prefix,
         help="Save a csv report. If FILENAME contains"
-             " slashes ('/') then directories will be created. Default: %r" % prefix
+             " slashes ('/') then directories will be created. Default: %r" % filename_prefix
     )
 
 
