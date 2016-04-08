@@ -4,7 +4,7 @@ from itertools import chain
 
 from pathlib import Path
 
-from .utils import short_filename, annotate_source
+from .utils import short_filename, annotate_source, commonpath
 
 
 class Storage(object):
@@ -92,9 +92,9 @@ class Storage(object):
             (short_filename(path), path, data)
             for path, data in self.load(*globs_or_files)
         ]
-        common = len(os.path.commonprefix([src for src, _, _ in sources])) if sources else 0
+        common = len(commonpath([src for src, _, _ in sources])) if sources else 0
         for source, path, data in sources:
-            source = source[common:]
+            source = source[common:].lstrip(r'\/')
 
             for bench in data["benchmarks"]:
                 bench.update(bench.pop("stats"))
