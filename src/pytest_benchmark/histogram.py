@@ -55,7 +55,7 @@ def make_plot(benchmarks, title, adjustment):
                 pygaljs.uri("2.0.x", "pygal-tooltips.js")
             ]
         }
-    print(["{0[name]}".format(row) for row in benchmarks])
+
     plot = CustomBox(
         box_mode='tukey',
         x_label_rotation=-90,
