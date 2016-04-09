@@ -4,13 +4,13 @@ from __future__ import print_function
 import argparse
 import genericpath
 import json
+import ntpath
 import os
 import platform
 import re
 import subprocess
 import sys
 import types
-import ntpath
 from datetime import datetime
 from decimal import Decimal
 from functools import partial
@@ -204,34 +204,44 @@ def parse_warmup(string):
         raise argparse.ArgumentTypeError("Could not parse value: %r." % string)
 
 
+def name_formatter_short(bench):
+    name = bench["name"]
+    if bench["source"]:
+        name = "%s (%.4s)" % (name, os.path.split(bench["source"])[-1])
+    if name.startswith("test_"):
+        name = name[5:]
+    return name
+
+
+def name_formatter_normal(bench):
+    name = bench["name"]
+    if bench["source"]:
+        parts = bench["source"].split('/')
+        parts[-1] = parts[-1][:12]
+        name = "%s (%s)" % (name, '/'.join(parts))
+    return name
+
+
+def name_formatter_long(bench):
+    if bench["source"]:
+        return "%(fullname)s (%(source)s)" % bench
+    else:
+        return bench["fullname"]
+
+
+NAME_FORMATTERS = {
+    "short": name_formatter_short,
+    "normal": name_formatter_normal,
+    "long": name_formatter_long,
+}
+
+
 def parse_name_format(string):
     string = string.lower().strip()
-    if string == "short":
-        def formatter(bench):
-            name = bench["name"]
-            if bench["source"]:
-                name = "%s (%.4s)" % (name, os.path.split(bench["source"])[-1])
-            if name.startswith("test_"):
-                name = name[5:]
-            return name
-    elif string == "normal":
-        def formatter(bench):
-            name = bench["name"]
-            if bench["source"]:
-                parts = bench["source"].split('/')
-                parts[-1] = parts[-1][:12]
-                name = "%s (%s)" % (name, '/'.join(parts))
-            return name
-    elif string == "long":
-        def formatter(bench):
-            if bench["source"]:
-                return "%(fullname)s (%(source)s)" % bench
-            else:
-                return bench["fullname"]
+    if string in NAME_FORMATTERS:
+        return string
     else:
         raise argparse.ArgumentTypeError("Could not parse value: %r." % string)
-
-    return formatter
 
 
 def parse_timer(string):

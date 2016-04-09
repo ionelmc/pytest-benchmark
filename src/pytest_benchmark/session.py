@@ -8,6 +8,7 @@ from .fixture import statistics_error
 from .logger import Logger
 from .storage import Storage
 from .table import TableResults
+from .utils import NAME_FORMATTERS
 from .utils import SecondsDecimal
 from .utils import cached_property
 from .utils import first_or_value
@@ -15,6 +16,7 @@ from .utils import get_machine_id
 from .utils import load_timer
 from .utils import safe_dumps
 from .utils import short_filename
+
 
 class PerformanceRegression(pytest.UsageError):
     pass
@@ -80,7 +82,7 @@ class BenchmarkSession(object):
         self.json = config.getoption("benchmark_json")
         self.compare = config.getoption("benchmark_compare")
         self.compare_fail = config.getoption("benchmark_compare_fail")
-        self.name_format = config.getoption("benchmark_name")
+        self.name_format = NAME_FORMATTERS[config.getoption("benchmark_name")]
 
         self.storage = Storage(config.getoption("benchmark_storage"),
                                default_machine_id=self.machine_id, logger=self.logger)

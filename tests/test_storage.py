@@ -4,11 +4,11 @@ import os
 import sys
 from io import BytesIO
 from io import StringIO
-from pathlib import Path
 
 import py
 import pytest
 from freezegun import freeze_time
+from pathlib import Path
 
 from pytest_benchmark import plugin
 from pytest_benchmark.plugin import BenchmarkSession
@@ -17,9 +17,11 @@ from pytest_benchmark.plugin import pytest_benchmark_generate_json
 from pytest_benchmark.plugin import pytest_benchmark_group_stats
 from pytest_benchmark.session import PerformanceRegression
 from pytest_benchmark.storage import Storage
-from pytest_benchmark.utils import DifferenceRegressionCheck, parse_name_format
+from pytest_benchmark.utils import NAME_FORMATTERS
+from pytest_benchmark.utils import DifferenceRegressionCheck
 from pytest_benchmark.utils import PercentageRegressionCheck
 from pytest_benchmark.utils import get_machine_id
+
 
 pytest_plugins = "pytester"
 
@@ -59,7 +61,7 @@ class MockSession(BenchmarkSession):
         self.logger = logging.getLogger(__name__)
         self.machine_id = "FoobarOS"
         self.machine_info = {'foo': 'bar'}
-        self.name_format = parse_name_format(name_format)
+        self.name_format = NAME_FORMATTERS[name_format]
         self.save = self.autosave = self.json = False
         self.options = {
             'min_rounds': 123,

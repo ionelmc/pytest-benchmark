@@ -3,12 +3,16 @@ import argparse
 import py
 
 from pytest_benchmark.csv import CSVResults
+
 from . import plugin
 from .logger import Logger
-from .plugin import add_display_options, add_histogram_options, add_csv_options
+from .plugin import add_csv_options
+from .plugin import add_display_options
 from .plugin import add_global_options
+from .plugin import add_histogram_options
 from .storage import Storage
 from .table import TableResults
+from .utils import NAME_FORMATTERS
 from .utils import first_or_value
 from .utils import report_noprogress
 
@@ -149,7 +153,9 @@ def main():
         for file in storage.query():
             print(file)
     elif args.command == 'compare':
-        results_table = TableResults(args.columns, args.sort, first_or_value(args.histogram, False), args.name, logger)
+        results_table = TableResults(
+            args.columns, args.sort, first_or_value(args.histogram, False), NAME_FORMATTERS[args.name], logger
+        )
         groups = load(storage, args.glob_or_file, args.group_by)
 
         results_table.display(TerminalReporter(), groups, progress_reporter=report_noprogress)
