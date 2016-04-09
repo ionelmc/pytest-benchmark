@@ -13,10 +13,11 @@ ALIGNED_NUMBER_FMT = "{0:>{1},.4f}{2:<{3}}" if sys.version_info[:2] > (2, 6) els
 
 
 class TableResults(object):
-    def __init__(self, columns, sort, histogram, logger):
+    def __init__(self, columns, sort, histogram, name_format, logger):
         self.columns = columns
         self.sort = sort
         self.histogram = histogram
+        self.name_format = name_format
         self.logger = logger
 
     def display(self, tr, groups, progress_reporter=report_progress):
@@ -24,6 +25,8 @@ class TableResults(object):
         tr.rewrite("Computing stats ...", black=True, bold=True)
         for line, (group, benchmarks) in progress_reporter(groups, tr, "Computing stats ... group {pos}/{total}"):
             benchmarks = sorted(benchmarks, key=operator.itemgetter(self.sort))
+            for bench in benchmarks:
+                bench["name"] = self.name_format(bench)
 
             worst = {}
             best = {}

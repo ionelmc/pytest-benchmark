@@ -149,7 +149,7 @@ def main():
         for file in storage.query():
             print(file)
     elif args.command == 'compare':
-        results_table = TableResults(args.columns, args.sort, first_or_value(args.histogram, False), logger)
+        results_table = TableResults(args.columns, args.sort, first_or_value(args.histogram, False), args.name, logger)
         groups = load(storage, args.glob_or_file, args.group_by)
 
         results_table.display(TerminalReporter(), groups, progress_reporter=report_noprogress)

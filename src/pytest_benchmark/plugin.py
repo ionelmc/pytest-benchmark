@@ -16,7 +16,7 @@ from .fixture import BenchmarkFixture
 from .session import BenchmarkSession
 from .session import PerformanceRegression
 from .timers import default_timer
-from .utils import NameWrapper
+from .utils import NameWrapper, parse_name_format
 from .utils import format_dict
 from .utils import get_commit_info
 from .utils import get_current_time
@@ -68,7 +68,13 @@ def add_display_options(addoption, prefix="benchmark-"):
         "--{0}columns".format(prefix),
         metavar="LABELS", type=parse_columns,
         default="min, max, mean, stddev, median, iqr, outliers, rounds, iterations",
-        help='Comma-separated list of columns to show in the result table. Default: %(default)r'
+        help="Comma-separated list of columns to show in the result table. Default: %(default)r"
+    )
+    addoption(
+        "--{0}name".format(prefix),
+        metavar="FORMAT", type=parse_name_format,
+        default="normal",
+        help="How to format names in results. Can be one of 'brief', 'normal', 'long'. Default: %(default)r"
     )
 
 
@@ -261,13 +267,13 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
             if grouping == "group":
                 key += bench["group"],
             elif grouping == "name":
-                key += bench["canonical_name"],
+                key += bench["name"],
             elif grouping == "func":
-                key += bench["canonical_name"].split("[")[0],
+                key += bench["name"].split("[")[0],
             elif grouping == "fullname":
-                key += bench["canonical_fullname"],
+                key += bench["fullname"],
             elif grouping == "fullfunc":
-                key += bench["canonical_fullname"].split("[")[0],
+                key += bench["fullname"].split("[")[0],
             elif grouping == "param":
                 key += bench["param"],
             elif grouping.startswith("param:"):

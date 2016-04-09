@@ -9,14 +9,12 @@ from .logger import Logger
 from .storage import Storage
 from .table import TableResults
 from .utils import SecondsDecimal
-from .utils import annotate_source
 from .utils import cached_property
 from .utils import first_or_value
 from .utils import get_machine_id
 from .utils import load_timer
 from .utils import safe_dumps
 from .utils import short_filename
-
 
 class PerformanceRegression(pytest.UsageError):
     pass
@@ -82,6 +80,7 @@ class BenchmarkSession(object):
         self.json = config.getoption("benchmark_json")
         self.compare = config.getoption("benchmark_compare")
         self.compare_fail = config.getoption("benchmark_compare_fail")
+        self.name_format = config.getoption("benchmark_name")
 
         self.storage = Storage(config.getoption("benchmark_storage"),
                                default_machine_id=self.machine_id, logger=self.logger)
@@ -107,7 +106,7 @@ class BenchmarkSession(object):
                         flat_bench = bench.as_dict(include_data=False, stats=False)
                         flat_bench.update(compared["stats"])
                         flat_bench["path"] = str(path)
-                        annotate_source(flat_bench, source)
+                        flat_bench["source"] = source
                         if self.compare_fail:
                             for check in self.compare_fail:
                                 fail = check.fails(bench, flat_bench)
@@ -116,7 +115,7 @@ class BenchmarkSession(object):
                         yield flat_bench
                 flat_bench = bench.as_dict(include_data=False, flat=True)
                 flat_bench["path"] = None
-                annotate_source(flat_bench, compared and "NOW")
+                flat_bench["source"] = compared and "NOW"
                 yield flat_bench
 
     @property
@@ -224,6 +223,7 @@ class BenchmarkSession(object):
             columns=self.columns,
             sort=self.sort,
             histogram=self.histogram,
+            name_format=self.name_format,
             logger=self.logger
         )
         results_table.display(tr, self.groups)

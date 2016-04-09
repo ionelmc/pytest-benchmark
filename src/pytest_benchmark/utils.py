@@ -129,6 +129,8 @@ def short_filename(path, machine_id=None):
             continue
         if pos == last:
             part = part.rsplit('.', 1)[0]
+            # if len(part) > 16:
+            #     part = "%.13s..." % part
         parts.append(part)
     return '/'.join(parts)
 
@@ -200,6 +202,36 @@ def parse_warmup(string):
         return True
     else:
         raise argparse.ArgumentTypeError("Could not parse value: %r." % string)
+
+
+def parse_name_format(string):
+    string = string.lower().strip()
+    if string == "brief":
+        def formatter(bench):
+            name = bench["name"]
+            if bench["path"]:
+                name = "%s (%.4s)" % (name, os.path.split(bench["source"])[-1])
+            if name.startswith("test_"):
+                name = name[5:]
+            return name
+    elif string == "normal":
+        def formatter(bench):
+            name = bench["name"]
+            if bench["path"]:
+                parts = bench["source"].split('/')
+                parts[-1] = parts[-1][:12]
+                name = "%s (%s)" % (name, '/'.join(parts))
+            return name
+    elif string == "long":
+        def formatter(bench):
+            if bench["path"]:
+                return "%(name)s (%(source)s)" % bench
+            else:
+                return bench["fullname"]
+    else:
+        raise argparse.ArgumentTypeError("Could not parse value: %r." % string)
+
+    return formatter
 
 
 def parse_timer(string):
@@ -359,20 +391,6 @@ def slugify(name):
     for c in "\/:*?<>| ":
         name = name.replace(c, '_').replace('__', '_')
     return name
-
-
-def annotate_source(bench, source):
-    bench.update(
-        canonical_name=bench["name"],
-        canonical_fullname=bench["fullname"],
-    )
-    if source:
-        bench.update(
-            name="{0} ({1})".format(bench["name"], source),
-            fullname="{0} ({1})".format(bench["fullname"], source),
-        )
-        bench["source"] = source
-    return bench
 
 
 def commonpath(paths):
