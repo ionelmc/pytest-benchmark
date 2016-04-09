@@ -111,7 +111,7 @@ class BenchmarkSession(object):
                             for check in self.compare_fail:
                                 fail = check.fails(bench, flat_bench)
                                 if fail:
-                                    self.performance_regressions.append((flat_bench["fullname"], fail))
+                                    self.performance_regressions.append((self.name_format(flat_bench), fail))
                         yield flat_bench
                 flat_bench = bench.as_dict(include_data=False, flat=True)
                 flat_bench["path"] = None

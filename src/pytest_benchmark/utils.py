@@ -206,10 +206,10 @@ def parse_warmup(string):
 
 def parse_name_format(string):
     string = string.lower().strip()
-    if string == "brief":
+    if string == "short":
         def formatter(bench):
             name = bench["name"]
-            if bench["path"]:
+            if bench["source"]:
                 name = "%s (%.4s)" % (name, os.path.split(bench["source"])[-1])
             if name.startswith("test_"):
                 name = name[5:]
@@ -217,15 +217,15 @@ def parse_name_format(string):
     elif string == "normal":
         def formatter(bench):
             name = bench["name"]
-            if bench["path"]:
+            if bench["source"]:
                 parts = bench["source"].split('/')
                 parts[-1] = parts[-1][:12]
                 name = "%s (%s)" % (name, '/'.join(parts))
             return name
     elif string == "long":
         def formatter(bench):
-            if bench["path"]:
-                return "%(name)s (%(source)s)" % bench
+            if bench["source"]:
+                return "%(fullname)s (%(source)s)" % bench
             else:
                 return bench["fullname"]
     else:

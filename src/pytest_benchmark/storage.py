@@ -4,7 +4,8 @@ from itertools import chain
 
 from pathlib import Path
 
-from .utils import short_filename, annotate_source, commonpath
+from .utils import commonpath
+from .utils import short_filename
 
 
 class Storage(object):
@@ -99,4 +100,5 @@ class Storage(object):
             for bench in data["benchmarks"]:
                 bench.update(bench.pop("stats"))
                 bench['path'] = str(path)
-                yield annotate_source(bench, source)
+                bench['source'] = source
+                yield bench

@@ -4,11 +4,11 @@ import os
 import sys
 from io import BytesIO
 from io import StringIO
+from pathlib import Path
 
 import py
 import pytest
 from freezegun import freeze_time
-from pathlib import Path
 
 from pytest_benchmark import plugin
 from pytest_benchmark.plugin import BenchmarkSession
@@ -17,7 +17,7 @@ from pytest_benchmark.plugin import pytest_benchmark_generate_json
 from pytest_benchmark.plugin import pytest_benchmark_group_stats
 from pytest_benchmark.session import PerformanceRegression
 from pytest_benchmark.storage import Storage
-from pytest_benchmark.utils import DifferenceRegressionCheck
+from pytest_benchmark.utils import DifferenceRegressionCheck, parse_name_format
 from pytest_benchmark.utils import PercentageRegressionCheck
 from pytest_benchmark.utils import get_machine_id
 
@@ -49,7 +49,7 @@ class LooseFileLike(BytesIO):
 
 
 class MockSession(BenchmarkSession):
-    def __init__(self):
+    def __init__(self, name_format):
         self.histogram = True
         self.storage = Storage(str(STORAGE), default_machine_id=get_machine_id(), logger=None)
         self.benchmarks = []
@@ -59,6 +59,7 @@ class MockSession(BenchmarkSession):
         self.logger = logging.getLogger(__name__)
         self.machine_id = "FoobarOS"
         self.machine_info = {'foo': 'bar'}
+        self.name_format = parse_name_format(name_format)
         self.save = self.autosave = self.json = False
         self.options = {
             'min_rounds': 123,
@@ -119,9 +120,14 @@ def force_bytes(text):
         return text
 
 
+@pytest.fixture(params=['short', 'normal', 'long'])
+def name_format(request):
+    return request.param
+
+
 @pytest.fixture
-def sess(request):
-    return MockSession()
+def sess(request, name_format):
+    return MockSession(name_format)
 
 
 def make_logger(sess):
@@ -148,7 +154,7 @@ def test_rendering(sess):
     ))
 
 
-def test_regression_checks(sess):
+def test_regression_checks(sess, name_format):
     output = make_logger(sess)
     sess.handle_loading()
     sess.performance_regressions = []
@@ -164,24 +170,48 @@ def test_regression_checks(sess):
         rewrite=lambda text, **opts: output.write(force_text(text)),
     ))
     print(output.getvalue())
-    assert sess.performance_regressions == [
-        ('tests/test_normal.py::test_xfast_parametrized[0] (0001)',
-         "Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000"),
-        ('tests/test_normal.py::test_xfast_parametrized[0] (0001)',
-         "Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000")
-    ]
+    assert sess.performance_regressions == {
+        'normal': [
+            ('test_xfast_parametrized[0] (0001_b87b9aa)',
+             "Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000"),
+            ('test_xfast_parametrized[0] (0001_b87b9aa)',
+             "Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000")
+        ],
+        'short': [
+            ('xfast_parametrized[0] (0001)',
+             "Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000"),
+            ('xfast_parametrized[0] (0001)',
+             "Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000")
+        ],
+        'long': [
+            ('tests/test_normal.py::test_xfast_parametrized[0] (0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted-changes)',
+             "Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000"),
+            ('tests/test_normal.py::test_xfast_parametrized[0] (0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted-changes)',
+             "Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000")
+        ],
+    }[name_format]
     output = make_logger(sess)
     pytest.raises(PerformanceRegression, sess.check_regressions)
     print(output.getvalue())
-    assert output.getvalue() == """Performance has regressed:
-\ttests/test_normal.py::test_xfast_parametrized[0] (0001) - Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000
-\ttests/test_normal.py::test_xfast_parametrized[0] (0001) - Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000
+    assert output.getvalue() == {
+        'short': """Performance has regressed:
+\txfast_parametrized[0] (0001) - Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000
+\txfast_parametrized[0] (0001) - Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000
+""",
+        'normal': """Performance has regressed:
+\ttest_xfast_parametrized[0] (0001_b87b9aa) - Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000
+\ttest_xfast_parametrized[0] (0001_b87b9aa) - Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000
+""",
+        'long': """Performance has regressed:
+\ttests/test_normal.py::test_xfast_parametrized[0] (0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted-changes) - Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000
+\ttests/test_normal.py::test_xfast_parametrized[0] (0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted-changes) - Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000
 """
+    }[name_format]
 
 
 @pytest.mark.skipif(sys.version_info[:2] < (2, 7),
                     reason="Something weird going on, see: https://bugs.python.org/issue4482")
-def test_regression_checks_inf(sess):
+def test_regression_checks_inf(sess, name_format):
     output = make_logger(sess)
     sess.compare = '0002'
     sess.handle_loading()
@@ -198,25 +228,48 @@ def test_regression_checks_inf(sess):
         rewrite=lambda text, **opts: output.write(force_text(text)),
     ))
     print(output.getvalue())
-    assert sess.performance_regressions == [
-        ('tests/test_normal.py::test_xfast_parametrized[0] (0002)',
-         "Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000"),
-        ('tests/test_normal.py::test_xfast_parametrized[0] (0002)',
-         "Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000")
-    ]
+    assert sess.performance_regressions == {
+        'normal': [
+            ('test_xfast_parametrized[0] (0002_b87b9aa)',
+             "Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000"),
+            ('test_xfast_parametrized[0] (0002_b87b9aa)',
+             "Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000")
+        ],
+        'short': [
+            ('xfast_parametrized[0] (0002)',
+             "Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000"),
+            ('xfast_parametrized[0] (0002)',
+             "Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000")
+        ],
+        'long': [
+            ('tests/test_normal.py::test_xfast_parametrized[0] '
+             '(0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes)',
+             "Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000"),
+            ('tests/test_normal.py::test_xfast_parametrized[0] '
+             '(0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes)',
+             "Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > "
+             '0.000001000')
+        ]
+    }[name_format]
     output = make_logger(sess)
     pytest.raises(PerformanceRegression, sess.check_regressions)
     print(output.getvalue())
-    assert output.getvalue() == """Performance has regressed:
-\ttests/test_normal.py::test_xfast_parametrized[0] (0002) - Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000
-\ttests/test_normal.py::test_xfast_parametrized[0] (0002) - Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000
+    assert output.getvalue() == {
+        'short': """Performance has regressed:
+\txfast_parametrized[0] (0002) - Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000
+\txfast_parametrized[0] (0002) - Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000
+""",
+        'normal': """Performance has regressed:
+\ttest_xfast_parametrized[0] (0002_b87b9aa) - Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000
+\ttest_xfast_parametrized[0] (0002_b87b9aa) - Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000
+""",
+        'long': """Performance has regressed:
+\ttests/test_normal.py::test_xfast_parametrized[0] (0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes) - Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000
+\ttests/test_normal.py::test_xfast_parametrized[0] (0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes) - Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000
 """
+    }[name_format]
 
-# @pytest.fixture
-# def terminalreporter(request):
-#     return request.config.pluginmanager.getplugin("terminalreporter")
 
-# def test_compare_1(sess, terminalreporter, LineMatcher):
 def test_compare_1(sess, LineMatcher):
     output = make_logger(sess)
     sess.handle_loading()
@@ -230,14 +283,14 @@ def test_compare_1(sess, LineMatcher):
     print(output.getvalue())
     LineMatcher(output.getvalue().splitlines()).fnmatch_lines([
         'BENCHMARK-C6: Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"}. {\'fslocation\': \'tests*test_storage\'}',
-        'Comparing against benchmark 0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted'
+        'Comparing against benchmarks from: 0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted'
         '-changes.json',
         '',
         '*------------------------------------------------------------------------ benchmark: 2 tests -----------------------------------------------------------------------*',
-        'Name (time in ns)                          Min                 *Max                Mean              StdDev              Median                IQR            Outliers(*)  Rounds  Iterations',
+        'Name (time in ns)               *      Min                 *Max                Mean              StdDev              Median                IQR            Outliers(*)  Rounds  Iterations',
         '--------------------------------------------------------------------------------------------------------------------------------------------------------------------*',
-        'test_xfast_parametrized[[]0[]] (0001)     217.3145 (1.0)      11*447.3891 (1.0)      262.2408 (1.00)     214.0442 (1.0)      220.1664 (1.00)     38.2154 (2.03)         90;1878    9987         418',
-        'test_xfast_parametrized[[]0[]] (NOW)      217.9511 (1.00)     13*290.0380 (1.16)     261.2051 (1.0)      263.9842 (1.23)     220.1638 (1.0)      18.8080 (1.0)         160;1726    9710         431',
+        '*xfast_parametrized[[]0[]] (0001*)     217.3145 (1.0)      11*447.3891 (1.0)      262.2408 (1.00)     214.0442 (1.0)      220.1664 (1.00)     38.2154 (2.03)         90;1878    9987         418',
+        '*xfast_parametrized[[]0[]] (NOW) *     217.9511 (1.00)     13*290.0380 (1.16)     261.2051 (1.0)      263.9842 (1.23)     220.1638 (1.0)      18.8080 (1.0)         160;1726    9710         431',
         '--------------------------------------------------------------------------------------------------------------------------------------------------------------------*',
         '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
     ])
@@ -258,13 +311,13 @@ def test_compare_2(sess, LineMatcher):
     print(output.getvalue())
     LineMatcher(output.getvalue().splitlines()).fnmatch_lines([
         'BENCHMARK-C6: Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"}. {\'fslocation\': \'tests*test_storage\'}',
-        'Comparing against benchmark 0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes.json',
+        'Comparing against benchmarks from: 0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes.json',
         '',
         '*------------------------------------------------------------------------ benchmark: 2 tests -----------------------------------------------------------------------*',
-        'Name (time in ns)                          Min                 *Max                Mean              StdDev              Median                IQR            Outliers(*)  Rounds  Iterations',
+        'Name (time in ns)            *         Min                 *Max                Mean              StdDev              Median                IQR            Outliers(*)  Rounds  Iterations',
         '--------------------------------------------------------------------------------------------------------------------------------------------------------------------*',
-        'test_xfast_parametrized[[]0[]] (0002)     216.9028 (1.0)       7*739.2997 (1.0)      254.0585 (1.0)        0.0000 (1.0)      219.8103 (1.0)      27.3309 (1.45)        235;1688   11009         410',
-        'test_xfast_parametrized[[]0[]] (NOW)      217.9511 (1.00)     13*290.0380 (1.72)     261.2051 (1.03)     263.9842 (inf)      220.1638 (1.00)     18.8080 (1.0)         160;1726    9710         431',
+        '*xfast_parametrized[[]0[]] (0002*)     216.9028 (1.0)       7*739.2997 (1.0)      254.0585 (1.0)        0.0000 (1.0)      219.8103 (1.0)      27.3309 (1.45)        235;1688   11009         410',
+        '*xfast_parametrized[[]0[]] (NOW) *     217.9511 (1.00)     13*290.0380 (1.72)     261.2051 (1.03)     263.9842 (inf)      220.1638 (1.00)     18.8080 (1.0)         160;1726    9710         431',
         '--------------------------------------------------------------------------------------------------------------------------------------------------------------------*',
         '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
     ])
