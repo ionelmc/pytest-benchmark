@@ -641,7 +641,7 @@ def test_save(testdir):
     result = testdir.runpytest('--doctest-modules', '--benchmark-save=foobar',
                                '--benchmark-max-time=0.0000001', test)
     result.stderr.fnmatch_lines([
-        "Saved benchmark data in *",
+        "Saved benchmark data in: *",
     ])
     json.loads(testdir.tmpdir.join('.benchmarks').listdir()[0].join('0001_foobar.json').read())
 
@@ -651,7 +651,7 @@ def test_histogram(testdir):
     result = testdir.runpytest('--doctest-modules', '--benchmark-histogram=foobar',
                                '--benchmark-max-time=0.0000001', test)
     result.stderr.fnmatch_lines([
-        "Generated histogram *foobar.svg",
+        "Generated histogram: *foobar.svg",
     ])
     assert [f.basename for f in testdir.tmpdir.listdir("*.svg", sort=True)] == [
         'foobar.svg',
@@ -663,7 +663,7 @@ def test_autosave(testdir):
     result = testdir.runpytest('--doctest-modules', '--benchmark-autosave',
                                '--benchmark-max-time=0.0000001', test)
     result.stderr.fnmatch_lines([
-        "Saved benchmark data in *",
+        "Saved benchmark data in: *",
     ])
     json.loads(testdir.tmpdir.join('.benchmarks').listdir()[0].listdir('0001_*.json')[0].read())
 

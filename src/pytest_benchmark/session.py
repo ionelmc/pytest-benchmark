@@ -152,7 +152,7 @@ class BenchmarkSession(object):
             )
             with self.json as fh:
                 fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())
-            self.logger.info("Wrote benchmark data in %s" % self.json, purple=True)
+            self.logger.info("Wrote benchmark data in: %s" % self.json, purple=True)
 
         if save:
             output_json = self.config.hook.pytest_benchmark_generate_json(
@@ -172,7 +172,7 @@ class BenchmarkSession(object):
 
             with output_file.open('wb') as fh:
                 fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())
-            self.logger.info("Saved benchmark data in %s" % output_file)
+            self.logger.info("Saved benchmark data in: %s" % output_file)
 
     def handle_loading(self):
         self.compared_mapping = {}
@@ -202,7 +202,7 @@ class BenchmarkSession(object):
                 self.compared_mapping[path] = dict(
                     (bench['fullname'], bench) for bench in compared_benchmark['benchmarks']
                 )
-                self.logger.info("Comparing against benchmark %s" % path)
+                self.logger.info("Comparing against benchmarks from: %s" % path)
 
     def finish(self):
         self.handle_saving()
