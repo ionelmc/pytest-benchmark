@@ -218,12 +218,15 @@ def pytest_addhooks(pluginmanager):
 
 
 def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark):
-    if compared_benchmark["machine_info"] != machine_info:
+    machine_info = format_dict(machine_info)
+    compared_machine_info = format_dict(compared_benchmark["machine_info"])
+
+    if compared_machine_info != machine_info:
         benchmarksession.logger.warn(
             "BENCHMARK-C6",
             "Benchmark machine_info is different. Current: %s VS saved: %s." % (
-                format_dict(machine_info),
-                format_dict(compared_benchmark["machine_info"]),
+                machine_info,
+                compared_machine_info,
             ),
             fslocation=benchmarksession.storage.location
         )
