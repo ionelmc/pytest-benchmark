@@ -45,7 +45,7 @@ class BenchmarkSession(object):
             warmup_iterations=config.getoption("benchmark_warmup_iterations"),
         )
         self.skip = config.getoption("benchmark_skip")
-        self.disable = config.getoption("benchmark_disable")
+        self.disabled = config.getoption("benchmark_disable") and not config.getoption("benchmark_enable")
 
         if config.getoption("dist", "no") != "no" and not self.skip:
             self.logger.warn(

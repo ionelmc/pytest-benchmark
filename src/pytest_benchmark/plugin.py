@@ -171,6 +171,12 @@ def pytest_addoption(parser):
              "want to run the test but don't do any benchmarking."
     )
     group.addoption(
+        "--benchmark-enable",
+        action="store_true", default=False,
+        help="Forcibly enable benchmarks. Use this option to override --benchmark-disable (in case you have it in "
+             "pytest configuration)."
+    )
+    group.addoption(
         "--benchmark-only",
         action="store_true", default=False,
         help="Only run benchmarks."
