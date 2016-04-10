@@ -361,7 +361,7 @@ def benchmark(request):
             add_stats=bs.benchmarks.append,
             logger=bs.logger,
             warner=request.node.warn,
-            disable=bs.disable,
+            disabled=bs.disabled,
             **dict(bs.options, **options)
         )
         request.addfinalizer(fixture._cleanup)

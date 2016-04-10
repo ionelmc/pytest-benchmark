@@ -17,6 +17,9 @@ def test_fast(benchmark):
         return time.sleep(0.000001)
     assert result is None
 
+    if not benchmark.disabled:
+        assert benchmark.stats.min >= 0.000001
+
 
 def test_slow(benchmark):
     assert benchmark(partial(time.sleep, 0.001)) is None
@@ -38,4 +41,5 @@ def foo(request):
 
 def test_parametrized(benchmark, foo):
     benchmark(time.sleep, 0.00001)
-    assert benchmark.stats.min >= 0.00001
+    if benchmark.enabled:
+        assert benchmark.stats.min >= 0.00001

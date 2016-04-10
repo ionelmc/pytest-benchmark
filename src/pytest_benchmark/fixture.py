@@ -37,10 +37,10 @@ class BenchmarkFixture(object):
             return cls._precisions.setdefault(timer, compute_timer_precision(timer))
 
     def __init__(self, node, disable_gc, timer, min_rounds, min_time, max_time, warmup, warmup_iterations,
-                 calibration_precision, add_stats, logger, warner, disable, group=None):
+                 calibration_precision, add_stats, logger, warner, disabled, group=None):
         self.name = node.name
         self.fullname = node._nodeid
-        self.disable = disable
+        self.disabled = disabled
         if hasattr(node, 'callspec'):
             self.param = node.callspec.id
             self.params = node.callspec.params
@@ -62,6 +62,10 @@ class BenchmarkFixture(object):
         self._warner = warner
         self._cleanup_callbacks = []
         self._mode = None
+
+    @property
+    def enabled(self):
+        return not self.disabled
 
     def _make_runner(self, function_to_benchmark, args, kwargs):
         def runner(loops_range, timer=self._timer):
@@ -128,7 +132,7 @@ class BenchmarkFixture(object):
             raise
 
     def _raw(self, function_to_benchmark, *args, **kwargs):
-        if not self.disable:
+        if not self.disabled:
             runner = self._make_runner(function_to_benchmark, args, kwargs)
 
             duration, iterations, loops_range = self._calibrate_timer(runner)
@@ -179,7 +183,7 @@ class BenchmarkFixture(object):
                     args, kwargs = maybe_args
             return args, kwargs
 
-        if self.disable:
+        if self.disabled:
             args, kwargs = make_arguments()
             return target(*args, **kwargs)
 

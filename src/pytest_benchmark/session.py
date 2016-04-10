@@ -54,9 +54,9 @@ class BenchmarkSession(object):
                 "Benchmarks cannot be performed reliably in a parallelized environment.",
                 fslocation="::"
             )
-            self.disable = True
+            self.disabled = True
         if hasattr(config, "slaveinput"):
-            self.disable = True
+            self.disabled = True
         if not statistics:
             self.logger.warn(
                 "BENCHMARK-U3",
@@ -64,14 +64,14 @@ class BenchmarkSession(object):
                 statistics_error,
                 fslocation="::"
             )
-            self.disable = True
+            self.disabled = True
 
         self.only = config.getoption("benchmark_only")
         self.sort = config.getoption("benchmark_sort")
         self.columns = config.getoption("benchmark_columns")
         if self.skip and self.only:
             raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
-        if self.disable and self.only:
+        if self.disabled and self.only:
             raise pytest.UsageError(
                 "Can't have both --benchmark-only and --benchmark-disable options. Note that --benchmark-disable is "
                 "automatically activated if xdist is on or you're missing the statistics dependency.")
