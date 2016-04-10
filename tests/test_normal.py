@@ -38,3 +38,4 @@ def foo(request):
 
 def test_parametrized(benchmark, foo):
     benchmark(time.sleep, 0.00001)
+    assert benchmark.stats.min >= 0.00001

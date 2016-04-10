@@ -90,7 +90,7 @@ class BenchmarkFixture(object):
         return runner
 
     def _make_stats(self, iterations):
-        stats = BenchmarkStats(self, iterations=iterations, options={
+        bench_stats = BenchmarkStats(self, iterations=iterations, options={
             "disable_gc": self._disable_gc,
             "timer": self._timer,
             "min_rounds": self._min_rounds,
@@ -98,8 +98,9 @@ class BenchmarkFixture(object):
             "min_time": self._min_time,
             "warmup": self._warmup,
         })
-        self._add_stats(stats)
-        return stats
+        self._add_stats(bench_stats)
+        self.stats = bench_stats.stats
+        return bench_stats
 
     def __call__(self, function_to_benchmark, *args, **kwargs):
         if self._mode:
