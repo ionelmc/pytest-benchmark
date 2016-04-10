@@ -1,5 +1,3 @@
-import operator
-
 import py
 
 from .utils import TIME_UNITS
