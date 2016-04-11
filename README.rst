@@ -6,7 +6,7 @@ pytest-benchmark
     :stub-columns: 1
 
     * - docs
-      - |docs|
+      - |docs| |gitter|
     * - tests
       - | |travis| |appveyor| |requires| |coveralls| |codecov|
         | |scrutinizer| |codacy| |codeclimate|
@@ -16,6 +16,10 @@ pytest-benchmark
 .. |docs| image:: https://readthedocs.org/projects/pytest-benchmark/badge/?style=flat
     :target: https://readthedocs.org/projects/pytest-benchmark
     :alt: Documentation Status
+
+.. image:: https://badges.gitter.im/ionelmc/pytest-benchmark.svg
+    :alt: Join the chat at https://gitter.im/ionelmc/pytest-benchmark
+    :target: https://gitter.im/ionelmc/pytest-benchmark
 
 .. |travis| image:: https://travis-ci.org/ionelmc/pytest-benchmark.svg?branch=master
     :alt: Travis-CI Build Status
