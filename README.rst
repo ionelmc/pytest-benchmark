@@ -17,7 +17,7 @@ pytest-benchmark
     :target: https://readthedocs.org/projects/pytest-benchmark
     :alt: Documentation Status
 
-.. image:: https://badges.gitter.im/ionelmc/pytest-benchmark.svg
+.. |gitter| image:: https://badges.gitter.im/ionelmc/pytest-benchmark.svg
     :alt: Join the chat at https://gitter.im/ionelmc/pytest-benchmark
     :target: https://gitter.im/ionelmc/pytest-benchmark
 
