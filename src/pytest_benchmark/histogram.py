@@ -5,7 +5,7 @@ from .utils import slugify
 
 try:
     from pygal.graph.box import Box
-    from pygal.graph.box import is_list_like
+    from pygal.graph.graph import is_list_like
     from pygal.style import DefaultStyle
 except ImportError as exc:
     raise ImportError(exc.args, "Please install pygal and pygaljs or pytest-benchmark[histogram]")
@@ -15,16 +15,23 @@ class CustomBox(Box):
     def _box_points(self, serie, _):
         return serie, [serie[0], serie[6]]
 
-    def _format(self, x):
+    def _value_format(self, x):
+        return "Min: {0[0]:.4f}\n" \
+               "Q1-1.5IQR: {0[1]:.4f}\n" \
+               "Q1: {0[2]:.4f}\nMedian: {0[3]:.4f}\nQ3: {0[4]:.4f}\n" \
+               "Q3+1.5IQR: {0[5]:.4f}\n" \
+               "Max: {0[6]:.4f}".format(x[:7])
+
+    def _format(self, x, *args):
         sup = super(CustomBox, self)._format
-        if is_list_like(x):
-            return "Min: {0[0]:.4f}\n" \
-                   "Q1-1.5IQR: {0[1]:.4f}\n" \
-                   "Q1: {0[2]:.4f}\nMedian: {0[3]:.4f}\nQ3: {0[4]:.4f}\n" \
-                   "Q3+1.5IQR: {0[5]:.4f}\n" \
-                   "Max: {0[6]:.4f}".format(x[:7]), x[7]
+        if args:
+            val = x.values
         else:
-            return sup(x)
+            val = x
+        if is_list_like(val):
+            return self._value_format(val), val[7]
+        else:
+            return sup(x, *args)
 
     def _tooltip_data(self, node, value, x, y, classes=None, xlabel=None):
         super(CustomBox, self)._tooltip_data(node, value[0], x, y, classes=classes, xlabel=None)
