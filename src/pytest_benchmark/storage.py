@@ -60,17 +60,18 @@ class Storage(object):
             filename_glob = filename_glob.rstrip("*") + "*.json"
             globs.append((platform_glob, filename_glob))
 
-        return sorted(chain(
-            files,
-            (
-                file
-                for platform_glob, filename_glob in globs
-                for path in self.path.glob(platform_glob)
-                for file in path.glob(filename_glob)
-            ), (
-                file for file in self.path.glob(filename_glob)
-            )
-        ), key=lambda file: (file.name, file.parent))
+        files.extend((
+            file
+            for platform_glob, filename_glob in globs
+            for path in self.path.glob(platform_glob)
+            for file in path.glob(filename_glob)
+        ))
+        files.extend((
+            file
+            for _, filename_glob in globs
+            for file in self.path.glob(filename_glob)
+        ))
+        return sorted(files, key=lambda file: (file.name, file.parent))
 
     def load(self, *globs_or_files):
         for file in self.query(*globs_or_files):
@@ -85,8 +86,11 @@ class Storage(object):
                                          "Failed to load {0}: {1}".format(file, exc), fslocation=self.location)
                         continue
                 self._cache[file] = data
-
-            yield file.relative_to(self.path), data
+            try:
+                relpath = file.relative_to(self.path)
+            except ValueError:
+                relpath = file
+            yield relpath, data
 
     def load_benchmarks(self, *globs_or_files):
         sources = [
