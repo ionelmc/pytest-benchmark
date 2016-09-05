@@ -13,7 +13,7 @@ import pytest
 
 from . import __version__
 from .fixture import BenchmarkFixture
-from .report_backend import FileReportBackend
+from .report_backend import ElasticReportBackend, FileReportBackend
 from .session import BenchmarkSession
 from .session import PerformanceRegression
 from .timers import default_timer
@@ -110,6 +110,30 @@ def add_global_options(addoption, prefix="benchmark-"):
         "--{0}verbose".format(prefix),
         action="store_true", default=False,
         help="Dump diagnostic and progress information."
+    )
+
+
+def add_elasticsearch_options(addoption, prefix="benchmark-"):
+    addoption(
+        "--{0}elasticsearch".format(prefix),
+        action="store_true", default=False,
+        help="Save data to elasticsearch instead of json files."
+    )
+
+    addoption(
+        "--{0}elasticsearch-host".format(prefix),
+        default="localhost:9200",
+        help="Address of elasticsearch host."
+    )
+    addoption(
+        "--{0}elasticsearch-index".format(prefix),
+        default="benchmark",
+        help="Elasticsearch index to save data in."
+    )
+    addoption(
+        "--{0}elasticsearch-doctype".format(prefix),
+        default="benchmark",
+        help="Elasticsearch doctype of inserted data."
     )
 
 
@@ -227,6 +251,7 @@ def pytest_addoption(parser):
     add_global_options(group.addoption)
     add_display_options(group.addoption)
     add_histogram_options(group.addoption)
+    add_elasticsearch_options(group.addoption)
 
 
 def pytest_addhooks(pluginmanager):
@@ -401,7 +426,10 @@ def pytest_runtest_setup(item):
 
 
 def get_report_backend(config):
-    return FileReportBackend(config)
+    if config.getoption("benchmark_elasticsearch"):
+        return ElasticReportBackend(config)
+    else:
+        return FileReportBackend(config)
 
 
 @pytest.mark.trylast  # force the other plugins to initialise, fixes issue with capture not being properly initialised

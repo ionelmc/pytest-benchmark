@@ -68,6 +68,7 @@ setup(
     ],
     install_requires=[
         'pytest>=2.6',
+        'elasticsearch==2.4.0'
     ],
     extras_require={
         'aspect': ['aspectlib'],
