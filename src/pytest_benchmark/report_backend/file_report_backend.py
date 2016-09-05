@@ -61,6 +61,8 @@ class FileReportBackend(BaseReportBackend):
                 output_json=output_json,
             )
             output_file = self.storage.get("%s_%s.json" % (self._next_num, save))
+            self.logger.info("output_file " + str(output_file))
+            self.logger.info("save " + str(save))
             assert not output_file.exists()
 
             with output_file.open('wb') as fh:

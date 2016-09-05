@@ -69,7 +69,14 @@ class NameWrapper(object):
 
 def get_tag():
     info = get_commit_info()
-    return '%s_%s%s' % (info['id'], get_current_time(), '_uncommitted-changes' if info['dirty'] else '')
+    parts = []
+    if info['project']:
+        parts.append(info['project'])
+    parts.append(info['id'])
+    parts.append(get_current_time())
+    if info['dirty']:
+        parts.append("uncommited-changes")
+    return "_".join(parts)
 
 
 def get_machine_id():
@@ -84,6 +91,7 @@ def get_machine_id():
 def get_commit_info():
     dirty = False
     commit = 'unversioned'
+    project_name = ''
     try:
         if os.path.exists('.git'):
             desc = check_output('git describe --dirty --always --long --abbrev=40'.split(),
@@ -93,6 +101,12 @@ def get_commit_info():
                 dirty = True
                 desc.pop()
             commit = desc[-1].strip('g')
+            project_address = check_output("git config --local remote.origin.url".split()).decode()
+            try:
+                project_name = re.findall(r'/([^/]*)\.git', project_address)[0]
+                project_name = project_name
+            except IndexError:
+                pass
         elif os.path.exists('.hg'):
             desc = check_output('hg id --id --debug'.split(), universal_newlines=True).strip()
             if desc[-1] == '+':
@@ -100,13 +114,15 @@ def get_commit_info():
             commit = desc.strip('+')
         return {
             'id': commit,
-            'dirty': dirty
+            'dirty': dirty,
+            'project': project_name,
         }
     except Exception as exc:
         return {
             'id': 'unknown',
             'dirty': dirty,
             'error': repr(exc),
+            'project': project_name,
         }
 
 

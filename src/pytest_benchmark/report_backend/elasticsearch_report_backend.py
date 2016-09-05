@@ -34,10 +34,13 @@ class ElasticReportBackend(BaseReportBackend):
             for bench in output_benchmarks:
                 # add top level info from output_json dict to each record
                 bench.update(output_json)
+                doc_id = "%s_%s" % (save, bench["fullname"])
                 self.elasticsearch.index(
                     index=self.elasticsearch_index,
                     doc_type=self.elasticsearch_doctype,
-                    body=bench)
+                    body=bench,
+                    id=doc_id,
+                )
             self.logger.info("Saved benchmark data to %s to index %s as doctype %s" %
                              (
                                  self.elasticsearch_host,
