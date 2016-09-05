@@ -13,6 +13,7 @@ import pytest
 
 from . import __version__
 from .fixture import BenchmarkFixture
+from .report_backend import FileReportBackend
 from .session import BenchmarkSession
 from .session import PerformanceRegression
 from .timers import default_timer
@@ -399,8 +400,12 @@ def pytest_runtest_setup(item):
                 raise ValueError("benchmark mark can't have %r keyword argument." % name)
 
 
+def get_report_backend(config):
+    return FileReportBackend(config)
+
+
 @pytest.mark.trylast  # force the other plugins to initialise, fixes issue with capture not being properly initialised
 def pytest_configure(config):
     config.addinivalue_line("markers", "benchmark: mark a test with custom benchmark settings.")
-    config._benchmarksession = BenchmarkSession(config)
+    config._benchmarksession = BenchmarkSession(config, get_report_backend(config))
     config.pluginmanager.register(config._benchmarksession, "pytest-benchmark")

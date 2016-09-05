@@ -6,7 +6,6 @@ import pytest
 from .fixture import statistics
 from .fixture import statistics_error
 from .logger import Logger
-from .storage import Storage
 from .table import TableResults
 from .utils import NAME_FORMATTERS
 from .utils import SecondsDecimal
@@ -14,7 +13,6 @@ from .utils import cached_property
 from .utils import first_or_value
 from .utils import get_machine_id
 from .utils import load_timer
-from .utils import safe_dumps
 from .utils import short_filename
 
 
@@ -26,13 +24,14 @@ class BenchmarkSession(object):
     compared_mapping = None
     groups = None
 
-    def __init__(self, config):
+    def __init__(self, config, report_backend):
         self.verbose = config.getoption("benchmark_verbose")
         self.logger = Logger(self.verbose, config)
         self.config = config
         self.performance_regressions = []
         self.benchmarks = []
         self.machine_id = get_machine_id()
+        self.report_backend = report_backend
 
         self.options = dict(
             min_time=SecondsDecimal(config.getoption("benchmark_min_time")),
@@ -78,16 +77,9 @@ class BenchmarkSession(object):
                 "Can't have both --benchmark-only and --benchmark-disable options. Note that --benchmark-disable is "
                 "automatically activated if xdist is on or you're missing the statistics dependency.")
         self.group_by = config.getoption("benchmark_group_by")
-        self.save = config.getoption("benchmark_save")
-        self.autosave = config.getoption("benchmark_autosave")
-        self.save_data = config.getoption("benchmark_save_data")
-        self.json = config.getoption("benchmark_json")
-        self.compare = config.getoption("benchmark_compare")
         self.compare_fail = config.getoption("benchmark_compare_fail")
         self.name_format = NAME_FORMATTERS[config.getoption("benchmark_name")]
 
-        self.storage = Storage(config.getoption("benchmark_storage"),
-                               default_machine_id=self.machine_id, logger=self.logger)
         self.histogram = first_or_value(config.getoption("benchmark_histogram"), False)
 
     @cached_property
@@ -122,94 +114,9 @@ class BenchmarkSession(object):
                 flat_bench["source"] = compared and "NOW"
                 yield flat_bench
 
-    @property
-    def next_num(self):
-        files = self.storage.query("[0-9][0-9][0-9][0-9]_*")
-        files.sort(reverse=True)
-        if not files:
-            return "0001"
-        for f in files:
-            try:
-                return "%04i" % (int(str(f.name).split('_')[0]) + 1)
-            except ValueError:
-                raise
-
-    def handle_saving(self):
-        save = self.benchmarks and self.save or self.autosave
-        if save or self.json:
-            commit_info = self.config.hook.pytest_benchmark_generate_commit_info(config=self.config)
-            self.config.hook.pytest_benchmark_update_commit_info(config=self.config, commit_info=commit_info)
-
-        if self.json:
-            output_json = self.config.hook.pytest_benchmark_generate_json(
-                config=self.config,
-                benchmarks=self.benchmarks,
-                include_data=True,
-                machine_info=self.machine_info,
-                commit_info=commit_info,
-            )
-            self.config.hook.pytest_benchmark_update_json(
-                config=self.config,
-                benchmarks=self.benchmarks,
-                output_json=output_json,
-            )
-            with self.json as fh:
-                fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())
-            self.logger.info("Wrote benchmark data in: %s" % self.json, purple=True)
-
-        if save:
-            output_json = self.config.hook.pytest_benchmark_generate_json(
-                config=self.config,
-                benchmarks=self.benchmarks,
-                include_data=self.save_data,
-                machine_info=self.machine_info,
-                commit_info=commit_info,
-            )
-            self.config.hook.pytest_benchmark_update_json(
-                config=self.config,
-                benchmarks=self.benchmarks,
-                output_json=output_json,
-            )
-            output_file = self.storage.get("%s_%s.json" % (self.next_num, save))
-            assert not output_file.exists()
-
-            with output_file.open('wb') as fh:
-                fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())
-            self.logger.info("Saved benchmark data in: %s" % output_file)
-
-    def handle_loading(self):
-        self.compared_mapping = {}
-        if self.compare:
-            if self.compare is True:
-                compared_benchmarks = list(self.storage.load('[0-9][0-9][0-9][0-9]_'))[-1:]
-            else:
-                compared_benchmarks = list(self.storage.load(self.compare))
-
-            if not compared_benchmarks:
-                msg = "Can't compare. No benchmark files in %r" % str(self.storage)
-                if self.compare is True:
-                    msg += ". Can't load the previous benchmark."
-                    code = "BENCHMARK-C2"
-                else:
-                    msg += " match %r." % self.compare
-                    code = "BENCHMARK-C1"
-                self.logger.warn(code, msg, fslocation=self.storage.location)
-
-            for path, compared_benchmark in compared_benchmarks:
-                self.config.hook.pytest_benchmark_compare_machine_info(
-                    config=self.config,
-                    benchmarksession=self,
-                    machine_info=self.machine_info,
-                    compared_benchmark=compared_benchmark,
-                )
-                self.compared_mapping[path] = dict(
-                    (bench['fullname'], bench) for bench in compared_benchmark['benchmarks']
-                )
-                self.logger.info("Comparing against benchmarks from: %s" % path)
-
     def finish(self):
-        self.handle_saving()
-        self.handle_loading()
+        self.report_backend.handle_saving(self.benchmarks, self.machine_info)
+        self.compared_mapping = self.report_backend.handle_loading(self.machine_info)
         prepared_benchmarks = list(self.prepare_benchmarks())
         if prepared_benchmarks:
             self.groups = self.config.hook.pytest_benchmark_group_stats(
