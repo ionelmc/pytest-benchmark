@@ -19,6 +19,7 @@ from .session import PerformanceRegression
 from .timers import default_timer
 from .utils import NameWrapper, parse_name_format
 from .utils import format_dict
+from .utils import get_project_name
 from .utils import get_commit_info
 from .utils import get_current_time
 from .utils import get_tag
@@ -247,6 +248,11 @@ def pytest_addoption(parser):
         help="If specified measure one run with cProfile and stores 10 top functions."
              " Argument is a column to sort by. Available columns: 'ncallls_recursion',"
              " 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'."
+    )
+    group.addoption(
+        "--benchmark-project",
+        default=get_project_name(),
+        help="Name of the current project"
     )
     add_global_options(group.addoption)
     add_display_options(group.addoption)
