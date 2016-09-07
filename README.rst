@@ -104,7 +104,8 @@ But first, a prologue:
     Take a look at the `introductory material <http://docs.pytest.org/en/latest/getting-started.html>`_ 
     or watch `talks <http://docs.pytest.org/en/latest/talks.html>`_.
     
-    Few notes: 
+    Few notes:
+    
     * This plugin benchmarks functions and only that. If you want to measure block of code
       or whole programs you will need to write a wrapper function.
     * In a test you can only benchmark one function. If you want to benchmark many functions write more tests or 
