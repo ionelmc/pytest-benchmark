@@ -11,6 +11,7 @@ class ElasticsearchStorage(object):
         self.default_machine_id = default_machine_id
         self.logger = logger
         self._cache = {}
+        self._create_index()
 
     def __str__(self):
         return str(self.elasticsearch_host)
@@ -89,3 +90,170 @@ class ElasticsearchStorage(object):
         r = self._search(project)
         for hit in r["hits"]["hits"]:
             yield self._benchmark_from_es_record(hit["_source"])
+
+    def save(self, document, document_id):
+        self.elasticsearch.index(
+            index=self.elasticsearch_index,
+            doc_type=self.elasticsearch_doctype,
+            body=document,
+            id=document_id,
+        )
+
+    def _create_index(self):
+        mapping = {
+            "mappings": {
+                "benchmark": {
+                    "properties": {
+                        "commit_info": {
+                            "properties": {
+                                "dirty": {
+                                    "type": "boolean"
+                                },
+                                "id": {
+                                    "type": "string",
+                                    "index": "not_analyzed"
+
+                                },
+                                "project": {
+                                    "type": "string",
+                                    "index": "not_analyzed"
+                                }
+                            }
+                        },
+                        "datetime": {
+                            "type": "date",
+                            "format": "strict_date_optional_time||epoch_millis"
+                        },
+                        "name": {
+                            "type": "string",
+                            "index": "not_analyzed"
+                        },
+                        "fullname": {
+                            "type": "string",
+                            "index": "not_analyzed"
+                        },
+                        "version": {
+                            "type": "string",
+                            "index": "not_analyzed"
+                        },
+                        "machine_info": {
+                            "properties": {
+                                "machine": {
+                                    "type": "string",
+                                    "index": "not_analyzed"
+                                },
+                                "node": {
+                                    "type": "string",
+                                    "index": "not_analyzed"
+                                },
+                                "processor": {
+                                    "type": "string",
+                                    "index": "not_analyzed"
+                                },
+                                "python_build": {
+                                    "type": "string",
+                                    "index": "not_analyzed"
+                                },
+                                "python_compiler": {
+                                    "type": "string",
+                                    "index": "not_analyzed"
+                                },
+                                "python_implementation": {
+                                    "type": "string",
+                                    "index": "not_analyzed"
+                                },
+                                "python_implementation_version": {
+                                    "type": "string",
+                                    "index": "not_analyzed"
+                                },
+                                "python_version": {
+                                    "type": "string",
+                                    "index": "not_analyzed"
+                                },
+                                "release": {
+                                    "type": "string",
+                                    "index": "not_analyzed"
+                                },
+                                "system": {
+                                    "type": "string",
+                                    "index": "not_analyzed"
+                                }
+                            }
+                        },
+                        "options": {
+                            "properties": {
+                                "disable_gc": {
+                                    "type": "boolean"
+                                },
+                                "max_time": {
+                                    "type": "double"
+                                },
+                                "min_rounds": {
+                                    "type": "long"
+                                },
+                                "min_time": {
+                                    "type": "double"
+                                },
+                                "timer": {
+                                    "type": "string"
+                                },
+                                "warmup": {
+                                    "type": "boolean"
+                                }
+                            }
+                        },
+                        "stats": {
+                            "properties": {
+                                "hd15iqr": {
+                                    "type": "double"
+                                },
+                                "iqr": {
+                                    "type": "double"
+                                },
+                                "iqr_outliers": {
+                                    "type": "long"
+                                },
+                                "iterations": {
+                                    "type": "long"
+                                },
+                                "ld15iqr": {
+                                    "type": "double"
+                                },
+                                "max": {
+                                    "type": "double"
+                                },
+                                "mean": {
+                                    "type": "double"
+                                },
+                                "median": {
+                                    "type": "double"
+                                },
+                                "min": {
+                                    "type": "double"
+                                },
+                                "outliers": {
+                                    "type": "string"
+                                },
+                                "q1": {
+                                    "type": "double"
+                                },
+                                "q3": {
+                                    "type": "double"
+                                },
+                                "rounds": {
+                                    "type": "long"
+                                },
+                                "stddev": {
+                                    "type": "double"
+                                },
+                                "stddev_outliers": {
+                                    "type": "long"
+                                }
+                            }
+                        },
+                    }
+                }
+            }
+        }
+        self.elasticsearch.indices.create(index=self.elasticsearch_index, ignore=400, body=mapping)
+

@@ -1,5 +1,3 @@
-from elasticsearch import Elasticsearch
-
 from .base_report_backend import BaseReportBackend
 from ..elasticsearch_storage import ElasticsearchStorage
 
@@ -10,172 +8,12 @@ class ElasticReportBackend(BaseReportBackend):
         self.elasticsearch_index = config.getoption("benchmark_elasticsearch_index")
         self.elasticsearch_doctype = config.getoption("benchmark_elasticsearch_doctype")
         self.project_name = config.getoption("benchmark_project")
-        self.elasticsearch = Elasticsearch(self.elasticsearch_host)
-        self._create_index()
-        super().__init__(config)
+        super(ElasticReportBackend, self).__init__(config)
         self.storage = ElasticsearchStorage(self.elasticsearch_host,
                                             self.elasticsearch_index,
                                             self.elasticsearch_doctype,
                                             self.logger,
                                             default_machine_id=self.machine_id)
-
-    def _create_index(self):
-        mapping = {
-            "mappings": {
-                "benchmark": {
-                    "properties": {
-                        "commit_info": {
-                            "properties": {
-                                "dirty": {
-                                    "type": "boolean"
-                                },
-                                "id": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-
-                                },
-                                "project": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                }
-                            }
-                        },
-                        "datetime": {
-                            "type": "date",
-                            "format": "strict_date_optional_time||epoch_millis"
-                        },
-                        "name": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "fullname": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "version": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "machine_info": {
-                            "properties": {
-                                "machine": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "node": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "processor": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "python_build": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "python_compiler": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "python_implementation": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "python_implementation_version": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "python_version": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "release": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "system": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                }
-                            }
-                        },
-                        "options": {
-                            "properties": {
-                                "disable_gc": {
-                                    "type": "boolean"
-                                },
-                                "max_time": {
-                                    "type": "double"
-                                },
-                                "min_rounds": {
-                                    "type": "long"
-                                },
-                                "min_time": {
-                                    "type": "double"
-                                },
-                                "timer": {
-                                    "type": "string"
-                                },
-                                "warmup": {
-                                    "type": "boolean"
-                                }
-                            }
-                        },
-                        "stats": {
-                            "properties": {
-                                "hd15iqr": {
-                                    "type": "double"
-                                },
-                                "iqr": {
-                                    "type": "double"
-                                },
-                                "iqr_outliers": {
-                                    "type": "long"
-                                },
-                                "iterations": {
-                                    "type": "long"
-                                },
-                                "ld15iqr": {
-                                    "type": "double"
-                                },
-                                "max": {
-                                    "type": "double"
-                                },
-                                "mean": {
-                                    "type": "double"
-                                },
-                                "median": {
-                                    "type": "double"
-                                },
-                                "min": {
-                                    "type": "double"
-                                },
-                                "outliers": {
-                                    "type": "string"
-                                },
-                                "q1": {
-                                    "type": "double"
-                                },
-                                "q3": {
-                                    "type": "double"
-                                },
-                                "rounds": {
-                                    "type": "long"
-                                },
-                                "stddev": {
-                                    "type": "double"
-                                },
-                                "stddev_outliers": {
-                                    "type": "long"
-                                }
-                            }
-                        },
-                    }
-                }
-            }
-        }
-        self.elasticsearch.indices.create(index=self.elasticsearch_index, ignore=400, body=mapping)
 
     def handle_saving(self, benchmarks, machine_info):
         save = benchmarks and self.save or self.autosave
@@ -200,12 +38,7 @@ class ElasticReportBackend(BaseReportBackend):
                 # add top level info from output_json dict to each record
                 bench.update(output_json)
                 doc_id = "%s_%s" % (save, bench["fullname"])
-                self.elasticsearch.index(
-                    index=self.elasticsearch_index,
-                    doc_type=self.elasticsearch_doctype,
-                    body=bench,
-                    id=doc_id,
-                )
+                self.storage.save(bench, doc_id)
             self.logger.info("Saved benchmark data to %s to index %s as doctype %s" %
                              (
                                  self.elasticsearch_host,
