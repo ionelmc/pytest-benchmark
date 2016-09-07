@@ -9,6 +9,7 @@ from pytest_benchmark.utils import clonefunc
 from pytest_benchmark.utils import get_commit_info
 from pytest_benchmark.utils import parse_warmup
 from pytest_benchmark.utils import parse_columns
+from pytest_benchmark.utils import get_project_name
 
 pytest_plugins = 'pytester',
 
@@ -68,8 +69,33 @@ def test_parse_warmup():
     assert parse_warmup('') == True
     assert parse_warmup('auto') in [True, False]
 
+
 def test_parse_columns():
     assert parse_columns('min,max') == ['min', 'max']
     assert parse_columns('MIN, max  ') == ['min', 'max']
     with pytest.raises(argparse.ArgumentTypeError):
         parse_columns('min,max,x')
+
+
+@mark.parametrize('scm', [None, 'git', 'hg'])
+@mark.parametrize('set_remote', [True, False])
+def test_get_project_name(scm, set_remote, testdir):
+    if scm is None:
+        assert get_project_name().startswith("test_get_project_name")
+        return
+    if not distutils.spawn.find_executable(scm):
+        pytest.skip("%r not availabe on $PATH")
+    subprocess.check_call([scm, 'init', '.'])
+    if scm == 'git' and set_remote:
+        subprocess.check_call('git config  remote.origin.url https://example.com/pytest_benchmark_repo.git'.split())
+    elif scm == 'hg'and set_remote:
+        testdir.tmpdir.join('.hg', 'hgrc').write("[ui]\n"
+            "username = you <you@example.com>\n"
+            "[paths]\n"
+            "default = https://example.com/pytest_benchmark_repo\n"
+                                                 )
+    if set_remote:
+        assert get_project_name() == "pytest_benchmark_repo"
+    else:
+        # use directory name if remote branch is not set
+        assert get_project_name().startswith("test_get_project_name")

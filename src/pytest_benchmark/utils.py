@@ -88,22 +88,30 @@ def get_machine_id():
     )
 
 
-def get_project_name(default=''):
+def get_project_name():
     if os.path.exists('.git'):
-        project_address = check_output("git config --local remote.origin.url".split()).decode()
         try:
-            project_name = re.findall(r'/([^/]*)\.git', project_address)[0]
+            project_address = check_output("git config --local remote.origin.url".split())
+            project_name = re.findall(r'/([^/]*)\.git', project_address.decode())[0]
             return project_name
-        except IndexError:
-            return default
+        except (IndexError, subprocess.CalledProcessError):
+            return os.path.basename(os.getcwd())
+    elif os.path.exists('.hg'):
+        try:
+            project_address = check_output("hg path default".split())
+            project_address = project_address.decode()
+            project_name = project_address.split("/")[-1]
+            return project_name.strip()
+        except (IndexError, subprocess.CalledProcessError):
+            return os.path.basename(os.getcwd())
     else:
-        return default
+        return os.path.basename(os.getcwd())
 
 
 def get_commit_info():
     dirty = False
     commit = 'unversioned'
-    project_name = ''
+    project_name = get_project_name()
     try:
         if os.path.exists('.git'):
             desc = check_output('git describe --dirty --always --long --abbrev=40'.split(),
@@ -113,7 +121,6 @@ def get_commit_info():
                 dirty = True
                 desc.pop()
             commit = desc[-1].strip('g')
-            project_name = get_project_name()
         elif os.path.exists('.hg'):
             desc = check_output('hg id --id --debug'.split(), universal_newlines=True).strip()
             if desc[-1] == '+':

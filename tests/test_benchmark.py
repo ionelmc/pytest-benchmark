@@ -46,8 +46,8 @@ def test_help(testdir):
         "  --benchmark-save=NAME",
         "                        Save the current run into 'STORAGE-",
         "                        PATH/counter_NAME.json'.",
-        "  --benchmark-autosave  Autosave the current run into 'STORAGE-",
-        "                        PATH/counter_*.json",
+        "  --benchmark-autosave  Autosave the current run into 'STORAGE-PATH/counter*",
+        "                        *.json",
         "  --benchmark-save-data",
         "                        Use this to make --benchmark-save and --benchmark-",
         "                        autosave include all the timing data, not just the",
@@ -69,6 +69,8 @@ def test_help(testdir):
         "                        Available columns: 'ncallls_recursion', 'ncalls',",
         "                        'tottime', 'tottime_per', 'cumtime', 'cumtime_per',",
         "                        'function_name'.",
+        "  --benchmark-project=BENCHMARK_PROJECT",
+        "                        Name of the current project",
         "  --benchmark-storage=STORAGE-PATH",
         "                        Specify a different path to store the runs (when",
         "                        --benchmark-save or --benchmark-autosave are used).",
@@ -90,6 +92,14 @@ def test_help(testdir):
         "                        FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX",
         "                        contains slashes ('/') then directories will be",
         "                        created. Default: '*'",
+        "  --benchmark-elasticsearch",
+        "                        Save data to elasticsearch instead of json files.",
+        "  --benchmark-elasticsearch-host=URL",
+        "                        Address of elasticsearch host.",
+        "  --benchmark-elasticsearch-index=INDEX",
+        "                        Elasticsearch index to save data in.",
+        "  --benchmark-elasticsearch-doctype=DOCTYPE",
+        "                        Elasticsearch doctype of inserted data.",
         "*",
     ])
 
@@ -547,12 +557,12 @@ def test_compare(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0001',
                                '--benchmark-compare-fail=min:0.1', test)
     result.stderr.fnmatch_lines([
-        "Comparing against benchmarks from: *0001_unversioned_*.json",
+        "Comparing against benchmarks from: *0001_test_compare0_unversioned_*.json",
     ])
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0001',
                                '--benchmark-compare-fail=min:1%', test)
     result.stderr.fnmatch_lines([
-        "Comparing against benchmarks from: *0001_unversioned_*.json",
+        "Comparing against benchmarks from: *0001_test_compare0_unversioned_*.json",
     ])
 
 
@@ -562,12 +572,12 @@ def test_compare_last(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare',
                                '--benchmark-compare-fail=min:0.1', test)
     result.stderr.fnmatch_lines([
-        "Comparing against benchmarks from: *0001_unversioned_*.json",
+        "Comparing against benchmarks from: *0001_test_compare_last0_unversioned_*.json",
     ])
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare',
                                '--benchmark-compare-fail=min:1%', test)
     result.stderr.fnmatch_lines([
-        "Comparing against benchmarks from: *0001_unversioned_*.json",
+        "Comparing against benchmarks from: *0001_test_compare_last0_unversioned_*.json",
     ])
 
 

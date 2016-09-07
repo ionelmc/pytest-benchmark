@@ -123,17 +123,17 @@ def add_elasticsearch_options(addoption, prefix="benchmark-"):
 
     addoption(
         "--{0}elasticsearch-host".format(prefix),
-        default="localhost:9200",
+        metavar="URL", default="localhost:9200",
         help="Address of elasticsearch host."
     )
     addoption(
         "--{0}elasticsearch-index".format(prefix),
-        default="benchmark",
+        metavar="INDEX", default="benchmark",
         help="Elasticsearch index to save data in."
     )
     addoption(
         "--{0}elasticsearch-doctype".format(prefix),
-        default="benchmark",
+        metavar="DOCTYPE", default="benchmark",
         help="Elasticsearch doctype of inserted data."
     )
 
