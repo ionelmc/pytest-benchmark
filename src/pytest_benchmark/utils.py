@@ -141,7 +141,7 @@ def get_commit_info():
 
 
 def get_current_time():
-    return datetime.now().strftime("%Y%m%d_%H%M%S")
+    return datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
 
 def first_or_value(obj, value):
