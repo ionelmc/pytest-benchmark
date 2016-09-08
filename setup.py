@@ -68,12 +68,12 @@ setup(
     ],
     install_requires=[
         'pytest>=2.6',
-        'elasticsearch==2.4.0'
     ],
     extras_require={
         'aspect': ['aspectlib'],
         'histogram': ['pygal', 'pygaljs'],
-        ':python_version < "3.4"': ['statistics', 'pathlib']
+        ':python_version < "3.4"': ['statistics', 'pathlib'],
+        'elasticsearch': ["elasticsearch"]
     },
     entry_points={
         'pytest11': [
