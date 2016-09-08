@@ -472,8 +472,6 @@ def get_cprofile_functions(stats, sort_by='cumtime', reverse=True):
             file_path = file_path[len(project_dir_parent):].lstrip('/')
         function_name = '{0}:{1}({2})'.format(file_path, function_info[1], function_info[2])
 
-
-
         # if the function is recursive write number of 'total calls/primitive calls'
         if run_info[0] == run_info[1]:
             calls = str(run_info[0])

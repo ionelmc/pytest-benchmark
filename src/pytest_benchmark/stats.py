@@ -198,7 +198,7 @@ class BenchmarkStats(object):
     def has_error(self):
         return self.fixture.has_error
 
-    def as_dict(self, include_data=True, flat=False, stats=True):
+    def as_dict(self, include_data=True, flat=False, stats=True, cprofile_sort_by="cumtime"):
         result = {
             "group": self.group,
             "name": self.name,
@@ -210,7 +210,7 @@ class BenchmarkStats(object):
             )
         }
         if self.cprofile_stats:
-            result["cprofile"] = get_cprofile_functions(self.cprofile_stats)[:10]
+            result["cprofile"] = get_cprofile_functions(self.cprofile_stats, cprofile_sort_by)[:10]
         if stats:
             stats = self.stats.as_dict()
             if include_data:

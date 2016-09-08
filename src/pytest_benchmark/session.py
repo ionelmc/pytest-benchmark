@@ -43,10 +43,11 @@ class BenchmarkSession(object):
             disable_gc=config.getoption("benchmark_disable_gc"),
             warmup=config.getoption("benchmark_warmup"),
             warmup_iterations=config.getoption("benchmark_warmup_iterations"),
-            use_cprofile=config.getoption("benchmark_cprofile"),
+            use_cprofile=bool(config.getoption("benchmark_cprofile")),
         )
         self.skip = config.getoption("benchmark_skip")
         self.disabled = config.getoption("benchmark_disable") and not config.getoption("benchmark_enable")
+        self.cprofile_sort_by = config.getoption("benchmark_cprofile")
 
         if config.getoption("dist", "no") != "no" and not self.skip:
             self.logger.warn(
@@ -106,7 +107,8 @@ class BenchmarkSession(object):
                     if bench.fullname in compared_mapping:
                         compared = compared_mapping[bench.fullname]
                         source = short_filename(path, self.machine_id)
-                        flat_bench = bench.as_dict(include_data=False, stats=False)
+                        flat_bench = bench.as_dict(include_data=False, stats=False,
+                                                   cprofile_sort_by=self.cprofile_sort_by)
                         flat_bench.update(compared["stats"])
                         flat_bench["path"] = str(path)
                         flat_bench["source"] = source
@@ -116,7 +118,8 @@ class BenchmarkSession(object):
                                 if fail:
                                     self.performance_regressions.append((self.name_format(flat_bench), fail))
                         yield flat_bench
-                flat_bench = bench.as_dict(include_data=False, flat=True)
+                flat_bench = bench.as_dict(include_data=False, flat=True,
+                                           cprofile_sort_by=self.cprofile_sort_by)
                 flat_bench["path"] = None
                 flat_bench["source"] = compared and "NOW"
                 yield flat_bench
@@ -257,6 +260,6 @@ class BenchmarkSession(object):
                         tr.write("\n")
                     tr.write_line("ncalls\ttottime\tpercall\tcumtime\tpercall\tfilename:lineno(function)")
                     for function_info in benchmark["cprofile"]:
-                        line = "{ncalls_recursion}\t{tottime:.{prec}f}\t{tottime_per:.{prec}f}\t{cumtime:.{prec}f}\t{cumtime_per:.{prec}f}\t{function_name}".format(**function_info, prec=4)
+                        line = "{ncalls_recursion}\t{tottime:.{prec}f}\t{tottime_per:.{prec}f}\t{cumtime:.{prec}f}\t{cumtime_per:.{prec}f}\t{function_name}".format(prec=4, **function_info)
                         tr.write_line(line)
                     tr.write("\n")
