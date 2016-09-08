@@ -455,7 +455,7 @@ def commonpath(paths):
         raise
 
 
-def get_stats_functions(stats, sort_by='cumtime', reverse=True):
+def get_cprofile_functions(stats, sort_by='cumtime', reverse=True):
     """
     convert pstats structure to list of sorted dicts about each function.
     you can sort by these keys: ncallls_recursion, ncalls, tottime, tottime_per,

@@ -210,7 +210,7 @@ class BenchmarkStats(object):
             )
         }
         if self.cprofile_stats:
-            result["cprofile"] = get_cprofile_functions(self.cprofile_stats, max_size=10)
+            result["cprofile"] = get_cprofile_functions(self.cprofile_stats)[:10]
         if stats:
             stats = self.stats.as_dict()
             if include_data:

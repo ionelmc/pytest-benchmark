@@ -67,6 +67,7 @@ class MockSession(BenchmarkSession):
             'min_rounds': 123,
             'min_time': 234,
             'max_time': 345,
+            'use_cprofile': False,
         }
         self.compare_fail = []
         self.config = Namespace(hook=Namespace(

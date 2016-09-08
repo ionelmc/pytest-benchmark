@@ -231,6 +231,7 @@ class BenchmarkSession(object):
         )
         results_table.display(tr, self.groups)
         self.check_regressions()
+        self.display_cprofile(tr)
 
     def check_regressions(self):
         if self.compare_fail and not self.compared_mapping:
@@ -241,3 +242,21 @@ class BenchmarkSession(object):
                 "\t%s - %s" % line for line in self.performance_regressions
             ))
             raise PerformanceRegression("Performance has regressed.")
+
+    def display_cprofile(self, tr):
+        if self.options["use_cprofile"]:
+            tr.section("cProfile information")
+            tr.write_line("Time in s")
+            for group in self.groups:
+                group_name, benchmarks = group
+                for benchmark in benchmarks:
+                    tr.write(benchmark["fullname"], yellow=True)
+                    if benchmark["source"]:
+                        tr.write_line(" ({})".format((benchmark["source"])))
+                    else:
+                        tr.write("\n")
+                    tr.write_line("ncalls\ttottime\tpercall\tcumtime\tpercall\tfilename:lineno(function)")
+                    for function_info in benchmark["cprofile"]:
+                        line = "{ncalls_recursion}\t{tottime:.{prec}f}\t{tottime_per:.{prec}f}\t{cumtime:.{prec}f}\t{cumtime_per:.{prec}f}\t{function_name}".format(**function_info, prec=4)
+                        tr.write_line(line)
+                    tr.write("\n")
