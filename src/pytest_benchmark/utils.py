@@ -463,9 +463,16 @@ def get_cprofile_functions(stats, sort_by='cumtime', reverse=True):
     `reverse`.
     """
     result = []
+    # this assumes that you run py.test from project root dir
+    project_dir_parent = os.path.dirname(os.getcwd())
 
     for function_info, run_info in stats.stats.items():
-        function_name = '{0}:{1}({2})'.format(function_info[0], function_info[1], function_info[2])
+        file_path = function_info[0]
+        if file_path.startswith(project_dir_parent):
+            file_path = file_path[len(project_dir_parent):].lstrip('/')
+        function_name = '{0}:{1}({2})'.format(file_path, function_info[1], function_info[2])
+
+
 
         # if the function is recursive write number of 'total calls/primitive calls'
         if run_info[0] == run_info[1]:
