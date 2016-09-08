@@ -7,21 +7,21 @@ class ElasticsearchStorage(object):
             import elasticsearch
         except ImportError as exc:
             raise ImportError(exc.args, "Please install elasticsearch or pytest-benchmark[elasticsearch]")
-        self.elasticsearch_host = elasticsearch_host
-        self.elasticsearch_index = elasticsearch_index
-        self.elasticsearch_doctype = elasticsearch_doctype
-        self.elasticsearch = elasticsearch.Elasticsearch(self.elasticsearch_host)
+        self._elasticsearch_host = elasticsearch_host
+        self._elasticsearch_index = elasticsearch_index
+        self._elasticsearch_doctype = elasticsearch_doctype
+        self._elasticsearch = elasticsearch.Elasticsearch(self._elasticsearch_host)
         self.default_machine_id = default_machine_id
         self.logger = logger
         self._cache = {}
         self._create_index()
 
     def __str__(self):
-        return str(self.elasticsearch_host)
+        return str(self._elasticsearch_host)
 
     @property
     def location(self):
-        return str(self.elasticsearch_host)
+        return str(self._elasticsearch_host)
 
     def query(self, project):
         """
@@ -61,7 +61,7 @@ class ElasticsearchStorage(object):
             }
         }
 
-        return self.elasticsearch.search(index=self.elasticsearch_index, doc_type=self.elasticsearch_doctype, body=body)
+        return self._elasticsearch.search(index=self._elasticsearch_index, doc_type=self._elasticsearch_doctype, body=body)
 
     @staticmethod
     def _benchmark_from_es_record(source_es_record):
@@ -95,9 +95,9 @@ class ElasticsearchStorage(object):
             yield self._benchmark_from_es_record(hit["_source"])
 
     def save(self, document, document_id):
-        self.elasticsearch.index(
-            index=self.elasticsearch_index,
-            doc_type=self.elasticsearch_doctype,
+        self._elasticsearch.index(
+            index=self._elasticsearch_index,
+            doc_type=self._elasticsearch_doctype,
             body=document,
             id=document_id,
         )
@@ -258,5 +258,5 @@ class ElasticsearchStorage(object):
                 }
             }
         }
-        self.elasticsearch.indices.create(index=self.elasticsearch_index, ignore=400, body=mapping)
+        self._elasticsearch.indices.create(index=self._elasticsearch_index, ignore=400, body=mapping)
 
