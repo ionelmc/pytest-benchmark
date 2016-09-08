@@ -43,6 +43,7 @@ class BenchmarkSession(object):
             disable_gc=config.getoption("benchmark_disable_gc"),
             warmup=config.getoption("benchmark_warmup"),
             warmup_iterations=config.getoption("benchmark_warmup_iterations"),
+            use_cprofile=config.getoption("benchmark_cprofile"),
         )
         self.skip = config.getoption("benchmark_skip")
         self.disabled = config.getoption("benchmark_disable") and not config.getoption("benchmark_enable")

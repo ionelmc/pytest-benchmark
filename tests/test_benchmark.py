@@ -63,6 +63,7 @@ def test_help(testdir):
         "                        Fail test if performance regresses according to given",
         "                        EXPR (eg: min:5% or mean:0.001 for number of seconds).",
         "                        Can be used multiple times.",
+        "  --benchmark-cprofile  Whether to measure one run with cProfile.",
         "  --benchmark-storage=STORAGE-PATH",
         "                        Specify a different path to store the runs (when",
         "                        --benchmark-save or --benchmark-autosave are used).",

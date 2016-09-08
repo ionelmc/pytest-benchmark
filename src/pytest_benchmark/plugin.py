@@ -215,6 +215,11 @@ def pytest_addoption(parser):
         help="Fail test if performance regresses according to given EXPR"
              " (eg: min:5%% or mean:0.001 for number of seconds). Can be used multiple times."
     )
+    group.addoption(
+        "--benchmark-cprofile",
+        action="store_true", default=False,
+        help="Whether to measure one run with cProfile."
+    )
     add_global_options(group.addoption)
     add_display_options(group.addoption)
     add_histogram_options(group.addoption)

@@ -11,6 +11,7 @@ import re
 import subprocess
 import sys
 import types
+import operator
 from datetime import datetime
 from decimal import Decimal
 from functools import partial
@@ -452,3 +453,34 @@ def commonpath(paths):
     except (TypeError, AttributeError):
         genericpath._check_arg_types('commonpath', *paths)
         raise
+
+
+def get_stats_functions(stats, sort_by='cumtime', reverse=True):
+    """
+    convert pstats structure to list of sorted dicts about each function.
+    you can sort by these keys: ncallls_recursion, ncalls, tottime, tottime_per,
+    cumtime, cumtime_per, function_name. sort direction can be influenced by
+    `reverse`.
+    """
+    result = []
+
+    for function_info, run_info in stats.stats.items():
+        function_name = '{0}:{1}({2})'.format(function_info[0], function_info[1], function_info[2])
+
+        # if the function is recursive write number of 'total calls/primitive calls'
+        if run_info[0] == run_info[1]:
+            calls = str(run_info[0])
+        else:
+            calls = '{1}/{0}'.format(run_info[0], run_info[1])
+
+        result.append(dict(ncalls_recursion=calls,
+                           ncalls=run_info[1],
+                           tottime=run_info[2],
+                           tottime_per=run_info[2] / run_info[0] if run_info[0] > 0 else 0,
+                           cumtime=run_info[3],
+                           cumtime_per=run_info[3] / run_info[0] if run_info[0] > 0 else 0,
+                           function_name=function_name))
+
+    result.sort(key=operator.itemgetter(sort_by), reverse=reverse)
+
+    return result

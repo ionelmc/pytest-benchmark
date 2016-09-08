@@ -7,6 +7,7 @@ from bisect import bisect_right
 
 from .utils import cached_property
 from .utils import funcname
+from .utils import get_cprofile_functions
 
 
 class Stats(object):
@@ -168,6 +169,7 @@ class BenchmarkStats(object):
         self.group = fixture.group
         self.param = fixture.param
         self.params = fixture.params
+        self.cprofile_stats = fixture.cprofile_stats
 
         self.iterations = iterations
         self.stats = Stats()
@@ -207,6 +209,8 @@ class BenchmarkStats(object):
                 (k, funcname(v) if callable(v) else v) for k, v in self.options.items()
             )
         }
+        if self.cprofile_stats:
+            result["cprofile"] = get_cprofile_functions(self.cprofile_stats, max_size=10)
         if stats:
             stats = self.stats.as_dict()
             if include_data:
