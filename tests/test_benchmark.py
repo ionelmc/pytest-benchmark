@@ -772,6 +772,26 @@ def test_xdist_verbose(testdir):
     ])
 
 
+def test_cprofile(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--benchmark-cprofile=cumtime', test)
+    result.stdout.fnmatch_lines([
+        "============================= cProfile information =============================",
+        "Time in s",
+        "test_cprofile.py::test_fast",
+        "ncalls	tottime	percall	cumtime	percall	filename:lineno(function)",
+        # "1	0.0000	0.0000	0.0001	0.0001	test_cprofile0/test_cprofile.py:9(result)",
+        # "1	0.0001	0.0001	0.0001	0.0001	~:0(<built-in method time.sleep>)",
+        # "1	0.0000	0.0000	0.0000	0.0000	~:0(<method 'disable' of '_lsprof.Profiler' objects>)",
+        "",
+        "test_cprofile.py::test_slow",
+        "ncalls	tottime	percall	cumtime	percall	filename:lineno(function)",
+        # "1	0.0000	0.0000	0.1002	0.1002	test_cprofile0/test_cprofile.py:15(<lambda>)",
+        # "1	0.1002	0.1002	0.1002	0.1002	~:0(<built-in method time.sleep>)",
+        # "1	0.0000	0.0000	0.0000	0.0000	~:0(<method 'disable' of '_lsprof.Profiler' objects>)",
+    ])
+
+
 def test_abort_broken(testdir):
     """
     Test that we don't benchmark code that raises exceptions.
