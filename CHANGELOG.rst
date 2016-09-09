@@ -26,6 +26,7 @@ Changelog
     * ``--group-by=LABEL``
     * ``--columns=LABELS``
     * ``--histogram=[FILENAME-PREFIX]``
+* Added ``--benchmark-cprofile`` that profiles last run of benchmarked function.  Contributed by Petr Šebek.
 
 
 3.0.0 (2015-11-08)

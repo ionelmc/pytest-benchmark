@@ -134,6 +134,12 @@ Commandline options
                         --benchmark-save or --benchmark-autosave are used).
                         Default: './.benchmarks/<os>-<pyimplementation>-<pyversion>-<arch>bit',
                         example: 'Linux-CPython-2.7-64bit'.
+  --benchmark-cprofile=COLUMN
+                        If specified measure one run with cProfile and stores
+                        10 top functions. Argument is a column to sort by.
+                        Available columns: 'ncallls_recursion', 'ncalls',
+                        'tottime', 'tottime_per', 'cumtime', 'cumtime_per',
+                        'function_name'.
   --benchmark-histogram=FILENAME-PREFIX
                         Plot graphs of min/max/avg/stddev over time in
                         FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX
