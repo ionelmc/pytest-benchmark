@@ -31,6 +31,7 @@ from .utils import parse_seconds
 from .utils import parse_sort
 from .utils import parse_timer
 from .utils import parse_warmup
+from .utils import parse_elasticsearch_storage
 
 
 def pytest_report_header(config):
@@ -103,38 +104,16 @@ def add_csv_options(addoption, prefix="benchmark-"):
 def add_global_options(addoption, prefix="benchmark-"):
     addoption(
         "--{0}storage".format(prefix),
-        metavar="STORAGE-PATH", default="./.benchmarks",
-        help="Specify a different path to store the runs (when --benchmark-save or --benchmark-autosave are used). "
-             "Default: %(default)r",
+        metavar="URI", default="file://./.benchmarks",
+        help="Specify a path to store the runs as uri in form file://path or"
+             " elasticsearch+http[s]://host1,host2/index/doctype "
+             "(when --benchmark-save or --benchmark-autosave are used). "
+             "Default: %(default)r.",
     )
     addoption(
         "--{0}verbose".format(prefix),
         action="store_true", default=False,
         help="Dump diagnostic and progress information."
-    )
-
-
-def add_elasticsearch_options(addoption, prefix="benchmark-"):
-    addoption(
-        "--{0}elasticsearch".format(prefix),
-        action="store_true", default=False,
-        help="Save data to elasticsearch instead of json files."
-    )
-
-    addoption(
-        "--{0}elasticsearch-host".format(prefix),
-        metavar="URL", default="localhost:9200",
-        help="Address of elasticsearch host."
-    )
-    addoption(
-        "--{0}elasticsearch-index".format(prefix),
-        metavar="INDEX", default="benchmark",
-        help="Elasticsearch index to save data in."
-    )
-    addoption(
-        "--{0}elasticsearch-doctype".format(prefix),
-        metavar="DOCTYPE", default="benchmark",
-        help="Elasticsearch doctype of inserted data."
     )
 
 
@@ -257,7 +236,6 @@ def pytest_addoption(parser):
     add_global_options(group.addoption)
     add_display_options(group.addoption)
     add_histogram_options(group.addoption)
-    add_elasticsearch_options(group.addoption)
 
 
 def pytest_addhooks(pluginmanager):
@@ -432,10 +410,18 @@ def pytest_runtest_setup(item):
 
 
 def get_report_backend(config):
-    if config.getoption("benchmark_elasticsearch"):
+    storage = config.getoption("benchmark_storage")
+    if storage.startswith("file://"):
+        config.option.__dict__["benchmark_storage"] = storage[len("file://"):]
+        return FileReportBackend(config)
+    elif storage.startswith("elasticsearch+"):
+        hosts, index, doctype = parse_elasticsearch_storage(storage[len("elasticsearch+"):])
+        config.option.__dict__["benchmark_elasticsearch_hosts"] = hosts
+        config.option.__dict__["benchmark_elasticsearch_index"] = index
+        config.option.__dict__["benchmark_elasticsearch_doctype"] = doctype
         return ElasticReportBackend(config)
     else:
-        return FileReportBackend(config)
+        raise argparse.ArgumentTypeError("Storage must be in form of file://path or elasticsearch+http[s]://host1,host2/index/doctype")
 
 
 @pytest.mark.trylast  # force the other plugins to initialise, fixes issue with capture not being properly initialised

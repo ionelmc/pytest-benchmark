@@ -142,6 +142,12 @@ Commandline options
                         Available columns: 'ncallls_recursion', 'ncalls',
                         'tottime', 'tottime_per', 'cumtime', 'cumtime_per',
                         'function_name'.
+  --benchmark-storage=URI
+                        Specify a path to store the runs as uri in form
+                        file://path or
+                        elasticsearch+http[s]://host1,host2/index/doctype
+                        (when --benchmark-save or --benchmark-autosave are
+                        used). Default: 'file://./.benchmarks'.
   --benchmark-histogram=FILENAME-PREFIX
                         Plot graphs of min/max/avg/stddev over time in
                         FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX
@@ -152,14 +158,6 @@ Commandline options
                         Dump a JSON report into PATH. Note that this will
                         include the complete data (all the timings, not just
                         the stats).
-  --benchmark-elasticsearch
-                        Save data to elasticsearch instead of json files.
-  --benchmark-elasticsearch-host=URL
-                        Address of elasticsearch host.
-  --benchmark-elasticsearch-index=INDEX
-                        Elasticsearch index to save data in.
-  --benchmark-elasticsearch-doctype=DOCTYPE
-                        Elasticsearch doctype of inserted data.
 
 
 Markers

@@ -10,6 +10,7 @@ from pytest_benchmark.utils import get_commit_info
 from pytest_benchmark.utils import parse_warmup
 from pytest_benchmark.utils import parse_columns
 from pytest_benchmark.utils import get_project_name
+from pytest_benchmark.utils import parse_elasticsearch_storage
 
 pytest_plugins = 'pytester',
 
@@ -99,3 +100,11 @@ def test_get_project_name(scm, set_remote, testdir):
     else:
         # use directory name if remote branch is not set
         assert get_project_name().startswith("test_get_project_name")
+
+
+def test_parse_elasticsearch_storage():
+    assert parse_elasticsearch_storage("http://localhost:9200") == (["http://localhost:9200"], "benchmark", "benchmark")
+    assert parse_elasticsearch_storage("http://localhost:9200/benchmark2") == (["http://localhost:9200"], "benchmark2", "benchmark")
+    assert parse_elasticsearch_storage("http://localhost:9200/benchmark2/benchmark2") == (["http://localhost:9200"], "benchmark2", "benchmark2")
+    assert parse_elasticsearch_storage("http://host1:9200,host2:9200") == (["http://host1:9200", "http://host2:9200"], "benchmark", "benchmark")
+    assert parse_elasticsearch_storage("http://host1:9200,host2:9200/benchmark2") == (["http://host1:9200", "http://host2:9200"], "benchmark2", "benchmark")

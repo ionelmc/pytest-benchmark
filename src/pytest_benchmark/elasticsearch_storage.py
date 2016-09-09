@@ -2,26 +2,26 @@ import datetime
 
 
 class ElasticsearchStorage(object):
-    def __init__(self, elasticsearch_host, elasticsearch_index, elasticsearch_doctype, logger, default_machine_id=None):
+    def __init__(self, elasticsearch_hosts, elasticsearch_index, elasticsearch_doctype, logger, default_machine_id=None):
         try:
             import elasticsearch
         except ImportError as exc:
             raise ImportError(exc.args, "Please install elasticsearch or pytest-benchmark[elasticsearch]")
-        self._elasticsearch_host = elasticsearch_host
+        self._elasticsearch_hosts = elasticsearch_hosts
         self._elasticsearch_index = elasticsearch_index
         self._elasticsearch_doctype = elasticsearch_doctype
-        self._elasticsearch = elasticsearch.Elasticsearch(self._elasticsearch_host)
+        self._elasticsearch = elasticsearch.Elasticsearch(self._elasticsearch_hosts)
         self.default_machine_id = default_machine_id
         self.logger = logger
         self._cache = {}
         self._create_index()
 
     def __str__(self):
-        return str(self._elasticsearch_host)
+        return str(self._elasticsearch_hosts)
 
     @property
     def location(self):
-        return str(self._elasticsearch_host)
+        return str(self._elasticsearch_hosts)
 
     def query(self, project):
         """

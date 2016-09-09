@@ -15,6 +15,11 @@ from datetime import datetime
 from decimal import Decimal
 from functools import partial
 
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
+
 from .compat import PY3
 
 try:
@@ -327,6 +332,19 @@ def parse_save(string):
     if illegal:
         raise argparse.ArgumentTypeError("Must not contain any of these characters: /:*?<>|\\ (it has %r)" % illegal)
     return string
+
+
+def parse_elasticsearch_storage(string, default_index="benchmark", default_doctype="benchmark"):
+    storage_url = urlparse(string)
+    hosts = ["{scheme}://{netloc}".format(scheme=storage_url.scheme, netloc=netloc) for netloc in storage_url.netloc.split(',')]
+    index = default_index
+    doctype = default_doctype
+    if storage_url.path:
+        splitted = storage_url.path.strip("/").split("/")
+        index = splitted[0]
+        if len(splitted) >= 2:
+            doctype = splitted[1]
+    return hosts, index, doctype
 
 
 def time_unit(value):

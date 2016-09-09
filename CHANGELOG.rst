@@ -30,6 +30,7 @@ Changelog
 * Added ``--benchmark-elasticsearch`` command line option. It allows to store data to elasticsearch instead to json files.
   The address of elasticsearch server may be specified by ``--benchmark-elasticsearch-host``, you can also specify index
   and doctype with ``--benchmark-elasticsearch-index`` and ``--benchmark-elasticsearch-doctype``. Contributed by
+* Changed ``--benchmark-storage`` so it now allows elasticsearch storage. Contributed by
   Petr Šebek in `#58 <https://github.com/ionelmc/pytest-benchmark/pull/58>`_.
 
 

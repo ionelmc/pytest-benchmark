@@ -58,7 +58,7 @@ class MockElasticsearchReportBackend(ElasticReportBackend):
         self.storage = mock.Mock(spec=ElasticsearchStorage)
         self.compare = '0001'
         self.save = self.autosave = self.json = False
-        self.elasticsearch_host = "localhost:9200"
+        self.elasticsearch_hosts = ["localhost:9200"]
         self.elasticsearch_index = "benchmark"
         self.elasticsearch_doctype = "benchmark"
 
