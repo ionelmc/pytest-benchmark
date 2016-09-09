@@ -129,6 +129,8 @@ Commandline options
                         Fail test if performance regresses according to given
                         EXPR (eg: min:5% or mean:0.001 for number of seconds).
                         Can be used multiple times.
+  --benchmark-project=BENCHMARK_PROJECT
+                        Name of the current project
   --benchmark-storage=STORAGE-PATH
                         Specify a different path to store the runs (when
                         --benchmark-save or --benchmark-autosave are used).
@@ -150,6 +152,15 @@ Commandline options
                         Dump a JSON report into PATH. Note that this will
                         include the complete data (all the timings, not just
                         the stats).
+  --benchmark-elasticsearch
+                        Save data to elasticsearch instead of json files.
+  --benchmark-elasticsearch-host=URL
+                        Address of elasticsearch host.
+  --benchmark-elasticsearch-index=INDEX
+                        Elasticsearch index to save data in.
+  --benchmark-elasticsearch-doctype=DOCTYPE
+                        Elasticsearch doctype of inserted data.
+
 
 Markers
 =======
