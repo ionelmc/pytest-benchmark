@@ -2,7 +2,8 @@ import datetime
 
 
 class ElasticsearchStorage(object):
-    def __init__(self, elasticsearch_hosts, elasticsearch_index, elasticsearch_doctype, logger, default_machine_id=None):
+    def __init__(self, elasticsearch_hosts, elasticsearch_index, elasticsearch_doctype, logger,
+                 default_machine_id=None):
         try:
             import elasticsearch
         except ImportError as exc:
@@ -25,22 +26,22 @@ class ElasticsearchStorage(object):
 
     def query(self, project):
         """
-        Returns sorted records names (ids) that corresponds with globs_or_files.
+        Returns sorted records names (ids) that corresponds with project.
         """
         return [commit_and_time for commit_and_time, _ in self.load(project)]
 
-    def load(self, project):
+    def load(self, project, id_prefix=None):
         """
-        Yield path and content of records that corresponds with globs_or_files
+        Yield key and content of records that corresponds with project name.
         """
-        r = self._search(project)
+        r = self._search(project, id_prefix)
         groupped_data = self._group_by_commit_and_time(r["hits"]["hits"])
         result = [(key, value) for key, value in groupped_data.items()]
         result.sort(key=lambda x: datetime.datetime.strptime(x[1]["datetime"], "%Y-%m-%dT%H:%M:%S.%f"))
         for key, data in result:
             yield key, data
 
-    def _search(self, project):
+    def _search(self, project, id_prefix=None):
         body = {
             "size": 1000,
             "sort": [
@@ -60,16 +61,30 @@ class ElasticsearchStorage(object):
                 }
             }
         }
+        if id_prefix:
+            body["query"]["bool"]["must"] = {
+                "prefix": {
+                    "_id": id_prefix
+                }
+            }
 
-        return self._elasticsearch.search(index=self._elasticsearch_index, doc_type=self._elasticsearch_doctype, body=body)
+        return self._elasticsearch.search(index=self._elasticsearch_index,
+                                          doc_type=self._elasticsearch_doctype,
+                                          body=body)
 
     @staticmethod
     def _benchmark_from_es_record(source_es_record):
-        return {benchmark_key: source_es_record[benchmark_key] for benchmark_key in ("group", "stats", "options", "param", "name", "params", "fullname")}
+        result = {}
+        for benchmark_key in ("group", "stats", "options", "param", "name", "params", "fullname"):
+            result[benchmark_key] = source_es_record[benchmark_key]
+        return result
 
     @staticmethod
     def _run_info_from_es_record(source_es_record):
-        return {run_key: source_es_record[run_key] for run_key in ("machine_info", "commit_info", "datetime", "version")}
+        result = {}
+        for run_key in ("machine_info", "commit_info", "datetime", "version"):
+            result[run_key] = source_es_record[run_key]
+        return result
 
     def _group_by_commit_and_time(self, hits):
         result = {}
@@ -87,7 +102,7 @@ class ElasticsearchStorage(object):
 
     def load_benchmarks(self, project):
         """
-        Yield benchmarks that corresponds with glob_or_files. Put path and
+        Yield benchmarks that corresponds with project. Put path and
         source (uncommon part of path) to benchmark dict.
         """
         r = self._search(project)

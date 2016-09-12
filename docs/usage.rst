@@ -122,9 +122,10 @@ Commandline options
                         Use this to make --benchmark-save and --benchmark-
                         autosave include all the timing data, not just the
                         stats.
-  --benchmark-compare=NUM
-                        Compare the current run against run NUM or the latest
-                        saved run if unspecified.
+  --benchmark-compare=NUM|ID
+                        Compare the current run against run NUM (or prefix of
+                        _id in elasticsearch) or the latest saved run if
+                        unspecified.
   --benchmark-compare-fail=EXPR
                         Fail test if performance regresses according to given
                         EXPR (eg: min:5% or mean:0.001 for number of seconds).

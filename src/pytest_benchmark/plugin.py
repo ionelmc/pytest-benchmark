@@ -211,8 +211,9 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-compare",
-        metavar="NUM", nargs="?", default=[], const=True,
-        help="Compare the current run against run NUM or the latest saved run if unspecified."
+        metavar="NUM|_ID", nargs="?", default=[], const=True,
+        help="Compare the current run against run NUM (or prefix of _id in elasticsearch) or the latest "
+             "saved run if unspecified."
     )
     group.addoption(
         "--benchmark-compare-fail",
