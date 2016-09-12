@@ -108,7 +108,8 @@ class BenchmarkSession(object):
                         compared = compared_mapping[bench.fullname]
                         source = short_filename(path, self.machine_id)
                         flat_bench = bench.as_dict(include_data=False, stats=False,
-                                                   cprofile_sort_by=self.cprofile_sort_by)
+                                                   cprofile_sort_by=self.cprofile_sort_by,
+                                                   cprofile_all_columns=False)
                         flat_bench.update(compared["stats"])
                         flat_bench["path"] = str(path)
                         flat_bench["source"] = source
@@ -119,7 +120,8 @@ class BenchmarkSession(object):
                                     self.performance_regressions.append((self.name_format(flat_bench), fail))
                         yield flat_bench
                 flat_bench = bench.as_dict(include_data=False, flat=True,
-                                           cprofile_sort_by=self.cprofile_sort_by)
+                                           cprofile_sort_by=self.cprofile_sort_by,
+                                           cprofile_all_columns=False)
                 flat_bench["path"] = None
                 flat_bench["source"] = compared and "NOW"
                 yield flat_bench

@@ -353,7 +353,9 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_inf
     }
     for bench in benchmarks:
         if not bench.has_error:
-            benchmarks_json.append(bench.as_dict(include_data=include_data, cprofile_sort_by=config.getoption("benchmark_cprofile")))
+            benchmarks_json.append(bench.as_dict(include_data=include_data,
+                                                 cprofile_sort_by=config.getoption("benchmark_cprofile"),
+                                                 cprofile_all_columns=True))
     return output_json
 
 

@@ -4,6 +4,7 @@ from __future__ import print_function
 import statistics
 from bisect import bisect_left
 from bisect import bisect_right
+import operator
 
 from .utils import cached_property
 from .utils import funcname
@@ -198,7 +199,8 @@ class BenchmarkStats(object):
     def has_error(self):
         return self.fixture.has_error
 
-    def as_dict(self, include_data=True, flat=False, stats=True, cprofile_sort_by="cumtime"):
+    def as_dict(self, include_data=True, flat=False, stats=True,
+                cprofile_sort_by="cumtime", cprofile_all_columns=False):
         result = {
             "group": self.group,
             "name": self.name,
@@ -210,7 +212,19 @@ class BenchmarkStats(object):
             )
         }
         if self.cprofile_stats:
-            result["cprofile"] = get_cprofile_functions(self.cprofile_stats, cprofile_sort_by)[:10]
+            result["cprofile"] = []
+            cprofile_functions = get_cprofile_functions(self.cprofile_stats)
+            stats_columns = ["ncalls_recursion", "ncalls", "tottime", "tottime_per",
+                             "cumtime", "cumtime_per", "function_name"]
+            stats_columns.remove(cprofile_sort_by)
+            stats_columns.insert(0, cprofile_sort_by)
+            for column in stats_columns:
+                cprofile_functions.sort(key=operator.itemgetter(column), reverse=True)
+                for cprofile_function in cprofile_functions[:10]:
+                    if cprofile_function not in result["cprofile"]:
+                        result["cprofile"].append(cprofile_function)
+                if not cprofile_all_columns or len(cprofile_function) == len(result["cprofile"]):
+                    break
         if stats:
             stats = self.stats.as_dict()
             if include_data:

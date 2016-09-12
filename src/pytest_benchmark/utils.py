@@ -11,7 +11,6 @@ import re
 import subprocess
 import sys
 import types
-import operator
 from datetime import datetime
 from decimal import Decimal
 from functools import partial
@@ -455,12 +454,9 @@ def commonpath(paths):
         raise
 
 
-def get_cprofile_functions(stats, sort_by='cumtime', reverse=True):
+def get_cprofile_functions(stats):
     """
-    convert pstats structure to list of sorted dicts about each function.
-    you can sort by these keys: ncallls_recursion, ncalls, tottime, tottime_per,
-    cumtime, cumtime_per, function_name. sort direction can be influenced by
-    `reverse`.
+    Convert pstats structure to list of sorted dicts about each function.
     """
     result = []
     # this assumes that you run py.test from project root dir
@@ -485,7 +481,5 @@ def get_cprofile_functions(stats, sort_by='cumtime', reverse=True):
                            cumtime=run_info[3],
                            cumtime_per=run_info[3] / run_info[0] if run_info[0] > 0 else 0,
                            function_name=function_name))
-
-    result.sort(key=operator.itemgetter(sort_by), reverse=reverse)
 
     return result
