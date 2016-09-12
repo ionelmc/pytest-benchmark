@@ -229,11 +229,6 @@ def pytest_addoption(parser):
              " Argument is a column to sort by. Available columns: 'ncallls_recursion',"
              " 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'."
     )
-    group.addoption(
-        "--benchmark-project",
-        default=get_project_name(),
-        help="Name of the current project"
-    )
     add_global_options(group.addoption)
     add_display_options(group.addoption)
     add_histogram_options(group.addoption)

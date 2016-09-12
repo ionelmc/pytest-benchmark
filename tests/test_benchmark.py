@@ -70,8 +70,6 @@ def test_help(testdir):
         "                        Available columns: 'ncallls_recursion', 'ncalls',",
         "                        'tottime', 'tottime_per', 'cumtime', 'cumtime_per',",
         "                        'function_name'.",
-        "  --benchmark-project=BENCHMARK_PROJECT",
-        "                        Name of the current project",
         "  --benchmark-storage=URI",
         "                        Specify a path to store the runs as uri in form",
         "                        file://path or",

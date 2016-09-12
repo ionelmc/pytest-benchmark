@@ -130,8 +130,6 @@ Commandline options
                         Fail test if performance regresses according to given
                         EXPR (eg: min:5% or mean:0.001 for number of seconds).
                         Can be used multiple times.
-  --benchmark-project=BENCHMARK_PROJECT
-                        Name of the current project
   --benchmark-storage=STORAGE-PATH
                         Specify a different path to store the runs (when
                         --benchmark-save or --benchmark-autosave are used).
