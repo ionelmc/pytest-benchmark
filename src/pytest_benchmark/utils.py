@@ -16,9 +16,9 @@ from decimal import Decimal
 from functools import partial
 
 try:
-    from urllib.parse import urlparse
+    from urllib.parse import urlparse, parse_qs
 except ImportError:
-    from urlparse import urlparse
+    from urlparse import urlparse, parse_qs
 
 from .compat import PY3
 
@@ -72,8 +72,8 @@ class NameWrapper(object):
         return "NameWrapper(%s)" % repr(self.target)
 
 
-def get_tag():
-    info = get_commit_info()
+def get_tag(project_name=None):
+    info = get_commit_info(project_name)
     parts = []
     if info['project']:
         parts.append(info['project'])
@@ -97,7 +97,9 @@ def get_project_name():
     if os.path.exists('.git'):
         try:
             project_address = check_output("git config --local remote.origin.url".split())
-            project_name = re.findall(r'/([^/]*)\.git', project_address.decode())[0]
+            if isinstance(project_address, bytes) and str != bytes:
+                project_address = project_address.decode()
+            project_name = re.findall(r'/([^/]*)\.git', project_address)[0]
             return project_name
         except (IndexError, subprocess.CalledProcessError):
             return os.path.basename(os.getcwd())
@@ -113,10 +115,10 @@ def get_project_name():
         return os.path.basename(os.getcwd())
 
 
-def get_commit_info():
+def get_commit_info(project_name=None):
     dirty = False
     commit = 'unversioned'
-    project_name = get_project_name()
+    project_name = project_name or get_project_name()
     try:
         if os.path.exists('.git'):
             desc = check_output('git describe --dirty --always --long --abbrev=40'.split(),
@@ -344,7 +346,12 @@ def parse_elasticsearch_storage(string, default_index="benchmark", default_docty
         index = splitted[0]
         if len(splitted) >= 2:
             doctype = splitted[1]
-    return hosts, index, doctype
+    query = parse_qs(storage_url.query)
+    try:
+        project_name = query["project_name"][0]
+    except KeyError:
+        project_name = get_project_name()
+    return hosts, index, doctype, project_name
 
 
 def time_unit(value):

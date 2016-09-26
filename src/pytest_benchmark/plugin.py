@@ -19,7 +19,6 @@ from .session import PerformanceRegression
 from .timers import default_timer
 from .utils import NameWrapper, parse_name_format
 from .utils import format_dict
-from .utils import get_project_name
 from .utils import get_commit_info
 from .utils import get_current_time
 from .utils import get_tag
@@ -106,7 +105,7 @@ def add_global_options(addoption, prefix="benchmark-"):
         "--{0}storage".format(prefix),
         metavar="URI", default="file://./.benchmarks",
         help="Specify a path to store the runs as uri in form file://path or"
-             " elasticsearch+http[s]://host1,host2/index/doctype "
+             " elasticsearch+http[s]://host1,host2/[index/doctype?project_name=Project] "
              "(when --benchmark-save or --benchmark-autosave are used). "
              "Default: %(default)r.",
     )
@@ -346,7 +345,7 @@ def pytest_benchmark_generate_machine_info():
 
 
 def pytest_benchmark_generate_commit_info(config):
-    return get_commit_info()
+    return get_commit_info(config.getoption("benchmark_project_name", None))
 
 
 def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_info, commit_info):
@@ -411,10 +410,12 @@ def get_report_backend(config):
         config.option.__dict__["benchmark_storage"] = storage[len("file://"):]
         return FileReportBackend(config)
     elif storage.startswith("elasticsearch+"):
-        hosts, index, doctype = parse_elasticsearch_storage(storage[len("elasticsearch+"):])
+        hosts, index, doctype, project_name = parse_elasticsearch_storage(storage[len("elasticsearch+"):])
         config.option.__dict__["benchmark_elasticsearch_hosts"] = hosts
         config.option.__dict__["benchmark_elasticsearch_index"] = index
         config.option.__dict__["benchmark_elasticsearch_doctype"] = doctype
+        config.option.__dict__["benchmark_project_name"] = project_name
+        config.option.__dict__["benchmark_autosave"] = get_tag(project_name)
         return ElasticReportBackend(config)
     else:
         raise argparse.ArgumentTypeError("Storage must be in form of file://path or elasticsearch+http[s]://host1,host2/index/doctype")

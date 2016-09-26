@@ -103,8 +103,9 @@ def test_get_project_name(scm, set_remote, testdir):
 
 
 def test_parse_elasticsearch_storage():
-    assert parse_elasticsearch_storage("http://localhost:9200") == (["http://localhost:9200"], "benchmark", "benchmark")
-    assert parse_elasticsearch_storage("http://localhost:9200/benchmark2") == (["http://localhost:9200"], "benchmark2", "benchmark")
-    assert parse_elasticsearch_storage("http://localhost:9200/benchmark2/benchmark2") == (["http://localhost:9200"], "benchmark2", "benchmark2")
-    assert parse_elasticsearch_storage("http://host1:9200,host2:9200") == (["http://host1:9200", "http://host2:9200"], "benchmark", "benchmark")
-    assert parse_elasticsearch_storage("http://host1:9200,host2:9200/benchmark2") == (["http://host1:9200", "http://host2:9200"], "benchmark2", "benchmark")
+    assert parse_elasticsearch_storage("http://localhost:9200") == (["http://localhost:9200"], "benchmark", "benchmark", "pytest-benchmark")
+    assert parse_elasticsearch_storage("http://localhost:9200/benchmark2") == (["http://localhost:9200"], "benchmark2", "benchmark", "pytest-benchmark")
+    assert parse_elasticsearch_storage("http://localhost:9200/benchmark2/benchmark2") == (["http://localhost:9200"], "benchmark2", "benchmark2", "pytest-benchmark")
+    assert parse_elasticsearch_storage("http://host1:9200,host2:9200") == (["http://host1:9200", "http://host2:9200"], "benchmark", "benchmark", "pytest-benchmark")
+    assert parse_elasticsearch_storage("http://host1:9200,host2:9200/benchmark2") == (["http://host1:9200", "http://host2:9200"], "benchmark2", "benchmark", "pytest-benchmark")
+    assert parse_elasticsearch_storage("http://localhost:9200/benchmark2/benchmark2?project_name=project_name") == (["http://localhost:9200"], "benchmark2", "benchmark2", "project_name")
