@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import
+from __future__ import print_function
 
 import io
 import re
@@ -20,12 +21,16 @@ def read(*names, **kwargs):
         encoding=kwargs.get('encoding', 'utf8')
     ).read()
 
+
 setup(
     name='pytest-benchmark',
     version='3.0.0',
     license='BSD',
-    description='A ``py.test`` fixture for benchmarking code.',
-    long_description='%s\n%s' % (read('README.rst'), re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))),
+    description='A ``py.test`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer. See calibration_ and FAQ_.',
+    long_description='%s\n%s' % (
+        re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.rst')),
+        re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))
+    ),
     author='Ionel Cristian Mărieș',
     author_email='contact@ionelmc.ro',
     url='https://github.com/ionelmc/pytest-benchmark',

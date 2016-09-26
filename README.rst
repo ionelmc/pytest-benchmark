@@ -1,6 +1,8 @@
-================
-pytest-benchmark
-================
+========
+Overview
+========
+
+.. start-badges
 
 .. list-table::
     :stub-columns: 1
@@ -8,8 +10,9 @@ pytest-benchmark
     * - docs
       - |docs| |gitter|
     * - tests
-      - | |travis| |appveyor| |requires| |coveralls| |codecov|
-        | |scrutinizer| |codacy| |codeclimate|
+      - | |travis| |appveyor| |requires|
+        | |coveralls| |codecov|
+        | |landscape| |scrutinizer| |codacy| |codeclimate|
     * - package
       - |version| |downloads| |wheel| |supported-versions| |supported-implementations|
 
@@ -78,8 +81,10 @@ pytest-benchmark
     :target: https://scrutinizer-ci.com/g/ionelmc/pytest-benchmark/
 
 
-A ``py.test`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer. See calibration_
-and FAQ_.
+.. end-badges
+
+A ``py.test`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen
+timer. See calibration_ and FAQ_.
 
 * Free software: BSD license
 

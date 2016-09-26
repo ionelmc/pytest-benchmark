@@ -2,12 +2,14 @@
 
 cookiecutter:
     appveyor: 'yes'
+    c_extension_cython: 'no'
     c_extension_optional: 'no'
     c_extension_support: 'no'
     codacy: 'yes'
     codeclimate: 'yes'
     codecov: 'yes'
     command_line_interface: 'no'
+    command_line_interface_bin_name: pytest-benchmark
     coveralls: 'yes'
     distribution_name: pytest-benchmark
     email: contact@ionelmc.ro
@@ -19,14 +21,16 @@ cookiecutter:
     project_short_description: A ``py.test`` fixture for benchmarking code. It will
         group the tests into rounds that are calibrated to the chosen timer. See calibration_
         and FAQ_.
-    release_date: today
+    release_date: '2015-11-08'
     repo_name: pytest-benchmark
     requiresio: 'yes'
     scrutinizer: 'yes'
+    sphinx_doctest: 'no'
     sphinx_theme: sphinx-py3doc-enhanced-theme
     test_matrix_configurator: 'no'
+    test_matrix_separate_coverage: 'yes'
     test_runner: pytest
     travis: 'yes'
     version: 3.0.0
     website: http://blog.ionelmc.ro
-    year: 2014-2015
+    year: 2014-2016
