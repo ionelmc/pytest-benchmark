@@ -1,5 +1,26 @@
 import datetime
 
+try:
+    import elasticsearch.serializer
+
+    import uuid
+    from datetime import date, datetime
+    from decimal import Decimal
+
+    class SaveElasticsearchJSONSerializer(elasticsearch.serializer.JSONSerializer):
+        def default(self, data):
+            if isinstance(data, (date, datetime)):
+                return data.isoformat()
+            elif isinstance(data, Decimal):
+                return float(data)
+            elif isinstance(data, uuid.UUID):
+                return str(data)
+            else:
+                return "UNSERIALIZABLE[%r]" % data
+
+except ImportError as exc:
+    SaveElasticsearchJSONSerializer = None
+
 
 class ElasticsearchStorage(object):
     def __init__(self, elasticsearch_hosts, elasticsearch_index, elasticsearch_doctype, logger,
@@ -11,7 +32,7 @@ class ElasticsearchStorage(object):
         self._elasticsearch_hosts = elasticsearch_hosts
         self._elasticsearch_index = elasticsearch_index
         self._elasticsearch_doctype = elasticsearch_doctype
-        self._elasticsearch = elasticsearch.Elasticsearch(self._elasticsearch_hosts)
+        self._elasticsearch = elasticsearch.Elasticsearch(self._elasticsearch_hosts, serializer=SaveElasticsearchJSONSerializer())
         self.default_machine_id = default_machine_id
         self.logger = logger
         self._cache = {}
