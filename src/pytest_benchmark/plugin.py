@@ -217,7 +217,8 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-cprofile",
-        metavar="COLUMN", default=None,
+        metavar="COLUMN", default=None, choices=['ncalls_recursion', 'ncalls', 'tottime',
+            'tottime_per', 'cumtime', 'cumtime_per', 'function_name'],
         help="If specified measure one run with cProfile and stores 10 top functions."
              " Argument is a column to sort by. Available columns: 'ncallls_recursion',"
              " 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'."
@@ -353,9 +354,7 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_inf
     }
     for bench in benchmarks:
         if not bench.has_error:
-            benchmarks_json.append(bench.as_dict(include_data=include_data,
-                                                 cprofile_sort_by=config.getoption("benchmark_cprofile"),
-                                                 cprofile_all_columns=True))
+            benchmarks_json.append(bench.as_dict(include_data=include_data))
     return output_json
 
 

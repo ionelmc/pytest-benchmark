@@ -21,7 +21,7 @@ except (ImportError, SyntaxError):
     statistics = None
 else:
     statistics_error = None
-    from .stats import BenchmarkStats
+    from .stats import Metadata
 
 
 class FixtureAlreadyUsed(Exception):
@@ -98,7 +98,7 @@ class BenchmarkFixture(object):
         return runner
 
     def _make_stats(self, iterations):
-        bench_stats = BenchmarkStats(self, iterations=iterations, options={
+        bench_stats = Metadata(self, iterations=iterations, options={
             "disable_gc": self._disable_gc,
             "timer": self._timer,
             "min_rounds": self._min_rounds,

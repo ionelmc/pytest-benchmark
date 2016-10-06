@@ -95,8 +95,7 @@ class MockSession(BenchmarkSession):
                 data = json.load(fh)
             self.benchmarks.extend(
                 Namespace(
-                    as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench,
-                                   cprofile_sort_by='cumtime', cprofile_all_columns=False:
+                    as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench, cprofile='cumtime':
                         dict(_bench, **_bench["stats"]) if flat else dict(_bench),
                     name=bench['name'],
                     fullname=bench['fullname'],
