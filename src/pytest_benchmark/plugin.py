@@ -406,6 +406,8 @@ def pytest_runtest_setup(item):
 
 def get_report_backend(config):
     storage = config.getoption("benchmark_storage")
+    if "://" not in storage:
+        storage = "file://" + storage
     if storage.startswith("file://"):
         config.option.__dict__["benchmark_storage"] = storage[len("file://"):]
         return FileReportBackend(config)
