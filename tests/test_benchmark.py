@@ -899,6 +899,9 @@ def test_ok(benchmark, bad_fixture):
         "E       assert 1 == 0",
 
         "test_abort_broken.py:18: AssertionError",
+    ])
+
+    result.stdout.fnmatch_lines([
         "* benchmark: 1 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
@@ -907,7 +910,6 @@ def test_ok(benchmark, bad_fixture):
 
         "*====== 2 failed*, 3 error* seconds ======*",
     ])
-
 
 BASIC_TEST = '''
 """
