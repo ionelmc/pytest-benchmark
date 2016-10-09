@@ -1,8 +1,8 @@
 import abc
 
-from ..utils import get_machine_id
-from ..logger import Logger
-from ..utils import safe_dumps
+from .utils import get_machine_id
+from .logger import Logger
+from .utils import safe_dumps
 
 
 class BaseReportBackend:
