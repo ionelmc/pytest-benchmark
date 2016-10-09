@@ -13,7 +13,6 @@ import pytest
 
 from . import __version__
 from .fixture import BenchmarkFixture
-from .report_backend import ElasticReportBackend, FileReportBackend
 from .session import BenchmarkSession
 from .session import PerformanceRegression
 from .timers import default_timer
@@ -24,7 +23,6 @@ from .utils import get_current_time
 from .utils import get_tag
 from .utils import parse_columns
 from .utils import parse_compare_fail
-from .utils import parse_elasticsearch_storage
 from .utils import parse_rounds
 from .utils import parse_save
 from .utils import parse_seconds
@@ -403,28 +401,8 @@ def pytest_runtest_setup(item):
                     "warmup_iterations", "calibration_precision"):
                 raise ValueError("benchmark mark can't have %r keyword argument." % name)
 
-
-def get_report_backend(config):
-    storage = config.getoption("benchmark_storage")
-    if "://" not in storage:
-        storage = "file://" + storage
-    if storage.startswith("file://"):
-        config.option.__dict__["benchmark_storage"] = storage[len("file://"):]
-        return FileReportBackend(config)
-    elif storage.startswith("elasticsearch+"):
-        hosts, index, doctype, project_name = parse_elasticsearch_storage(storage[len("elasticsearch+"):])
-        config.option.__dict__["benchmark_elasticsearch_hosts"] = hosts
-        config.option.__dict__["benchmark_elasticsearch_index"] = index
-        config.option.__dict__["benchmark_elasticsearch_doctype"] = doctype
-        config.option.__dict__["benchmark_project_name"] = project_name
-        config.option.__dict__["benchmark_autosave"] = get_tag(project_name)
-        return ElasticReportBackend(config)
-    else:
-        raise argparse.ArgumentTypeError("Storage must be in form of file://path or elasticsearch+http[s]://host1,host2/index/doctype")
-
-
 @pytest.mark.trylast  # force the other plugins to initialise, fixes issue with capture not being properly initialised
 def pytest_configure(config):
     config.addinivalue_line("markers", "benchmark: mark a test with custom benchmark settings.")
-    config._benchmarksession = BenchmarkSession(config, get_report_backend(config))
+    config._benchmarksession = BenchmarkSession(config)
     config.pluginmanager.register(config._benchmarksession, "pytest-benchmark")

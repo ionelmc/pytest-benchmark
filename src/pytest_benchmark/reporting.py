@@ -1,14 +1,10 @@
-import abc
-
-from .utils import get_machine_id
 from .logger import Logger
+from .utils import get_machine_id
 from .utils import safe_dumps
 
 
-class BaseReportBackend:
-    __metaclass__ = abc.ABCMeta
-
-    def __init__(self, config):
+class Reporter(object):
+    def __init__(self, config, storage):
         self.verbose = config.getoption("benchmark_verbose")
         self.logger = Logger(self.verbose, config)
         self.config = config
@@ -18,16 +14,12 @@ class BaseReportBackend:
         self.save_data = config.getoption("benchmark_save_data")
         self.json = config.getoption("benchmark_json")
         self.compare = config.getoption("benchmark_compare")
-        self.storage = None
+        self.storage = storage
 
-    def _save_json(self, output_json):
+    def save_json(self, output_json):
         with self.json as fh:
             fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())
         self.logger.info("Wrote benchmark data in: %s" % self.json, purple=True)
-
-    @abc.abstractmethod
-    def _save(self, output_json, save):
-        pass
 
     def handle_saving(self, benchmarks, machine_info):
         save = benchmarks and self.save or self.autosave
@@ -48,7 +40,7 @@ class BaseReportBackend:
                 benchmarks=benchmarks,
                 output_json=output_json,
             )
-            self._save_json(output_json)
+            self.save_json(output_json)
 
         if save:
             output_json = self.config.hook.pytest_benchmark_generate_json(
@@ -63,19 +55,15 @@ class BaseReportBackend:
                 benchmarks=benchmarks,
                 output_json=output_json,
             )
-            self._save(output_json, save)
-
-    @abc.abstractmethod
-    def _load(self, id_prefix=None):
-        pass
+            self.storage.save(output_json, save)
 
     def handle_loading(self, machine_info):
         compared_mapping = {}
         if self.compare:
             if self.compare is True:
-                compared_benchmarks = list(self._load())[-1:]
+                compared_benchmarks = list(self.storage.load())[-1:]
             else:
-                compared_benchmarks = list(self._load(self.compare))
+                compared_benchmarks = list(self.storage.load(self.compare))
 
             if not compared_benchmarks:
                 msg = "Can't compare. No benchmark files in %r" % str(self.storage)

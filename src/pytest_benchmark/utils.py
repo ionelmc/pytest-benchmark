@@ -354,6 +354,20 @@ def parse_elasticsearch_storage(string, default_index="benchmark", default_docty
     return hosts, index, doctype, project_name
 
 
+def load_storage(storage, **kwargs):
+    if "://" not in storage:
+        storage = "file://" + storage
+    if storage.startswith("file://"):
+        from .storage.file import FileStorage
+        return FileStorage(storage[len("file://"):], **kwargs)
+    elif storage.startswith("elasticsearch+"):
+        from .storage.elasticsearch import ElasticsearchStorage
+        return ElasticsearchStorage(*parse_elasticsearch_storage(storage[len("elasticsearch+"):]), **kwargs)
+    else:
+        raise argparse.ArgumentTypeError("Storage must be in form of file://path or "
+                                         "elasticsearch+http[s]://host1,host2/index/doctype")
+
+
 def time_unit(value):
     if value < 1e-6:
         return "n", 1e9

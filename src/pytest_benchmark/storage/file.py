@@ -1,13 +1,13 @@
 import json
 import os
-
 from pathlib import Path
 
-from .utils import commonpath
-from .utils import short_filename
+from ..utils import commonpath
+from ..utils import safe_dumps
+from ..utils import short_filename
 
 
-class Storage(object):
+class FileStorage(object):
     def __init__(self, path, logger, default_machine_id=None):
         self.path = Path(path)
         self.default_machine_id = default_machine_id
@@ -29,6 +29,25 @@ class Storage(object):
         if not path.exists():
             path.mkdir(parents=True)
         return path.joinpath(name)
+
+    @property
+    def _next_num(self):
+        files = self.query("[0-9][0-9][0-9][0-9]_*")
+        files.sort(reverse=True)
+        if not files:
+            return "0001"
+        for f in files:
+            try:
+                return "%04i" % (int(str(f.name).split('_')[0]) + 1)
+            except ValueError:
+                raise
+
+    def save(self, output_json, save):
+        output_file = self.get("%s_%s.json" % (self._next_num, save))
+        assert not output_file.exists()
+        with output_file.open('wb') as fh:
+            fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())
+        self.logger.info("Saved benchmark data in: %s" % output_file)
 
     def query(self, *globs_or_files):
         files = []
@@ -73,6 +92,9 @@ class Storage(object):
         return sorted(files, key=lambda file: (file.name, file.parent))
 
     def load(self, *globs_or_files):
+        if not globs_or_files:
+            globs_or_files = '[0-9][0-9][0-9][0-9]_',
+
         for file in self.query(*globs_or_files):
             if file in self._cache:
                 data = self._cache[file]

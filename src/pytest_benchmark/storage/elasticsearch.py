@@ -1,61 +1,62 @@
 import datetime
+import uuid
+import sys
+from datetime import date
+from datetime import datetime
+from decimal import Decimal
+
+from ..compat import reraise
 
 try:
     import elasticsearch.serializer
-
-    import uuid
-    from datetime import date, datetime
-    from decimal import Decimal
-
-    class SaveElasticsearchJSONSerializer(elasticsearch.serializer.JSONSerializer):
-        def default(self, data):
-            if isinstance(data, (date, datetime)):
-                return data.isoformat()
-            elif isinstance(data, Decimal):
-                return float(data)
-            elif isinstance(data, uuid.UUID):
-                return str(data)
-            else:
-                return "UNSERIALIZABLE[%r]" % data
-
 except ImportError as exc:
-    SaveElasticsearchJSONSerializer = None
+    reraise(ImportError, ImportError("Please install elasticsearch or pytest-benchmark[elasticsearch]", exc.args),
+            sys.exc_info()[2])
+
+
+class JSONSerializer(elasticsearch.serializer.JSONSerializer):
+    def default(self, data):
+        if isinstance(data, (date, datetime)):
+            return data.isoformat()
+        elif isinstance(data, Decimal):
+            return float(data)
+        elif isinstance(data, uuid.UUID):
+            return str(data)
+        else:
+            return "UNSERIALIZABLE[%r]" % data
 
 
 class ElasticsearchStorage(object):
-    def __init__(self, elasticsearch_hosts, elasticsearch_index, elasticsearch_doctype, logger,
+    def __init__(self, hosts, index, doctype, project_name, logger,
                  default_machine_id=None):
-        try:
-            import elasticsearch
-        except ImportError as exc:
-            raise ImportError(exc.args, "Please install elasticsearch or pytest-benchmark[elasticsearch]")
-        self._elasticsearch_hosts = elasticsearch_hosts
-        self._elasticsearch_index = elasticsearch_index
-        self._elasticsearch_doctype = elasticsearch_doctype
-        self._elasticsearch = elasticsearch.Elasticsearch(self._elasticsearch_hosts, serializer=SaveElasticsearchJSONSerializer())
+        self._es_hosts = hosts
+        self._es_index = index
+        self._es_doctype = doctype
+        self._es = elasticsearch.Elasticsearch(self._es_hosts, serializer=JSONSerializer())
+        self._project_name = project_name
         self.default_machine_id = default_machine_id
         self.logger = logger
         self._cache = {}
         self._create_index()
 
     def __str__(self):
-        return str(self._elasticsearch_hosts)
+        return str(self._hosts)
 
     @property
     def location(self):
-        return str(self._elasticsearch_hosts)
+        return str(self._hosts)
 
-    def query(self, project):
+    def query(self):
         """
         Returns sorted records names (ids) that corresponds with project.
         """
-        return [commit_and_time for commit_and_time, _ in self.load(project)]
+        return [commit_and_time for commit_and_time, _ in self.load(self._project_name)]
 
-    def load(self, project, id_prefix=None):
+    def load(self, id_prefix=None):
         """
         Yield key and content of records that corresponds with project name.
         """
-        r = self._search(project, id_prefix)
+        r = self._search(self._project_name, id_prefix)
         groupped_data = self._group_by_commit_and_time(r["hits"]["hits"])
         result = [(key, value) for key, value in groupped_data.items()]
         result.sort(key=lambda x: datetime.datetime.strptime(x[1]["datetime"], "%Y-%m-%dT%H:%M:%S.%f"))
@@ -89,8 +90,8 @@ class ElasticsearchStorage(object):
                 }
             }
 
-        return self._elasticsearch.search(index=self._elasticsearch_index,
-                                          doc_type=self._elasticsearch_doctype,
+        return self._es.search(index=self._es_index,
+                                          doc_type=self._es_doctype,
                                           body=body)
 
     @staticmethod
@@ -130,13 +131,23 @@ class ElasticsearchStorage(object):
         for hit in r["hits"]["hits"]:
             yield self._benchmark_from_es_record(hit["_source"])
 
-    def save(self, document, document_id):
-        self._elasticsearch.index(
-            index=self._elasticsearch_index,
-            doc_type=self._elasticsearch_doctype,
-            body=document,
-            id=document_id,
-        )
+    def save(self, output_json, save):
+        output_benchmarks = output_json.pop("benchmarks")
+        for bench in output_benchmarks:
+            # add top level info from output_json dict to each record
+            bench.update(output_json)
+            doc_id = "%s_%s" % (save, bench["fullname"])
+            self.storage.save(bench, doc_id)
+            self._es.index(
+                index=self._es_index,
+                doc_type=self._es_doctype,
+                body=bench,
+                id=doc_id,
+            )
+        self.logger.info("Saved benchmark data to %s to index %s as doctype %s" % (
+            self.elasticsearch_hosts,
+            self.elasticsearch_index,
+            self.elasticsearch_doctype))
 
     def _create_index(self):
         mapping = {
@@ -294,5 +305,5 @@ class ElasticsearchStorage(object):
                 }
             }
         }
-        self._elasticsearch.indices.create(index=self._elasticsearch_index, ignore=400, body=mapping)
+        self._es.indices.create(index=self._es_index, ignore=400, body=mapping)
 

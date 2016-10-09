@@ -10,10 +10,10 @@ from .plugin import add_csv_options
 from .plugin import add_display_options
 from .plugin import add_global_options
 from .plugin import add_histogram_options
-from .storage import Storage
 from .table import TableResults
 from .utils import NAME_FORMATTERS
 from .utils import first_or_value
+from .utils import load_storage
 from .utils import report_noprogress
 
 COMPARE_HELP = '''examples:
@@ -147,7 +147,7 @@ def main():
     parser = make_parser()
     args = parser.parse_args()
     logger = Logger(args.verbose)
-    storage = Storage(args.storage, logger)
+    storage = load_storage(args.storage, logger=logger)
 
     if args.command == 'list':
         for file in storage.query():

@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import pytest
 
+from pytest_benchmark.reporting import Reporter
 from .fixture import statistics
 from .fixture import statistics_error
 from .logger import Logger
@@ -12,6 +13,7 @@ from .utils import SecondsDecimal
 from .utils import cached_property
 from .utils import first_or_value
 from .utils import get_machine_id
+from .utils import load_storage
 from .utils import load_timer
 from .utils import short_filename
 
@@ -24,15 +26,21 @@ class BenchmarkSession(object):
     compared_mapping = None
     groups = None
 
-    def __init__(self, config, report_backend):
+    def __init__(self, config):
         self.verbose = config.getoption("benchmark_verbose")
         self.logger = Logger(self.verbose, config)
         self.config = config
         self.performance_regressions = []
         self.benchmarks = []
         self.machine_id = get_machine_id()
-        self.report_backend = report_backend
-
+        self.reporter = Reporter(
+            config=config,
+            storage=load_storage(
+                config.getoption("benchmark_storage"),
+                logger=self.logger,
+                default_machine_id=self.machine_id
+            )
+        )
         self.options = dict(
             min_time=SecondsDecimal(config.getoption("benchmark_min_time")),
             min_rounds=config.getoption("benchmark_min_rounds"),
@@ -115,8 +123,8 @@ class BenchmarkSession(object):
                 yield flat_bench
 
     def finish(self):
-        self.report_backend.handle_saving(self.benchmarks, self.machine_info)
-        self.compared_mapping = self.report_backend.handle_loading(self.machine_info)
+        self.reporter.handle_saving(self.benchmarks, self.machine_info)
+        self.compared_mapping = self.reporter.handle_loading(self.machine_info)
         prepared_benchmarks = list(self.prepare_benchmarks())
         if prepared_benchmarks:
             self.groups = self.config.hook.pytest_benchmark_group_stats(
