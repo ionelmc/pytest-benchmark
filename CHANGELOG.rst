@@ -27,12 +27,8 @@ Changelog
     * ``--columns=LABELS``
     * ``--histogram=[FILENAME-PREFIX]``
 * Added ``--benchmark-cprofile`` that profiles last run of benchmarked function.  Contributed by Petr Šebek.
-* Added ``--benchmark-elasticsearch`` command line option. It allows to store data to elasticsearch instead to json files.
-  The address of elasticsearch server may be specified by ``--benchmark-elasticsearch-host``, you can also specify index
-  and doctype with ``--benchmark-elasticsearch-index`` and ``--benchmark-elasticsearch-doctype``. Contributed by
-* Changed ``--benchmark-storage`` so it now allows elasticsearch storage. Contributed by
-  Petr Šebek in `#58 <https://github.com/ionelmc/pytest-benchmark/pull/58>`_.
-
+* Changed ``--benchmark-storage`` so it now allows elasticsearch storage. It allows to store data to elasticsearch instead to
+  json files. Contributed by Petr Šebek in `#58 <https://github.com/ionelmc/pytest-benchmark/pull/58>`_.
 
 3.0.0 (2015-11-08)
 ------------------
