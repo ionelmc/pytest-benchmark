@@ -67,7 +67,7 @@ setup(
         'pytest', 'benchmark',
     ],
     install_requires=[
-        'pytest>=2.6',
+        'pytest>=2.8',
     ],
     extras_require={
         'aspect': ['aspectlib'],
