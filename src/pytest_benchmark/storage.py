@@ -1,6 +1,5 @@
 import json
 import os
-from itertools import chain
 
 from pathlib import Path
 
