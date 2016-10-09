@@ -24,13 +24,13 @@ from .utils import get_current_time
 from .utils import get_tag
 from .utils import parse_columns
 from .utils import parse_compare_fail
+from .utils import parse_elasticsearch_storage
 from .utils import parse_rounds
 from .utils import parse_save
 from .utils import parse_seconds
 from .utils import parse_sort
 from .utils import parse_timer
 from .utils import parse_warmup
-from .utils import parse_elasticsearch_storage
 
 
 def pytest_report_header(config):
@@ -222,8 +222,8 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--benchmark-cprofile",
-        metavar="COLUMN", default=None, choices=['ncalls_recursion', 'ncalls', 'tottime',
-            'tottime_per', 'cumtime', 'cumtime_per', 'function_name'],
+        metavar="COLUMN", default=None,
+        choices=['ncalls_recursion', 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'],
         help="If specified measure one run with cProfile and stores 10 top functions."
              " Argument is a column to sort by. Available columns: 'ncallls_recursion',"
              " 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'."
