@@ -215,6 +215,14 @@ def pytest_addoption(parser):
         help="Fail test if performance regresses according to given EXPR"
              " (eg: min:5%% or mean:0.001 for number of seconds). Can be used multiple times."
     )
+    group.addoption(
+        "--benchmark-cprofile",
+        metavar="COLUMN", default=None, choices=['ncalls_recursion', 'ncalls', 'tottime',
+            'tottime_per', 'cumtime', 'cumtime_per', 'function_name'],
+        help="If specified measure one run with cProfile and stores 10 top functions."
+             " Argument is a column to sort by. Available columns: 'ncallls_recursion',"
+             " 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'."
+    )
     add_global_options(group.addoption)
     add_display_options(group.addoption)
     add_histogram_options(group.addoption)

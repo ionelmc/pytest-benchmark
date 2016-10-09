@@ -63,6 +63,12 @@ def test_help(testdir):
         "                        Fail test if performance regresses according to given",
         "                        EXPR (eg: min:5% or mean:0.001 for number of seconds).",
         "                        Can be used multiple times.",
+        "  --benchmark-cprofile=COLUMN",
+        "                        If specified measure one run with cProfile and stores",
+        "                        10 top functions. Argument is a column to sort by.",
+        "                        Available columns: 'ncallls_recursion', 'ncalls',",
+        "                        'tottime', 'tottime_per', 'cumtime', 'cumtime_per',",
+        "                        'function_name'.",
         "  --benchmark-storage=STORAGE-PATH",
         "                        Specify a different path to store the runs (when",
         "                        --benchmark-save or --benchmark-autosave are used).",
@@ -763,6 +769,26 @@ def test_xdist_verbose(testdir):
         " WARNING: Benchmarks are automatically disabled because xdist plugin is active.Benchmarks cannot be performed "
         "reliably in a parallelized environment.",
         "------*",
+    ])
+
+
+def test_cprofile(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest('--benchmark-cprofile=cumtime', test)
+    result.stdout.fnmatch_lines([
+        "============================= cProfile information =============================",
+        "Time in s",
+        "test_cprofile.py::test_fast",
+        "ncalls	tottime	percall	cumtime	percall	filename:lineno(function)",
+        # "1	0.0000	0.0000	0.0001	0.0001	test_cprofile0/test_cprofile.py:9(result)",
+        # "1	0.0001	0.0001	0.0001	0.0001	~:0(<built-in method time.sleep>)",
+        # "1	0.0000	0.0000	0.0000	0.0000	~:0(<method 'disable' of '_lsprof.Profiler' objects>)",
+        "",
+        "test_cprofile.py::test_slow",
+        "ncalls	tottime	percall	cumtime	percall	filename:lineno(function)",
+        # "1	0.0000	0.0000	0.1002	0.1002	test_cprofile0/test_cprofile.py:15(<lambda>)",
+        # "1	0.1002	0.1002	0.1002	0.1002	~:0(<built-in method time.sleep>)",
+        # "1	0.0000	0.0000	0.0000	0.0000	~:0(<method 'disable' of '_lsprof.Profiler' objects>)",
     ])
 
 

@@ -42,6 +42,12 @@ class Namespace(object):
     def __getitem__(self, item):
         return self.__dict__[item]
 
+    def getoption(self, item, default=None):
+        try:
+            return self[item]
+        except KeyError:
+            return default
+
 
 class LooseFileLike(BytesIO):
     def close(self):
@@ -67,7 +73,9 @@ class MockSession(BenchmarkSession):
             'min_rounds': 123,
             'min_time': 234,
             'max_time': 345,
+            'use_cprofile': False,
         }
+        self.cprofile_sort_by = 'cumtime'
         self.compare_fail = []
         self.config = Namespace(hook=Namespace(
             pytest_benchmark_group_stats=pytest_benchmark_group_stats,
@@ -87,7 +95,7 @@ class MockSession(BenchmarkSession):
                 data = json.load(fh)
             self.benchmarks.extend(
                 Namespace(
-                    as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench:
+                    as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench, cprofile='cumtime':
                         dict(_bench, **_bench["stats"]) if flat else dict(_bench),
                     name=bench['name'],
                     fullname=bench['fullname'],

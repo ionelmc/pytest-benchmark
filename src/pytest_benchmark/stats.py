@@ -4,9 +4,11 @@ from __future__ import print_function
 import statistics
 from bisect import bisect_left
 from bisect import bisect_right
+import operator
 
 from .utils import cached_property
 from .utils import funcname
+from .utils import get_cprofile_functions
 
 
 class Stats(object):
@@ -161,13 +163,14 @@ class Stats(object):
         return "%s;%s" % (self.stddev_outliers, self.iqr_outliers)
 
 
-class BenchmarkStats(object):
+class Metadata(object):
     def __init__(self, fixture, iterations, options):
         self.name = fixture.name
         self.fullname = fixture.fullname
         self.group = fixture.group
         self.param = fixture.param
         self.params = fixture.params
+        self.cprofile_stats = fixture.cprofile_stats
 
         self.iterations = iterations
         self.stats = Stats()
@@ -196,7 +199,7 @@ class BenchmarkStats(object):
     def has_error(self):
         return self.fixture.has_error
 
-    def as_dict(self, include_data=True, flat=False, stats=True):
+    def as_dict(self, include_data=True, flat=False, stats=True, cprofile=None):
         result = {
             "group": self.group,
             "name": self.name,
@@ -207,6 +210,23 @@ class BenchmarkStats(object):
                 (k, funcname(v) if callable(v) else v) for k, v in self.options.items()
             )
         }
+        if self.cprofile_stats:
+            cprofile_list = result["cprofile"] = []
+            cprofile_functions = get_cprofile_functions(self.cprofile_stats)
+            stats_columns = ["cumtime", "tottime","ncalls", "ncalls_recursion",
+                             "tottime_per", "cumtime_per", "function_name"]
+            # move column first
+            if cprofile is not None:
+                stats_columns.remove(cprofile)
+                stats_columns.insert(0, cprofile)
+            for column in stats_columns:
+                cprofile_functions.sort(key=operator.itemgetter(column), reverse=True)
+                for cprofile_function in cprofile_functions[:25]:
+                    if cprofile_function not in cprofile_list:
+                        cprofile_list.append(cprofile_function)
+                # if we want only one column or we already have all available functions
+                if cprofile is None or len(cprofile_functions) == len(cprofile_list):
+                    break
         if stats:
             stats = self.stats.as_dict()
             if include_data:

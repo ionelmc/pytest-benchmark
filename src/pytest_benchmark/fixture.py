@@ -1,6 +1,8 @@
 from __future__ import division
 from __future__ import print_function
 
+import cProfile
+import pstats
 import gc
 import sys
 import time
@@ -19,7 +21,7 @@ except (ImportError, SyntaxError):
     statistics = None
 else:
     statistics_error = None
-    from .stats import BenchmarkStats
+    from .stats import Metadata
 
 
 class FixtureAlreadyUsed(Exception):
@@ -37,7 +39,7 @@ class BenchmarkFixture(object):
             return cls._precisions.setdefault(timer, compute_timer_precision(timer))
 
     def __init__(self, node, disable_gc, timer, min_rounds, min_time, max_time, warmup, warmup_iterations,
-                 calibration_precision, add_stats, logger, warner, disabled, group=None):
+                 calibration_precision, add_stats, logger, warner, disabled, use_cprofile, group=None):
         self.name = node.name
         self.fullname = node._nodeid
         self.disabled = disabled
@@ -62,6 +64,8 @@ class BenchmarkFixture(object):
         self._warner = warner
         self._cleanup_callbacks = []
         self._mode = None
+        self.use_cprofile = use_cprofile
+        self.cprofile_stats = None
 
     @property
     def enabled(self):
@@ -94,7 +98,7 @@ class BenchmarkFixture(object):
         return runner
 
     def _make_stats(self, iterations):
-        bench_stats = BenchmarkStats(self, iterations=iterations, options={
+        bench_stats = Metadata(self, iterations=iterations, options={
             "disable_gc": self._disable_gc,
             "timer": self._timer,
             "min_rounds": self._min_rounds,
@@ -103,7 +107,7 @@ class BenchmarkFixture(object):
             "warmup": self._warmup,
         })
         self._add_stats(bench_stats)
-        self.stats = bench_stats.stats
+        self.stats = bench_stats
         return bench_stats
 
     def __call__(self, function_to_benchmark, *args, **kwargs):
@@ -154,7 +158,13 @@ class BenchmarkFixture(object):
             for _ in XRANGE(rounds):
                 stats.update(runner(loops_range))
             self._logger.debug("  Ran for %ss." % format_time(time.time() - run_start), yellow=True, bold=True)
-        return function_to_benchmark(*args, **kwargs)
+        if self.use_cprofile:
+            profile = cProfile.Profile()
+            function_result = profile.runcall(function_to_benchmark, *args, **kwargs)
+            self.stats.cprofile_stats = pstats.Stats(profile)
+        else:
+            function_result = function_to_benchmark(*args, **kwargs)
+        return function_result
 
     def _raw_pedantic(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
         if kwargs is None:
@@ -208,6 +218,12 @@ class BenchmarkFixture(object):
         if loops_range:
             args, kwargs = make_arguments()
             result = target(*args, **kwargs)
+
+        if self.use_cprofile:
+            profile = cProfile.Profile()
+            profile.runcall(target, *args, **kwargs)
+            self.stats.cprofile_stats = pstats.Stats(profile)
+
         return result
 
     def weave(self, target, **kwargs):
