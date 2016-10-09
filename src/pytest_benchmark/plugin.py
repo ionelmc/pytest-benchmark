@@ -106,8 +106,8 @@ def add_global_options(addoption, prefix="benchmark-"):
         metavar="URI", default="file://./.benchmarks",
         help="Specify a path to store the runs as uri in form file://path or"
              " elasticsearch+http[s]://host1,host2/[index/doctype?project_name=Project] "
-             "(when --benchmark-save or --benchmark-autosave are used). "
-             "Default: %(default)r.",
+             "(when --benchmark-save or --benchmark-autosave are used). For backwards compatibility unexpected values "
+             "are converted to file://<value>. Default: %(default)r.",
     )
     addoption(
         "--{0}verbose".format(prefix),
