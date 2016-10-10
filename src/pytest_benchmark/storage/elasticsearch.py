@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import datetime
 import uuid
 import sys
@@ -8,13 +10,14 @@ from decimal import Decimal
 from ..compat import reraise
 
 try:
-    import elasticsearch.serializer
+    import elasticsearch
+    from elasticsearch.serializer import JSONSerializer
 except ImportError as exc:
     reraise(ImportError, ImportError("Please install elasticsearch or pytest-benchmark[elasticsearch]", exc.args),
             sys.exc_info()[2])
 
 
-class JSONSerializer(elasticsearch.serializer.JSONSerializer):
+class BenchmarkJSONSerializer(JSONSerializer):
     def default(self, data):
         if isinstance(data, (date, datetime)):
             return data.isoformat()
@@ -32,7 +35,7 @@ class ElasticsearchStorage(object):
         self._es_hosts = hosts
         self._es_index = index
         self._es_doctype = doctype
-        self._es = elasticsearch.Elasticsearch(self._es_hosts, serializer=JSONSerializer())
+        self._es = elasticsearch.Elasticsearch(self._es_hosts, serializer=BenchmarkJSONSerializer())
         self._project_name = project_name
         self.default_machine_id = default_machine_id
         self.logger = logger
@@ -137,7 +140,6 @@ class ElasticsearchStorage(object):
             # add top level info from output_json dict to each record
             bench.update(output_json)
             doc_id = "%s_%s" % (save, bench["fullname"])
-            self.storage.save(bench, doc_id)
             self._es.index(
                 index=self._es_index,
                 doc_type=self._es_doctype,
@@ -145,9 +147,7 @@ class ElasticsearchStorage(object):
                 id=doc_id,
             )
         self.logger.info("Saved benchmark data to %s to index %s as doctype %s" % (
-            self.elasticsearch_hosts,
-            self.elasticsearch_index,
-            self.elasticsearch_doctype))
+            self._es_hosts, self._es_index, self._es_doctype))
 
     def _create_index(self):
         mapping = {

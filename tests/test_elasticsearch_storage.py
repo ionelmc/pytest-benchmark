@@ -1,12 +1,11 @@
+from __future__ import absolute_import
+
 import json
 import logging
 from io import BytesIO
 from io import StringIO
-try:
-    import unittest.mock as mock
-except ImportError:
-    import mock
 
+import elasticsearch
 import py
 import pytest
 from freezegun import freeze_time
@@ -16,9 +15,15 @@ from pytest_benchmark.plugin import BenchmarkSession
 from pytest_benchmark.plugin import pytest_benchmark_compare_machine_info
 from pytest_benchmark.plugin import pytest_benchmark_generate_json
 from pytest_benchmark.plugin import pytest_benchmark_group_stats
-from pytest_benchmark.report_backend import ElasticReportBackend
-from pytest_benchmark.elasticsearch_storage import ElasticsearchStorage
+from pytest_benchmark.reporting import Reporter
+from pytest_benchmark.storage.elasticsearch import ElasticsearchStorage
 
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
+
+logger = logging.getLogger(__name__)
 
 THIS = py.path.local(__file__)
 BENCHFILE = THIS.dirpath('test_storage/0030_5b78858eb718649a31fb93d8dc96ca2cee41a4cd_20150815_030419_uncommitted-changes.json')
@@ -47,15 +52,21 @@ class LooseFileLike(BytesIO):
         self.getvalue = lambda: value
 
 
-class MockElasticsearchReportBackend(ElasticReportBackend):
+class MockStorage(ElasticsearchStorage):
+    def __init__(self):
+        self._es = mock.Mock(spec=elasticsearch.Elasticsearch)
+        self._es_hosts = self._es_index = self._es_doctype = 'mocked'
+        self.logger = logger
+
+class MockReporter(Reporter):
     def __init__(self, config):
         self.verbose = False
-        self.logger = logging.getLogger(__name__)
+        self.logger = logger
         self.config = config
         self.performance_regressions = []
         self.benchmarks = []
         self.machine_id = "FoobarOS"
-        self.storage = mock.Mock(spec=ElasticsearchStorage)
+        self.storage = MockStorage()
         self.compare = '0001'
         self.save = self.autosave = self.json = False
         self.elasticsearch_hosts = ["localhost:9200"]
@@ -91,7 +102,7 @@ class MockSession(BenchmarkSession):
         self.elasticsearch_host = "localhost:9200"
         self.elasticsearch_index = "benchmark"
         self.elasticsearch_doctype = "benchmark"
-        self.report_backend = MockElasticsearchReportBackend(self.config)
+        self.report_backend = MockReporter(self.config)
         self.group_by = 'group'
         self.columns = ['min', 'max', 'mean', 'stddev', 'median', 'iqr',
                         'outliers', 'rounds', 'iterations']
@@ -167,4 +178,9 @@ def test_handle_saving(sess, logger_output, monkeypatch):
     sess.report_backend.json = None
     sess.report_backend.save_data = False
     sess.report_backend.handle_saving(sess.benchmarks, sess.machine_info)
-    sess.report_backend.storage.save.assert_called_with(ES_DATA, 'commitId_tests/test_normal.py::test_xfast_parametrized[0]')
+    sess.report_backend.storage._es.index.assert_called_with(
+        index='mocked',
+        doc_type='mocked',
+        body=ES_DATA,
+        id='commitId_tests/test_normal.py::test_xfast_parametrized[0]',
+    )
