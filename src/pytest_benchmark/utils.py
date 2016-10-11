@@ -341,7 +341,7 @@ def parse_elasticsearch_storage(string, default_index="benchmark", default_docty
     hosts = ["{scheme}://{netloc}".format(scheme=storage_url.scheme, netloc=netloc) for netloc in storage_url.netloc.split(',')]
     index = default_index
     doctype = default_doctype
-    if storage_url.path:
+    if storage_url.path and storage_url.path != "/":
         splitted = storage_url.path.strip("/").split("/")
         index = splitted[0]
         if len(splitted) >= 2:
@@ -362,6 +362,7 @@ def load_storage(storage, **kwargs):
         return FileStorage(storage[len("file://"):], **kwargs)
     elif storage.startswith("elasticsearch+"):
         from .storage.elasticsearch import ElasticsearchStorage
+        # TODO update benchmark_autosave
         return ElasticsearchStorage(*parse_elasticsearch_storage(storage[len("elasticsearch+"):]), **kwargs)
     else:
         raise argparse.ArgumentTypeError("Storage must be in form of file://path or "

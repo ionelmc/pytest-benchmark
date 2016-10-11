@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import datetime
 import uuid
 import sys
 from datetime import date
@@ -43,11 +42,11 @@ class ElasticsearchStorage(object):
         self._create_index()
 
     def __str__(self):
-        return str(self._hosts)
+        return str(self._es_hosts)
 
     @property
     def location(self):
-        return str(self._hosts)
+        return str(self._es_hosts)
 
     def query(self):
         """
@@ -62,7 +61,7 @@ class ElasticsearchStorage(object):
         r = self._search(self._project_name, id_prefix)
         groupped_data = self._group_by_commit_and_time(r["hits"]["hits"])
         result = [(key, value) for key, value in groupped_data.items()]
-        result.sort(key=lambda x: datetime.datetime.strptime(x[1]["datetime"], "%Y-%m-%dT%H:%M:%S.%f"))
+        result.sort(key=lambda x: datetime.strptime(x[1]["datetime"], "%Y-%m-%dT%H:%M:%S.%f"))
         for key, data in result:
             yield key, data
 
@@ -93,9 +92,7 @@ class ElasticsearchStorage(object):
                 }
             }
 
-        return self._es.search(index=self._es_index,
-                                          doc_type=self._es_doctype,
-                                          body=body)
+        return self._es.search(index=self._es_index, doc_type=self._es_doctype, body=body)
 
     @staticmethod
     def _benchmark_from_es_record(source_es_record):
@@ -306,4 +303,3 @@ class ElasticsearchStorage(object):
             }
         }
         self._es.indices.create(index=self._es_index, ignore=400, body=mapping)
-

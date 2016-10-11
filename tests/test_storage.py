@@ -15,7 +15,6 @@ from pytest_benchmark.plugin import BenchmarkSession
 from pytest_benchmark.plugin import pytest_benchmark_compare_machine_info
 from pytest_benchmark.plugin import pytest_benchmark_generate_json
 from pytest_benchmark.plugin import pytest_benchmark_group_stats
-from pytest_benchmark.reporting import Reporter
 from pytest_benchmark.session import PerformanceRegression
 from pytest_benchmark.storage.file import FileStorage
 from pytest_benchmark.utils import NAME_FORMATTERS
@@ -56,28 +55,18 @@ class LooseFileLike(BytesIO):
         self.getvalue = lambda: value
 
 
-class MockReporter(Reporter):
-    def __init__(self, config):
-        self.verbose = False
-        self.logger = logging.getLogger(__name__)
-        self.config = config
-        self.performance_regressions = []
-        self.benchmarks = []
-        self.machine_id = "FoobarOS"
-        self.storage = FileStorage(str(STORAGE), default_machine_id=get_machine_id(), logger=self.logger)
-        self.compare = '0001'
-        self.save = self.autosave = self.json = False
-
-
 class MockSession(BenchmarkSession):
     def __init__(self, name_format):
         self.histogram = True
+        self.verbose = False
         self.benchmarks = []
         self.performance_regressions = []
         self.sort = u"min"
+        self.compare = '0001'
         self.logger = logging.getLogger(__name__)
         self.machine_id = "FoobarOS"
         self.machine_info = {'foo': 'bar'}
+        self.save = self.autosave = self.json = False
         self.name_format = NAME_FORMATTERS[name_format]
         self.options = {
             'min_rounds': 123,
@@ -97,11 +86,11 @@ class MockSession(BenchmarkSession):
             pytest_benchmark_generate_commit_info=lambda **kwargs: {'foo': 'bar'},
             pytest_benchmark_update_commit_info=lambda **kwargs: None,
         ))
-        self.reporter = MockReporter(self.config)
+        self.storage = FileStorage(str(STORAGE), default_machine_id=get_machine_id(), logger=self.logger)
         self.group_by = 'group'
         self.columns = ['min', 'max', 'mean', 'stddev', 'median', 'iqr',
                         'outliers', 'rounds', 'iterations']
-        for bench_file in reversed(self.reporter.storage.query("[0-9][0-9][0-9][0-9]_*")):
+        for bench_file in reversed(self.storage.query("[0-9][0-9][0-9][0-9]_*")):
             with bench_file.open('rU') as fh:
                 data = json.load(fh)
             self.benchmarks.extend(
@@ -158,7 +147,7 @@ def make_logger(sess):
         info=lambda text, **opts: output.write(force_text(text) + u'\n'),
         error=lambda text: output.write(force_text(text) + u'\n'),
     )
-    sess.reporter.logger = Namespace(
+    sess.storage.logger = Namespace(
         warn=lambda code, text, **opts: output.write(u"%s: %s %s\n" % (code, force_text(text), opts)),
         info=lambda text, **opts: output.write(force_text(text) + u'\n'),
         error=lambda text: output.write(force_text(text) + u'\n'),
@@ -169,7 +158,7 @@ def make_logger(sess):
 def test_rendering(sess):
     output = make_logger(sess)
     sess.histogram = os.path.join('docs', 'sample')
-    sess.reporter.compare = '*/*'
+    sess.compare = '*/*'
     sess.sort = 'name'
     sess.finish()
     sess.display(Namespace(
@@ -182,7 +171,7 @@ def test_rendering(sess):
 
 def test_regression_checks(sess, name_format):
     output = make_logger(sess)
-    sess.reporter.handle_loading(sess.machine_info)
+    sess.handle_loading()
     sess.performance_regressions = []
     sess.compare_fail = [
         PercentageRegressionCheck("stddev", 5),
@@ -239,8 +228,8 @@ def test_regression_checks(sess, name_format):
                     reason="Something weird going on, see: https://bugs.python.org/issue4482")
 def test_regression_checks_inf(sess, name_format):
     output = make_logger(sess)
-    sess.reporter.compare = '0002'
-    sess.reporter.handle_loading(sess.machine_info)
+    sess.compare = '0002'
+    sess.handle_loading()
     sess.performance_regressions = []
     sess.compare_fail = [
         PercentageRegressionCheck("stddev", 5),
@@ -298,7 +287,7 @@ def test_regression_checks_inf(sess, name_format):
 
 def test_compare_1(sess, LineMatcher):
     output = make_logger(sess)
-    sess.reporter.handle_loading(sess.machine_info)
+    sess.handle_loading()
     sess.finish()
     sess.display(Namespace(
         ensure_newline=lambda: None,
@@ -324,8 +313,8 @@ def test_compare_1(sess, LineMatcher):
 
 def test_compare_2(sess, LineMatcher):
     output = make_logger(sess)
-    sess.reporter.compare = '0002'
-    sess.reporter.handle_loading(sess.machine_info)
+    sess.compare = '0002'
+    sess.handle_loading()
     sess.finish()
     sess.display(Namespace(
         ensure_newline=lambda: None,
@@ -351,24 +340,24 @@ def test_compare_2(sess, LineMatcher):
 @freeze_time("2015-08-15T00:04:18.687119")
 def test_save_json(sess, tmpdir, monkeypatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
-    sess.reporter.save = False
-    sess.reporter.autosave = False
-    sess.reporter.json = LooseFileLike()
-    sess.reporter.save_data = False
-    sess.reporter.handle_saving(sess.benchmarks, sess.machine_info)
+    sess.save = False
+    sess.autosave = False
+    sess.json = LooseFileLike()
+    sess.save_data = False
+    sess.handle_saving()
     assert tmpdir.listdir() == []
-    assert json.loads(sess.reporter.json.getvalue().decode()) == JSON_DATA
+    assert json.loads(sess.json.getvalue().decode()) == JSON_DATA
 
 
 @freeze_time("2015-08-15T00:04:18.687119")
 def test_save_with_name(sess, tmpdir, monkeypatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = 'foobar'
-    sess.reporter.autosave = True
-    sess.reporter.json = None
-    sess.reporter.save_data = False
-    sess.reporter.storage.path = Path(str(tmpdir))
-    sess.reporter.handle_saving(sess.benchmarks, sess.machine_info)
+    sess.autosave = True
+    sess.json = None
+    sess.save_data = False
+    sess.storage.path = Path(str(tmpdir))
+    sess.handle_saving()
     files = list(Path(str(tmpdir)).rglob('*.json'))
     print(files)
     assert len(files) == 1
@@ -378,12 +367,12 @@ def test_save_with_name(sess, tmpdir, monkeypatch):
 @freeze_time("2015-08-15T00:04:18.687119")
 def test_save_no_name(sess, tmpdir, monkeypatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
-    sess.reporter.save = True
-    sess.reporter.autosave = True
-    sess.reporter.json = None
-    sess.reporter.save_data = False
-    sess.reporter.storage.path = Path(str(tmpdir))
-    sess.reporter.handle_saving(sess.benchmarks, sess.machine_info)
+    sess.save = True
+    sess.autosave = True
+    sess.json = None
+    sess.save_data = False
+    sess.storage.path = Path(str(tmpdir))
+    sess.handle_saving()
     files = list(Path(str(tmpdir)).rglob('*.json'))
     assert len(files) == 1
     assert json.load(files[0].open('rU')) == SAVE_DATA
@@ -392,14 +381,14 @@ def test_save_no_name(sess, tmpdir, monkeypatch):
 @freeze_time("2015-08-15T00:04:18.687119")
 def test_save_with_error(sess, tmpdir, monkeypatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
-    sess.reporter.save = True
-    sess.reporter.autosave = True
-    sess.reporter.json = None
-    sess.reporter.save_data = False
-    sess.reporter.storage.path = Path(str(tmpdir))
+    sess.save = True
+    sess.autosave = True
+    sess.json = None
+    sess.save_data = False
+    sess.storage.path = Path(str(tmpdir))
     for bench in sess.benchmarks:
         bench.has_error = True
-    sess.reporter.handle_saving(sess.benchmarks, sess.machine_info)
+    sess.handle_saving()
     files = list(Path(str(tmpdir)).rglob('*.json'))
     assert len(files) == 1
     assert json.load(files[0].open('rU')) == {
@@ -414,12 +403,12 @@ def test_save_with_error(sess, tmpdir, monkeypatch):
 @freeze_time("2015-08-15T00:04:18.687119")
 def test_autosave(sess, tmpdir, monkeypatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
-    sess.reporter.save = False
-    sess.reporter.autosave = True
-    sess.reporter.json = None
-    sess.reporter.save_data = False
-    sess.reporter.storage.path = Path(str(tmpdir))
-    sess.reporter.handle_saving(sess.benchmarks, sess.machine_info)
+    sess.save = False
+    sess.autosave = True
+    sess.json = None
+    sess.save_data = False
+    sess.storage.path = Path(str(tmpdir))
+    sess.handle_saving()
     files = list(Path(str(tmpdir)).rglob('*.json'))
     assert len(files) == 1
     assert json.load(files[0].open('rU')) == SAVE_DATA
