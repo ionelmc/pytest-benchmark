@@ -52,7 +52,18 @@ class ElasticsearchStorage(object):
         """
         Returns sorted records names (ids) that corresponds with project.
         """
-        return [commit_and_time for commit_and_time, _ in self.load(self._project_name)]
+        body = {
+            "size": 0,
+            "aggs": {
+                "benchmark_ids": {
+                    "terms": {
+                        "field": "benchmark_id"
+                    }
+                }
+            }
+        }
+        result = self._es.search(index=self._es_index, doc_type=self._es_doctype, body=body)
+        return sorted([record["key"] for record in result["aggregations"]["benchmark_ids"]["buckets"]])
 
     def load(self, id_prefix=None):
         """
@@ -97,7 +108,7 @@ class ElasticsearchStorage(object):
     @staticmethod
     def _benchmark_from_es_record(source_es_record):
         result = {}
-        for benchmark_key in ("group", "stats", "options", "param", "name", "params", "fullname"):
+        for benchmark_key in ("group", "stats", "options", "param", "name", "params", "fullname", "benchmark_id"):
             result[benchmark_key] = source_es_record[benchmark_key]
         return result
 
@@ -122,21 +133,29 @@ class ElasticsearchStorage(object):
                 result[key] = run_info
         return result
 
-    def load_benchmarks(self, project):
+    def load_benchmarks(self, *args):
         """
         Yield benchmarks that corresponds with project. Put path and
         source (uncommon part of path) to benchmark dict.
         """
-        r = self._search(project)
+        id_prefix = args[0] if args else None
+        r = self._search(self._project_name, id_prefix)
         for hit in r["hits"]["hits"]:
-            yield self._benchmark_from_es_record(hit["_source"])
+            bench = self._benchmark_from_es_record(hit["_source"])
+            bench.update(bench.pop("stats"))
+            bench["source"] = bench["benchmark_id"]
+            yield bench
 
     def save(self, output_json, save):
         output_benchmarks = output_json.pop("benchmarks")
         for bench in output_benchmarks:
             # add top level info from output_json dict to each record
             bench.update(output_json)
-            doc_id = "%s_%s" % (save, bench["fullname"])
+            benchmark_id = save
+            if self.default_machine_id:
+                benchmark_id = self.default_machine_id + "_" + benchmark_id
+            doc_id = benchmark_id + "_" + bench["fullname"]
+            bench["benchmark_id"] = benchmark_id
             self._es.index(
                 index=self._es_index,
                 doc_type=self._es_doctype,
@@ -182,6 +201,10 @@ class ElasticsearchStorage(object):
                         "version": {
                             "type": "string",
                             "index": "not_analyzed"
+                        },
+                        "benchmark_id": {
+                            "type": "string",
+                            "index": "not_analyzed",
                         },
                         "machine_info": {
                             "properties": {

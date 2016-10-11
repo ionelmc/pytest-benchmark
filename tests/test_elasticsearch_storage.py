@@ -34,6 +34,7 @@ tmp = SAVE_DATA.copy()
 
 ES_DATA = tmp.pop("benchmarks")[0]
 ES_DATA.update(tmp)
+ES_DATA["benchmark_id"] = "FoobarOS_commitId"
 
 
 class Namespace(object):
@@ -56,6 +57,7 @@ class MockStorage(ElasticsearchStorage):
         self._es = mock.Mock(spec=elasticsearch.Elasticsearch)
         self._es_hosts = self._es_index = self._es_doctype = 'mocked'
         self.logger = logger
+        self.default_machine_id = "FoobarOS"
 
 
 class MockSession(BenchmarkSession):
@@ -169,5 +171,5 @@ def test_handle_saving(sess, logger_output, monkeypatch):
         index='mocked',
         doc_type='mocked',
         body=ES_DATA,
-        id='commitId_tests/test_normal.py::test_xfast_parametrized[0]',
+        id='FoobarOS_commitId_tests/test_normal.py::test_xfast_parametrized[0]',
     )
