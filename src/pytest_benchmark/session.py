@@ -247,7 +247,8 @@ class BenchmarkSession(object):
                         tr.write("\n")
                     tr.write_line("ncalls\ttottime\tpercall\tcumtime\tpercall\tfilename:lineno(function)")
                     for function_info in benchmark["cprofile"]:
-                        line = "{ncalls_recursion}\t{tottime:.{prec}f}\t{tottime_per:.{prec}f}\t{cumtime:.{prec}f}\t{cumtime_per:.{prec}f}\t{function_name}".format(
+                        line = ("{ncalls_recursion}\t{tottime:.{prec}f}\t{tottime_per:.{prec}f}\t{cumtime:.{prec}f}"
+                                "\t{cumtime_per:.{prec}f}\t{function_name}").format(
                             prec=4, **function_info)
                         tr.write_line(line)
                     tr.write("\n")

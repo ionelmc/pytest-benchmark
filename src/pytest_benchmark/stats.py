@@ -213,7 +213,7 @@ class Metadata(object):
         if self.cprofile_stats:
             cprofile_list = result["cprofile"] = []
             cprofile_functions = get_cprofile_functions(self.cprofile_stats)
-            stats_columns = ["cumtime", "tottime","ncalls", "ncalls_recursion",
+            stats_columns = ["cumtime", "tottime", "ncalls", "ncalls_recursion",
                              "tottime_per", "cumtime_per", "function_name"]
             # move column first
             if cprofile is not None:

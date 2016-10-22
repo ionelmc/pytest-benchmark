@@ -401,6 +401,7 @@ def pytest_runtest_setup(item):
                     "warmup_iterations", "calibration_precision"):
                 raise ValueError("benchmark mark can't have %r keyword argument." % name)
 
+
 @pytest.mark.trylast  # force the other plugins to initialise, fixes issue with capture not being properly initialised
 def pytest_configure(config):
     config.addinivalue_line("markers", "benchmark: mark a test with custom benchmark settings.")
