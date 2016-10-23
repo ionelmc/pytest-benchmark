@@ -11,7 +11,7 @@ env:
       env: TOXENV=docs
 {% for env in tox_environments %}{{ '' }}
     - python: '{% if env.startswith('pypy-') %}pypy{% else %}{{ env[2] }}.{{ env[3] }}{% endif %}'
-    - env: TOXENV={{ env }}{% if 'cover' in env %},coveralls,codecov{% endif -%}
+      env: TOXENV={{ env }}{% if 'cover' in env %},coveralls,codecov{% endif -%}
 {% endfor %}
 
 before_install:
