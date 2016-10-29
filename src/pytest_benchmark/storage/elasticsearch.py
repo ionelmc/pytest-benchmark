@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
-import uuid
 import sys
+import uuid
 from datetime import date
 from datetime import datetime
 from decimal import Decimal

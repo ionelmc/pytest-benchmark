@@ -14,8 +14,8 @@ from .utils import first_or_value
 from .utils import get_machine_id
 from .utils import load_storage
 from .utils import load_timer
-from .utils import short_filename
 from .utils import safe_dumps
+from .utils import short_filename
 
 
 class PerformanceRegression(pytest.UsageError):

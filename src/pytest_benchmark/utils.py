@@ -15,12 +15,12 @@ from datetime import datetime
 from decimal import Decimal
 from functools import partial
 
+from .compat import PY3
+
 try:
     from urllib.parse import urlparse, parse_qs
 except ImportError:
     from urlparse import urlparse, parse_qs
-
-from .compat import PY3
 
 try:
     from subprocess import check_output

@@ -1,5 +1,5 @@
-from functools import partial
 import time
+from functools import partial
 
 import pytest
 

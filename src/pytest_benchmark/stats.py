@@ -1,10 +1,10 @@
 from __future__ import division
 from __future__ import print_function
 
+import operator
 import statistics
 from bisect import bisect_left
 from bisect import bisect_right
-import operator
 
 from .utils import cached_property
 from .utils import funcname

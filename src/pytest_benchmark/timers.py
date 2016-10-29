@@ -1,4 +1,7 @@
 from time import time as timeout_timer
+
+from .compat import XRANGE
+
 try:
     from __pypy__.time import clock_gettime
     from __pypy__.time import CLOCK_MONOTONIC
@@ -9,8 +12,6 @@ except ImportError:
     from timeit import default_timer
 else:
     default_timer = monotonic
-
-from .compat import XRANGE
 
 
 def compute_timer_precision(timer):

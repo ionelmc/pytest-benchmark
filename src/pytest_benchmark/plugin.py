@@ -16,13 +16,14 @@ from .fixture import BenchmarkFixture
 from .session import BenchmarkSession
 from .session import PerformanceRegression
 from .timers import default_timer
-from .utils import NameWrapper, parse_name_format
+from .utils import NameWrapper
 from .utils import format_dict
 from .utils import get_commit_info
 from .utils import get_current_time
 from .utils import get_tag
 from .utils import parse_columns
 from .utils import parse_compare_fail
+from .utils import parse_name_format
 from .utils import parse_rounds
 from .utils import parse_save
 from .utils import parse_seconds
