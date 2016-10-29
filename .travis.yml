@@ -588,11 +588,9 @@ matrix:
     - python: 'pypy'
       env: TOXENV=pypy-pytest30-pygal23-xdist-nocov
     - python: '3.2'
-      env: TOXENV=py32-pytest28-pygal23-nodist-nocov
+      env: TOXENV=py32-pytest28
     - python: '3.2'
-      env: TOXENV=py32-pytest29-pygal23-nodist-nocov
-    - python: '3.2'
-      env: TOXENV=py32-pytest30-pygal23-nodist-nocov
+      env: TOXENV=py32-pytest29
 before_install:
   - python --version
   - uname -a
