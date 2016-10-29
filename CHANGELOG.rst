@@ -2,8 +2,8 @@
 Changelog
 =========
 
-3.1.0 (unreleased)
-------------------
+3.1.0a1 (2016-10-29)
+--------------------
 
 * Added ``--benchmark-colums`` command line option. It selects what columns are displayed in the result table. Contributed by
   Antonio Cuni in `#34 <https://github.com/ionelmc/pytest-benchmark/pull/34>`_.
