@@ -656,6 +656,23 @@ def test_save(testdir):
     json.loads(testdir.tmpdir.join('.benchmarks').listdir()[0].join('0001_foobar.json').read())
 
 
+def test_save_extra_info(testdir):
+    test = testdir.makepyfile("""
+    def test_extra(benchmark):
+        benchmark.extra_info['foo'] = 'bar'
+        benchmark(lambda: None)
+    """)
+    result = testdir.runpytest('--doctest-modules', '--benchmark-save=foobar',
+                               '--benchmark-max-time=0.0000001', test)
+    result.stderr.fnmatch_lines([
+        "Saved benchmark data in: *",
+    ])
+    info = json.loads(testdir.tmpdir.join('.benchmarks').listdir()[0].join('0001_foobar.json').read())
+    bench_info = info['benchmarks'][0]
+    assert bench_info['name'] == 'test_extra'
+    assert bench_info['extra_info'] == {'foo': 'bar'}
+
+
 def test_histogram(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-histogram=foobar',
