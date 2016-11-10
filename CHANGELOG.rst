@@ -2,6 +2,15 @@
 Changelog
 =========
 
+3.1.0a2 (unreleased)
+--------------------
+
+* ``machine_info`` now contains more detailed information about the CPU, in
+  particular the exact model. Contributed by Antonio Cuni in `#61 <https://github.com/ionelmc/pytest-benchmark/pull/61>`_.
+* Added ``benchmark.extra_info``, which you can use to save arbitrary stuff in
+  the JSON. Contributed by Antonio Cuni in the same PR as above.
+
+
 3.1.0a1 (2016-10-29)
 --------------------
 
