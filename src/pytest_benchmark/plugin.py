@@ -322,6 +322,16 @@ def pytest_terminal_summary(terminalreporter):
         raise
 
 
+def get_cpu_info():
+    import cpuinfo
+    all_info = cpuinfo.get_cpu_info()
+    all_info = all_info or {}
+    info = {}
+    for key in ('vendor_id', 'hardware', 'brand'):
+        info[key] = all_info.get(key, 'unknown')
+    return info
+
+
 def pytest_benchmark_generate_machine_info():
     python_implementation = platform.python_implementation()
     python_implementation_version = platform.python_version()
@@ -339,7 +349,8 @@ def pytest_benchmark_generate_machine_info():
         "python_version": platform.python_version(),
         "python_build": platform.python_build(),
         "release": platform.release(),
-        "system": platform.system()
+        "system": platform.system(),
+        "cpu": get_cpu_info(),
     }
 
 

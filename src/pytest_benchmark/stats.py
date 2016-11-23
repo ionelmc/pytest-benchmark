@@ -170,6 +170,7 @@ class Metadata(object):
         self.group = fixture.group
         self.param = fixture.param
         self.params = fixture.params
+        self.extra_info = fixture.extra_info
         self.cprofile_stats = fixture.cprofile_stats
 
         self.iterations = iterations
@@ -206,6 +207,7 @@ class Metadata(object):
             "fullname": self.fullname,
             "params": self.params,
             "param": self.param,
+            "extra_info": self.extra_info,
             "options": dict(
                 (k, funcname(v) if callable(v) else v) for k, v in self.options.items()
             )

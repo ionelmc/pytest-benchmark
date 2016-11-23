@@ -51,6 +51,7 @@ class BenchmarkFixture(object):
             self.params = None
         self.group = group
         self.has_error = False
+        self.extra_info = {}
 
         self._disable_gc = disable_gc
         self._timer = timer.target

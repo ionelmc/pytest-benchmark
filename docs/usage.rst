@@ -186,6 +186,19 @@ You can set per-test options with the ``benchmark`` marker:
         # Note: this code is not measured.
         assert result is None
 
+
+Extra info
+==========
+
+You can set arbirary values in the ``benchmark.extra_info`` dictionary, which
+will be saved in the JSON if you use ``--benchmark-autosave`` or similar:
+
+.. code-block:: python
+
+    def test_my_stuff(benchmark):
+        benchmark.extra_info['foo'] = 'bar'
+        benchmark(time.sleep, 0.02)
+
 Patch utilities
 ===============
 
