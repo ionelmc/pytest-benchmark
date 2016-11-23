@@ -68,8 +68,9 @@ def add_display_options(addoption, prefix="benchmark-"):
     addoption(
         "--{0}columns".format(prefix),
         metavar="LABELS", type=parse_columns,
-        default="min, max, mean, stddev, median, iqr, outliers, rounds, iterations",
-        help="Comma-separated list of columns to show in the result table. Default: %(default)r"
+        default=["min", "max", "mean", "stddev", "median", "iqr", "outliers", "rounds", "iterations"],
+        help="Comma-separated list of columns to show in the result table. Default: "
+             "'min, max, mean, stddev, median, iqr, outliers, rounds, iterations'"
     )
     addoption(
         "--{0}name".format(prefix),
@@ -254,6 +255,7 @@ def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info
             ),
             fslocation=benchmarksession.storage.location
         )
+
 
 if hasattr(pytest, 'hookimpl'):
     _hookwrapper = pytest.hookimpl(hookwrapper=True)
