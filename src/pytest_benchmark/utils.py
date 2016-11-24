@@ -74,11 +74,7 @@ class NameWrapper(object):
 
 def get_tag(project_name=None):
     info = get_commit_info(project_name)
-    parts = []
-    if info['project']:
-        parts.append(info['project'])
-    parts.append(info['id'])
-    parts.append(get_current_time())
+    parts = [info['id'], get_current_time()]
     if info['dirty']:
         parts.append("uncommited-changes")
     return "_".join(parts)
