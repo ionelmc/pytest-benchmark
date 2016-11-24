@@ -419,5 +419,6 @@ def pytest_runtest_setup(item):
 @pytest.mark.trylast  # force the other plugins to initialise, fixes issue with capture not being properly initialised
 def pytest_configure(config):
     config.addinivalue_line("markers", "benchmark: mark a test with custom benchmark settings.")
-    config._benchmarksession = BenchmarkSession(config)
-    config.pluginmanager.register(config._benchmarksession, "pytest-benchmark")
+    bs = config._benchmarksession = BenchmarkSession(config)
+    bs.handle_loading()
+    config.pluginmanager.register(bs, "pytest-benchmark")

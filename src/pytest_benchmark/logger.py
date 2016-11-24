@@ -45,9 +45,11 @@ class Logger(object):
         self.term.line(text, red=True, bold=True)
         self.term.sep("-", red=True, bold=True)
 
-    def info(self, text, **kwargs):
+    def info(self, text, newline=True, **kwargs):
         if not kwargs or kwargs == {'bold': True}:
             kwargs['purple'] = True
+        if newline:
+            self.term.line("")
         self.term.line(text, **kwargs)
 
     def debug(self, text, **kwargs):

@@ -193,12 +193,11 @@ class BenchmarkSession(object):
                 compared_mapping[path] = dict(
                     (bench['fullname'], bench) for bench in compared_benchmark['benchmarks']
                 )
-                self.logger.info("Comparing against benchmarks from: %s" % path)
+                self.logger.info("Comparing against benchmarks from: %s" % path, newline=False)
         self.compared_mapping = compared_mapping
 
     def finish(self):
         self.handle_saving()
-        self.handle_loading()
         prepared_benchmarks = list(self.prepare_benchmarks())
         if prepared_benchmarks:
             self.groups = self.config.hook.pytest_benchmark_group_stats(
