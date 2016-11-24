@@ -130,8 +130,11 @@ class BenchmarkSession(object):
         self.logger.info("Wrote benchmark data in: %s" % self.json, purple=True)
 
     def handle_saving(self):
-        save = self.benchmarks and self.save or self.autosave
+        save = self.save or self.autosave
         if save or self.json:
+            if not self.benchmarks:
+                self.logger.warn("BENCHMARK-U2", "Not saving anything, no benchmarks have been run!")
+                return
             commit_info = self.config.hook.pytest_benchmark_generate_commit_info(config=self.config)
             self.config.hook.pytest_benchmark_update_commit_info(config=self.config, commit_info=commit_info)
 
