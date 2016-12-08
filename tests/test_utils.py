@@ -66,6 +66,10 @@ def test_get_commit_info(scm, testdir):
     assert 'id' in out
 
 def test_get_branch_info(scm, testdir):
+    # make an initial commit
+    testdir.tmpdir.join('foo.txt').ensure(file=True)
+    subprocess.check_call([scm, 'add', 'foo.txt'])
+    subprocess.check_call([scm, 'commit', '-m', 'added foo.txt'])
     branch = get_branch_info()
     expected = 'master' if scm == 'git' else 'default'
     assert branch == expected
