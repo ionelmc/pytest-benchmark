@@ -114,6 +114,7 @@ def get_project_name():
     else:
         return os.path.basename(os.getcwd())
 
+
 def get_branch_info():
     def cmd(s):
         args = s.split()
