@@ -114,11 +114,27 @@ def get_project_name():
     else:
         return os.path.basename(os.getcwd())
 
+def get_branch_info():
+    if os.path.exists('.git'):
+        try:
+            branch = check_output('git symbolic-ref --short -q HEAD'.split())
+            return branch.strip()
+        except subprocess.CalledProcessError:
+            return '(detached head)'
+    elif os.path.exists('.hg'):
+        try:
+            branch = check_output('hg branch'.split())
+            return branch.strip()
+        except subprocess.CalledProcessError:
+            return 'unknown'
+    else:
+        return 'unknown'
 
 def get_commit_info(project_name=None):
     dirty = False
     commit = 'unversioned'
     project_name = project_name or get_project_name()
+    branch = get_branch_info()
     try:
         if os.path.exists('.git'):
             desc = check_output('git describe --dirty --always --long --abbrev=40'.split(),
@@ -137,6 +153,7 @@ def get_commit_info(project_name=None):
             'id': commit,
             'dirty': dirty,
             'project': project_name,
+            'branch': branch,
         }
     except Exception as exc:
         return {
@@ -144,6 +161,7 @@ def get_commit_info(project_name=None):
             'dirty': dirty,
             'error': repr(exc),
             'project': project_name,
+            'branch': branch,
         }
 
 

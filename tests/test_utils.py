@@ -7,6 +7,7 @@ from pytest import mark
 
 from pytest_benchmark.utils import clonefunc
 from pytest_benchmark.utils import get_commit_info
+from pytest_benchmark.utils import get_branch_info
 from pytest_benchmark.utils import get_project_name
 from pytest_benchmark.utils import parse_columns
 from pytest_benchmark.utils import parse_elasticsearch_storage
@@ -31,8 +32,9 @@ def test_clonefunc_not_function():
     assert clonefunc(1) == 1
 
 
-@mark.parametrize('scm', ['git', 'hg'])
-def test_get_commit_info(scm, testdir):
+@pytest.fixture(params=('git', 'hg'))
+def scm(request, testdir):
+    scm = request.param
     if not distutils.spawn.find_executable(scm):
         pytest.skip("%r not availabe on $PATH")
     subprocess.check_call([scm, 'init', '.'])
@@ -44,11 +46,15 @@ def test_get_commit_info(scm, testdir):
 [ui]
 username = you <you@example.com>
 """)
+    return scm
 
+def test_get_commit_info(scm, testdir):
     testdir.makepyfile('asdf')
     subprocess.check_call([scm, 'add', 'test_get_commit_info.py'])
     subprocess.check_call([scm, 'commit', '-m', 'asdf'])
     out = get_commit_info()
+    branch = 'master' if scm == 'git' else 'default'
+    assert out['branch'] == branch
 
     assert out.get('dirty') == False
     assert 'id' in out
@@ -59,6 +65,25 @@ username = you <you@example.com>
     assert out.get('dirty') == True
     assert 'id' in out
 
+def test_get_branch_info(scm, testdir):
+    branch = get_branch_info()
+    expected = 'master' if scm == 'git' else 'default'
+    assert branch == expected
+    #
+    # switch to a branch
+    if scm == 'git':
+        subprocess.check_call(['git', 'checkout', '-b', 'mybranch'])
+    else:
+        subprocess.check_call(['hg', 'branch', 'mybranch'])
+    branch = get_branch_info()
+    assert branch == 'mybranch'
+    #
+    # git only: test detached head
+    if scm == 'git':
+        subprocess.check_call(['git', 'commit', '--allow-empty', '-m', '...'])
+        subprocess.check_call(['git', 'commit', '--allow-empty', '-m', '...'])
+        subprocess.check_call(['git', 'checkout', 'HEAD~1'])
+        assert get_branch_info() == '(detached head)'
 
 def test_parse_warmup():
     assert parse_warmup('yes') == True
