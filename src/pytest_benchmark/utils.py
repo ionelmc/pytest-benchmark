@@ -117,20 +117,19 @@ def get_project_name():
 def get_branch_info():
     def cmd(s):
         args = s.split()
-        return check_output(args, stderr=subprocess.STDOUT)
+        return check_output(args, stderr=subprocess.STDOUT, universal_newlines=True)
     #
     try:
         if os.path.exists('.git'):
-            branch = cmd('git rev-parse --abbrev-ref HEAD')
+            branch = cmd('git rev-parse --abbrev-ref HEAD').strip()
             if branch == 'HEAD':
-                branch = '(detached head)'
-            return branch.strip()
+                return '(detached head)'
+            return branch
         elif os.path.exists('.hg'):
-            branch = cmd('hg branch')
-            return branch.strip()
+            return cmd('hg branch').strip()
         else:
             return 'unknown'
-    except subprocess.CalledProcessError, e:
+    except subprocess.CalledProcessError as e:
         return 'ERROR: %s' % e.output
 
 
