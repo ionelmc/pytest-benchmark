@@ -115,20 +115,24 @@ def get_project_name():
         return os.path.basename(os.getcwd())
 
 def get_branch_info():
-    if os.path.exists('.git'):
-        try:
-            branch = check_output('git symbolic-ref --short -q HEAD'.split())
+    def cmd(s):
+        args = s.split()
+        return check_output(args, stderr=subprocess.STDOUT)
+    #
+    try:
+        if os.path.exists('.git'):
+            branch = cmd('git rev-parse --abbrev-ref HEAD')
+            if branch == 'HEAD':
+                branch = '(detached head)'
             return branch.strip()
-        except subprocess.CalledProcessError:
-            return '(detached head)'
-    elif os.path.exists('.hg'):
-        try:
-            branch = check_output('hg branch'.split())
+        elif os.path.exists('.hg'):
+            branch = cmd('hg branch')
             return branch.strip()
-        except subprocess.CalledProcessError:
+        else:
             return 'unknown'
-    else:
-        return 'unknown'
+    except subprocess.CalledProcessError, e:
+        return 'ERROR: %s' % e.output
+
 
 def get_commit_info(project_name=None):
     dirty = False
