@@ -6,8 +6,8 @@ import pytest
 from pytest import mark
 
 from pytest_benchmark.utils import clonefunc
-from pytest_benchmark.utils import get_commit_info
 from pytest_benchmark.utils import get_branch_info
+from pytest_benchmark.utils import get_commit_info
 from pytest_benchmark.utils import get_project_name
 from pytest_benchmark.utils import parse_columns
 from pytest_benchmark.utils import parse_elasticsearch_storage
