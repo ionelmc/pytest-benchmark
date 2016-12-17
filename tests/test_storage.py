@@ -160,6 +160,7 @@ def test_rendering(sess):
     sess.histogram = os.path.join('docs', 'sample')
     sess.compare = '*/*'
     sess.sort = 'name'
+    sess.handle_loading()
     sess.finish()
     sess.display(Namespace(
         ensure_newline=lambda: None,

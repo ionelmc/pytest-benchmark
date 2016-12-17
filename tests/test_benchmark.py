@@ -46,8 +46,8 @@ def test_help(testdir):
         "  --benchmark-save=NAME",
         "                        Save the current run into 'STORAGE-",
         "                        PATH/counter_NAME.json'.",
-        "  --benchmark-autosave  Autosave the current run into 'STORAGE-PATH/counter*",
-        "                        *.json",
+        "  --benchmark-autosave  Autosave the current run into 'STORAGE-",
+        "                        PATH/counter*.json",
         "  --benchmark-save-data",
         "                        Use this to make --benchmark-save and --benchmark-",
         "                        autosave include all the timing data, not just the",
@@ -551,12 +551,12 @@ def test_compare(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0001',
                                '--benchmark-compare-fail=min:0.1', test)
     result.stderr.fnmatch_lines([
-        "Comparing against benchmarks from: *0001_test_compare0_unversioned_*.json",
+        "Comparing against benchmarks from: *0001_unversioned_*.json",
     ])
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0001',
                                '--benchmark-compare-fail=min:1%', test)
     result.stderr.fnmatch_lines([
-        "Comparing against benchmarks from: *0001_test_compare0_unversioned_*.json",
+        "Comparing against benchmarks from: *0001_unversioned_*.json",
     ])
 
 
@@ -566,12 +566,12 @@ def test_compare_last(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare',
                                '--benchmark-compare-fail=min:0.1', test)
     result.stderr.fnmatch_lines([
-        "Comparing against benchmarks from: *0001_test_compare_last0_unversioned_*.json",
+        "Comparing against benchmarks from: *0001_unversioned_*.json",
     ])
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare',
                                '--benchmark-compare-fail=min:1%', test)
     result.stderr.fnmatch_lines([
-        "Comparing against benchmarks from: *0001_test_compare_last0_unversioned_*.json",
+        "Comparing against benchmarks from: *0001_unversioned_*.json",
     ])
 
 
