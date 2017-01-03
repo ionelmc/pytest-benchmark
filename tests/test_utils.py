@@ -48,6 +48,7 @@ username = you <you@example.com>
 """)
     return scm
 
+
 def test_get_commit_info(scm, testdir):
     testdir.makepyfile('asdf')
     subprocess.check_call([scm, 'add', 'test_get_commit_info.py'])
@@ -64,6 +65,7 @@ def test_get_commit_info(scm, testdir):
 
     assert out.get('dirty') == True
     assert 'id' in out
+
 
 def test_get_branch_info(scm, testdir):
     # make an initial commit
@@ -88,6 +90,16 @@ def test_get_branch_info(scm, testdir):
         subprocess.check_call(['git', 'commit', '--allow-empty', '-m', '...'])
         subprocess.check_call(['git', 'checkout', 'HEAD~1'])
         assert get_branch_info() == '(detached head)'
+
+
+def test_no_branch_info(testdir):
+    assert get_branch_info() == '(unknown vcs)'
+
+
+def test_branch_info_error(testdir):
+    testdir.mkdir('.git')
+    assert get_branch_info() == '(error: fatal: Not a git repository (or any of the parent directories): .git)'
+
 
 def test_parse_warmup():
     assert parse_warmup('yes') == True

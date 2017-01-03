@@ -115,7 +115,6 @@ def get_branch_info():
     def cmd(s):
         args = s.split()
         return check_output(args, stderr=subprocess.STDOUT, universal_newlines=True)
-    #
     try:
         if os.path.exists('.git'):
             branch = cmd('git rev-parse --abbrev-ref HEAD').strip()
@@ -125,9 +124,9 @@ def get_branch_info():
         elif os.path.exists('.hg'):
             return cmd('hg branch').strip()
         else:
-            return 'unknown'
+            return '(unknown vcs)'
     except subprocess.CalledProcessError as e:
-        return 'ERROR: %s' % e.output
+        return '(error: %s)' % e.output.strip()
 
 
 def get_commit_info(project_name=None):
