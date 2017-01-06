@@ -9,7 +9,7 @@ cookiecutter:
     codeclimate: 'yes'
     codecov: 'yes'
     command_line_interface: 'no'
-    command_line_interface_bin_name: pytest-benchmark
+    command_line_interface_bin_name: py.test-benchmark
     coveralls: 'yes'
     distribution_name: pytest-benchmark
     email: contact@ionelmc.ro
@@ -21,7 +21,7 @@ cookiecutter:
     project_short_description: A ``py.test`` fixture for benchmarking code. It will
         group the tests into rounds that are calibrated to the chosen timer. See calibration_
         and FAQ_.
-    release_date: '2015-11-08'
+    release_date: 'unreleased'
     repo_name: pytest-benchmark
     requiresio: 'yes'
     scrutinizer: 'yes'
@@ -31,6 +31,6 @@ cookiecutter:
     test_matrix_separate_coverage: 'yes'
     test_runner: pytest
     travis: 'yes'
-    version: 3.0.0
+    version: 3.1.0a1
     website: http://blog.ionelmc.ro
-    year: 2014-2016
+    year: 2014-2017

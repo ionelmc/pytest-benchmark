@@ -23,7 +23,7 @@ if os.getenv('SPELLCHECK'):
 source_suffix = '.rst'
 master_doc = 'index'
 project = 'pytest-benchmark'
-year = '2014-2016'
+year = '2014-2017'
 author = 'Ionel Cristian Mărieș'
 copyright = '{0}, {1}'.format(year, author)
 version = release = '3.1.0a1'
