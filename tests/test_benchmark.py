@@ -60,7 +60,7 @@ def test_help(testdir):
         "                        Compare the current run against run NUM (or prefix of",
         "                        _id in elasticsearch) or the latest saved run if",
         "                        unspecified.",
-        "  --benchmark-compare-fail=EXPR=[EXPR=...]",
+        "  --benchmark-compare-fail=EXPR?[[]EXPR?...[]]",
         "                        Fail test if performance regresses according to given",
         "                        EXPR (eg: min:5% or mean:0.001 for number of seconds).",
         "                        Can be used multiple times.",
