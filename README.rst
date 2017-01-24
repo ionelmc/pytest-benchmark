@@ -14,7 +14,8 @@ Overview
         | |coveralls| |codecov|
         | |landscape| |scrutinizer| |codacy| |codeclimate|
     * - package
-      - |version| |downloads| |wheel| |supported-versions| |supported-implementations|
+      - | |version| |downloads| |wheel| |supported-versions| |supported-implementations|
+        | |commits-since|
 
 .. |docs| image:: https://readthedocs.org/projects/pytest-benchmark/badge/?style=flat
     :target: https://readthedocs.org/projects/pytest-benchmark
@@ -59,6 +60,10 @@ Overview
 .. |version| image:: https://img.shields.io/pypi/v/pytest-benchmark.svg?style=flat
     :alt: PyPI Package latest release
     :target: https://pypi.python.org/pypi/pytest-benchmark
+
+.. |commits-since| image:: https://img.shields.io/github/commits-since/ionelmc/pytest-benchmark/v3.1.0a1.svg
+    :alt: Commits since latest release
+    :target: https://github.com/ionelmc/pytest-benchmark/compare/v3.1.0a1...master
 
 .. |downloads| image:: https://img.shields.io/pypi/dm/pytest-benchmark.svg?style=flat
     :alt: PyPI Package monthly downloads
