@@ -9,6 +9,7 @@ Changelog
   particular the exact model. Contributed by Antonio Cuni in `#61 <https://github.com/ionelmc/pytest-benchmark/pull/61>`_.
 * Added ``benchmark.extra_info``, which you can use to save arbitrary stuff in
   the JSON. Contributed by Antonio Cuni in the same PR as above.
+* Fix histograms with latest PyGal version.
 
 
 3.1.0a1 (2016-10-29)

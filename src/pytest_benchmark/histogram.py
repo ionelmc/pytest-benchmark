@@ -2,10 +2,10 @@ import py
 
 from .utils import TIME_UNITS
 from .utils import slugify
+from .utils import is_list_like
 
 try:
     from pygal.graph.box import Box
-    from pygal.graph.graph import is_list_like
     from pygal.style import DefaultStyle
 except ImportError as exc:
     raise ImportError(exc.args, "Please install pygal and pygaljs or pytest-benchmark[histogram]")
