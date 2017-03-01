@@ -9,3 +9,4 @@ Authors
 * Thomas Waldmann - https://github.com/ThomasWaldmann
 * Antonio Cuni - http://antocuni.eu/en/
 * Petr Šebek - https://github.com/Artimi
+* Swen Kooij - https://github.com/Photonios
