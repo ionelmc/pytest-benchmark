@@ -621,8 +621,3 @@ def get_cprofile_functions(stats):
                            function_name=function_name))
 
     return result
-
-
-def is_list_like(value):
-    """Return whether value is an iterable but not a mapping / string"""
-    return isinstance(value, Iterable) and not isinstance(value, (base, dict))

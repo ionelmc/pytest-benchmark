@@ -1,11 +1,13 @@
+from collections import Iterable
+
 import py
 
 from .utils import TIME_UNITS
 from .utils import slugify
-from .utils import is_list_like
 
 try:
     from pygal.graph.box import Box
+    from pygal._compat import is_list_like
     from pygal.style import DefaultStyle
 except ImportError as exc:
     raise ImportError(exc.args, "Please install pygal and pygaljs or pytest-benchmark[histogram]")
@@ -28,7 +30,7 @@ class CustomBox(Box):
             val = x.values
         else:
             val = x
-        if is_list_like(val):
+        if isinstance(val, Iterable):
             return self._value_format(val), val[7]
         else:
             return sup(x, *args)
