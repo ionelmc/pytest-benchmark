@@ -21,7 +21,7 @@ cookiecutter:
     project_short_description: A ``py.test`` fixture for benchmarking code. It will
         group the tests into rounds that are calibrated to the chosen timer. See calibration_
         and FAQ_.
-    release_date: 'unreleased'
+    release_date: unreleased
     repo_name: pytest-benchmark
     requiresio: 'yes'
     scrutinizer: 'yes'

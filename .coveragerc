@@ -1,3 +1,6 @@
+[paths]
+source = src
+
 [run]
 branch = true
 source =

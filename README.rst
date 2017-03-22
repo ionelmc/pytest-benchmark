@@ -14,7 +14,7 @@ Overview
         | |coveralls| |codecov|
         | |landscape| |scrutinizer| |codacy| |codeclimate|
     * - package
-      - | |version| |downloads| |wheel| |supported-versions| |supported-implementations|
+      - | |version| |wheel| |supported-versions| |supported-implementations|
         | |commits-since|
 
 .. |docs| image:: https://readthedocs.org/projects/pytest-benchmark/badge/?style=flat
@@ -57,7 +57,7 @@ Overview
    :target: https://codeclimate.com/github/ionelmc/pytest-benchmark
    :alt: CodeClimate Quality Status
 
-.. |version| image:: https://img.shields.io/pypi/v/pytest-benchmark.svg?style=flat
+.. |version| image:: https://img.shields.io/pypi/v/pytest-benchmark.svg
     :alt: PyPI Package latest release
     :target: https://pypi.python.org/pypi/pytest-benchmark
 
@@ -65,23 +65,19 @@ Overview
     :alt: Commits since latest release
     :target: https://github.com/ionelmc/pytest-benchmark/compare/v3.1.0a1...master
 
-.. |downloads| image:: https://img.shields.io/pypi/dm/pytest-benchmark.svg?style=flat
-    :alt: PyPI Package monthly downloads
-    :target: https://pypi.python.org/pypi/pytest-benchmark
-
-.. |wheel| image:: https://img.shields.io/pypi/wheel/pytest-benchmark.svg?style=flat
+.. |wheel| image:: https://img.shields.io/pypi/wheel/pytest-benchmark.svg
     :alt: PyPI Wheel
     :target: https://pypi.python.org/pypi/pytest-benchmark
 
-.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/pytest-benchmark.svg?style=flat
+.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/pytest-benchmark.svg
     :alt: Supported versions
     :target: https://pypi.python.org/pypi/pytest-benchmark
 
-.. |supported-implementations| image:: https://img.shields.io/pypi/implementation/pytest-benchmark.svg?style=flat
+.. |supported-implementations| image:: https://img.shields.io/pypi/implementation/pytest-benchmark.svg
     :alt: Supported implementations
     :target: https://pypi.python.org/pypi/pytest-benchmark
 
-.. |scrutinizer| image:: https://img.shields.io/scrutinizer/g/ionelmc/pytest-benchmark/master.svg?style=flat
+.. |scrutinizer| image:: https://img.shields.io/scrutinizer/g/ionelmc/pytest-benchmark/master.svg
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/ionelmc/pytest-benchmark/
 
