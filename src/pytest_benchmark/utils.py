@@ -15,6 +15,11 @@ from collections import Iterable
 from datetime import datetime
 from decimal import Decimal
 from functools import partial
+from os.path import basename
+from os.path import dirname
+from os.path import exists
+from os.path import join
+from os.path import split
 
 from .compat import PY3
 
@@ -24,12 +29,13 @@ except ImportError:
     from urlparse import urlparse, parse_qs
 
 try:
-    from subprocess import check_output
+    from subprocess import check_output, CalledProcessError
 except ImportError:
     class CalledProcessError(subprocess.CalledProcessError):
         def __init__(self, returncode, cmd, output=None):
             super(CalledProcessError, self).__init__(returncode, cmd)
             self.output = output
+
 
     def check_output(*popenargs, **kwargs):
         if 'stdout' in kwargs:
@@ -95,39 +101,72 @@ def get_machine_id():
     )
 
 
-def get_project_name():
-    if subprocess.call(["git", "rev-parse"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) == 0:
-        try:
-            project_address = check_output("git config --local remote.origin.url".split())
-            if isinstance(project_address, bytes) and str != bytes:
-                project_address = project_address.decode()
-            project_name = re.findall(r'/([^/]*)\.git', project_address)[0]
-            return project_name
-        except (IndexError, subprocess.CalledProcessError):
-            return os.path.basename(os.getcwd())
-    elif subprocess.call(["hg", "id", "--id"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) == 0:
-        try:
-            project_address = check_output("hg path default".split())
-            project_address = project_address.decode()
-            project_name = project_address.split("/")[-1]
-            return project_name.strip()
-        except (IndexError, subprocess.CalledProcessError):
-            return os.path.basename(os.getcwd())
-    else:
-        return os.path.basename(os.getcwd())
+class Fallback(object):
+    def __init__(self, *exceptions):
+        self.functions = []
+        self.exceptions = exceptions
+
+    def __call__(self, *args, **kwargs):
+        for func in self.functions:
+            try:
+                return func(*args, **kwargs)
+            except self.exceptions:
+                continue
+        else:
+            raise NotImplementedError("Must have an fallback implementation for %s" % self.functions[0])
+
+    def register(self, other):
+        self.functions.append(other)
+        return self
+
+
+get_project_name = Fallback(IndexError, CalledProcessError)
+
+
+@get_project_name.register
+def get_project_name_git():
+    project_address = check_output(['git', 'config', '--local', 'remote.origin.url'])
+    if isinstance(project_address, bytes) and str != bytes:
+        project_address = project_address.decode()
+    project_name = [i for i in re.split(r'[/:\s]|\.git', project_address) if i][-1]
+    return project_name.strip()
+
+
+@get_project_name.register
+def get_project_name_hg():
+    project_address = check_output(['hg', 'path', 'default'])
+    project_address = project_address.decode()
+    project_name = project_address.split("/")[-1]
+    return project_name.strip()
+
+
+@get_project_name.register
+def get_project_name_default():
+    return basename(os.getcwd())
+
+
+def in_any_parent(name, path=None):
+    prev = None
+    if not path:
+        path = os.getcwd()
+    while path and prev != path and not exists(join(path, name)):
+        prev = path
+        path = dirname(path)
+    return exists(join(path, name))
 
 
 def get_branch_info():
     def cmd(s):
         args = s.split()
         return check_output(args, stderr=subprocess.STDOUT, universal_newlines=True)
+
     try:
-        if subprocess.call(["git", "rev-parse"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) == 0:
+        if in_any_parent('.git'):
             branch = cmd('git rev-parse --abbrev-ref HEAD').strip()
             if branch == 'HEAD':
                 return '(detached head)'
             return branch
-        elif subprocess.call(["hg", "id", "--id"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) == 0:
+        elif in_any_parent('.hg'):
             return cmd('hg branch').strip()
         else:
             return '(unknown vcs)'
@@ -141,7 +180,7 @@ def get_commit_info(project_name=None):
     project_name = project_name or get_project_name()
     branch = get_branch_info()
     try:
-        if subprocess.call(["git", "rev-parse"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) == 0:
+        if in_any_parent('.git'):
             desc = check_output('git describe --dirty --always --long --abbrev=40'.split(),
                                 universal_newlines=True).strip()
             desc = desc.split('-')
@@ -149,7 +188,7 @@ def get_commit_info(project_name=None):
                 dirty = True
                 desc.pop()
             commit = desc[-1].strip('g')
-        elif subprocess.call(["hg", "id", "--id"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) == 0:
+        elif in_any_parent('.hg'):
             desc = check_output('hg id --id --debug'.split(), universal_newlines=True).strip()
             if desc[-1] == '+':
                 dirty = True
@@ -243,7 +282,8 @@ class DifferenceRegressionCheck(RegressionCheck):
 
 def parse_compare_fail(string,
                        rex=re.compile('^(?P<field>min|max|mean|median|stddev|iqr):'
-                                      '((?P<percentage>[0-9]?[0-9])%|(?P<difference>[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?))$')):
+                                      '((?P<percentage>[0-9]?[0-9])%|(?P<difference>[0-9]*\.?[0-9]+([eE][-+]?['
+                                      '0-9]+)?))$')):
     m = rex.match(string)
     if m:
         g = m.groupdict()
@@ -270,7 +310,7 @@ def parse_warmup(string):
 def name_formatter_short(bench):
     name = bench["name"]
     if bench["source"]:
-        name = "%s (%.4s)" % (name, os.path.split(bench["source"])[-1])
+        name = "%s (%.4s)" % (name, split(bench["source"])[-1])
     if name.startswith("test_"):
         name = name[5:]
     return name
@@ -361,7 +401,8 @@ def parse_save(string):
 
 def parse_elasticsearch_storage(string, default_index="benchmark", default_doctype="benchmark"):
     storage_url = urlparse(string)
-    hosts = ["{scheme}://{netloc}".format(scheme=storage_url.scheme, netloc=netloc) for netloc in storage_url.netloc.split(',')]
+    hosts = ["{scheme}://{netloc}".format(scheme=storage_url.scheme, netloc=netloc) for netloc in
+             storage_url.netloc.split(',')]
     index = default_index
     doctype = default_doctype
     if storage_url.path and storage_url.path != "/":
@@ -485,6 +526,7 @@ def report_progress(iterable, terminal_reporter, format_string, **kwargs):
             string = format_string.format(pos=pos + 1, total=total, value=item, **kwargs)
             terminal_reporter.rewrite(string, black=True, bold=True)
             yield string, item
+
     return progress_reporting_wrapper()
 
 
@@ -556,7 +598,7 @@ def get_cprofile_functions(stats):
     """
     result = []
     # this assumes that you run py.test from project root dir
-    project_dir_parent = os.path.dirname(os.getcwd())
+    project_dir_parent = dirname(os.getcwd())
 
     for function_info, run_info in stats.stats.items():
         file_path = function_info[0]

@@ -4,7 +4,6 @@ import subprocess
 
 import pytest
 from pytest import mark
-
 from pytest_benchmark.utils import clonefunc
 from pytest_benchmark.utils import get_branch_info
 from pytest_benchmark.utils import get_commit_info
@@ -32,6 +31,14 @@ def test_clonefunc_not_function():
     assert clonefunc(1) == 1
 
 
+@pytest.yield_fixture(params=(True, False))
+def crazytestdir(request, testdir):
+    if request.param:
+        testdir.tmpdir.join('foo', 'bar').ensure(dir=1).chdir()
+
+    yield testdir
+
+
 @pytest.fixture(params=('git', 'hg'))
 def scm(request, testdir):
     scm = request.param
@@ -49,8 +56,9 @@ username = you <you@example.com>
     return scm
 
 
-def test_get_commit_info(scm, testdir):
-    testdir.makepyfile('asdf')
+def test_get_commit_info(scm, crazytestdir):
+    with open('test_get_commit_info.py', 'w') as fh:
+        fh.write('asdf')
     subprocess.check_call([scm, 'add', 'test_get_commit_info.py'])
     subprocess.check_call([scm, 'commit', '-m', 'asdf'])
     out = get_commit_info()
@@ -60,7 +68,8 @@ def test_get_commit_info(scm, testdir):
     assert out.get('dirty') == False
     assert 'id' in out
 
-    testdir.makepyfile('sadf')
+    with open('test_get_commit_info.py', 'w') as fh:
+        fh.write('sadf')
     out = get_commit_info()
 
     assert out.get('dirty') == True
@@ -120,7 +129,11 @@ def test_parse_columns():
 
 
 @mark.parametrize('scm', [None, 'git', 'hg'])
-@mark.parametrize('set_remote', [True, False])
+@mark.parametrize('set_remote', [
+    False,
+    'https://example.com/pytest_benchmark_repo',
+    'https://example.com/pytest_benchmark_repo.git',
+    'foo@example.com:pytest_benchmark_repo.git'])
 def test_get_project_name(scm, set_remote, testdir):
     if scm is None:
         assert get_project_name().startswith("test_get_project_name")
@@ -129,13 +142,15 @@ def test_get_project_name(scm, set_remote, testdir):
         pytest.skip("%r not availabe on $PATH")
     subprocess.check_call([scm, 'init', '.'])
     if scm == 'git' and set_remote:
-        subprocess.check_call('git config  remote.origin.url https://example.com/pytest_benchmark_repo.git'.split())
-    elif scm == 'hg'and set_remote:
-        testdir.tmpdir.join('.hg', 'hgrc').write("[ui]\n"
+        subprocess.check_call(['git', 'config', 'remote.origin.url', set_remote])
+    elif scm == 'hg' and set_remote:
+        set_remote = set_remote.replace('.git', '')
+        set_remote = set_remote.replace('.com:', '/')
+        testdir.tmpdir.join('.hg', 'hgrc').write(
+            "[ui]\n"
             "username = you <you@example.com>\n"
             "[paths]\n"
-            "default = https://example.com/pytest_benchmark_repo\n"
-                                                 )
+            "default = %s\n" % set_remote)
     if set_remote:
         assert get_project_name() == "pytest_benchmark_repo"
     else:
@@ -144,9 +159,15 @@ def test_get_project_name(scm, set_remote, testdir):
 
 
 def test_parse_elasticsearch_storage():
-    assert parse_elasticsearch_storage("http://localhost:9200") == (["http://localhost:9200"], "benchmark", "benchmark", "pytest-benchmark")
-    assert parse_elasticsearch_storage("http://localhost:9200/benchmark2") == (["http://localhost:9200"], "benchmark2", "benchmark", "pytest-benchmark")
-    assert parse_elasticsearch_storage("http://localhost:9200/benchmark2/benchmark2") == (["http://localhost:9200"], "benchmark2", "benchmark2", "pytest-benchmark")
-    assert parse_elasticsearch_storage("http://host1:9200,host2:9200") == (["http://host1:9200", "http://host2:9200"], "benchmark", "benchmark", "pytest-benchmark")
-    assert parse_elasticsearch_storage("http://host1:9200,host2:9200/benchmark2") == (["http://host1:9200", "http://host2:9200"], "benchmark2", "benchmark", "pytest-benchmark")
-    assert parse_elasticsearch_storage("http://localhost:9200/benchmark2/benchmark2?project_name=project_name") == (["http://localhost:9200"], "benchmark2", "benchmark2", "project_name")
+    assert parse_elasticsearch_storage("http://localhost:9200") == (
+    ["http://localhost:9200"], "benchmark", "benchmark", "pytest-benchmark")
+    assert parse_elasticsearch_storage("http://localhost:9200/benchmark2") == (
+    ["http://localhost:9200"], "benchmark2", "benchmark", "pytest-benchmark")
+    assert parse_elasticsearch_storage("http://localhost:9200/benchmark2/benchmark2") == (
+    ["http://localhost:9200"], "benchmark2", "benchmark2", "pytest-benchmark")
+    assert parse_elasticsearch_storage("http://host1:9200,host2:9200") == (
+    ["http://host1:9200", "http://host2:9200"], "benchmark", "benchmark", "pytest-benchmark")
+    assert parse_elasticsearch_storage("http://host1:9200,host2:9200/benchmark2") == (
+    ["http://host1:9200", "http://host2:9200"], "benchmark2", "benchmark", "pytest-benchmark")
+    assert parse_elasticsearch_storage("http://localhost:9200/benchmark2/benchmark2?project_name=project_name") == (
+    ["http://localhost:9200"], "benchmark2", "benchmark2", "project_name")
