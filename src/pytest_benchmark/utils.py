@@ -96,7 +96,7 @@ def get_machine_id():
 
 
 def get_project_name():
-    if os.path.exists('.git'):
+    if subprocess.call(["git", "rev-parse"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) == 0:
         try:
             project_address = check_output("git config --local remote.origin.url".split())
             if isinstance(project_address, bytes) and str != bytes:
@@ -105,7 +105,7 @@ def get_project_name():
             return project_name
         except (IndexError, subprocess.CalledProcessError):
             return os.path.basename(os.getcwd())
-    elif os.path.exists('.hg'):
+    elif subprocess.call(["hg", "id", "--id"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) == 0:
         try:
             project_address = check_output("hg path default".split())
             project_address = project_address.decode()
@@ -122,12 +122,12 @@ def get_branch_info():
         args = s.split()
         return check_output(args, stderr=subprocess.STDOUT, universal_newlines=True)
     try:
-        if os.path.exists('.git'):
+        if subprocess.call(["git", "rev-parse"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) == 0:
             branch = cmd('git rev-parse --abbrev-ref HEAD').strip()
             if branch == 'HEAD':
                 return '(detached head)'
             return branch
-        elif os.path.exists('.hg'):
+        elif subprocess.call(["hg", "id", "--id"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) == 0:
             return cmd('hg branch').strip()
         else:
             return '(unknown vcs)'
@@ -141,7 +141,7 @@ def get_commit_info(project_name=None):
     project_name = project_name or get_project_name()
     branch = get_branch_info()
     try:
-        if os.path.exists('.git'):
+        if subprocess.call(["git", "rev-parse"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) == 0:
             desc = check_output('git describe --dirty --always --long --abbrev=40'.split(),
                                 universal_newlines=True).strip()
             desc = desc.split('-')
@@ -149,7 +149,7 @@ def get_commit_info(project_name=None):
                 dirty = True
                 desc.pop()
             commit = desc[-1].strip('g')
-        elif os.path.exists('.hg'):
+        elif subprocess.call(["hg", "id", "--id"], stderr=subprocess.STDOUT, stdout=open(os.devnull, 'w')) == 0:
             desc = check_output('hg id --id --debug'.split(), universal_newlines=True).strip()
             if desc[-1] == '+':
                 dirty = True
