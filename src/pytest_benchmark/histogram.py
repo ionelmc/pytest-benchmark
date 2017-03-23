@@ -7,7 +7,6 @@ from .utils import slugify
 
 try:
     from pygal.graph.box import Box
-    from pygal._compat import is_list_like
     from pygal.style import DefaultStyle
 except ImportError as exc:
     raise ImportError(exc.args, "Please install pygal and pygaljs or pytest-benchmark[histogram]")

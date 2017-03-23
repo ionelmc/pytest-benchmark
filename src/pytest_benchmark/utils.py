@@ -11,7 +11,6 @@ import re
 import subprocess
 import sys
 import types
-from collections import Iterable
 from datetime import datetime
 from decimal import Decimal
 from functools import partial
@@ -35,7 +34,6 @@ except ImportError:
         def __init__(self, returncode, cmd, output=None):
             super(CalledProcessError, self).__init__(returncode, cmd)
             self.output = output
-
 
     def check_output(*popenargs, **kwargs):
         if 'stdout' in kwargs:
