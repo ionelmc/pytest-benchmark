@@ -875,148 +875,148 @@ matrix:
     - python: '3.6'
       env:
         - TOXENV=py36-pytest30-pygal23-xdist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal20-nodist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal20-nodist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal20-xdist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal20-xdist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal21-nodist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal21-nodist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal21-xdist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal21-xdist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal22-nodist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal22-nodist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal22-xdist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal22-xdist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal23-nodist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal23-nodist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal23-xdist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest28-pygal23-xdist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal20-nodist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal20-nodist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal20-xdist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal20-xdist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal21-nodist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal21-nodist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal21-xdist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal21-xdist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal22-nodist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal22-nodist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal22-xdist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal22-xdist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal23-nodist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal23-nodist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal23-xdist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest29-pygal23-xdist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal20-nodist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal20-nodist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal20-xdist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal20-xdist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal21-nodist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal21-nodist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal21-xdist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal21-xdist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal22-nodist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal22-nodist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal22-xdist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal22-xdist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal23-nodist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal23-nodist-nocov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal23-xdist-cover,report,coveralls,codecov
-    - python: 'pypy'
+    - python: 'pypy-5.4'
       env:
         - TOXENV=pypy-pytest30-pygal23-xdist-nocov
     - python: '3.2'

@@ -11,7 +11,7 @@ env:
 matrix:
   include:
 {% for env in tox_environments %}{{ '' }}
-    - python: '{{ env.split('-')[0] if env.startswith('pypy') else '{0[2]}.{0[3]}'.format(env) }}'
+    - python: '{{ '{0[0]}-5.4'.format(env.split('-')) if env.startswith('pypy') else '{0[2]}.{0[3]}'.format(env) }}'
       env:
         - TOXENV={{ env }}{% if 'cover' in env %},report,coveralls,codecov{% endif -%}
 {% endfor %}{{ '' }}
