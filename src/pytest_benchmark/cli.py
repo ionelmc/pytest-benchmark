@@ -164,8 +164,8 @@ def main():
             output_file, = args.csv
 
             results_csv.render(output_file, groups)
-    else:
-        parser.error("Unknown command {0!r}".format(args.command))
+    elif args.command is None:
+        parser.error("missing command (available commands: %s)" % ', '.join(map(repr, parser.commands.choices)))
 
 
 class TerminalReporter(object):
