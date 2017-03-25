@@ -112,7 +112,6 @@ class TableResults(object):
             tr.write_line("")
             if self.histogram:
                 from .histogram import make_histogram
-                print(["{0[name]}".format(row) for row in benchmarks])
                 if len(benchmarks) > 75:
                     self.logger.warn("BENCHMARK-H1",
                                      "Group {0!r} has too many benchmarks. Only plotting 50 benchmarks.".format(group))
