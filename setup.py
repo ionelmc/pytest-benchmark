@@ -82,7 +82,8 @@ setup(
             'benchmark = pytest_benchmark.plugin'
         ],
         'console_scripts': [
-            'py.test-benchmark = pytest_benchmark.cli:main'
+            'py.test-benchmark = pytest_benchmark.cli:main',
+            'pytest-benchmark = pytest_benchmark.cli:main',
         ]
     }
 
