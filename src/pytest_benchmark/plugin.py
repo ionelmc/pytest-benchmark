@@ -102,15 +102,15 @@ def add_csv_options(addoption, prefix="benchmark-"):
 
 def add_global_options(addoption, prefix="benchmark-"):
     addoption(
-        "--{0}storage".format(prefix),
+        "--{0}storage".format(prefix), *[] if prefix else ['-s'],
         metavar="URI", default="file://./.benchmarks",
         help="Specify a path to store the runs as uri in form file://path or"
              " elasticsearch+http[s]://host1,host2/[index/doctype?project_name=Project] "
              "(when --benchmark-save or --benchmark-autosave are used). For backwards compatibility unexpected values "
-             "are converted to file://<value>. Default: %(default)r.",
+             "are converted to file://<value>. Default: %(default)r."
     )
     addoption(
-        "--{0}verbose".format(prefix),
+        "--{0}verbose".format(prefix), *[] if prefix else ['-v'],
         action="store_true", default=False,
         help="Dump diagnostic and progress information."
     )
