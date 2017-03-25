@@ -325,6 +325,7 @@ def test_group_by_param_all(testdir):
         '============* 8 passed* seconds ============*',
     ])
 
+
 def test_group_by_param_select(testdir):
     test_x = testdir.makepyfile(test_x=GROUPING_PARAMS_TEST)
     result = testdir.runpytest('--benchmark-max-time=0.0000001',
@@ -397,6 +398,7 @@ def test_group_by_param_select_multiple(testdir):
         'Quartile.',
         '============* 8 passed* seconds ============*',
     ])
+
 
 def test_group_by_fullname(testdir):
     test_x = testdir.makepyfile(test_x=GROUPING_TEST)
@@ -600,8 +602,8 @@ def test_compare_no_files(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '-rw',
                                test, '--benchmark-compare')
     result.stdout.fnmatch_lines([
-         "WBENCHMARK-C2 * Can't compare. No benchmark files in '*'."
-         " Can't load the previous benchmark."
+        "WBENCHMARK-C2 * Can't compare. No benchmark files in '*'."
+        " Can't load the previous benchmark."
     ])
 
 
@@ -767,7 +769,8 @@ def test_bogus_sort(testdir):
     result = testdir.runpytest('--benchmark-sort=bogus', test)
     result.stderr.fnmatch_lines([
         "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
-        "py*: error: argument --benchmark-sort: Unacceptable value: 'bogus'. Value for --benchmark-sort must be one of: 'min', 'max', 'mean', 'stddev', 'name', 'fullname'."
+        "py*: error: argument --benchmark-sort: Unacceptable value: 'bogus'. Value for --benchmark-sort must be one "
+        "of: 'min', 'max', 'mean', 'stddev', 'name', 'fullname'."
     ])
 
 
@@ -932,6 +935,7 @@ def test_ok(benchmark, bad_fixture):
         "*====== 2 failed*, 3 error* seconds ======*",
     ])
 
+
 BASIC_TEST = '''
 """
 Just to make sure the plugin doesn't choke on doctests::
@@ -1052,6 +1056,7 @@ def test_only_benchmarks(testdir):
         "------*",
         "*====== 4 passed, 1 skipped* seconds ======*",
     ])
+
 
 def test_columns(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
