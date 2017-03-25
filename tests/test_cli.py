@@ -1,5 +1,6 @@
 import py
 import pytest
+from _pytest.pytester import LineMatcher
 
 pytest_plugins = 'pytester',
 
@@ -171,21 +172,21 @@ def test_compare(testdir, name):
     result.stderr.fnmatch_lines([
         'Generated csv: *foobar.csv'
     ])
-    assert testdir.tmpdir.join('foobar.csv').readlines(cr=0) == [
+    LineMatcher(testdir.tmpdir.join('foobar.csv').readlines(cr=0)).fnmatch_lines([
         "name,min,max",
-        "tests/test_normal.py::test_xfast_parametrized[0],2.1562856786391314e-07,1.0318615857292624e-05",
-        "tests/test_normal.py::test_xfast_parametrized[0],2.1690275610947028e-07,7.739299681128525e-06",
-        "tests/test_normal.py::test_xfast_parametrized[0],2.1731454219544334e-07,1.1447389118979421e-05",
+        "tests/test_normal.py::test_xfast_parametrized[[]0[]],2.15628567*e-07,1.03186158*e-05",
+        "tests/test_normal.py::test_xfast_parametrized[[]0[]],2.16902756*e-07,7.73929968*e-06",
+        "tests/test_normal.py::test_xfast_parametrized[[]0[]],2.17314542*e-07,1.14473891*e-05",
         ""
-    ]
+    ])
     result.stdout.fnmatch_lines([
         'Computing stats ...',
         '---*--- benchmark: 3 tests ---*---',
-        'Name (time in ns) *                   Min                    Max          ',
+        'Name (time in ns) *                   Min    *    Max          ',
         '---*---',
-        '*xfast_parametrized[[]0[]] (0003*)     215.6286 (1.0)      10,318.6159 (1.33)   ',
-        '*xfast_parametrized[[]0[]] (0002*)     216.9028 (1.01)      7,739.2997 (1.0)    ',
-        '*xfast_parametrized[[]0[]] (0001*)     217.3145 (1.01)     11,447.3891 (1.48)   ',
+        '*xfast_parametrized[[]0[]] (0003*)     215.6286 (1.0)      10*318.6159 (1.33)   ',
+        '*xfast_parametrized[[]0[]] (0002*)     216.9028 (1.01)      7*739.2997 (1.0)    ',
+        '*xfast_parametrized[[]0[]] (0001*)     217.3145 (1.01)     11*447.3891 (1.48)   ',
         '---*---',
         '',
         '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
