@@ -7,9 +7,8 @@ THIS = py.path.local(__file__)
 STORAGE = THIS.dirpath('test_storage')
 
 
-@pytest.mark.parametrize('arg', ['--help', 'help'])
-def test_help(testdir, arg):
-    result = testdir.run('py.test-benchmark', arg)
+def test_help(testdir):
+    result = testdir.run('py.test-benchmark', '--help')
     result.stdout.fnmatch_lines([
         "usage: py.test-benchmark [-h [COMMAND]] [--storage URI] [--verbose]",
         "                         {help,list,compare} ...",
@@ -35,6 +34,21 @@ def test_help(testdir, arg):
         "    compare             Compare saved runs.",
     ])
     assert result.ret == 0
+
+
+def test_help(testdir):
+    result = testdir.run('py.test-benchmark', 'help')
+    result.stdout.fnmatch_lines([
+        'usage: py.test-benchmark help [-h] [command]',
+        '',
+        'Display help and exit.',
+        '',
+        'positional arguments:',
+        '  command',
+        '',
+        'optional arguments:',
+        '  -h, --help  show this help message and exit',
+    ])
 
 
 @pytest.mark.parametrize('args', ['list --help', 'help list'])

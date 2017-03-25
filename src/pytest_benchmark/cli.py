@@ -34,12 +34,8 @@ COMPARE_HELP = '''examples:
 
 class HelpAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        if values:
-            namespace.command = values
-            namespace.help = True
-        else:
-            parser.print_help()
-            parser.exit()
+        namespace.help = True
+        namespace.command = values or 'help'
 
 
 class CommandArgumentParser(argparse.ArgumentParser):
