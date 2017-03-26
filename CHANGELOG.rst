@@ -9,8 +9,17 @@ Changelog
   particular the exact model. Contributed by Antonio Cuni in `#61 <https://github.com/ionelmc/pytest-benchmark/pull/61>`_.
 * Added ``benchmark.extra_info``, which you can use to save arbitrary stuff in
   the JSON. Contributed by Antonio Cuni in the same PR as above.
-* Fix histograms with latest PyGal version.
-
+* Fix support for latest PyGal version (histograms). Contributed by Swen Kooij in
+  `#68 <https://github.com/ionelmc/pytest-benchmark/pull/68>`_.
+* Added support for getting ``commit_info`` when not running in the root of the repository. Contributed by Vara Canero in
+  `#69 <https://github.com/ionelmc/pytest-benchmark/pull/69>` _.
+* Added short form for ``--storage``/``--verbose`` options in CLI.
+* Added an alternate ``pytest-benchmark`` CLI bin (in addition to ``py.test-benchmark``) to match the madness in pytest.
+* Fix some issues with `--help`` in CLI.
+* Improved git remote parsing (for ``commit_info`` in JSON outputs).
+* Fixed default value for `--benchmark-columns``.
+* Fixed comparison mode (loading was done too late).
+* Remove the project name from the autosave name. This will get the old brief naming from 3.0 back.
 
 3.1.0a1 (2016-10-29)
 --------------------

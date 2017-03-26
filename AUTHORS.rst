@@ -10,3 +10,4 @@ Authors
 * Antonio Cuni - http://antocuni.eu/en/
 * Petr Šebek - https://github.com/Artimi
 * Swen Kooij - https://github.com/Photonios
+* Vara Canero - https://github.com/varac
