@@ -2,7 +2,7 @@
 Changelog
 =========
 
-3.1.0a2 (unreleased)
+3.1.0a2 (2017-03-27)
 --------------------
 
 * ``machine_info`` now contains more detailed information about the CPU, in
