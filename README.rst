@@ -61,9 +61,9 @@ Overview
     :alt: PyPI Package latest release
     :target: https://pypi.python.org/pypi/pytest-benchmark
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/ionelmc/pytest-benchmark/v3.1.0a1.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/ionelmc/pytest-benchmark/v3.1.0a2.svg
     :alt: Commits since latest release
-    :target: https://github.com/ionelmc/pytest-benchmark/compare/v3.1.0a1...master
+    :target: https://github.com/ionelmc/pytest-benchmark/compare/v3.1.0a2...master
 
 .. |wheel| image:: https://img.shields.io/pypi/wheel/pytest-benchmark.svg
     :alt: PyPI Wheel
