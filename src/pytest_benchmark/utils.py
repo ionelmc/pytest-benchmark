@@ -4,6 +4,7 @@ from __future__ import print_function
 import argparse
 import genericpath
 import json
+import netrc
 import ntpath
 import os
 import platform
@@ -404,10 +405,34 @@ def parse_save(string):
     return string
 
 
-def parse_elasticsearch_storage(string, default_index="benchmark", default_doctype="benchmark"):
+def _parse_hosts(storage_url, use_netrc):
+
+    # load creds from netrc file
+    path = os.path.expanduser('~/.netrc')
+    creds = None
+    if use_netrc and os.path.isfile(path):
+        creds = netrc.netrc(path)
+
+    # add creds to urls
+    urls = []
+    for netloc in storage_url.netloc.split(','):
+        auth = ""
+        if creds and '@' not in netloc:
+            host = netloc.split(':').pop(0)
+            res = creds.authenticators(host)
+            if res:
+                user, _, secret = res
+                auth = "{user}:{secret}@".format(user=user, secret=secret)
+        url = "{scheme}://{auth}{netloc}".format(scheme=storage_url.scheme,
+                                                 netloc=netloc, auth=auth)
+        urls.append(url)
+    return urls
+
+
+def parse_elasticsearch_storage(string, default_index="benchmark",
+                                default_doctype="benchmark", use_netrc=False):
     storage_url = urlparse(string)
-    hosts = ["{scheme}://{netloc}".format(scheme=storage_url.scheme, netloc=netloc) for netloc in
-             storage_url.netloc.split(',')]
+    hosts = _parse_hosts(storage_url, use_netrc)
     index = default_index
     doctype = default_doctype
     if storage_url.path and storage_url.path != "/":
@@ -426,13 +451,16 @@ def parse_elasticsearch_storage(string, default_index="benchmark", default_docty
 def load_storage(storage, **kwargs):
     if "://" not in storage:
         storage = "file://" + storage
+    use_netrc = kwargs.pop('netrc', False)  # only used by elasticsearch storage
     if storage.startswith("file://"):
         from .storage.file import FileStorage
         return FileStorage(storage[len("file://"):], **kwargs)
     elif storage.startswith("elasticsearch+"):
         from .storage.elasticsearch import ElasticsearchStorage
         # TODO update benchmark_autosave
-        return ElasticsearchStorage(*parse_elasticsearch_storage(storage[len("elasticsearch+"):]), **kwargs)
+        args = parse_elasticsearch_storage(storage[len("elasticsearch+"):],
+                                           use_netrc=use_netrc)
+        return ElasticsearchStorage(*args, **kwargs)
     else:
         raise argparse.ArgumentTypeError("Storage must be in form of file://path or "
                                          "elasticsearch+http[s]://host1,host2/index/doctype")

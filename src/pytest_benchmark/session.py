@@ -36,7 +36,8 @@ class BenchmarkSession(object):
         self.storage = load_storage(
             config.getoption("benchmark_storage"),
             logger=self.logger,
-            default_machine_id=self.machine_id
+            default_machine_id=self.machine_id,
+            netrc=config.getoption("benchmark_netrc")
         )
         self.options = dict(
             min_time=SecondsDecimal(config.getoption("benchmark_min_time")),
