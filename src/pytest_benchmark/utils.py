@@ -175,6 +175,7 @@ def get_branch_info():
 def get_commit_info(project_name=None):
     dirty = False
     commit = 'unversioned'
+    commit_time = None
     project_name = project_name or get_project_name()
     branch = get_branch_info()
     try:
@@ -186,13 +187,18 @@ def get_commit_info(project_name=None):
                 dirty = True
                 desc.pop()
             commit = desc[-1].strip('g')
+            commit_time = check_output('git show -s --pretty=format:"%cI"'.split(),
+                                       universal_newlines=True).strip().strip('"')
         elif in_any_parent('.hg'):
             desc = check_output('hg id --id --debug'.split(), universal_newlines=True).strip()
             if desc[-1] == '+':
                 dirty = True
             commit = desc.strip('+')
+            commit_time = check_output('hg tip --template "{date|rfc3339date}"'.split(),
+                                       universal_newlines=True).strip().strip('"')
         return {
             'id': commit,
+            'time': commit_time,
             'dirty': dirty,
             'project': project_name,
             'branch': branch,
@@ -200,6 +206,7 @@ def get_commit_info(project_name=None):
     except Exception as exc:
         return {
             'id': 'unknown',
+            'time': None,
             'dirty': dirty,
             'error': repr(exc),
             'project': project_name,
