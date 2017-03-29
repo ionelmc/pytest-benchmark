@@ -2,6 +2,12 @@
 Changelog
 =========
 
+3.1.0b1 (2017-0?-0?)
+---------------------
+
+* Added a ``time`` field in ``commit_info``. Contributed by Vara Canero in
+  `#71 <https://github.com/ionelmc/pytest-benchmark/pull/71>`_.
+
 3.1.0a2 (2017-03-27)
 --------------------
 
