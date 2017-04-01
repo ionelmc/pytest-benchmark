@@ -7,6 +7,10 @@ Changelog
 
 * Added a ``time`` field in ``commit_info``. Contributed by Vara Canero in
   `#71 <https://github.com/ionelmc/pytest-benchmark/pull/71>`_.
+* Fixed the leaking of credentials by masking the URL printed when storing
+  data to elasticsearch.
+* Added a `--benchmark-netrc` option to use credentials from a netrc file when
+  storing data to elasticsearch.
 
 3.1.0a2 (2017-03-27)
 --------------------
