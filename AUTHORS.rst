@@ -11,3 +11,4 @@ Authors
 * Petr Šebek - https://github.com/Artimi
 * Swen Kooij - https://github.com/Photonios
 * Vara Canero - https://github.com/varac
+* Andre Bianchi - https://github.com/drebs

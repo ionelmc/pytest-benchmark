@@ -1,10 +1,12 @@
 from __future__ import absolute_import
 
+import re
 import sys
 import uuid
 from datetime import date
 from datetime import datetime
 from decimal import Decimal
+from functools import partial
 
 from ..compat import reraise
 
@@ -26,6 +28,13 @@ class BenchmarkJSONSerializer(JSONSerializer):
             return str(data)
         else:
             return "UNSERIALIZABLE[%r]" % data
+
+
+def _mask_hosts(hosts):
+    m = re.compile('^([^:]+)://[^@]+@')
+    sub_fun = partial(m.sub, '\\1://***:***@')
+    masked_hosts = list(map(sub_fun, hosts))
+    return masked_hosts
 
 
 class ElasticsearchStorage(object):
@@ -162,8 +171,10 @@ class ElasticsearchStorage(object):
                 body=bench,
                 id=doc_id,
             )
+        # hide user's credentials before logging
+        masked_hosts = _mask_hosts(self._es_hosts)
         self.logger.info("Saved benchmark data to %s to index %s as doctype %s" % (
-            self._es_hosts, self._es_index, self._es_doctype))
+            masked_hosts, self._es_index, self._es_doctype))
 
     def _create_index(self):
         mapping = {

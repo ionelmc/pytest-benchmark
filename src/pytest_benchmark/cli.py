@@ -147,7 +147,7 @@ def main():
     parser = make_parser()
     args = parser.parse_args()
     logger = Logger(args.verbose)
-    storage = load_storage(args.storage, logger=logger)
+    storage = load_storage(args.storage, logger=logger, netrc=args.netrc)
 
     if args.command == 'list':
         for file in storage.query():

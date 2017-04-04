@@ -110,6 +110,11 @@ def add_global_options(addoption, prefix="benchmark-"):
              "are converted to file://<value>. Default: %(default)r."
     )
     addoption(
+        "--{0}netrc".format(prefix),
+        nargs="?", default='', const='~/.netrc',
+        help="Load elasticsearch credentials from a netrc file. Default: %(default)r.",
+    )
+    addoption(
         "--{0}verbose".format(prefix), *[] if prefix else ['-v'],
         action="store_true", default=False,
         help="Dump diagnostic and progress information."

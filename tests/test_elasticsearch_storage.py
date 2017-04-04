@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import json
 import logging
+import os
 from io import BytesIO
 from io import StringIO
 
@@ -16,6 +17,8 @@ from pytest_benchmark.plugin import pytest_benchmark_compare_machine_info
 from pytest_benchmark.plugin import pytest_benchmark_generate_json
 from pytest_benchmark.plugin import pytest_benchmark_group_stats
 from pytest_benchmark.storage.elasticsearch import ElasticsearchStorage
+from pytest_benchmark.storage.elasticsearch import _mask_hosts
+from pytest_benchmark.utils import parse_elasticsearch_storage
 
 try:
     import unittest.mock as mock
@@ -173,3 +176,59 @@ def test_handle_saving(sess, logger_output, monkeypatch):
         body=ES_DATA,
         id='FoobarOS_commitId_tests/test_normal.py::test_xfast_parametrized[0]',
     )
+
+
+def test_parse_with_no_creds():
+    string = 'https://example.org,another.org'
+    hosts, _, _, _ = parse_elasticsearch_storage(string)
+    assert len(hosts) == 2
+    assert 'https://example.org' in hosts
+    assert 'https://another.org' in hosts
+
+
+def test_parse_with_creds_in_first_host_of_url():
+    string = 'https://user:pass@example.org,another.org'
+    hosts, _, _, _ = parse_elasticsearch_storage(string)
+    assert len(hosts) == 2
+    assert 'https://user:pass@example.org' in hosts
+    assert 'https://another.org' in hosts
+
+
+def test_parse_with_creds_in_second_host_of_url():
+    string = 'https://example.org,user:pass@another.org'
+    hosts, _, _, _ = parse_elasticsearch_storage(string)
+    assert len(hosts) == 2
+    assert 'https://example.org' in hosts
+    assert 'https://user:pass@another.org' in hosts
+
+
+def test_parse_with_creds_in_netrc(tmpdir):
+    netrc_file = os.path.join(tmpdir.strpath, 'netrc')
+    with open(netrc_file, 'w') as f:
+        f.write('machine example.org login user1 password pass1\n')
+        f.write('machine another.org login user2 password pass2\n')
+    string = 'https://example.org,another.org'
+    hosts, _, _, _ = parse_elasticsearch_storage(string, netrc_file=netrc_file)
+    assert len(hosts) == 2
+    assert 'https://user1:pass1@example.org' in hosts
+    assert 'https://user2:pass2@another.org' in hosts
+
+
+def test_parse_url_creds_supersedes_netrc_creds(tmpdir):
+    netrc_file = os.path.join(tmpdir.strpath, 'netrc')
+    with open(netrc_file, 'w') as f:
+        f.write('machine example.org login user1 password pass1\n')
+        f.write('machine another.org login user2 password pass2\n')
+    string = 'https://user3:pass3@example.org,another.org'
+    hosts, _, _, _ = parse_elasticsearch_storage(string, netrc_file=netrc_file)
+    assert len(hosts) == 2
+    assert 'https://user3:pass3@example.org' in hosts  # superseded by creds in url
+    assert 'https://user2:pass2@another.org' in hosts  # got creds from netrc file
+
+
+def test__mask_hosts():
+    hosts = ['https://user1:pass1@example.org', 'https://user2:pass2@another.org']
+    masked_hosts = _mask_hosts(hosts)
+    assert len(masked_hosts) == len(hosts)
+    assert 'https://***:***@example.org' in masked_hosts
+    assert 'https://***:***@another.org' in masked_hosts
