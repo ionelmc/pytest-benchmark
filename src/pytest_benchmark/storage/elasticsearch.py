@@ -30,6 +30,13 @@ class BenchmarkJSONSerializer(JSONSerializer):
             return "UNSERIALIZABLE[%r]" % data
 
 
+def _mask_hosts(hosts):
+    m = re.compile('^([^:]+)://[^@]+@')
+    sub_fun = partial(m.sub, '\\1://***:***@')
+    masked_hosts = list(map(sub_fun, hosts))
+    return masked_hosts
+
+
 class ElasticsearchStorage(object):
     def __init__(self, hosts, index, doctype, project_name, logger,
                  default_machine_id=None):
@@ -165,9 +172,7 @@ class ElasticsearchStorage(object):
                 id=doc_id,
             )
         # hide user's credentials before logging
-        m = re.compile('^([^:]+)://[^@]+@')
-        sub_fun = partial(m.sub, '\\1://***:***@')
-        masked_hosts = list(map(sub_fun, self._es_hosts))
+        masked_hosts = _mask_hosts(self._es_hosts)
         self.logger.info("Saved benchmark data to %s to index %s as doctype %s" % (
             masked_hosts, self._es_index, self._es_doctype))
 
