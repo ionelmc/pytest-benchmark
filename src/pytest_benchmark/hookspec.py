@@ -4,7 +4,7 @@ def pytest_benchmark_generate_machine_info(config):
 
     .. sourcecode:: python
 
-        def pytest_benchmark_update_machine_info(config):
+        def pytest_benchmark_generate_machine_info(config):
             return {'user': getpass.getuser()}
     """
     pass
