@@ -5,12 +5,16 @@ Changelog
 3.1.0b1 (2017-0?-0?)
 ---------------------
 
-* Added a ``time`` field in ``commit_info``. Contributed by Vara Canero in
+* Added a ``time`` field in ``commit_info``. Contributed by "varac" in
   `#71 <https://github.com/ionelmc/pytest-benchmark/pull/71>`_.
+* Added a ``author_time`` field in ``commit_info``. Contributed by "varac" in
+  `#75   <https://github.com/ionelmc/pytest-benchmark/pull/75>`_.
 * Fixed the leaking of credentials by masking the URL printed when storing
   data to elasticsearch.
 * Added a `--benchmark-netrc` option to use credentials from a netrc file when
-  storing data to elasticsearch.
+  storing data to elasticsearch. Both contributed by Andre Bianchi in
+  `#73 <https://github.com/ionelmc/pytest-benchmark/pull/73>`_.
+* Fixed docs on hooks. Contributed by Andre Bianchi in `#74 <https://github.com/ionelmc/pytest-benchmark/pull/74>`_.
 
 3.1.0a2 (2017-03-27)
 --------------------
