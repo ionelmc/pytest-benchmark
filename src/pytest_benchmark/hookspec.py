@@ -4,13 +4,13 @@ def pytest_benchmark_generate_machine_info(config):
 
     .. sourcecode:: python
 
-        def pytest_benchmark_update_machine_info(config):
+        def pytest_benchmark_generate_machine_info(config):
             return {'user': getpass.getuser()}
     """
     pass
 
 
-def pytest_benchmark_update_machine_info(config, info):
+def pytest_benchmark_update_machine_info(config, machine_info):
     """
     If benchmarks are compared and machine_info is different then warnings will be shown.
 
@@ -18,8 +18,8 @@ def pytest_benchmark_update_machine_info(config, info):
 
     .. sourcecode:: python
 
-        def pytest_benchmark_update_machine_info(config, info):
-            info['user'] = getpass.getuser()
+        def pytest_benchmark_update_machine_info(config, machine_info):
+            machine_info['user'] = getpass.getuser()
     """
     pass
 
@@ -36,14 +36,14 @@ def pytest_benchmark_generate_commit_info(config):
     pass
 
 
-def pytest_benchmark_update_commit_info(config, info):
+def pytest_benchmark_update_commit_info(config, commit_info):
     """
     To add something into the commit_info, like the commit message do something like this:
 
     .. sourcecode:: python
 
-        def pytest_benchmark_update_commit_info(config, info):
-            info['message'] = subprocess.check_output(['git', 'log', '-1', '--pretty=%B']).strip()
+        def pytest_benchmark_update_commit_info(config, commit_info):
+            commit_info['message'] = subprocess.check_output(['git', 'log', '-1', '--pretty=%B']).strip()
     """
     pass
 
