@@ -177,6 +177,7 @@ def get_commit_info(project_name=None):
     dirty = False
     commit = 'unversioned'
     commit_time = None
+    author_time = None
     project_name = project_name or get_project_name()
     branch = get_branch_info()
     try:
@@ -190,6 +191,8 @@ def get_commit_info(project_name=None):
             commit = desc[-1].strip('g')
             commit_time = check_output('git show -s --pretty=format:"%cI"'.split(),
                                        universal_newlines=True).strip().strip('"')
+            author_time = check_output('git show -s --pretty=format:"%aI"'.split(),
+                                       universal_newlines=True).strip().strip('"')
         elif in_any_parent('.hg'):
             desc = check_output('hg id --id --debug'.split(), universal_newlines=True).strip()
             if desc[-1] == '+':
@@ -200,6 +203,7 @@ def get_commit_info(project_name=None):
         return {
             'id': commit,
             'time': commit_time,
+            'author_time': author_time,
             'dirty': dirty,
             'project': project_name,
             'branch': branch,
@@ -208,6 +212,7 @@ def get_commit_info(project_name=None):
         return {
             'id': 'unknown',
             'time': None,
+            'author_time': None,
             'dirty': dirty,
             'error': repr(exc),
             'project': project_name,
