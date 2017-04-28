@@ -119,7 +119,7 @@ class Fallback(object):
         return self
 
 
-get_project_name = Fallback(IndexError, CalledProcessError, FileNotFoundError)
+get_project_name = Fallback(IndexError, CalledProcessError, OSError)
 
 
 @get_project_name.register
