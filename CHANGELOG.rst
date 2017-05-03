@@ -15,6 +15,7 @@ Changelog
   storing data to elasticsearch. Both contributed by Andre Bianchi in
   `#73 <https://github.com/ionelmc/pytest-benchmark/pull/73>`_.
 * Fixed docs on hooks. Contributed by Andre Bianchi in `#74 <https://github.com/ionelmc/pytest-benchmark/pull/74>`_.
+* Remove `git` and `hg` as system dependencies when guessing the project name.
 
 3.1.0a2 (2017-03-27)
 --------------------
