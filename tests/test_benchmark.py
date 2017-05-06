@@ -800,7 +800,7 @@ def test_cprofile(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-cprofile=cumtime', test)
     result.stdout.fnmatch_lines([
-        "============================= cProfile information =============================",
+        "============*=========== cProfile information ============*===========",
         "Time in s",
         "test_cprofile.py::test_fast",
         "ncalls	tottime	percall	cumtime	percall	filename:lineno(function)",
