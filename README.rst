@@ -226,3 +226,8 @@ Credits
 
 
 
+
+
+.. image:: https://badges.gitter.im/ionelmc/pytest-benchmark.svg
+   :alt: Join the chat at https://gitter.im/ionelmc/pytest-benchmark
+   :target: https://gitter.im/ionelmc/pytest-benchmark?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
