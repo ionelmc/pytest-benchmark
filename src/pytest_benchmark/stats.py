@@ -14,7 +14,7 @@ from .utils import get_cprofile_functions
 class Stats(object):
     fields = (
         "min", "max", "mean", "stddev", "rounds", "median", "iqr", "q1", "q3", "iqr_outliers", "stddev_outliers",
-        "outliers", "ld15iqr", "hd15iqr"
+        "outliers", "ld15iqr", "hd15iqr", "ops",
     )
 
     def __init__(self):
@@ -161,6 +161,12 @@ class Stats(object):
     @cached_property
     def outliers(self):
         return "%s;%s" % (self.stddev_outliers, self.iqr_outliers)
+
+    @cached_property
+    def ops(self):
+        if self.mean:
+            return 1 / self.mean
+        return 0
 
 
 class Metadata(object):
