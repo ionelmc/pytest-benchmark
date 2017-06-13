@@ -40,7 +40,8 @@
                 "hd15iqr": 2.2514103111285562e-07, 
                 "mean": 2.5026479245141756e-07, 
                 "iterations": 413, 
-                "iqr": 2.886423475805845e-09
+                "iqr": 2.886423475805845e-09,
+                "ops": 3995767.8033921774
             }, 
             "name": "test_xfast_parametrized[0]", 
             "fullname": "tests/test_normal.py::test_xfast_parametrized[0]"

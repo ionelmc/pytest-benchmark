@@ -64,7 +64,7 @@ class TableResults(object):
                 "iqr": "IQR",
                 "median": "Median",
                 "outliers": "Outliers(*)",
-                "ops": "OPS ({}ops/s)".format(ops_unit) if ops_unit else "OPS",
+                "ops": "OPS ({0}ops/s)".format(ops_unit) if ops_unit else "OPS",
             }
             widths = {
                 "name": 3 + max(len(labels["name"]), max(len(benchmark["name"]) for benchmark in benchmarks)),

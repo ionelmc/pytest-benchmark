@@ -18,7 +18,8 @@
                 "outliers": "95;1848", 
                 "q1": 2.1885231273152545e-07, 
                 "q3": 2.3696922603711532e-07, 
-                "hd15iqr": 2.6450693426161187e-07
+                "hd15iqr": 2.6450693426161187e-07,
+                "ops": 3967600.2276544925
             }, 
             "fullname": "tests/test_normal.py::test_xfast_parametrized[0]", 
             "options": {
