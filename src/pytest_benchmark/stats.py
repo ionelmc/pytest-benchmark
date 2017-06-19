@@ -164,8 +164,9 @@ class Stats(object):
 
     @cached_property
     def ops(self):
-        if self.mean:
-            return 1 / self.mean
+        s = sum(self.data)
+        if s:
+            return len(self.data) / s
         return 0
 
 
