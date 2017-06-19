@@ -2,7 +2,6 @@ from pytest import mark
 from pytest import raises
 
 
-
 def test_single(benchmark):
     runs = []
     benchmark.pedantic(runs.append, args=[123])

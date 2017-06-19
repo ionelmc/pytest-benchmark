@@ -61,4 +61,3 @@ def test_calibrate_stuck(benchmark, minimum, additive, skew_ratio):
     benchmark._timer = partial(next, t)
     benchmark._min_time = minimum
     benchmark(t.send, True)
-
