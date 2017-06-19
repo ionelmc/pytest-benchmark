@@ -13,3 +13,4 @@ Authors
 * "varac" - https://github.com/varac
 * Andre Bianchi - https://github.com/drebs
 * Jeremy Dobbins-Bucklad - https://github.com/jad-b
+* Alexey Popravka - https://github.com/popravich

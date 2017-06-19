@@ -5,6 +5,9 @@ Changelog
 3.1.0b1 (2017-0?-0?)
 ---------------------
 
+* Added "operations per second" (``ops`` field in ``Stats``) metric --
+  shows the call rate of code being tested. Contributed by Alexey Popravka in
+  `#78 <https://github.com/ionelmc/pytest-benchmark/pull/78>`_.
 * Added a ``time`` field in ``commit_info``. Contributed by "varac" in
   `#71 <https://github.com/ionelmc/pytest-benchmark/pull/71>`_.
 * Added a ``author_time`` field in ``commit_info``. Contributed by "varac" in
