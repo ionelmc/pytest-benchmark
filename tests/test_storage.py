@@ -89,7 +89,7 @@ class MockSession(BenchmarkSession):
         self.storage = FileStorage(str(STORAGE), default_machine_id=get_machine_id(), logger=self.logger)
         self.group_by = 'group'
         self.columns = ['min', 'max', 'mean', 'stddev', 'median', 'iqr',
-                        'outliers', 'rounds', 'iterations']
+                        'outliers', 'rounds', 'iterations', 'ops']
         for bench_file in reversed(self.storage.query("[0-9][0-9][0-9][0-9]_*")):
             with bench_file.open('rU') as fh:
                 data = json.load(fh)
@@ -303,12 +303,13 @@ def test_compare_1(sess, LineMatcher):
         '-changes.json',
         '',
         '*------------------------------------------------------------------------ benchmark: 2 tests -----------------------------------------------------------------------*',
-        'Name (time in ns)               *      Min                 *Max                Mean              StdDev              Median                IQR            Outliers(*)  Rounds  Iterations',
-        '--------------------------------------------------------------------------------------------------------------------------------------------------------------------*',
-        '*xfast_parametrized[[]0[]] (0001*)     217.3145 (1.0)      11*447.3891 (1.0)      262.2408 (1.00)     214.0442 (1.0)      220.1664 (1.00)     38.2154 (2.03)         90;1878    9987         418',
-        '*xfast_parametrized[[]0[]] (NOW) *     217.9511 (1.00)     13*290.0380 (1.16)     261.2051 (1.0)      263.9842 (1.23)     220.1638 (1.0)      18.8080 (1.0)         160;1726    9710         431',
+        'Name (time in ns)               *      Min                 *Max                Mean              StdDev              Median                IQR            Outliers(*)  Rounds  Iterations  OPS (Mops/s) *',
+        '--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*',
+        '*xfast_parametrized[[]0[]] (0001*)     217.3145 (1.0)      11*447.3891 (1.0)      262.2408 (1.00)     214.0442 (1.0)      220.1664 (1.00)     38.2154 (2.03)         90;1878    9987         418        3.8133 (1.00)*',
+        '*xfast_parametrized[[]0[]] (NOW) *     217.9511 (1.00)     13*290.0380 (1.16)     261.2051 (1.0)      263.9842 (1.23)     220.1638 (1.0)      18.8080 (1.0)         160;1726    9710         431        3.8284 (1.0)*',
         '--------------------------------------------------------------------------------------------------------------------------------------------------------------------*',
         '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
+        'OPS: Operations Per Second, computed as 1 / Mean',
     ])
 
 
@@ -330,12 +331,13 @@ def test_compare_2(sess, LineMatcher):
         'Comparing against benchmarks from: 0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes.json',
         '',
         '*------------------------------------------------------------------------ benchmark: 2 tests -----------------------------------------------------------------------*',
-        'Name (time in ns)            *         Min                 *Max                Mean              StdDev              Median                IQR            Outliers(*)  Rounds  Iterations',
+        'Name (time in ns)            *         Min                 *Max                Mean              StdDev              Median                IQR            Outliers(*)  Rounds  Iterations  OPS (Mops/s)*',
         '--------------------------------------------------------------------------------------------------------------------------------------------------------------------*',
-        '*xfast_parametrized[[]0[]] (0002*)     216.9028 (1.0)       7*739.2997 (1.0)      254.0585 (1.0)        0.0000 (1.0)      219.8103 (1.0)      27.3309 (1.45)        235;1688   11009         410',
-        '*xfast_parametrized[[]0[]] (NOW) *     217.9511 (1.00)     13*290.0380 (1.72)     261.2051 (1.03)     263.9842 (inf)      220.1638 (1.00)     18.8080 (1.0)         160;1726    9710         431',
+        '*xfast_parametrized[[]0[]] (0002*)     216.9028 (1.0)       7*739.2997 (1.0)      254.0585 (1.0)        0.0000 (1.0)      219.8103 (1.0)      27.3309 (1.45)        235;1688   11009         410        3.9361 (1.0)*',
+        '*xfast_parametrized[[]0[]] (NOW) *     217.9511 (1.00)     13*290.0380 (1.72)     261.2051 (1.03)     263.9842 (inf)      220.1638 (1.00)     18.8080 (1.0)         160;1726    9710         431        3.8284 (0.97)*',
         '--------------------------------------------------------------------------------------------------------------------------------------------------------------------*',
         '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
+        'OPS: Operations Per Second, computed as 1 / Mean',
     ])
 
 @freeze_time("2015-08-15T00:04:18.687119")

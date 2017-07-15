@@ -5,6 +5,7 @@ import operator
 import sys
 from math import isinf
 
+from .utils import operations_unit
 from .utils import report_progress
 from .utils import time_unit
 
@@ -31,12 +32,18 @@ class TableResults(object):
             worst = {}
             best = {}
             solo = len(benchmarks) == 1
-            for line, prop in progress_reporter(("min", "max", "mean", "median", "iqr", "stddev"),
+            for line, prop in progress_reporter(("min", "max", "mean", "median", "iqr", "stddev", "ops"),
                                                 tr, "{line}: {value}", line=line):
-                worst[prop] = max(bench[prop] for _, bench in progress_reporter(
-                    benchmarks, tr, "{line} ({pos}/{total})", line=line))
-                best[prop] = min(bench[prop] for _, bench in progress_reporter(
-                    benchmarks, tr, "{line} ({pos}/{total})", line=line))
+                if prop == "ops":
+                    worst[prop] = min(bench[prop] for _, bench in progress_reporter(
+                        benchmarks, tr, "{line} ({pos}/{total})", line=line))
+                    best[prop] = max(bench[prop] for _, bench in progress_reporter(
+                        benchmarks, tr, "{line} ({pos}/{total})", line=line))
+                else:
+                    worst[prop] = max(bench[prop] for _, bench in progress_reporter(
+                        benchmarks, tr, "{line} ({pos}/{total})", line=line))
+                    best[prop] = min(bench[prop] for _, bench in progress_reporter(
+                        benchmarks, tr, "{line} ({pos}/{total})", line=line))
             for line, prop in progress_reporter(("outliers", "rounds", "iterations"), tr, "{line}: {value}", line=line):
                 worst[prop] = max(benchmark[prop] for _, benchmark in progress_reporter(
                     benchmarks, tr, "{line} ({pos}/{total})", line=line))
@@ -45,6 +52,7 @@ class TableResults(object):
             if self.sort in ("name", "fullname"):
                 time_unit_key = "min"
             unit, adjustment = time_unit(best.get(self.sort, benchmarks[0][time_unit_key]))
+            ops_unit, ops_adjustment = operations_unit(worst.get('ops', benchmarks[0]['ops']))
             labels = {
                 "name": "Name (time in {0}s)".format(unit),
                 "min": "Min",
@@ -56,12 +64,14 @@ class TableResults(object):
                 "iqr": "IQR",
                 "median": "Median",
                 "outliers": "Outliers(*)",
+                "ops": "OPS ({0}ops/s)".format(ops_unit) if ops_unit else "OPS",
             }
             widths = {
                 "name": 3 + max(len(labels["name"]), max(len(benchmark["name"]) for benchmark in benchmarks)),
                 "rounds": 2 + max(len(labels["rounds"]), len(str(worst["rounds"]))),
                 "iterations": 2 + max(len(labels["iterations"]), len(str(worst["iterations"]))),
                 "outliers": 2 + max(len(labels["outliers"]), len(str(worst["outliers"]))),
+                "ops": 2 + max(len(labels["ops"]), len(NUMBER_FMT.format(best["ops"] * ops_adjustment))),
             }
             for prop in "min", "max", "mean", "stddev", "median", "iqr":
                 widths[prop] = 2 + max(len(labels[prop]), max(
@@ -105,6 +115,18 @@ class TableResults(object):
                             red=not solo and bench[prop] == worst.get(prop),
                             bold=True,
                         )
+                    elif prop == "ops":
+                        tr.write(
+                            ALIGNED_NUMBER_FMT.format(
+                                bench[prop] * ops_adjustment,
+                                widths[prop],
+                                compute_baseline_scale(best[prop], bench[prop], rpadding),
+                                rpadding
+                            ),
+                            green=not solo and bench[prop] == best.get(prop),
+                            red=not solo and bench[prop] == worst.get(prop),
+                            bold=True,
+                        )
                     else:
                         tr.write("{0:>{1}}".format(bench[prop], widths[prop]))
                 tr.write("\n")
@@ -123,6 +145,7 @@ class TableResults(object):
 
         tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
                       "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.")
+        tr.write_line("OPS: Operations Per Second, computed as 1 / Mean")
 
 
 def compute_baseline_scale(baseline, value, width):

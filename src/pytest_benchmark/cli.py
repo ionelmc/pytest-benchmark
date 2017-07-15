@@ -16,6 +16,7 @@ from .utils import first_or_value
 from .utils import load_storage
 from .utils import report_noprogress
 
+
 COMPARE_HELP = '''examples:
 
     pytest-benchmark {0} 'Linux-CPython-3.5-64bit/*'

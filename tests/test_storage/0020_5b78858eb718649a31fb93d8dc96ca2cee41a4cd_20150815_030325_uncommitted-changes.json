@@ -33,7 +33,8 @@
                 "iqr_outliers": 4267, 
                 "hd15iqr": 2.2345898198146446e-07, 
                 "mean": 2.435695228497899e-07, 
-                "iterations": 255
+                "iterations": 255,
+                "ops": 4105603.970069372
             }, 
             "options": {
                 "disable_gc": false, 

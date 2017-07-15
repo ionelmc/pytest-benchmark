@@ -32,7 +32,8 @@
                 "mean": 2.5225501594359257e-07, 
                 "iqr": 1.882251940275494e-08, 
                 "outliers": "156;1653", 
-                "iqr_outliers": 1653
+                "iqr_outliers": 1653,
+                "ops": 3964242.281801099
             }, 
             "group": null, 
             "name": "test_xfast_parametrized[0]", 

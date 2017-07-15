@@ -55,7 +55,7 @@ TIME_UNITS = {
     "u": "Microseconds (us)",
     "n": "Nanoseconds (ns)"
 }
-ALLOWED_COLUMNS = ["min", "max", "mean", "stddev", "median", "iqr", "outliers", "rounds", "iterations"]
+ALLOWED_COLUMNS = ["min", "max", "mean", "stddev", "median", "iqr", "ops", "outliers", "rounds", "iterations"]
 
 
 class SecondsDecimal(Decimal):
@@ -480,6 +480,14 @@ def time_unit(value):
         return "m", 1e3
     else:
         return "", 1.
+
+
+def operations_unit(value):
+    if value > 1e+6:
+        return "M", 1e-6
+    if value > 1e+3:
+        return "K", 1e-3
+    return "", 1.
 
 
 def format_time(value):

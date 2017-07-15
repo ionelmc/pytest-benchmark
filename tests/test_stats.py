@@ -13,6 +13,7 @@ def test_1():
     assert stats.stddev == 25.700194551792794
     assert stats.rounds == 5
     assert stats.total == 210.
+    assert stats.ops == 0.023809523809523808
 
 
 def test_2():
@@ -26,6 +27,7 @@ def test_2():
     assert stats.stddev == 3.605551275463989
     assert stats.rounds == 3
     assert stats.total == 60.
+    assert stats.ops == 0.05
 
 
 def test_single_item():
@@ -43,6 +45,7 @@ def test_single_item():
     assert stats.total == 1
     assert stats.ld15iqr == 1
     assert stats.hd15iqr == 1
+    assert stats.ops == 1
 
 
 @mark.parametrize('length', range(1, 10))
@@ -100,3 +103,10 @@ def test_iqr():
     ]:
         stats.update(i)
     assert stats.iqr == 18.1  # close enough: http://www.wessa.net/rwasp_variability.wasp
+
+
+def test_ops():
+    stats = Stats()
+    stats.update(0)
+    assert stats.mean == 0
+    assert stats.ops == 0
