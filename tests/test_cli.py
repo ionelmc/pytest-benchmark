@@ -1,3 +1,6 @@
+from collections import namedtuple
+import sys
+
 import py
 import pytest
 from _pytest.pytester import LineMatcher
@@ -6,6 +9,13 @@ pytest_plugins = 'pytester',
 
 THIS = py.path.local(__file__)
 STORAGE = THIS.dirpath('test_storage')
+
+
+@pytest.fixture
+def testdir(testdir, monkeypatch):
+    return namedtuple('testdir', 'tmpdir,run')(
+        testdir.tmpdir,
+        lambda bin, *args: testdir.run(bin+".exe" if sys.platform == "win32" else bin, *args))
 
 
 def test_help(testdir):
