@@ -134,6 +134,7 @@ def test_parse_columns():
     False,
     'https://example.com/pytest_benchmark_repo',
     'https://example.com/pytest_benchmark_repo.git',
+    'c:\\foo\\bar\\pytest_benchmark_repo.git'
     'foo@example.com:pytest_benchmark_repo.git'])
 def test_get_project_name(scm, set_remote, testdir):
     if scm is None:

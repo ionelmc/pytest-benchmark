@@ -127,7 +127,7 @@ def get_project_name_git():
     project_address = check_output(['git', 'config', '--local', 'remote.origin.url'])
     if isinstance(project_address, bytes) and str != bytes:
         project_address = project_address.decode()
-    project_name = [i for i in re.split(r'[/:\s]|\.git', project_address) if i][-1]
+    project_name = [i for i in re.split(r'[/:\s\\]|\.git', project_address) if i][-1]
     return project_name.strip()
 
 
