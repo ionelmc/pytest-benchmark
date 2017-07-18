@@ -6,11 +6,13 @@ Just to make sure the plugin doesn't choke on doctests::
 
 """
 import time
+import sys
 from functools import partial
 
 import pytest
 
 
+@pytest.mark.skipif('sys.platform == "win32"')
 def test_fast(benchmark):
     @benchmark
     def result():
@@ -39,6 +41,7 @@ def foo(request):
     return request.param
 
 
+@pytest.mark.skipif('sys.platform == "win32"')
 def test_parametrized(benchmark, foo):
     benchmark(time.sleep, 0.00001)
     if benchmark.enabled:
