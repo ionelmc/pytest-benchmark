@@ -5,8 +5,8 @@ Just to make sure the plugin doesn't choke on doctests::
     Yay, doctests!
 
 """
-import time
 import sys
+import time
 from functools import partial
 
 import pytest
