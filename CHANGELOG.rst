@@ -2,8 +2,8 @@
 Changelog
 =========
 
-3.1.0b1 (2017-0?-0?)
----------------------
+3.1.0 (2017-07-21)
+------------------
 
 * Added "operations per second" (``ops`` field in ``Stats``) metric --
   shows the call rate of code being tested. Contributed by Alexey Popravka in
