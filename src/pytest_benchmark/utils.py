@@ -154,23 +154,8 @@ def in_any_parent(name, path=None):
     return exists(join(path, name))
 
 
-def get_branch_info():
-    def cmd(s):
-        args = s.split()
-        return check_output(args, stderr=subprocess.STDOUT, universal_newlines=True)
-
-    try:
-        if in_any_parent('.git'):
-            branch = cmd('git rev-parse --abbrev-ref HEAD').strip()
-            if branch == 'HEAD':
-                return '(detached head)'
-            return branch
-        elif in_any_parent('.hg'):
-            return cmd('hg branch').strip()
-        else:
-            return '(unknown vcs)'
-    except subprocess.CalledProcessError as e:
-        return '(error: %s)' % e.output.strip()
+def subprocess_output(cmd):
+    return check_output(cmd.split(), stderr=subprocess.STDOUT, universal_newlines=True).strip()
 
 
 def get_commit_info(project_name=None):
@@ -179,27 +164,27 @@ def get_commit_info(project_name=None):
     commit_time = None
     author_time = None
     project_name = project_name or get_project_name()
-    branch = get_branch_info()
+    branch = '(unknown)'
     try:
         if in_any_parent('.git'):
-            desc = check_output('git describe --dirty --always --long --abbrev=40'.split(),
-                                universal_newlines=True).strip()
+            desc = subprocess_output('git describe --dirty --always --long --abbrev=40')
             desc = desc.split('-')
             if desc[-1].strip() == 'dirty':
                 dirty = True
                 desc.pop()
             commit = desc[-1].strip('g')
-            commit_time = check_output('git show -s --pretty=format:"%cI"'.split(),
-                                       universal_newlines=True).strip().strip('"')
-            author_time = check_output('git show -s --pretty=format:"%aI"'.split(),
-                                       universal_newlines=True).strip().strip('"')
+            commit_time = subprocess_output('git show -s --pretty=format:"%cI"').strip('"')
+            author_time = subprocess_output('git show -s --pretty=format:"%aI"').strip('"')
+            branch = subprocess_output('git rev-parse --abbrev-ref HEAD')
+            if branch == 'HEAD':
+                branch = '(detached head)'
         elif in_any_parent('.hg'):
-            desc = check_output('hg id --id --debug'.split(), universal_newlines=True).strip()
+            desc = subprocess_output('hg id --id --debug')
             if desc[-1] == '+':
                 dirty = True
             commit = desc.strip('+')
-            commit_time = check_output('hg tip --template "{date|rfc3339date}"'.split(),
-                                       universal_newlines=True).strip().strip('"')
+            commit_time = subprocess_output('hg tip --template "{date|rfc3339date}"').strip('"')
+            branch = subprocess_output('hg branch')
         return {
             'id': commit,
             'time': commit_time,
@@ -214,7 +199,8 @@ def get_commit_info(project_name=None):
             'time': None,
             'author_time': None,
             'dirty': dirty,
-            'error': repr(exc),
+            'error': 'CalledProcessError({0.returncode}, {0.output!r})'.format(exc)
+                     if isinstance(exc, CalledProcessError) else repr(exc),
             'project': project_name,
             'branch': branch,
         }

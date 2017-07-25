@@ -1,12 +1,12 @@
 import argparse
 import distutils.spawn
+import os
 import subprocess
 
 import pytest
 from pytest import mark
 
 from pytest_benchmark.utils import clonefunc
-from pytest_benchmark.utils import get_branch_info
 from pytest_benchmark.utils import get_commit_info
 from pytest_benchmark.utils import get_project_name
 from pytest_benchmark.utils import parse_columns
@@ -77,12 +77,22 @@ def test_get_commit_info(scm, crazytestdir):
     assert 'id' in out
 
 
+def test_missing_scm_bins(scm, crazytestdir, monkeypatch):
+    with open('test_get_commit_info.py', 'w') as fh:
+        fh.write('asdf')
+    subprocess.check_call([scm, 'add', 'test_get_commit_info.py'])
+    subprocess.check_call([scm, 'commit', '-m', 'asdf'])
+    monkeypatch.setenv('PATH', os.getcwd())
+    out = get_commit_info()
+    assert 'No such file or directory' in out['error']
+
+
 def test_get_branch_info(scm, testdir):
     # make an initial commit
     testdir.tmpdir.join('foo.txt').ensure(file=True)
     subprocess.check_call([scm, 'add', 'foo.txt'])
     subprocess.check_call([scm, 'commit', '-m', 'added foo.txt'])
-    branch = get_branch_info()
+    branch = get_commit_info()['branch']
     expected = 'master' if scm == 'git' else 'default'
     assert branch == expected
     #
@@ -91,7 +101,7 @@ def test_get_branch_info(scm, testdir):
         subprocess.check_call(['git', 'checkout', '-b', 'mybranch'])
     else:
         subprocess.check_call(['hg', 'branch', 'mybranch'])
-    branch = get_branch_info()
+    branch = get_commit_info()['branch']
     assert branch == 'mybranch'
     #
     # git only: test detached head
@@ -99,16 +109,19 @@ def test_get_branch_info(scm, testdir):
         subprocess.check_call(['git', 'commit', '--allow-empty', '-m', '...'])
         subprocess.check_call(['git', 'commit', '--allow-empty', '-m', '...'])
         subprocess.check_call(['git', 'checkout', 'HEAD~1'])
-        assert get_branch_info() == '(detached head)'
+        assert get_commit_info()['branch'] == '(detached head)'
 
 
 def test_no_branch_info(testdir):
-    assert get_branch_info() == '(unknown vcs)'
+    assert get_commit_info()['branch'] == '(unknown)'
 
 
-def test_branch_info_error(testdir):
+def test_commit_info_error(testdir):
     testdir.mkdir('.git')
-    assert get_branch_info() == '(error: fatal: Not a git repository (or any of the parent directories): .git)'
+    info = get_commit_info()
+    assert info['branch'] == '(unknown)'
+    assert info['error'] == 'CalledProcessError(128, ' \
+                            '\'fatal: Not a git repository (or any of the parent directories): .git\\n\')'
 
 
 def test_parse_warmup():
