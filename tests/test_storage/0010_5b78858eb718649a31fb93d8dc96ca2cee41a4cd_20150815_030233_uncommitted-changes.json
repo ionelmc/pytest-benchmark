@@ -26,8 +26,7 @@
                 "iqr_outliers": 2111, 
                 "iqr": 3.3580081563600307e-09, 
                 "iterations": 284, 
-                "stddev_outliers": 47,
-                "ops": 4094496.184178953
+                "stddev_outliers": 47
             }, 
             "fullname": "tests/test_normal.py::test_xfast_parametrized[0]"
         }

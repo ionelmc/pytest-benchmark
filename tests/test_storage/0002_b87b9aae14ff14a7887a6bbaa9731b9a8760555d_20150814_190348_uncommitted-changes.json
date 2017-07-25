@@ -17,8 +17,7 @@
                 "iqr": 2.7330910287252284e-08,
                 "iqr_outliers": 1688,
                 "ld15iqr": 2.1690275610947028e-07,
-                "median": 2.1981029975705031e-07,
-                "ops": 3936101.0585843595
+                "median": 2.1981029975705031e-07
             },
             "name": "test_xfast_parametrized[0]",
             "group": null,

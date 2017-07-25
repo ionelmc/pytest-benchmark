@@ -20,8 +20,7 @@
                 "stddev_outliers": 49, 
                 "iterations": 420, 
                 "stddev": 2.397469802275838e-07, 
-                "outliers": "49;2503",
-                "ops": 4109818.483899419
+                "outliers": "49;2503"
             }, 
             "group": null, 
             "options": {

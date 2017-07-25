@@ -21,8 +21,7 @@
                 "hd15iqr": 2.2225460763704978e-07, 
                 "iqr": 5.772846951611743e-10, 
                 "median": 2.2052275355156628e-07, 
-                "stddev": 2.7747228347912803e-07,
-                "ops": 4089151.3188353465
+                "stddev": 2.7747228347912803e-07
             }, 
             "fullname": "tests/test_normal.py::test_xfast_parametrized[0]", 
             "group": null, 

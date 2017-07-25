@@ -32,8 +32,7 @@
                 "iqr_outliers": 5048, 
                 "outliers": "70;5048", 
                 "max": 1.4833041599818639e-05, 
-                "stddev": 1.855664701184603e-07,
-                "ops": 4206356.814862113
+                "stddev": 1.855664701184603e-07
             }, 
             "name": "test_xfast_parametrized[0]", 
             "fullname": "tests/test_normal.py::test_xfast_parametrized[0]", 
