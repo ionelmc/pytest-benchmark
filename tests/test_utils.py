@@ -66,14 +66,14 @@ def test_get_commit_info(scm, crazytestdir):
     branch = 'master' if scm == 'git' else 'default'
     assert out['branch'] == branch
 
-    assert out.get('dirty') == False
+    assert out.get('dirty') is False
     assert 'id' in out
 
     with open('test_get_commit_info.py', 'w') as fh:
         fh.write('sadf')
     out = get_commit_info()
 
-    assert out.get('dirty') == True
+    assert out.get('dirty') is True
     assert 'id' in out
 
 
@@ -125,13 +125,13 @@ def test_commit_info_error(testdir):
 
 
 def test_parse_warmup():
-    assert parse_warmup('yes') == True
-    assert parse_warmup('on') == True
-    assert parse_warmup('true') == True
-    assert parse_warmup('off') == False
-    assert parse_warmup('off') == False
-    assert parse_warmup('no') == False
-    assert parse_warmup('') == True
+    assert parse_warmup('yes') is True
+    assert parse_warmup('on') is True
+    assert parse_warmup('true') is True
+    assert parse_warmup('off') is False
+    assert parse_warmup('off') is False
+    assert parse_warmup('no') is False
+    assert parse_warmup('') is True
     assert parse_warmup('auto') in [True, False]
 
 
