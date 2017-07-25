@@ -63,7 +63,7 @@ class TableResults(object):
                 "iterations": "Iterations",
                 "iqr": "IQR",
                 "median": "Median",
-                "outliers": "Outliers(*)",
+                "outliers": "Outliers",
                 "ops": "OPS ({0}ops/s)".format(ops_unit) if ops_unit else "OPS",
             }
             widths = {
