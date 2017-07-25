@@ -14,7 +14,7 @@ from .utils import get_cprofile_functions
 class Stats(object):
     fields = (
         "min", "max", "mean", "stddev", "rounds", "median", "iqr", "q1", "q3", "iqr_outliers", "stddev_outliers",
-        "outliers", "ld15iqr", "hd15iqr", "ops",
+        "outliers", "ld15iqr", "hd15iqr", "ops", "total"
     )
 
     def __init__(self):
@@ -164,9 +164,8 @@ class Stats(object):
 
     @cached_property
     def ops(self):
-        s = sum(self.data)
-        if s:
-            return len(self.data) / s
+        if self.total:
+            return self.rounds / self.total
         return 0
 
 
@@ -249,3 +248,10 @@ class Metadata(object):
 
     def update(self, duration):
         self.stats.update(duration / self.iterations)
+
+
+def normalize_stats(stats):
+    if 'ops' not in stats:
+        # fill field added in 3.1.0
+        stats['ops'] = 1 / stats['mean']
+    return stats
