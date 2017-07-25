@@ -199,6 +199,7 @@ def test_compare(testdir, name):
         '*xfast_parametrized[[]0[]] (0001*)     217.3145 (1.01)     11*447.3891 (1.48)   ',
         '---*---',
         '',
-        '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
+        'Legend:',
+        '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
     ])
     assert result.ret == 0

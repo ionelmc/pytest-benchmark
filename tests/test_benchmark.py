@@ -291,7 +291,8 @@ def test_group_by_fullfunc(testdir):
         'test_b[[]*[]]         *',
         '------------------*',
         '',
-        '(*) Outliers: 1 Standard Deviation from M*',
+        'Legend:',
+        '  Outliers: 1 Standard Deviation from M*',
         '============* 8 passed* seconds ============*',
     ])
 
@@ -320,7 +321,8 @@ def test_group_by_param_all(testdir):
         'test_*[[]1[]]         *',
         '------------------*',
         '',
-        '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '
+        'Legend:',
+        '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '
         'Quartile.',
         '============* 8 passed* seconds ============*',
     ])
@@ -352,7 +354,8 @@ def test_group_by_param_select(testdir):
         'test_b[[]foo2-bar2[]]    *',
         '------------------*',
         '',
-        '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '
+        'Legend:',
+        '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '
         'Quartile.',
         '============* 8 passed* seconds ============*',
     ])
@@ -394,7 +397,8 @@ def test_group_by_param_select_multiple(testdir):
         'test_b[[]foo2-bar2[]]    *',
         '------------------*',
         '',
-        '(*) Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '
+        'Legend:',
+        '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '
         'Quartile.',
         '============* 8 passed* seconds ============*',
     ])

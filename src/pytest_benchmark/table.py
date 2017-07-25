@@ -143,9 +143,10 @@ class TableResults(object):
 
                 self.logger.info("Generated histogram: {0}".format(output_file), bold=True)
 
-        tr.write_line("(*) Outliers: 1 Standard Deviation from Mean; "
+        tr.write_line("Legend:")
+        tr.write_line("  Outliers: 1 Standard Deviation from Mean; "
                       "1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.")
-        tr.write_line("OPS: Operations Per Second, computed as 1 / Mean")
+        tr.write_line("  OPS: Operations Per Second, computed as 1 / Mean")
 
 
 def compute_baseline_scale(baseline, value, width):
