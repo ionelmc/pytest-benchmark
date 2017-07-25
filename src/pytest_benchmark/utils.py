@@ -29,13 +29,16 @@ except ImportError:
     from urlparse import urlparse, parse_qs
 
 try:
-    from subprocess import check_output, CalledProcessError
+    from subprocess import CalledProcessError
 except ImportError:
     class CalledProcessError(subprocess.CalledProcessError):
         def __init__(self, returncode, cmd, output=None):
             super(CalledProcessError, self).__init__(returncode, cmd)
             self.output = output
 
+try:
+    from subprocess import check_output
+except ImportError:
     def check_output(*popenargs, **kwargs):
         if 'stdout' in kwargs:
             raise ValueError('stdout argument not allowed, it will be overridden.')
