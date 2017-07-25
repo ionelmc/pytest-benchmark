@@ -173,6 +173,12 @@ def test_get_project_name(scm, set_remote, testdir):
         assert get_project_name().startswith("test_get_project_name")
 
 
+@mark.parametrize('scm', ['git', 'hg'])
+def test_get_project_name_broken(scm, testdir):
+    testdir.tmpdir.join('.' + scm).ensure(dir=1)
+    assert get_project_name() in ['test_get_project_name_broken0', 'test_get_project_name_broken1']
+
+
 def test_parse_elasticsearch_storage():
     assert parse_elasticsearch_storage("http://localhost:9200") == (
     ["http://localhost:9200"], "benchmark", "benchmark", "pytest-benchmark")
