@@ -332,7 +332,10 @@ class ElasticsearchStorage(object):
                                 },
                                 "stddev_outliers": {
                                     "type": "long"
-                                }
+                                },
+                                "ops": {
+                                    "type": "double"
+                                },
                             }
                         },
                     }
