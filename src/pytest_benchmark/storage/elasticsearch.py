@@ -9,6 +9,7 @@ from decimal import Decimal
 from functools import partial
 
 from ..compat import reraise
+from ..stats import normalize_stats
 
 try:
     import elasticsearch
@@ -83,6 +84,8 @@ class ElasticsearchStorage(object):
         result = [(key, value) for key, value in groupped_data.items()]
         result.sort(key=lambda x: datetime.strptime(x[1]["datetime"], "%Y-%m-%dT%H:%M:%S.%f"))
         for key, data in result:
+            for bench in data["benchmarks"]:
+                normalize_stats(bench["stats"])
             yield key, data
 
     def _search(self, project, id_prefix=None):

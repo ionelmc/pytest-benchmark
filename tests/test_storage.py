@@ -16,6 +16,7 @@ from pytest_benchmark.plugin import pytest_benchmark_compare_machine_info
 from pytest_benchmark.plugin import pytest_benchmark_generate_json
 from pytest_benchmark.plugin import pytest_benchmark_group_stats
 from pytest_benchmark.session import PerformanceRegression
+from pytest_benchmark.stats import normalize_stats
 from pytest_benchmark.storage.file import FileStorage
 from pytest_benchmark.utils import NAME_FORMATTERS
 from pytest_benchmark.utils import DifferenceRegressionCheck
@@ -28,10 +29,10 @@ pytest_plugins = "pytester"
 THIS = py.path.local(__file__)
 STORAGE = THIS.dirpath(THIS.purebasename)
 
-SAVE_DATA = json.load(STORAGE.listdir('0030_*.json')[0].open())
 JSON_DATA = json.load(STORAGE.listdir('0030_*.json')[0].open())
-SAVE_DATA["machine_info"] = JSON_DATA["machine_info"] = {'foo': 'bar'}
-SAVE_DATA["commit_info"] = JSON_DATA["commit_info"] = {'foo': 'bar'}
+JSON_DATA["machine_info"] = {'foo': 'bar'}
+JSON_DATA["commit_info"] = {'foo': 'bar'}
+list(normalize_stats(bench['stats']) for bench in JSON_DATA["benchmarks"])
 
 
 class Namespace(object):

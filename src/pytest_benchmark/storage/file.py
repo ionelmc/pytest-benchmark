@@ -2,6 +2,7 @@ import json
 import os
 from pathlib import Path
 
+from ..stats import normalize_stats
 from ..utils import commonpath
 from ..utils import safe_dumps
 from ..utils import short_filename
@@ -102,6 +103,8 @@ class FileStorage(object):
                 with file.open("rU") as fh:
                     try:
                         data = json.load(fh)
+                        for bench in data["benchmarks"]:
+                            normalize_stats(bench["stats"])
                     except Exception as exc:
                         self.logger.warn("BENCHMARK-C5",
                                          "Failed to load {0}: {1}".format(file, exc), fslocation=self.location)
