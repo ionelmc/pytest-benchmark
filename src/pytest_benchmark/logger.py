@@ -16,12 +16,8 @@ class Logger(object):
         else:
             self.capman = None
             self.pytest_warn = lambda **kwargs: None
-        try:
-            self.pytest_warn_has_fslocation = 'fslocation' in config.warn.func_code.co_varnames
-        except AttributeError:
-            self.pytest_warn_has_fslocation = False
 
-    def warn(self, code, text, warner=None, suspend=False, fslocation=None):
+    def warn(self, code, text, warner=None, suspend=False, fslocation='::'):
         if self.verbose:
             if suspend and self.capman:
                 self.capman.suspendcapture(in_=True)
@@ -34,10 +30,7 @@ class Logger(object):
                 self.capman.resumecapture()
         if warner is None:
             warner = self.pytest_warn
-        if fslocation and self.pytest_warn_has_fslocation:
-            warner(code=code, message=text, fslocation=fslocation)
-        else:
-            warner(code=code, message=text)
+        warner(code=code, message=text, fslocation=fslocation)
 
     def error(self, text):
         self.term.line("")

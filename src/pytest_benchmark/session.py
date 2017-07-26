@@ -16,6 +16,7 @@ from .utils import load_storage
 from .utils import load_timer
 from .utils import safe_dumps
 from .utils import short_filename
+from . import utils
 
 
 class PerformanceRegression(pytest.UsageError):
@@ -28,7 +29,7 @@ class BenchmarkSession(object):
 
     def __init__(self, config):
         self.verbose = config.getoption("benchmark_verbose")
-        self.logger = Logger(self.verbose, config)
+        self.logger = utils.logger = Logger(self.verbose, config)
         self.config = config
         self.performance_regressions = []
         self.benchmarks = []
@@ -59,7 +60,6 @@ class BenchmarkSession(object):
                 "BENCHMARK-U2",
                 "Benchmarks are automatically disabled because xdist plugin is active."
                 "Benchmarks cannot be performed reliably in a parallelized environment.",
-                fslocation="::"
             )
             self.disabled = True
         if hasattr(config, "slaveinput"):
@@ -69,7 +69,6 @@ class BenchmarkSession(object):
                 "BENCHMARK-U3",
                 "Benchmarks are automatically disabled because we could not import `statistics`\n\n%s" %
                 statistics_error,
-                fslocation="::"
             )
             self.disabled = True
 

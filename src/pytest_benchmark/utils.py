@@ -15,6 +15,7 @@ import types
 from datetime import datetime
 from decimal import Decimal
 from functools import partial
+from collections import namedtuple
 from os.path import basename
 from os.path import dirname
 from os.path import exists
@@ -22,6 +23,7 @@ from os.path import join
 from os.path import split
 
 from .compat import PY3
+from .logger import Logger
 
 try:
     from urllib.parse import urlparse, parse_qs
@@ -56,6 +58,8 @@ TIME_UNITS = {
     "n": "Nanoseconds (ns)"
 }
 ALLOWED_COLUMNS = ["min", "max", "mean", "stddev", "median", "iqr", "ops", "outliers", "rounds", "iterations"]
+
+logger = Logger(verbose=True)
 
 
 class SecondsDecimal(Decimal):
@@ -100,48 +104,13 @@ def get_machine_id():
     )
 
 
-class Fallback(object):
-    def __init__(self, *exceptions):
-        self.functions = []
-        self.exceptions = exceptions
+def repr_exc(exc):
+    if isinstance(exc, CalledProcessError):
+        return 'CalledProcessError({0.returncode}, {0.output!r})'.format(exc)
+    else:
+        return repr(exc)
 
-    def __call__(self, *args, **kwargs):
-        for func in self.functions:
-            try:
-                return func(*args, **kwargs)
-            except self.exceptions:
-                continue
-        else:
-            raise NotImplementedError("Must have an fallback implementation for %s" % self.functions[0])
-
-    def register(self, other):
-        self.functions.append(other)
-        return self
-
-
-get_project_name = Fallback(IndexError, CalledProcessError, OSError)
-
-
-@get_project_name.register
-def get_project_name_git():
-    project_address = check_output(['git', 'config', '--local', 'remote.origin.url'])
-    if isinstance(project_address, bytes) and str != bytes:
-        project_address = project_address.decode()
-    project_name = [i for i in re.split(r'[/:\s\\]|\.git', project_address) if i][-1]
-    return project_name.strip()
-
-
-@get_project_name.register
-def get_project_name_hg():
-    project_address = check_output(['hg', 'path', 'default'])
-    project_address = project_address.decode()
-    project_name = project_address.split("/")[-1]
-    return project_name.strip()
-
-
-@get_project_name.register
-def get_project_name_default():
-    return basename(os.getcwd())
+Path = namedtuple('Path', 'path exists name')
 
 
 def in_any_parent(name, path=None):
@@ -151,11 +120,31 @@ def in_any_parent(name, path=None):
     while path and prev != path and not exists(join(path, name)):
         prev = path
         path = dirname(path)
-    return exists(join(path, name))
+    path = join(path, name)
+    return Path(path, exists(path), name)
 
 
 def subprocess_output(cmd):
     return check_output(cmd.split(), stderr=subprocess.STDOUT, universal_newlines=True).strip()
+
+
+def get_project_name():
+    project_name = basename(os.getcwd())
+    scm = Path(None, None, None)
+    try:
+        scm = in_any_parent('.git')
+        if scm.exists:
+            project_address = subprocess_output('git config --local remote.origin.url')
+            project_name = [i for i in re.split(r'[/:\s\\]|\.git', project_address) if i][-1]
+        else:
+            scm = in_any_parent('.hg')
+            if scm.exists:
+                project_address = subprocess_output('hg path default')
+                project_name = project_address.split("/")[-1]
+    except Exception as exc:
+        logger.warn('BENCHMARK-S1', 'Failed to figure out project name from %s scm (%s)' % (scm.name, repr_exc(exc)),
+                    fslocation=scm.path)
+    return project_name.strip()
 
 
 def get_commit_info(project_name=None):
@@ -165,8 +154,10 @@ def get_commit_info(project_name=None):
     author_time = None
     project_name = project_name or get_project_name()
     branch = '(unknown)'
+    scm = Path(None, None, None)
     try:
-        if in_any_parent('.git'):
+        scm = in_any_parent('.git')
+        if scm.exists:
             desc = subprocess_output('git describe --dirty --always --long --abbrev=40')
             desc = desc.split('-')
             if desc[-1].strip() == 'dirty':
@@ -178,13 +169,15 @@ def get_commit_info(project_name=None):
             branch = subprocess_output('git rev-parse --abbrev-ref HEAD')
             if branch == 'HEAD':
                 branch = '(detached head)'
-        elif in_any_parent('.hg'):
-            desc = subprocess_output('hg id --id --debug')
-            if desc[-1] == '+':
-                dirty = True
-            commit = desc.strip('+')
-            commit_time = subprocess_output('hg tip --template "{date|rfc3339date}"').strip('"')
-            branch = subprocess_output('hg branch')
+        else:
+            scm = in_any_parent('.hg')
+            if scm.exists:
+                desc = subprocess_output('hg id --id --debug')
+                if desc[-1] == '+':
+                    dirty = True
+                commit = desc.strip('+')
+                commit_time = subprocess_output('hg tip --template "{date|rfc3339date}"').strip('"')
+                branch = subprocess_output('hg branch')
         return {
             'id': commit,
             'time': commit_time,
@@ -194,13 +187,15 @@ def get_commit_info(project_name=None):
             'branch': branch,
         }
     except Exception as exc:
+        exc_repr = repr_exc(exc)
+        logger.warn('BENCHMARK-S2', 'Failed to extract commit info from %s scm (%s)' % (scm.name, exc_repr),
+                    fslocation=scm.path)
         return {
             'id': 'unknown',
             'time': None,
             'author_time': None,
             'dirty': dirty,
-            'error': 'CalledProcessError({0.returncode}, {0.output!r})'.format(exc)
-                     if isinstance(exc, CalledProcessError) else repr(exc),
+            'error': exc_repr,
             'project': project_name,
             'branch': branch,
         }
