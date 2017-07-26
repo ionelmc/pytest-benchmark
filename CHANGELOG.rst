@@ -2,6 +2,14 @@
 Changelog
 =========
 
+3.1.1 (2017-07-26)
+------------------
+
+* Fixed loading data from old json files (missing ``ops`` field, see
+  `#81 <https://github.com/ionelmc/pytest-benchmark/issues/81>`_).
+* Fixed regression on broken SCM (see
+  `#82 <https://github.com/ionelmc/pytest-benchmark/issues/82>`_).
+
 3.1.0 (2017-07-21)
 ------------------
 
