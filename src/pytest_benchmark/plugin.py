@@ -268,20 +268,28 @@ else:
     _hookwrapper = pytest.mark.hookwrapper
 
 
-@_hookwrapper
-def pytest_runtest_call(item):
-    bs = item.config._benchmarksession
-    fixure = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
-    if isinstance(fixure, BenchmarkFixture):
-        if bs.skip:
-            pytest.skip("Skipping benchmark (--benchmark-skip active).")
+def pytest_collection_modifyitems(items, config):
+    selected_items = []
+    deselected_items = []
+
+    only = config.getvalue("benchmark_only", False)
+    skip = config.getvalue("benchmark_skip", False)
+
+    for item in items:
+        uses_benchmark = hasattr(item, "funcargnames") and "benchmark" in item.funcargnames
+        if uses_benchmark:
+            if skip:
+                deselected_items.append(item)
+            else:
+                selected_items.append(item)
         else:
-            yield
-    else:
-        if bs.only:
-            pytest.skip("Skipping non-benchmark (--benchmark-only active).")
-        else:
-            yield
+            if only:
+                deselected_items.append(item)
+            else:
+                selected_items.append(item)
+
+        config.hook.pytest_deselected(items=deselected_items)
+        items[:] = selected_items
 
 
 def pytest_benchmark_group_stats(config, benchmarks, group_by):
