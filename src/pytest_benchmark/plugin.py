@@ -269,6 +269,9 @@ else:
 
 
 def pytest_collection_modifyitems(items, config):
+    """
+    Select all tests with a parameter whose name contains "benchmark".
+    """
     selected_items = []
     deselected_items = []
 
@@ -276,7 +279,8 @@ def pytest_collection_modifyitems(items, config):
     skip = config.getvalue("benchmark_skip", False)
 
     for item in items:
-        uses_benchmark = hasattr(item, "funcargnames") and "benchmark" in item.funcargnames
+        args = getattr(item, "funcargnames", [])
+        uses_benchmark = bool(filter(lambda name: "benchmark" in name, args))
         if uses_benchmark:
             if skip:
                 deselected_items.append(item)
