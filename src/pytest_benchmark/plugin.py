@@ -288,8 +288,8 @@ def pytest_collection_modifyitems(items, config):
             else:
                 selected_items.append(item)
 
-        config.hook.pytest_deselected(items=deselected_items)
-        items[:] = selected_items
+    config.hook.pytest_deselected(items=deselected_items)
+    items[:] = selected_items
 
 
 def pytest_benchmark_group_stats(config, benchmarks, group_by):
