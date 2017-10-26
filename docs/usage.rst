@@ -82,12 +82,6 @@ Commandline options
   --benchmark-min-rounds=NUM
                         Minimum rounds, even if total time would exceed
                         `--max-time`. Default: 5
-  --benchmark-sort=COL  Column to sort on. Can be one of: 'min', 'max', 'mean'
-                        or 'stddev'. Default: 'min'
-  --benchmark-group-by=LABEL
-                        How to group tests. Can be one of: 'group', 'name',
-                        'fullname', 'func', 'fullfunc' or 'param'. Default:
-                        'group'
   --benchmark-timer=FUNC
                         Timer to use when measuring time. Default:
                         'time.perf_counter'
@@ -106,10 +100,15 @@ Commandline options
   --benchmark-warmup-iterations=NUM
                         Max number of iterations to run in the warmup phase.
                         Default: 100000
-  --benchmark-verbose   Dump diagnostic and progress information.
   --benchmark-disable-gc
                         Disable GC during benchmarks.
-  --benchmark-skip      Skip running any benchmarks.
+  --benchmark-skip      Skip running any tests that contain benchmarks.
+  --benchmark-disable   Disable benchmarks. Benchmarked functions are only ran
+                        once and no stats are reported. Use this is you want
+                        to run the test but don't do any benchmarking.
+  --benchmark-enable    Forcibly enable benchmarks. Use this option to
+                        override --benchmark-disable (in case you have it in
+                        pytest configuration).
   --benchmark-only      Only run benchmarks.
   --benchmark-save=NAME
                         Save the current run into 'STORAGE-PATH/counter-
@@ -122,7 +121,11 @@ Commandline options
                         Use this to make --benchmark-save and --benchmark-
                         autosave include all the timing data, not just the
                         stats.
-  --benchmark-compare=NUM|ID
+  --benchmark-json=PATH
+                        Dump a JSON report into PATH. Note that this will
+                        include the complete data (all the timings, not just
+                        the stats).
+  --benchmark-compare=NUM
                         Compare the current run against run NUM (or prefix of
                         _id in elasticsearch) or the latest saved run if
                         unspecified.
@@ -130,11 +133,6 @@ Commandline options
                         Fail test if performance regresses according to given
                         EXPR (eg: min:5% or mean:0.001 for number of seconds).
                         Can be used multiple times.
-  --benchmark-storage=STORAGE-PATH
-                        Specify a different path to store the runs (when
-                        --benchmark-save or --benchmark-autosave are used).
-                        Default: './.benchmarks/<os>-<pyimplementation>-<pyversion>-<arch>bit',
-                        example: 'Linux-CPython-2.7-64bit'.
   --benchmark-cprofile=COLUMN
                         If specified measure one run with cProfile and stores
                         10 top functions. Argument is a column to sort by.
@@ -143,21 +141,91 @@ Commandline options
                         'function_name'.
   --benchmark-storage=URI
                         Specify a path to store the runs as uri in form
-                        file://path or
-                        elasticsearch+http[s]://host1,host2/index/doctype
-                        (when --benchmark-save or --benchmark-autosave are
-                        used). Default: 'file://./.benchmarks'.
+                        file://path or elasticsearch+http[s]://host1,host2/[in
+                        dex/doctype?project_name=Project] (when --benchmark-
+                        save or --benchmark-autosave are used). For backwards
+                        compatibility unexpected values are converted to
+                        file://<value>. Default: 'file://./.benchmarks'.
+  --benchmark-netrc=BENCHMARK_NETRC
+                        Load elasticsearch credentials from a netrc file.
+                        Default: ''.
+  --benchmark-verbose   Dump diagnostic and progress information.
+  --benchmark-sort=COL  Column to sort on. Can be one of: 'min', 'max',
+                        'mean', 'stddev', 'name', 'fullname'. Default: 'min'
+  --benchmark-group-by=LABEL
+                        How to group tests. Can be one of: 'group', 'name',
+                        'fullname', 'func', 'fullfunc', 'param' or
+                        'param:NAME', where NAME is the name passed to
+                        @pytest.parametrize. Default: 'group'
+  --benchmark-columns=LABELS
+                        Comma-separated list of columns to show in the result
+                        table. Default: 'min, max, mean, stddev, median, iqr,
+                        outliers, rounds, iterations'
+  --benchmark-name=FORMAT
+                        How to format names in results. Can be one of 'short',
+                        'normal', 'long'. Default: 'normal'
   --benchmark-histogram=FILENAME-PREFIX
                         Plot graphs of min/max/avg/stddev over time in
                         FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX
                         contains slashes ('/') then directories will be
-                        created. Default: 'benchmark_<date>_<time>', example:
-                        'benchmark_20150811_041632'.
-  --benchmark-json=PATH
-                        Dump a JSON report into PATH. Note that this will
-                        include the complete data (all the timings, not just
-                        the stats).
+                        created. Default: 'benchmark_<date>_<time>'
 
+Comparison CLI
+--------------
+
+An extra ``py.test-benchmark`` bin is available for inspecting previous benchmark data::
+
+    py.test-benchmark [-h [COMMAND]] [--storage URI] [--netrc [NETRC]]
+                      [--verbose]
+                      {help,list,compare} ...
+
+    Commands:
+        help       Display help and exit.
+        list       List saved runs.
+        compare    Compare saved runs.
+
+The compare ``command`` takes almost all the ``--benchmark`` options, minus the prefix:
+
+    positional arguments:
+      glob_or_file          Glob or exact path for json files. If not specified
+                            all runs are loaded.
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --sort=COL            Column to sort on. Can be one of: 'min', 'max',
+                            'mean', 'stddev', 'name', 'fullname'. Default: 'min'
+      --group-by=LABEL      How to group tests. Can be one of: 'group', 'name',
+                            'fullname', 'func', 'fullfunc', 'param' or
+                            'param:NAME', where NAME is the name passed to
+                            @pytest.parametrize. Default: 'group'
+      --columns=LABELS      Comma-separated list of columns to show in the result
+                            table. Default: 'min, max, mean, stddev, median, iqr,
+                            outliers, rounds, iterations'
+      --name=FORMAT         How to format names in results. Can be one of 'short',
+                            'normal', 'long'. Default: 'normal'
+      --histogram=FILENAME-PREFIX
+                            Plot graphs of min/max/avg/stddev over time in
+                            FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX
+                            contains slashes ('/') then directories will be
+                            created. Default: 'benchmark_<date>_<time>'
+      --csv=FILENAME        Save a csv report. If FILENAME contains slashes ('/')
+                            then directories will be created. Default:
+                            'benchmark_<date>_<time>'
+
+    examples:
+
+        pytest-benchmark compare 'Linux-CPython-3.5-64bit/*'
+
+            Loads all benchmarks ran with that interpreter. Note the special quoting that disables your shell's glob
+            expansion.
+
+        pytest-benchmark compare 0001
+
+            Loads first run from all the interpreters.
+
+        pytest-benchmark compare /foo/bar/0001_abc.json /lorem/ipsum/0001_sir_dolor.json
+
+            Loads runs from exactly those files.
 
 Markers
 =======
