@@ -11,52 +11,52 @@ environment:
       PYTHON_VERSION: '2.7'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py27-pytest29-pygal23-nodist-cover,report,codecov'
+    - TOXENV: 'py27-pytest31-pygal23-nodist-cover,report,codecov'
       TOXPYTHON: C:\Python27\python.exe
       PYTHON_HOME: C:\Python27
       PYTHON_VERSION: '2.7'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py27-pytest29-pygal23-nodist-cover,report,codecov'
+    - TOXENV: 'py27-pytest31-pygal23-nodist-cover,report,codecov'
       TOXPYTHON: C:\Python27-x64\python.exe
       WINDOWS_SDK_VERSION: v7.0
       PYTHON_HOME: C:\Python27-x64
       PYTHON_VERSION: '2.7'
       PYTHON_ARCH: '64'
 
-    - TOXENV: 'py27-pytest29-pygal23-nodist-nocov'
+    - TOXENV: 'py27-pytest31-pygal23-nodist-nocov'
       TOXPYTHON: C:\Python27\python.exe
       PYTHON_HOME: C:\Python27
       PYTHON_VERSION: '2.7'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py27-pytest29-pygal23-nodist-nocov'
+    - TOXENV: 'py27-pytest31-pygal23-nodist-nocov'
       TOXPYTHON: C:\Python27-x64\python.exe
       WINDOWS_SDK_VERSION: v7.0
       PYTHON_HOME: C:\Python27-x64
       PYTHON_VERSION: '2.7'
       PYTHON_ARCH: '64'
 
-    - TOXENV: 'py27-pytest29-pygal23-xdist-cover,report,codecov'
+    - TOXENV: 'py27-pytest31-pygal23-xdist-cover,report,codecov'
       TOXPYTHON: C:\Python27\python.exe
       PYTHON_HOME: C:\Python27
       PYTHON_VERSION: '2.7'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py27-pytest29-pygal23-xdist-cover,report,codecov'
+    - TOXENV: 'py27-pytest31-pygal23-xdist-cover,report,codecov'
       TOXPYTHON: C:\Python27-x64\python.exe
       WINDOWS_SDK_VERSION: v7.0
       PYTHON_HOME: C:\Python27-x64
       PYTHON_VERSION: '2.7'
       PYTHON_ARCH: '64'
 
-    - TOXENV: 'py27-pytest29-pygal23-xdist-nocov'
+    - TOXENV: 'py27-pytest31-pygal23-xdist-nocov'
       TOXPYTHON: C:\Python27\python.exe
       PYTHON_HOME: C:\Python27
       PYTHON_VERSION: '2.7'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py27-pytest29-pygal23-xdist-nocov'
+    - TOXENV: 'py27-pytest31-pygal23-xdist-nocov'
       TOXPYTHON: C:\Python27-x64\python.exe
       WINDOWS_SDK_VERSION: v7.0
       PYTHON_HOME: C:\Python27-x64
@@ -115,52 +115,52 @@ environment:
       PYTHON_VERSION: '2.7'
       PYTHON_ARCH: '64'
 
-    - TOXENV: 'py34-pytest29-pygal23-nodist-cover,report,codecov'
+    - TOXENV: 'py34-pytest31-pygal23-nodist-cover,report,codecov'
       TOXPYTHON: C:\Python34\python.exe
       PYTHON_HOME: C:\Python34
       PYTHON_VERSION: '3.4'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py34-pytest29-pygal23-nodist-cover,report,codecov'
+    - TOXENV: 'py34-pytest31-pygal23-nodist-cover,report,codecov'
       TOXPYTHON: C:\Python34-x64\python.exe
       WINDOWS_SDK_VERSION: v7.1
       PYTHON_HOME: C:\Python34-x64
       PYTHON_VERSION: '3.4'
       PYTHON_ARCH: '64'
 
-    - TOXENV: 'py34-pytest29-pygal23-nodist-nocov'
+    - TOXENV: 'py34-pytest31-pygal23-nodist-nocov'
       TOXPYTHON: C:\Python34\python.exe
       PYTHON_HOME: C:\Python34
       PYTHON_VERSION: '3.4'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py34-pytest29-pygal23-nodist-nocov'
+    - TOXENV: 'py34-pytest31-pygal23-nodist-nocov'
       TOXPYTHON: C:\Python34-x64\python.exe
       WINDOWS_SDK_VERSION: v7.1
       PYTHON_HOME: C:\Python34-x64
       PYTHON_VERSION: '3.4'
       PYTHON_ARCH: '64'
 
-    - TOXENV: 'py34-pytest29-pygal23-xdist-cover,report,codecov'
+    - TOXENV: 'py34-pytest31-pygal23-xdist-cover,report,codecov'
       TOXPYTHON: C:\Python34\python.exe
       PYTHON_HOME: C:\Python34
       PYTHON_VERSION: '3.4'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py34-pytest29-pygal23-xdist-cover,report,codecov'
+    - TOXENV: 'py34-pytest31-pygal23-xdist-cover,report,codecov'
       TOXPYTHON: C:\Python34-x64\python.exe
       WINDOWS_SDK_VERSION: v7.1
       PYTHON_HOME: C:\Python34-x64
       PYTHON_VERSION: '3.4'
       PYTHON_ARCH: '64'
 
-    - TOXENV: 'py34-pytest29-pygal23-xdist-nocov'
+    - TOXENV: 'py34-pytest31-pygal23-xdist-nocov'
       TOXPYTHON: C:\Python34\python.exe
       PYTHON_HOME: C:\Python34
       PYTHON_VERSION: '3.4'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py34-pytest29-pygal23-xdist-nocov'
+    - TOXENV: 'py34-pytest31-pygal23-xdist-nocov'
       TOXPYTHON: C:\Python34-x64\python.exe
       WINDOWS_SDK_VERSION: v7.1
       PYTHON_HOME: C:\Python34-x64
@@ -219,49 +219,49 @@ environment:
       PYTHON_VERSION: '3.4'
       PYTHON_ARCH: '64'
 
-    - TOXENV: 'py35-pytest29-pygal23-nodist-cover,report,codecov'
+    - TOXENV: 'py35-pytest31-pygal23-nodist-cover,report,codecov'
       TOXPYTHON: C:\Python35\python.exe
       PYTHON_HOME: C:\Python35
       PYTHON_VERSION: '3.5'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py35-pytest29-pygal23-nodist-cover,report,codecov'
+    - TOXENV: 'py35-pytest31-pygal23-nodist-cover,report,codecov'
       TOXPYTHON: C:\Python35-x64\python.exe
       PYTHON_HOME: C:\Python35-x64
       PYTHON_VERSION: '3.5'
       PYTHON_ARCH: '64'
 
-    - TOXENV: 'py35-pytest29-pygal23-nodist-nocov'
+    - TOXENV: 'py35-pytest31-pygal23-nodist-nocov'
       TOXPYTHON: C:\Python35\python.exe
       PYTHON_HOME: C:\Python35
       PYTHON_VERSION: '3.5'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py35-pytest29-pygal23-nodist-nocov'
+    - TOXENV: 'py35-pytest31-pygal23-nodist-nocov'
       TOXPYTHON: C:\Python35-x64\python.exe
       PYTHON_HOME: C:\Python35-x64
       PYTHON_VERSION: '3.5'
       PYTHON_ARCH: '64'
 
-    - TOXENV: 'py35-pytest29-pygal23-xdist-cover,report,codecov'
+    - TOXENV: 'py35-pytest31-pygal23-xdist-cover,report,codecov'
       TOXPYTHON: C:\Python35\python.exe
       PYTHON_HOME: C:\Python35
       PYTHON_VERSION: '3.5'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py35-pytest29-pygal23-xdist-cover,report,codecov'
+    - TOXENV: 'py35-pytest31-pygal23-xdist-cover,report,codecov'
       TOXPYTHON: C:\Python35-x64\python.exe
       PYTHON_HOME: C:\Python35-x64
       PYTHON_VERSION: '3.5'
       PYTHON_ARCH: '64'
 
-    - TOXENV: 'py35-pytest29-pygal23-xdist-nocov'
+    - TOXENV: 'py35-pytest31-pygal23-xdist-nocov'
       TOXPYTHON: C:\Python35\python.exe
       PYTHON_HOME: C:\Python35
       PYTHON_VERSION: '3.5'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py35-pytest29-pygal23-xdist-nocov'
+    - TOXENV: 'py35-pytest31-pygal23-xdist-nocov'
       TOXPYTHON: C:\Python35-x64\python.exe
       PYTHON_HOME: C:\Python35-x64
       PYTHON_VERSION: '3.5'
@@ -315,49 +315,49 @@ environment:
       PYTHON_VERSION: '3.5'
       PYTHON_ARCH: '64'
 
-    - TOXENV: 'py36-pytest29-pygal23-nodist-cover,report,codecov'
+    - TOXENV: 'py36-pytest31-pygal23-nodist-cover,report,codecov'
       TOXPYTHON: C:\Python36\python.exe
       PYTHON_HOME: C:\Python36
       PYTHON_VERSION: '3.6'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py36-pytest29-pygal23-nodist-cover,report,codecov'
+    - TOXENV: 'py36-pytest31-pygal23-nodist-cover,report,codecov'
       TOXPYTHON: C:\Python36-x64\python.exe
       PYTHON_HOME: C:\Python36-x64
       PYTHON_VERSION: '3.6'
       PYTHON_ARCH: '64'
 
-    - TOXENV: 'py36-pytest29-pygal23-nodist-nocov'
+    - TOXENV: 'py36-pytest31-pygal23-nodist-nocov'
       TOXPYTHON: C:\Python36\python.exe
       PYTHON_HOME: C:\Python36
       PYTHON_VERSION: '3.6'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py36-pytest29-pygal23-nodist-nocov'
+    - TOXENV: 'py36-pytest31-pygal23-nodist-nocov'
       TOXPYTHON: C:\Python36-x64\python.exe
       PYTHON_HOME: C:\Python36-x64
       PYTHON_VERSION: '3.6'
       PYTHON_ARCH: '64'
 
-    - TOXENV: 'py36-pytest29-pygal23-xdist-cover,report,codecov'
+    - TOXENV: 'py36-pytest31-pygal23-xdist-cover,report,codecov'
       TOXPYTHON: C:\Python36\python.exe
       PYTHON_HOME: C:\Python36
       PYTHON_VERSION: '3.6'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py36-pytest29-pygal23-xdist-cover,report,codecov'
+    - TOXENV: 'py36-pytest31-pygal23-xdist-cover,report,codecov'
       TOXPYTHON: C:\Python36-x64\python.exe
       PYTHON_HOME: C:\Python36-x64
       PYTHON_VERSION: '3.6'
       PYTHON_ARCH: '64'
 
-    - TOXENV: 'py36-pytest29-pygal23-xdist-nocov'
+    - TOXENV: 'py36-pytest31-pygal23-xdist-nocov'
       TOXPYTHON: C:\Python36\python.exe
       PYTHON_HOME: C:\Python36
       PYTHON_VERSION: '3.6'
       PYTHON_ARCH: '32'
 
-    - TOXENV: 'py36-pytest29-pygal23-xdist-nocov'
+    - TOXENV: 'py36-pytest31-pygal23-xdist-nocov'
       TOXPYTHON: C:\Python36-x64\python.exe
       PYTHON_HOME: C:\Python36-x64
       PYTHON_VERSION: '3.6'
@@ -431,32 +431,6 @@ environment:
       PYTHON_ARCH: '32'
 
     - TOXENV: 'py33-pytest29-pygal22-nodist-nocov'
-      TOXPYTHON: C:\Python33-x64\python.exe
-      WINDOWS_SDK_VERSION: v7.1
-      PYTHON_HOME: C:\Python33-x64
-      PYTHON_VERSION: '3.3'
-      PYTHON_ARCH: '64'
-
-    - TOXENV: 'py33-pytest29-pygal22-xdist-cover,report,codecov'
-      TOXPYTHON: C:\Python33\python.exe
-      PYTHON_HOME: C:\Python33
-      PYTHON_VERSION: '3.3'
-      PYTHON_ARCH: '32'
-
-    - TOXENV: 'py33-pytest29-pygal22-xdist-cover,report,codecov'
-      TOXPYTHON: C:\Python33-x64\python.exe
-      WINDOWS_SDK_VERSION: v7.1
-      PYTHON_HOME: C:\Python33-x64
-      PYTHON_VERSION: '3.3'
-      PYTHON_ARCH: '64'
-
-    - TOXENV: 'py33-pytest29-pygal22-xdist-nocov'
-      TOXPYTHON: C:\Python33\python.exe
-      PYTHON_HOME: C:\Python33
-      PYTHON_VERSION: '3.3'
-      PYTHON_ARCH: '32'
-
-    - TOXENV: 'py33-pytest29-pygal22-xdist-nocov'
       TOXPYTHON: C:\Python33-x64\python.exe
       WINDOWS_SDK_VERSION: v7.1
       PYTHON_HOME: C:\Python33-x64

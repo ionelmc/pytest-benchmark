@@ -587,7 +587,7 @@ def test_compare_non_existing(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0002', '-rw',
                                test)
     result.stdout.fnmatch_lines([
-        "WBENCHMARK-C1 * Can't compare. No benchmark files * '0002'.",
+        "* Can't compare. No benchmark files * '0002'.",
     ])
 
 
@@ -606,7 +606,7 @@ def test_compare_no_files(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '-rw',
                                test, '--benchmark-compare')
     result.stdout.fnmatch_lines([
-        "WBENCHMARK-C2 * Can't compare. No benchmark files in '*'."
+        "* Can't compare. No benchmark files in '*'."
         " Can't load the previous benchmark."
     ])
 
@@ -626,7 +626,7 @@ def test_compare_no_files_match(testdir):
     result = testdir.runpytest('--benchmark-max-time=0.0000001', '--doctest-modules', '-rw',
                                test, '--benchmark-compare=1')
     result.stdout.fnmatch_lines([
-        "WBENCHMARK-C1 * Can't compare. No benchmark files in '*' match '1'."
+        "* Can't compare. No benchmark files in '*' match '1'."
     ])
 
 
@@ -783,7 +783,7 @@ def test_xdist(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '-n', '1', '-rw', test)
     result.stdout.fnmatch_lines([
-        "WBENCHMARK-U2 * Benchmarks are automatically disabled because xdist plugin is active.Benchmarks cannot be "
+        "* Benchmarks are automatically disabled because xdist plugin is active.Benchmarks cannot be "
         "performed reliably in a parallelized environment.",
     ])
 
