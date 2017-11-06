@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import operator
 import statistics
+import math
 from bisect import bisect_left
 from bisect import bisect_right
 
@@ -167,6 +168,34 @@ class Stats(object):
         if self.total:
             return self.rounds / self.total
         return 0
+
+    def percentile(self, percent):
+        ''' Compute the interpolated percentile.
+
+        This is the method recommmended by NIST:
+        http://www.itl.nist.gov/div898/handbook/prc/section2/prc262.htm
+        
+        percent must be in the range [0.0, 1.0].
+        '''
+        if not (0.0 <= percent <= 1.0):
+            raise ValueError('percent must be in the range [0.0, 1.0]')
+        
+        # percentiles require sorted data
+        data = self.sorted_data
+        N = len(data)
+        if percent <= 1/(N+1):
+            # Too small, return min
+            return data[0]
+        elif percent >= N/(N+1):
+            # too big, return max
+            return data[-1]
+        else:
+            r = percent * (N + 1)
+            k = r // 1
+            d = r % 1
+            
+            n = int(k - 1) # zero-indexed lists
+            return data[n] + d * (data[n+1] - data[n])
 
 
 class Metadata(object):

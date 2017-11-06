@@ -1,4 +1,4 @@
-from pytest import mark
+from pytest import mark, approx
 
 from pytest_benchmark.stats import Stats
 
@@ -110,3 +110,31 @@ def test_ops():
     stats.update(0)
     assert stats.mean == 0
     assert stats.ops == 0
+
+def test_percentile():
+    stats = Stats()
+
+    # Taken from http://onlinestatbook.com/2/introduction/percentiles.html
+    for i in [4, 4, 5, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 9, 9, 9, 10, 10, 10]:
+        stats.update(i)
+
+    assert stats.percentile(0.0) == stats.min
+    assert stats.percentile(1.0) == stats.max
+    assert stats.percentile(0.5) == stats.median
+    assert stats.percentile(0.25) == approx(5.0)
+    assert stats.percentile(0.85) == approx(9.85)
+
+def test_percentile2():
+    stats = Stats()
+
+    # Taken from http://www.itl.nist.gov/div898/handbook/prc/section2/prc262.htm
+    for i in [95.1772, 95.1567, 95.1937, 95.1959, 95.1442, 95.0610, 95.1591, 95.1195, 95.1065, 95.0925, 95.1990, 95.1682]:
+        stats.update(i)
+
+    assert stats.percentile(0.0) == stats.min
+    assert stats.percentile(1.0) == stats.max
+    assert stats.percentile(0.5) == stats.median
+    assert stats.percentile(0.90) == approx(95.1981)
+
+
+
