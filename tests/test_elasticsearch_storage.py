@@ -81,6 +81,8 @@ class MockSession(BenchmarkSession):
             'max_time': 345,
         }
         self.compare_fail = []
+        self.columns = ['min', 'max', 'mean', 'stddev', 'median', 'iqr',
+                        'outliers', 'rounds', 'iterations']
         self.config = Namespace(hook=Namespace(
             pytest_benchmark_group_stats=pytest_benchmark_group_stats,
             pytest_benchmark_generate_machine_info=lambda **kwargs: {'foo': 'bar'},
@@ -90,20 +92,18 @@ class MockSession(BenchmarkSession):
             pytest_benchmark_update_json=lambda **kwargs: None,
             pytest_benchmark_generate_commit_info=lambda **kwargs: {'foo': 'bar'},
             pytest_benchmark_update_commit_info=lambda **kwargs: None,
-        ))
+        ), getoption=lambda name: {'benchmark_columns': self.columns}[name])
         self.elasticsearch_host = "localhost:9200"
         self.elasticsearch_index = "benchmark"
         self.elasticsearch_doctype = "benchmark"
         self.storage = MockStorage()
         self.group_by = 'group'
-        self.columns = ['min', 'max', 'mean', 'stddev', 'median', 'iqr',
-                        'outliers', 'rounds', 'iterations']
         self.benchmarks = []
         with BENCHFILE.open('rU') as fh:
             data = json.load(fh)
         self.benchmarks.extend(
             Namespace(
-                as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench:
+                as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench, columns=None:
                     dict(_bench, **_bench["stats"]) if flat else dict(_bench),
                 name=bench['name'],
                 fullname=bench['fullname'],

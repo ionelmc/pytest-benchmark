@@ -69,8 +69,8 @@ def add_display_options(addoption, prefix="benchmark-"):
         "--{0}columns".format(prefix),
         metavar="LABELS", type=parse_columns,
         default=["min", "max", "mean", "stddev", "median", "iqr", "outliers", "ops", "rounds", "iterations"],
-        help="Comma-separated list of columns to show in the result table. Default: "
-             "'min, max, mean, stddev, median, iqr, outliers, rounds, iterations'"
+        help="Comma-separated list of columns to show in the result table. Use 'pXX.XX' (e.g. 'p99.9') to show "
+             "percentiles. Default: 'min, max, mean, stddev, median, iqr, outliers, rounds, iterations'"
     )
     addoption(
         "--{0}name".format(prefix),
@@ -374,9 +374,10 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_inf
         "datetime": datetime.utcnow().isoformat(),
         "version": __version__,
     }
+    columns = config.getoption("benchmark_columns")
     for bench in benchmarks:
         if not bench.has_error:
-            benchmarks_json.append(bench.as_dict(include_data=include_data))
+            benchmarks_json.append(bench.as_dict(include_data=include_data, columns=columns))
     return output_json
 
 

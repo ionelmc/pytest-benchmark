@@ -138,6 +138,8 @@ def test_parse_warmup():
 def test_parse_columns():
     assert parse_columns('min,max') == ['min', 'max']
     assert parse_columns('MIN, max  ') == ['min', 'max']
+    assert parse_columns('min,max,p99') == ['min', 'max', 'p99']
+    assert parse_columns('p0,p50,p99,p99.9,p100') == ['p0', 'p50', 'p99', 'p99.9', 'p100']
     with pytest.raises(argparse.ArgumentTypeError):
         parse_columns('min,max,x')
 

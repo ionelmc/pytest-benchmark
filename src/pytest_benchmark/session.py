@@ -120,7 +120,12 @@ class BenchmarkSession(object):
                                 if fail:
                                     self.performance_regressions.append((self.name_format(flat_bench), fail))
                         yield flat_bench
-                flat_bench = bench.as_dict(include_data=False, flat=True, cprofile=self.cprofile_sort_by)
+                flat_bench = bench.as_dict(
+                    include_data=False,
+                    flat=True,
+                    cprofile=self.cprofile_sort_by,
+                    columns=self.columns
+                )
                 flat_bench["path"] = None
                 flat_bench["source"] = compared and "NOW"
                 yield flat_bench

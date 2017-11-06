@@ -1,4 +1,4 @@
-from pytest import mark, approx
+from pytest import mark
 
 from pytest_benchmark.stats import Stats
 
@@ -111,6 +111,7 @@ def test_ops():
     assert stats.mean == 0
     assert stats.ops == 0
 
+
 def test_percentile():
     stats = Stats()
 
@@ -121,8 +122,13 @@ def test_percentile():
     assert stats.percentile(0.0) == stats.min
     assert stats.percentile(1.0) == stats.max
     assert stats.percentile(0.5) == stats.median
-    assert stats.percentile(0.25) == approx(5.0)
-    assert stats.percentile(0.85) == approx(9.85)
+    assert stats.percentile(0.25) == 5.0
+    assert stats.percentile(0.85) == 9.849999999999998 # approx(9.85)
+
+    assert hasattr(stats, '_percentile_cache')
+    assert 0.85 in stats._percentile_cache
+    assert stats._percentile_cache[0.85] == 9.849999999999998 # approx(9.85)
+
 
 def test_percentile2():
     stats = Stats()
@@ -131,10 +137,40 @@ def test_percentile2():
     for i in [95.1772, 95.1567, 95.1937, 95.1959, 95.1442, 95.0610, 95.1591, 95.1195, 95.1065, 95.0925, 95.1990, 95.1682]:
         stats.update(i)
 
-    assert stats.percentile(0.0) == stats.min
-    assert stats.percentile(1.0) == stats.max
-    assert stats.percentile(0.5) == stats.median
-    assert stats.percentile(0.90) == approx(95.1981)
+    assert stats.p0 == stats.min
+    assert stats.p100 == stats.max
+    assert stats.p50 == stats.median
+    assert stats.p90 == 95.19807 # approx(95.1981)
 
 
+def test_extra_fields():
+    # Test that percentiles are included in .as_dict() results
+    expected = {
+        'p85': 9.849999999999998,
+        'p25': 5.0,
+        "min": 4,
+        "max": 10,
+        "mean": 7,
+        "stddev": 2.0261449005179113,
+        "rounds": 20,
+        "median": 7.0,
+        "iqr": 4.0,
+        "q1": 5.0,
+        "q3": 9.0,
+        "iqr_outliers": 0,
+        "stddev_outliers": 5,
+        "outliers": '5;0',
+        "ld15iqr": 4,
+        "hd15iqr": 10,
+        "ops": 0.14285714285714285,
+        "total": 140,
+    }
 
+    stats = Stats()
+
+    for i in [4, 4, 5, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 9, 9, 9, 10, 10, 10]:
+        stats.update(i)
+
+    result = stats.as_dict(extra_fields=('p25', 'p85'))
+
+    assert result == expected

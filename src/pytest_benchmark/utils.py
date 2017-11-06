@@ -56,6 +56,7 @@ TIME_UNITS = {
     "n": "Nanoseconds (ns)"
 }
 ALLOWED_COLUMNS = ["min", "max", "mean", "stddev", "median", "iqr", "ops", "outliers", "rounds", "iterations"]
+PERCENTILE_COL_RX = re.compile(r'p(\d+(?:.\d+)?)')
 
 
 class SecondsDecimal(Decimal):
@@ -360,11 +361,11 @@ def parse_sort(string):
 
 def parse_columns(string):
     columns = [str.strip(s) for s in string.lower().split(',')]
-    invalid = set(columns) - set(ALLOWED_COLUMNS)
+    invalid = set(columns) - set(ALLOWED_COLUMNS) - set(c for c in columns if PERCENTILE_COL_RX.match(c))
     if invalid:
         # there are extra items in columns!
         msg = "Invalid column name(s): %s. " % ', '.join(invalid)
-        msg += "The only valid column names are: %s" % ', '.join(ALLOWED_COLUMNS)
+        msg += "The only valid column names are: %s, pXX.XX" % ', '.join(ALLOWED_COLUMNS)
         raise argparse.ArgumentTypeError(msg)
     return columns
 
