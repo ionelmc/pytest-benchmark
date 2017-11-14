@@ -99,7 +99,9 @@ Installation
 Documentation
 =============
 
-Available at: `pytest-benchmark.readthedocs.org <http://pytest-benchmark.readthedocs.org/en/stable/>`_.
+For latest release: `pytest-benchmark.readthedocs.org/en/stable <http://pytest-benchmark.readthedocs.org/en/stable/>`_.
+
+For master branch (may include documentation fixes): `pytest-benchmark.readthedocs.io/en/latest <http://pytest-benchmark.readthedocs.io/en/latest/>`_.
 
 Examples
 ========
