@@ -6,6 +6,7 @@ import statistics
 from bisect import bisect_left
 from bisect import bisect_right
 
+from .utils import PERCENTILE_COL_RX
 from .utils import cached_property
 from .utils import funcname
 from .utils import get_cprofile_functions
@@ -26,10 +27,11 @@ class Stats(object):
     def __nonzero__(self):
         return bool(self.data)
 
-    def as_dict(self):
+    def as_dict(self, extra_fields=None):
+        fields = Stats.fields + tuple(extra_fields) if extra_fields else Stats.fields
         return dict(
             (field, getattr(self, field))
-            for field in self.fields
+            for field in fields
         )
 
     def update(self, duration):
@@ -168,6 +170,52 @@ class Stats(object):
             return self.rounds / self.total
         return 0
 
+    def __getattr__(self, name):
+        m = PERCENTILE_COL_RX.match(name)
+        if not m:
+            raise AttributeError(name)
+
+        p = float(m.group(1)) / 100.0
+        return self.percentile(p)
+
+    def percentile(self, percent):
+        ''' Compute the interpolated percentile.
+
+        This is the method recommmended by NIST:
+        http://www.itl.nist.gov/div898/handbook/prc/section2/prc262.htm
+
+        percent must be in the range [0.0, 1.0].
+        '''
+        if not (0.0 <= percent <= 1.0):
+            raise ValueError('percent must be in the range [0.0, 1.0]')
+
+        if not hasattr(self, '_percentile_cache'):
+            self._percentile_cache = {}
+
+        # Check the cache first
+        # This isn't perfect with floats for the usual reasons, but is good enough
+        cached = self._percentile_cache.get(percent)
+        if cached is not None:
+            return cached
+
+        # percentiles require sorted data
+        data = self.sorted_data
+        N = len(data)
+        if percent <= 1/(N+1):
+            # Too small, return min
+            return self._percentile_cache.setdefault(percent, data[0])
+        elif percent >= N/(N+1):
+            # too big, return max
+            return self._percentile_cache.setdefault(percent, data[-1])
+        else:
+            r = percent * (N + 1)
+            k = r // 1
+            d = r % 1
+
+            n = int(k - 1)  # zero-indexed lists
+            result = data[n] + d * (data[n+1] - data[n])
+            return self._percentile_cache.setdefault(percent, result)
+
 
 class Metadata(object):
     def __init__(self, fixture, iterations, options):
@@ -180,9 +228,9 @@ class Metadata(object):
         self.cprofile_stats = fixture.cprofile_stats
 
         self.iterations = iterations
-        self.stats = Stats()
         self.options = options
         self.fixture = fixture
+        self.stats = Stats()
 
     def __bool__(self):
         return bool(self.stats)
@@ -206,7 +254,7 @@ class Metadata(object):
     def has_error(self):
         return self.fixture.has_error
 
-    def as_dict(self, include_data=True, flat=False, stats=True, cprofile=None):
+    def as_dict(self, include_data=True, flat=False, stats=True, cprofile=None, columns=None):
         result = {
             "group": self.group,
             "name": self.name,
@@ -236,7 +284,12 @@ class Metadata(object):
                 if cprofile is None or len(cprofile_functions) == len(cprofile_list):
                     break
         if stats:
-            stats = self.stats.as_dict()
+            if columns is not None:
+                extra_fields = tuple(c for c in columns if c not in Stats.fields and PERCENTILE_COL_RX.match(c))
+            else:
+                extra_fields = None
+
+            stats = self.stats.as_dict(extra_fields=extra_fields)
             if include_data:
                 stats["data"] = self.stats.data
             stats["iterations"] = self.iterations

@@ -77,6 +77,8 @@ class MockSession(BenchmarkSession):
         }
         self.cprofile_sort_by = 'cumtime'
         self.compare_fail = []
+        self.columns = ['min', 'max', 'mean', 'stddev', 'median', 'iqr',
+                        'outliers', 'rounds', 'iterations', 'ops']
         self.config = Namespace(hook=Namespace(
             pytest_benchmark_group_stats=pytest_benchmark_group_stats,
             pytest_benchmark_generate_machine_info=lambda **kwargs: {'foo': 'bar'},
@@ -86,15 +88,13 @@ class MockSession(BenchmarkSession):
             pytest_benchmark_update_json=lambda **kwargs: None,
             pytest_benchmark_generate_commit_info=lambda **kwargs: {'foo': 'bar'},
             pytest_benchmark_update_commit_info=lambda **kwargs: None,
-        ))
+            ), getoption=lambda name: {'benchmark_columns': self.columns}[name])
         self.storage = FileStorage(str(STORAGE), default_machine_id=get_machine_id(), logger=self.logger)
         self.group_by = 'group'
-        self.columns = ['min', 'max', 'mean', 'stddev', 'median', 'iqr',
-                        'outliers', 'rounds', 'iterations', 'ops']
         for bench_file, data in reversed(list(self.storage.load("[0-9][0-9][0-9][0-9]_*"))):
             self.benchmarks.extend(
                 Namespace(
-                    as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench, cprofile='cumtime':
+                    as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench, cprofile='cumtime', columns=None:
                         dict(_bench, **_bench["stats"]) if flat else dict(_bench),
                     name=bench['name'],
                     fullname=bench['fullname'],
