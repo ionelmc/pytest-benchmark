@@ -104,7 +104,7 @@ def test_help_compare(testdir, args):
         "                        table. Default: 'min, max, mean, stddev, median, iqr,",
         "                        outliers, ops, rounds, iterations'",
         "  --name FORMAT         How to format names in results. Can be one of 'short',",
-        "                        'normal', 'long'. Default: 'normal'",
+        "                        'normal', 'long', or 'trial'. Default: 'normal'",
         "  --histogram [FILENAME-PREFIX]",
         "                        Plot graphs of min/max/avg/stddev over time in",
         "                        FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX",
@@ -171,8 +171,13 @@ def test_list(testdir):
     assert result.ret == 0
 
 
-@pytest.mark.parametrize('name', ['short', 'long', 'normal'])
-def test_compare(testdir, name):
+@pytest.mark.parametrize('name,name_pattern_generator', [
+    ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n),
+    ('long', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n),
+    ('normal', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n),
+    ('trial', lambda n: '%.4d*' % n)
+])
+def test_compare(testdir, name, name_pattern_generator):
     result = testdir.run('py.test-benchmark', '--storage', STORAGE, 'compare', '0001', '0002', '0003',
                          '--sort', 'min',
                          '--columns', 'min,max',
@@ -192,11 +197,11 @@ def test_compare(testdir, name):
     result.stdout.fnmatch_lines([
         'Computing stats ...',
         '---*--- benchmark: 3 tests ---*---',
-        'Name (time in ns) *                   Min    *    Max          ',
+        'Name (time in ns) * Min * Max          ',
         '---*---',
-        '*xfast_parametrized[[]0[]] (0003*)     215.6286 (1.0)      10*318.6159 (1.33)   ',
-        '*xfast_parametrized[[]0[]] (0002*)     216.9028 (1.01)      7*739.2997 (1.0)    ',
-        '*xfast_parametrized[[]0[]] (0001*)     217.3145 (1.01)     11*447.3891 (1.48)   ',
+        '%s * 215.6286 (1.0)      10*318.6159 (1.33)   ' % name_pattern_generator(3),
+        '%s * 216.9028 (1.01)      7*739.2997 (1.0)    ' % name_pattern_generator(2),
+        '%s * 217.3145 (1.01)     11*447.3891 (1.48)   ' % name_pattern_generator(1),
         '---*---',
         '',
         'Legend:',

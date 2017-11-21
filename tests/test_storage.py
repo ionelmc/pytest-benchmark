@@ -135,7 +135,7 @@ def force_bytes(text):
         return text
 
 
-@pytest.fixture(params=['short', 'normal', 'long'])
+@pytest.fixture(params=['short', 'normal', 'long', 'trial'])
 def name_format(request):
     return request.param
 
@@ -210,6 +210,12 @@ def test_regression_checks(sess, name_format):
             ('tests/test_normal.py::test_xfast_parametrized[0] (0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted-changes)',
              "Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000")
         ],
+        'trial': [
+            ('0001',
+             "Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000"),
+            ('0001',
+             "Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000")
+        ],
     }[name_format]
     output = make_logger(sess)
     pytest.raises(PerformanceRegression, sess.check_regressions)
@@ -226,6 +232,10 @@ def test_regression_checks(sess, name_format):
         'long': """Performance has regressed:
 \ttests/test_normal.py::test_xfast_parametrized[0] (0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted-changes) - Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000
 \ttests/test_normal.py::test_xfast_parametrized[0] (0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted-changes) - Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000
+""",
+        'trial': """Performance has regressed:
+\t0001 - Field 'stddev' has failed PercentageRegressionCheck: 23.331641765 > 5.000000000
+\t0001 - Field 'max' has failed DifferenceRegressionCheck: 0.000001843 > 0.000001000
 """
     }[name_format]
 
@@ -270,6 +280,12 @@ def test_regression_checks_inf(sess, name_format):
              '(0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes)',
              "Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > "
              '0.000001000')
+        ],
+        'trial': [
+            ('0002',
+             "Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000"),
+            ('0002',
+             "Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000")
         ]
     }[name_format]
     output = make_logger(sess)
@@ -287,6 +303,10 @@ def test_regression_checks_inf(sess, name_format):
         'long': """Performance has regressed:
 \ttests/test_normal.py::test_xfast_parametrized[0] (0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes) - Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000
 \ttests/test_normal.py::test_xfast_parametrized[0] (0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes) - Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000
+""",
+        'trial': """Performance has regressed:
+\t0002 - Field 'stddev' has failed PercentageRegressionCheck: inf > 5.000000000
+\t0002 - Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000
 """
     }[name_format]
 
@@ -308,10 +328,10 @@ def test_compare_1(sess, LineMatcher):
         '-changes.json',
         '',
         '*------------------------------------------------------------------------ benchmark: 2 tests -----------------------------------------------------------------------*',
-        'Name (time in ns)               *      Min                 *Max                Mean              StdDev              Median                IQR            Outliers  Rounds  Iterations  OPS (Mops/s) *',
+        'Name (time in ns) * Min                 * Max                Mean              StdDev              Median                IQR            Outliers  Rounds  Iterations  OPS (Mops/s) *',
         '-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*',
-        '*xfast_parametrized[[]0[]] (0001*)     217.3145 (1.0)      11*447.3891 (1.0)      262.2408 (1.00)     214.0442 (1.0)      220.1664 (1.00)     38.2154 (2.03)      90;1878    9987         418        3.8133 (1.00)*',
-        '*xfast_parametrized[[]0[]] (NOW) *     217.9511 (1.00)     13*290.0380 (1.16)     261.2051 (1.0)      263.9842 (1.23)     220.1638 (1.0)      18.8080 (1.0)      160;1726    9710         431        3.8284 (1.0)*',
+        '*0001* 217.3145 (1.0)      11*447.3891 (1.0)      262.2408 (1.00)     214.0442 (1.0)      220.1664 (1.00)     38.2154 (2.03)      90;1878    9987         418        3.8133 (1.00)*',
+        '*NOW*  217.9511 (1.00)     13*290.0380 (1.16)     261.2051 (1.0)      263.9842 (1.23)     220.1638 (1.0)      18.8080 (1.0)      160;1726    9710         431        3.8284 (1.0)*',
         '--------------------------------------------------------------------------------------------------------------------------------------------------------------------*',
         'Legend:',
         '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
@@ -337,10 +357,10 @@ def test_compare_2(sess, LineMatcher):
         'Comparing against benchmarks from: 0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes.json',
         '',
         '*------------------------------------------------------------------------ benchmark: 2 tests -----------------------------------------------------------------------*',
-        'Name (time in ns)            *         Min                 *Max                Mean              StdDev              Median                IQR            Outliers  Rounds  Iterations  OPS (Mops/s)*',
+        'Name (time in ns) * Min                 *Max                Mean              StdDev              Median                IQR            Outliers  Rounds  Iterations  OPS (Mops/s)*',
         '--------------------------------------------------------------------------------------------------------------------------------------------------------------------*',
-        '*xfast_parametrized[[]0[]] (0002*)     216.9028 (1.0)       7*739.2997 (1.0)      254.0585 (1.0)        0.0000 (1.0)      219.8103 (1.0)      27.3309 (1.45)     235;1688   11009         410        3.9361 (1.0)*',
-        '*xfast_parametrized[[]0[]] (NOW) *     217.9511 (1.00)     13*290.0380 (1.72)     261.2051 (1.03)     263.9842 (inf)      220.1638 (1.00)     18.8080 (1.0)      160;1726    9710         431        3.8284 (0.97)*',
+        '*0002* 216.9028 (1.0)       7*739.2997 (1.0)      254.0585 (1.0)        0.0000 (1.0)      219.8103 (1.0)      27.3309 (1.45)     235;1688   11009         410        3.9361 (1.0)*',
+        '*NOW*  217.9511 (1.00)     13*290.0380 (1.72)     261.2051 (1.03)     263.9842 (inf)      220.1638 (1.00)     18.8080 (1.0)      160;1726    9710         431        3.8284 (0.97)*',
         '--------------------------------------------------------------------------------------------------------------------------------------------------------------------*',
         'Legend:',
         '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',

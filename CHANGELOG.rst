@@ -9,6 +9,8 @@ Changelog
   (see `#110 <https://github.com/ionelmc/pytest-benchmark/pull/110>`_).
 * Fix misspelled unit (see
   `#97 <https://github.com/ionelmc/pytest-benchmark/issues/97>`_).
+* Support simple ``trial`` x-axis histogram label (see
+  `#95 <https://github.com/ionelmc/pytest-benchmark/issues/95>`_).
 
 3.1.1 (2017-07-26)
 ------------------

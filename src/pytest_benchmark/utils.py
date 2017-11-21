@@ -333,10 +333,18 @@ def name_formatter_long(bench):
         return bench["fullname"]
 
 
+def name_formatter_trial(bench):
+    if bench["source"]:
+        return "%.4s" % split(bench["source"])[-1]
+    else:
+        return '????'
+
+
 NAME_FORMATTERS = {
     "short": name_formatter_short,
     "normal": name_formatter_normal,
     "long": name_formatter_long,
+    "trial": name_formatter_trial,
 }
 
 

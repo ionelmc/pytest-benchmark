@@ -76,7 +76,7 @@ def add_display_options(addoption, prefix="benchmark-"):
         "--{0}name".format(prefix),
         metavar="FORMAT", type=parse_name_format,
         default="normal",
-        help="How to format names in results. Can be one of 'short', 'normal', 'long'. Default: %(default)r"
+        help="How to format names in results. Can be one of 'short', 'normal', 'long', or 'trial'. Default: %(default)r"
     )
 
 
