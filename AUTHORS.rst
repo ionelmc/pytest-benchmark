@@ -14,3 +14,4 @@ Authors
 * Andre Bianchi - https://github.com/drebs
 * Jeremy Dobbins-Bucklad - https://github.com/jad-b
 * Alexey Popravka - https://github.com/popravich
+* Ken Crowell - https://github.com/oeuftete

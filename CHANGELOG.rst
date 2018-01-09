@@ -2,6 +2,12 @@
 Changelog
 =========
 
+3.1.2-dev
+---------
+
+* Fix misspelled unit (see
+  `#97 <https://github.com/ionelmc/pytest-benchmark/issues/97>`_).
+
 3.1.1 (2017-07-26)
 ------------------
 
