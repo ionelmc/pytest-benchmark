@@ -857,12 +857,12 @@ def test_ok(benchmark, bad_fixture):
     result = testdir.runpytest('-vv', test)
     result.stdout.fnmatch_lines([
         "*collected 5 items",
-
+        "*",
         "test_abort_broken.py::test_bad FAILED*",
         "test_abort_broken.py::test_bad2 FAILED*",
-        "test_abort_broken.py::test_ok[a] ERROR*",
-        "test_abort_broken.py::test_ok[b] ERROR*",
-        "test_abort_broken.py::test_ok[c] ERROR*",
+        "test_abort_broken.py::test_ok*a* ERROR*",
+        "test_abort_broken.py::test_ok*b* ERROR*",
+        "test_abort_broken.py::test_ok*c* ERROR*",
 
         "*====== ERRORS ======*",
         "*______ ERROR at setup of test_ok[[]a[]] ______*",
