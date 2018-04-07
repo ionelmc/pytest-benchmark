@@ -128,11 +128,11 @@ def test_xfast(benchmark):
     result.stdout.fnmatch_lines([
         "*collected 5 items",
         "*",
-        "test_groups.py::*test_groups PASSED",
-        "test_groups.py::test_fast PASSED",
-        "test_groups.py::test_slow PASSED",
-        "test_groups.py::test_slower PASSED",
-        "test_groups.py::test_xfast PASSED",
+        "test_groups.py::*test_groups PASSED*",
+        "test_groups.py::test_fast PASSED*",
+        "test_groups.py::test_slow PASSED*",
+        "test_groups.py::test_slower PASSED*",
+        "test_groups.py::test_xfast PASSED*",
         "*",
         "* benchmark: 2 tests *",
         "*",
@@ -460,7 +460,7 @@ def test_max_time_min_rounds(testdir):
     result = testdir.runpytest('--doctest-modules', '--benchmark-max-time=0.000001', '--benchmark-min-rounds=1', test)
     result.stdout.fnmatch_lines([
         "*collected 3 items",
-        "test_max_time_min_rounds.py ...",
+        "test_max_time_min_rounds.py ...*",
         "* benchmark: 2 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
@@ -476,7 +476,7 @@ def test_max_time(testdir):
     result = testdir.runpytest('--doctest-modules', '--benchmark-max-time=0.000001', test)
     result.stdout.fnmatch_lines([
         "*collected 3 items",
-        "test_max_time.py ...",
+        "test_max_time.py ...*",
         "* benchmark: 2 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
@@ -491,8 +491,8 @@ def test_bogus_max_time(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-max-time=bogus', test)
     result.stderr.fnmatch_lines([
-        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
-        "py*: error: argument --benchmark-max-time: Invalid decimal value 'bogus': InvalidOperation*",
+        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*py*: error: argument --benchmark-max-time: Invalid decimal value 'bogus': InvalidOperation*",
     ])
 
 
@@ -510,8 +510,8 @@ def test_bad_save(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-save=asd:f?', test)
     result.stderr.fnmatch_lines([
-        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
-        "py*: error: argument --benchmark-save: Must not contain any of these characters: /:*?<>|\\ (it has ':?')",
+        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*py*: error: argument --benchmark-save: Must not contain any of these characters: /:*?<>|\\ (it has ':?')",
     ])
 
 
@@ -519,8 +519,8 @@ def test_bad_save_2(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-save=', test)
     result.stderr.fnmatch_lines([
-        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
-        "py*: error: argument --benchmark-save: Can't be empty.",
+        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*py*: error: argument --benchmark-save: Can't be empty.",
     ])
 
 
@@ -528,8 +528,8 @@ def test_bad_compare_fail(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-compare-fail=?', test)
     result.stderr.fnmatch_lines([
-        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
-        "py*: error: argument --benchmark-compare-fail: Could not parse value: '?'.",
+        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*py*: error: argument --benchmark-compare-fail: Could not parse value: '?'.",
     ])
 
 
@@ -537,8 +537,8 @@ def test_bad_rounds(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-min-rounds=asd', test)
     result.stderr.fnmatch_lines([
-        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
-        "py*: error: argument --benchmark-min-rounds: invalid literal for int() with base 10: 'asd'",
+        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*py*: error: argument --benchmark-min-rounds: invalid literal for int() with base 10: 'asd'",
     ])
 
 
@@ -546,8 +546,8 @@ def test_bad_rounds_2(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-min-rounds=0', test)
     result.stderr.fnmatch_lines([
-        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
-        "py*: error: argument --benchmark-min-rounds: Value for --benchmark-rounds must be at least 1.",
+        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*py*: error: argument --benchmark-min-rounds: Value for --benchmark-rounds must be at least 1.",
     ])
 
 
@@ -715,7 +715,7 @@ def test_disable_gc(testdir):
     result = testdir.runpytest('--benchmark-disable-gc', test)
     result.stdout.fnmatch_lines([
         "*collected 2 items",
-        "test_disable_gc.py ..",
+        "test_disable_gc.py ..*",
         "* benchmark: 2 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
@@ -731,7 +731,7 @@ def test_custom_timer(testdir):
     result = testdir.runpytest('--benchmark-timer=time.time', test)
     result.stdout.fnmatch_lines([
         "*collected 2 items",
-        "test_custom_timer.py ..",
+        "test_custom_timer.py ..*",
         "* benchmark: 2 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
@@ -746,8 +746,8 @@ def test_bogus_timer(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-timer=bogus', test)
     result.stderr.fnmatch_lines([
-        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
-        "py*: error: argument --benchmark-timer: Value for --benchmark-timer must be in dotted form. Eg: "
+        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*py*: error: argument --benchmark-timer: Value for --benchmark-timer must be in dotted form. Eg: "
         "'module.attr'.",
     ])
 
@@ -757,7 +757,7 @@ def test_sort_by_mean(testdir):
     result = testdir.runpytest('--benchmark-sort=mean', test)
     result.stdout.fnmatch_lines([
         "*collected 2 items",
-        "test_sort_by_mean.py ..",
+        "test_sort_by_mean.py ..*",
         "* benchmark: 2 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
@@ -772,8 +772,8 @@ def test_bogus_sort(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-sort=bogus', test)
     result.stderr.fnmatch_lines([
-        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
-        "py*: error: argument --benchmark-sort: Unacceptable value: 'bogus'. Value for --benchmark-sort must be one "
+        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*py*: error: argument --benchmark-sort: Unacceptable value: 'bogus'. Value for --benchmark-sort must be one "
         "of: 'min', 'max', 'mean', 'stddev', 'name', 'fullname'."
     ])
 
@@ -858,11 +858,11 @@ def test_ok(benchmark, bad_fixture):
     result.stdout.fnmatch_lines([
         "*collected 5 items",
 
-        "test_abort_broken.py::test_bad FAILED",
-        "test_abort_broken.py::test_bad2 FAILED",
-        "test_abort_broken.py::test_ok[a] ERROR",
-        "test_abort_broken.py::test_ok[b] ERROR",
-        "test_abort_broken.py::test_ok[c] ERROR",
+        "test_abort_broken.py::test_bad FAILED*",
+        "test_abort_broken.py::test_bad2 FAILED*",
+        "test_abort_broken.py::test_ok[a] ERROR*",
+        "test_abort_broken.py::test_ok[b] ERROR*",
+        "test_abort_broken.py::test_ok[c] ERROR*",
 
         "*====== ERRORS ======*",
         "*______ ERROR at setup of test_ok[[]a[]] ______*",
@@ -977,11 +977,11 @@ def test_basic(testdir):
     result = testdir.runpytest('-vv', '--doctest-modules', test)
     result.stdout.fnmatch_lines([
         "*collected 5 items",
-        "test_basic.py::*test_basic PASSED",
-        "test_basic.py::test_slow PASSED",
-        "test_basic.py::test_slower PASSED",
-        "test_basic.py::test_xfast PASSED",
-        "test_basic.py::test_fast PASSED",
+        "test_basic.py::*test_basic PASSED*",
+        "test_basic.py::test_slow PASSED*",
+        "test_basic.py::test_slower PASSED*",
+        "test_basic.py::test_xfast PASSED*",
+        "test_basic.py::test_fast PASSED*",
         "",
         "* benchmark: 4 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
@@ -1001,11 +1001,11 @@ def test_skip(testdir):
     result = testdir.runpytest('-vv', '--doctest-modules', '--benchmark-skip', test)
     result.stdout.fnmatch_lines([
         "*collected 5 items",
-        "test_skip.py::*test_skip PASSED",
-        "test_skip.py::test_slow SKIPPED",
-        "test_skip.py::test_slower SKIPPED",
-        "test_skip.py::test_xfast SKIPPED",
-        "test_skip.py::test_fast SKIPPED",
+        "test_skip.py::*test_skip PASSED*",
+        "test_skip.py::test_slow SKIPPED*",
+        "test_skip.py::test_slower SKIPPED*",
+        "test_skip.py::test_xfast SKIPPED*",
+        "test_skip.py::test_fast SKIPPED*",
         "*====== 1 passed, 4 skipped* seconds ======*",
     ])
 
@@ -1015,11 +1015,11 @@ def test_disable(testdir):
     result = testdir.runpytest('-vv', '--doctest-modules', '--benchmark-disable', test)
     result.stdout.fnmatch_lines([
         "*collected 5 items",
-        "test_disable.py::*test_disable PASSED",
-        "test_disable.py::test_slow PASSED",
-        "test_disable.py::test_slower PASSED",
-        "test_disable.py::test_xfast PASSED",
-        "test_disable.py::test_fast PASSED",
+        "test_disable.py::*test_disable PASSED*",
+        "test_disable.py::test_slow PASSED*",
+        "test_disable.py::test_slower PASSED*",
+        "test_disable.py::test_xfast PASSED*",
+        "test_disable.py::test_fast PASSED*",
         "*====== 5 passed * seconds ======*",
     ])
 
@@ -1028,8 +1028,8 @@ def test_mark_selection(testdir):
     test = testdir.makepyfile(BASIC_TEST)
     result = testdir.runpytest('-vv', '--doctest-modules', '-m', 'benchmark', test)
     result.stdout.fnmatch_lines([
-        "*collected 5 items",
-        "test_mark_selection.py::test_xfast PASSED",
+        "*collected 5 items*",
+        "test_mark_selection.py::test_xfast PASSED*",
         "* benchmark: 1 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
@@ -1045,11 +1045,11 @@ def test_only_benchmarks(testdir):
     result = testdir.runpytest('-vv', '--doctest-modules', '--benchmark-only', test)
     result.stdout.fnmatch_lines([
         "*collected 5 items",
-        "test_only_benchmarks.py::*test_only_benchmarks SKIPPED",
-        "test_only_benchmarks.py::test_slow PASSED",
-        "test_only_benchmarks.py::test_slower PASSED",
-        "test_only_benchmarks.py::test_xfast PASSED",
-        "test_only_benchmarks.py::test_fast PASSED",
+        "test_only_benchmarks.py::*test_only_benchmarks SKIPPED*",
+        "test_only_benchmarks.py::test_slow PASSED*",
+        "test_only_benchmarks.py::test_slower PASSED*",
+        "test_only_benchmarks.py::test_xfast PASSED*",
+        "test_only_benchmarks.py::test_fast PASSED*",
         "* benchmark: 4 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",
@@ -1067,7 +1067,7 @@ def test_columns(testdir):
     result = testdir.runpytest('--doctest-modules', '--benchmark-columns=max,iterations,min', test)
     result.stdout.fnmatch_lines([
         "*collected 3 items",
-        "test_columns.py ...",
+        "test_columns.py ...*",
         "* benchmark: 2 tests *",
         "Name (time in ?s) * Max * Iterations * Min *",
         "------*",
