@@ -9,7 +9,6 @@ from .logger import Logger
 from .table import TableResults
 from .utils import NAME_FORMATTERS
 from .utils import SecondsDecimal
-from .utils import cached_property
 from .utils import first_or_value
 from .utils import get_machine_id
 from .utils import load_storage
@@ -93,8 +92,7 @@ class BenchmarkSession(object):
 
         self.histogram = first_or_value(config.getoption("benchmark_histogram"), False)
 
-    @cached_property
-    def machine_info(self):
+    def get_machine_info(self):
         obj = self.config.hook.pytest_benchmark_generate_machine_info(config=self.config)
         self.config.hook.pytest_benchmark_update_machine_info(
             config=self.config,
@@ -136,6 +134,7 @@ class BenchmarkSession(object):
             if not self.benchmarks:
                 self.logger.warn("BENCHMARK-U2", "Not saving anything, no benchmarks have been run!")
                 return
+            machine_info = self.get_machine_info()
             commit_info = self.config.hook.pytest_benchmark_generate_commit_info(config=self.config)
             self.config.hook.pytest_benchmark_update_commit_info(config=self.config, commit_info=commit_info)
 
@@ -144,7 +143,7 @@ class BenchmarkSession(object):
                 config=self.config,
                 benchmarks=self.benchmarks,
                 include_data=True,
-                machine_info=self.machine_info,
+                machine_info=machine_info,
                 commit_info=commit_info,
             )
             self.config.hook.pytest_benchmark_update_json(
@@ -159,7 +158,7 @@ class BenchmarkSession(object):
                 config=self.config,
                 benchmarks=self.benchmarks,
                 include_data=self.save_data,
-                machine_info=self.machine_info,
+                machine_info=machine_info,
                 commit_info=commit_info,
             )
             self.config.hook.pytest_benchmark_update_json(
@@ -187,11 +186,12 @@ class BenchmarkSession(object):
                     code = "BENCHMARK-C1"
                 self.logger.warn(code, msg, fslocation=self.storage.location)
 
+            machine_info = self.get_machine_info()
             for path, compared_benchmark in compared_benchmarks:
                 self.config.hook.pytest_benchmark_compare_machine_info(
                     config=self.config,
                     benchmarksession=self,
-                    machine_info=self.machine_info,
+                    machine_info=machine_info,
                     compared_benchmark=compared_benchmark,
                 )
                 compared_mapping[path] = dict(
