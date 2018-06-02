@@ -229,7 +229,7 @@ def pytest_addoption(parser):
         "--benchmark-cprofile",
         metavar="COLUMN", default=None,
         choices=['ncalls_recursion', 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'],
-        help="If specified measure one run with cProfile and stores 10 top functions."
+        help="If specified measure one run with cProfile and stores 25 top functions."
              " Argument is a column to sort by. Available columns: 'ncallls_recursion',"
              " 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'."
     )
