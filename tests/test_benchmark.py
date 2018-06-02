@@ -1035,7 +1035,6 @@ def test_mark_selection(testdir):
         "------*",
         "test_xfast       *",
         "------*",
-        "*====== 4 tests deselected* ======*",
         "*====== 1 passed, 4 deselected* seconds ======*",
     ])
 
