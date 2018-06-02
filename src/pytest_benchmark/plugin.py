@@ -271,8 +271,8 @@ else:
 @_hookwrapper
 def pytest_runtest_call(item):
     bs = item.config._benchmarksession
-    fixure = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
-    if isinstance(fixure, BenchmarkFixture):
+    fixture = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
+    if isinstance(fixture, BenchmarkFixture):
         if bs.skip:
             pytest.skip("Skipping benchmark (--benchmark-skip active).")
         else:
