@@ -64,7 +64,13 @@ class MockSession(BenchmarkSession):
         self.performance_regressions = []
         self.sort = u"min"
         self.compare = '0001'
-        self.logger = logging.getLogger(__name__)
+        logger = logging.getLogger(__name__)
+        self.logger = Namespace(
+            debug=lambda *args, **_kwargs: logger.debug(*args),
+            info=lambda *args, **_kwargs: logger.info(*args),
+            warn=lambda *args, **_kwargs: logger.warn(*args),
+            error=lambda *args, **_kwargs: logger.error(*args),
+        )
         self.machine_id = "FoobarOS"
         self.machine_info = {'foo': 'bar'}
         self.save = self.autosave = self.json = False
