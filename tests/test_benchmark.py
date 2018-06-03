@@ -679,6 +679,59 @@ def test_save_extra_info(testdir):
     assert bench_info['extra_info'] == {'foo': 'bar'}
 
 
+
+def test_update_machine_info_hook_detection(testdir):
+    """Tests detection and execution and update_machine_info_hooks.
+
+    Verifies that machine info hooks are detected and executed in nested
+    `conftest.py`s.
+
+    """
+
+    record_path_conftest = '''
+import os
+
+def pytest_benchmark_update_machine_info(config, machine_info):
+    machine_info["conftest_path"] = (
+        machine_info.get("conftest_path", []) + [os.path.relpath(__file__)]
+    )
+    '''
+
+    simple_test = '''
+def test_simple(benchmark):
+    @benchmark
+    def resuilt():
+        1+1
+    '''
+
+    testdir.makepyfile(**{
+        "conftest" : record_path_conftest,
+        "test_module/conftest" : record_path_conftest,
+        "test_module/tests/conftest" : record_path_conftest,
+        "test_module/tests/simple_test.py" : simple_test,
+    })
+
+    def run_verify_pytest(*args):
+        testdir.runpytest(
+            '--benchmark-json=benchmark.json',
+            '--benchmark-max-time=0.0000001',
+            *args
+        )
+
+        benchmark_json = json.loads(testdir.tmpdir.join('benchmark.json').read())
+        machine_info = benchmark_json["machine_info"]
+
+        assert sorted(machine_info["conftest_path"]) == sorted([
+            "conftest.py",
+            "test_module/conftest.py",
+            "test_module/tests/conftest.py",
+        ])
+
+    run_verify_pytest("test_module/tests")
+    run_verify_pytest("test_module")
+    run_verify_pytest(".")
+
+
 def test_histogram(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--doctest-modules', '--benchmark-histogram=foobar',
