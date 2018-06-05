@@ -229,7 +229,7 @@ def pytest_addoption(parser):
         "--benchmark-cprofile",
         metavar="COLUMN", default=None,
         choices=['ncalls_recursion', 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'],
-        help="If specified measure one run with cProfile and stores 10 top functions."
+        help="If specified measure one run with cProfile and stores 25 top functions."
              " Argument is a column to sort by. Available columns: 'ncallls_recursion',"
              " 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'."
     )
@@ -271,8 +271,8 @@ else:
 @_hookwrapper
 def pytest_runtest_call(item):
     bs = item.config._benchmarksession
-    fixure = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
-    if isinstance(fixure, BenchmarkFixture):
+    fixture = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
+    if isinstance(fixture, BenchmarkFixture):
         if bs.skip:
             pytest.skip("Skipping benchmark (--benchmark-skip active).")
         else:

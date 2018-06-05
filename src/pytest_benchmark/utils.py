@@ -51,7 +51,7 @@ except ImportError:
 
 TIME_UNITS = {
     "": "Seconds",
-    "m": "Miliseconds (ms)",
+    "m": "Milliseconds (ms)",
     "u": "Microseconds (us)",
     "n": "Nanoseconds (ns)"
 }
