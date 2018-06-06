@@ -38,7 +38,7 @@ Plotting
     To use plotting you need to ``pip install pygal pygaljs`` or ``pip install pytest-benchmark[histogram]``.
 
 
-You can also get a nice plot with ``--benchmark-histogram``. The result is a modified Tukey box and wiskers plot where the
+You can also get a nice plot with ``--benchmark-histogram``. The result is a modified Tukey box and whisker plot where the
 outliers (the small bullets) are ``Min`` and ``Max``. Note that if you do not supply a name for the plot it is recommended
 that ``--benchmark-histogram`` is the last option passed.
 
