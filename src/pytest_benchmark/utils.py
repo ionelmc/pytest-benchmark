@@ -101,25 +101,31 @@ def get_machine_id():
 
 
 class Fallback(object):
-    def __init__(self, *exceptions):
+    def __init__(self, fallback, exceptions):
+        self.fallback = fallback
         self.functions = []
         self.exceptions = exceptions
 
     def __call__(self, *args, **kwargs):
         for func in self.functions:
             try:
-                return func(*args, **kwargs)
+                value = func(*args, **kwargs)
             except self.exceptions:
                 continue
+            else:
+                if not value:
+                    continue
         else:
-            raise NotImplementedError("Must have an fallback implementation for %s" % self.functions[0])
+            return self.fallback(*args, **kwargs)
 
     def register(self, other):
         self.functions.append(other)
         return self
 
 
-get_project_name = Fallback(IndexError, CalledProcessError, OSError)
+@partial(Fallback, exceptions=(IndexError, CalledProcessError, OSError))
+def get_project_name():
+    return basename(os.getcwd())
 
 
 @get_project_name.register
@@ -133,15 +139,10 @@ def get_project_name_git():
 
 @get_project_name.register
 def get_project_name_hg():
-    project_address = check_output(['hg', 'path', 'default'])
+    project_address = check_output(['hg', 'path', 'default', '--quiet'])
     project_address = project_address.decode()
     project_name = project_address.split("/")[-1]
     return project_name.strip()
-
-
-@get_project_name.register
-def get_project_name_default():
-    return basename(os.getcwd())
 
 
 def in_any_parent(name, path=None):

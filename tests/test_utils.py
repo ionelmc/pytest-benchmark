@@ -179,6 +179,20 @@ def test_get_project_name_broken(scm, testdir):
     assert get_project_name() in ['test_get_project_name_broken0', 'test_get_project_name_broken1']
 
 
+def test_get_project_name_fallback(testdir, capfd):
+    testdir.tmpdir.ensure('.hg', dir=1)
+    project_name = get_project_name()
+    assert project_name.startswith("test_get_project_name_fallback")
+    assert capfd.readouterr() == ('', '')
+
+
+def test_get_project_name_fallback_broken_hgrc(testdir, capfd):
+    testdir.tmpdir.ensure('.hg', 'hgrc').write('[paths]\ndefault = /')
+    project_name = get_project_name()
+    assert project_name.startswith("test_get_project_name_fallback")
+    assert capfd.readouterr() == ('', '')
+
+
 def test_parse_elasticsearch_storage():
     assert parse_elasticsearch_storage("http://localhost:9200") == (
         ["http://localhost:9200"], "benchmark", "benchmark", "pytest-benchmark")
@@ -192,4 +206,3 @@ def test_parse_elasticsearch_storage():
         ["http://host1:9200", "http://host2:9200"], "benchmark2", "benchmark", "pytest-benchmark")
     assert parse_elasticsearch_storage("http://localhost:9200/benchmark2/benchmark2?project_name=project_name") == (
         ["http://localhost:9200"], "benchmark2", "benchmark2", "project_name")
-
