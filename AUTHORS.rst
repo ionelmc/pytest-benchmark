@@ -15,3 +15,4 @@ Authors
 * Jeremy Dobbins-Bucklad - https://github.com/jad-b
 * Alexey Popravka - https://github.com/popravich
 * Ken Crowell - https://github.com/oeuftete
+* Matthew Feickert - https://github.com/matthewfeickert 
