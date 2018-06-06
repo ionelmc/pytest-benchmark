@@ -39,7 +39,8 @@ Plotting
 
 
 You can also get a nice plot with ``--benchmark-histogram``. The result is a modified Tukey box and wiskers plot where the
-outliers (the small bullets) are ``Min`` and ``Max``.
+outliers (the small bullets) are ``Min`` and ``Max``. Note that if you do not supply a name for the plot it is recommended
+that ``--benchmark-histogram`` is the last option passed.
 
 Example output:
 
