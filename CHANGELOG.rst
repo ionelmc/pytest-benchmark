@@ -6,7 +6,7 @@ Changelog
 ---------
 
 * Add note to docs on placement of ``--benchmark-histogram`` option
-  (see `#110 <https://github.com/ionelmc/pytest-benchmark/pull/110>` _).
+  (see `#110 <https://github.com/ionelmc/pytest-benchmark/pull/110>`_).
 * Fix misspelled unit (see
   `#97 <https://github.com/ionelmc/pytest-benchmark/issues/97>`_).
 
@@ -46,7 +46,7 @@ Changelog
 * Fix support for latest PyGal version (histograms). Contributed by Swen Kooij in
   `#68 <https://github.com/ionelmc/pytest-benchmark/pull/68>`_.
 * Added support for getting ``commit_info`` when not running in the root of the repository. Contributed by Vara Canero in
-  `#69 <https://github.com/ionelmc/pytest-benchmark/pull/69>` _.
+  `#69 <https://github.com/ionelmc/pytest-benchmark/pull/69>`_.
 * Added short form for ``--storage``/``--verbose`` options in CLI.
 * Added an alternate ``pytest-benchmark`` CLI bin (in addition to ``py.test-benchmark``) to match the madness in pytest.
 * Fix some issues with `--help`` in CLI.
