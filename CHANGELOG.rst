@@ -30,11 +30,11 @@ Changelog
   `#75   <https://github.com/ionelmc/pytest-benchmark/pull/75>`_.
 * Fixed the leaking of credentials by masking the URL printed when storing
   data to elasticsearch.
-* Added a `--benchmark-netrc` option to use credentials from a netrc file when
+* Added a ``--benchmark-netrc`` option to use credentials from a netrc file when
   storing data to elasticsearch. Both contributed by Andre Bianchi in
   `#73 <https://github.com/ionelmc/pytest-benchmark/pull/73>`_.
 * Fixed docs on hooks. Contributed by Andre Bianchi in `#74 <https://github.com/ionelmc/pytest-benchmark/pull/74>`_.
-* Remove `git` and `hg` as system dependencies when guessing the project name.
+* Remove ``git`` and ``hg`` as system dependencies when guessing the project name.
 
 3.1.0a2 (2017-03-27)
 --------------------
@@ -49,9 +49,9 @@ Changelog
   `#69 <https://github.com/ionelmc/pytest-benchmark/pull/69>`_.
 * Added short form for ``--storage``/``--verbose`` options in CLI.
 * Added an alternate ``pytest-benchmark`` CLI bin (in addition to ``py.test-benchmark``) to match the madness in pytest.
-* Fix some issues with `--help`` in CLI.
+* Fix some issues with ``--help`` in CLI.
 * Improved git remote parsing (for ``commit_info`` in JSON outputs).
-* Fixed default value for `--benchmark-columns``.
+* Fixed default value for ``--benchmark-columns``.
 * Fixed comparison mode (loading was done too late).
 * Remove the project name from the autosave name. This will get the old brief naming from 3.0 back.
 
@@ -62,13 +62,13 @@ Changelog
   Antonio Cuni in `#34 <https://github.com/ionelmc/pytest-benchmark/pull/34>`_.
 * Added support for grouping by specific test parametrization (``--benchmark-group-by=param:NAME`` where ``NAME`` is your
   param name). Contributed by Antonio Cuni in `#37 <https://github.com/ionelmc/pytest-benchmark/pull/37>`_.
-* Added support for `name` or `fullname` in ``--benchmark-sort``.
+* Added support for ``name`` or ``fullname`` in ``--benchmark-sort``.
   Contributed by Antonio Cuni in `#37 <https://github.com/ionelmc/pytest-benchmark/pull/37>`_.
 * Changed signature for ``pytest_benchmark_generate_json`` hook to take 2 new arguments: ``machine_info`` and ``commit_info``.
-* Changed `--benchmark-histogram`` to plot groups instead of name-matching runs.
-* Changed `--benchmark-histogram`` to plot exactly what you compared against. Now it's ``1:1`` with the compare feature.
-* Changed `--benchmark-compare`` to allow globs. You can compare against all the previous runs now.
-* Changed `--benchmark-group-by`` to allow multiple values separated by comma.
+* Changed ``--benchmark-histogram`` to plot groups instead of name-matching runs.
+* Changed ``--benchmark-histogram`` to plot exactly what you compared against. Now it's ``1:1`` with the compare feature.
+* Changed ``--benchmark-compare`` to allow globs. You can compare against all the previous runs now.
+* Changed ``--benchmark-group-by`` to allow multiple values separated by comma.
   Example: ``--benchmark-group-by=param:foo,param:bar``
 * Added a command line tool to compare previous data: ``py.test-benchmark``. It has two commands:
 
@@ -118,7 +118,7 @@ Changelog
 ---------------------
 
 * Add a ``--benchmark-disable`` option. It's automatically activated when xdist is on
-* When xdist is on or `statistics` can't be imported then ``--benchmark-disable`` is automatically activated (instead
+* When xdist is on or ``statistics`` can't be imported then ``--benchmark-disable`` is automatically activated (instead
   of ``--benchmark-skip``). **BACKWARDS INCOMPATIBLE**
 * Replace the deprecated ``__multicall__`` with the new hookwrapper system.
 * Improved description for ``--benchmark-max-time``.
@@ -127,7 +127,7 @@ Changelog
 --------------------
 
 * Tests are sorted alphabetically in the results table.
-* Failing to import `statistics` doesn't create hard failures anymore. Benchmarks are automatically skipped if import
+* Failing to import ``statistics`` doesn't create hard failures anymore. Benchmarks are automatically skipped if import
   failure occurs. This would happen on Python 3.2 (or earlier Python 3).
 
 3.0.0a4 (2015-10-08)
@@ -154,7 +154,7 @@ Changelog
 * Added benchmark data storage(the ``--benchmark-save`` and ``--benchmark-autosave`` command line arguments).
 * Added comparison to previous runs (the ``--benchmark-compare`` command line argument).
 * Added performance regression checks (the ``--benchmark-compare-fail`` command line argument).
-* Added possibility to group by various parts of test name (the `--benchmark-compare-group-by`` command line argument).
+* Added possibility to group by various parts of test name (the ``--benchmark-compare-group-by`` command line argument).
 * Added historical plotting (the ``--benchmark-histogram`` command line argument).
 * Added option to fine tune the calibration (the ``--benchmark-calibration-precision`` command line argument and
   ``calibration_precision`` marker option).
@@ -179,13 +179,13 @@ Changelog
   * Tracers are automatically disabled when running the test function (like coverage tracers).
   * Fixed an issue with calibration code getting stuck.
 
-* Added `pedantic mode` via ``benchmark.pedantic()``. This mode disables calibration and allows a setup function.
+* Added ``pedantic mode`` via ``benchmark.pedantic()``. This mode disables calibration and allows a setup function.
 
 
 2.5.0 (2015-06-20)
 ------------------
 
-* Improved test suite a bit (not using `cram` anymore).
+* Improved test suite a bit (not using ``cram`` anymore).
 * Improved help text on the ``--benchmark-warmup`` option.
 * Made ``warmup_iterations`` available as a marker argument (eg: ``@pytest.mark.benchmark(warmup_iterations=1234)``).
 * Fixed ``--benchmark-verbose``'s printouts to work properly with output capturing.
@@ -202,8 +202,8 @@ Changelog
 ------------------
 
 * Add a ``benchmark_weave`` experimental fixture.
-* Fix internal failures when `xdist` plugin is active.
-* Automatically disable benchmarks if `xdist` is active.
+* Fix internal failures when ``xdist`` plugin is active.
+* Automatically disable benchmarks if ``xdist`` is active.
 
 2.3.0 (2014-12-27)
 ------------------
@@ -238,5 +238,5 @@ Changelog
 ? (?)
 -----
 
-* Readme and styling fixes. Contributed by Marc Abramowitz in `#4 <https://github.com/ionelmc/pytest-benchmark/pull/4>`_.
+* README and styling fixes. Contributed by Marc Abramowitz in `#4 <https://github.com/ionelmc/pytest-benchmark/pull/4>`_.
 * Lots of wild changes.
