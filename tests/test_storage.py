@@ -4,7 +4,6 @@ import os
 import sys
 from io import BytesIO
 from io import StringIO
-from pathlib import Path
 
 import py
 import pytest
@@ -23,6 +22,7 @@ from pytest_benchmark.utils import NAME_FORMATTERS
 from pytest_benchmark.utils import DifferenceRegressionCheck
 from pytest_benchmark.utils import PercentageRegressionCheck
 from pytest_benchmark.utils import get_machine_id
+from pytest_benchmark.utils import Path
 
 pytest_plugins = "pytester"
 

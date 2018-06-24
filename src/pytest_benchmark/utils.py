@@ -23,6 +23,13 @@ from os.path import split
 
 from .compat import PY3
 
+# This is here (in the utils module) because it might be used by
+# various other modules.
+try:
+    from pathlib2 import Path   # noqa: F401
+except ImportError:
+    from pathlib import Path    # noqa: F401
+
 try:
     from urllib.parse import urlparse, parse_qs
 except ImportError:
