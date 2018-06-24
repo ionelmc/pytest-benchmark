@@ -1,11 +1,11 @@
 import json
 import os
-from pathlib import Path
 
 from ..stats import normalize_stats
 from ..utils import commonpath
 from ..utils import safe_dumps
 from ..utils import short_filename
+from ..utils import Path
 
 
 class FileStorage(object):
