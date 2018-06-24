@@ -53,7 +53,7 @@ class BenchmarkSession(object):
         self.disabled = config.getoption("benchmark_disable") and not config.getoption("benchmark_enable")
         self.cprofile_sort_by = config.getoption("benchmark_cprofile")
 
-        if config.getoption("dist", "no") != "no" and not self.skip:
+        if config.getoption("dist", "no") != "no" and not self.skip and not self.disabled:
             self.logger.warn(
                 "BENCHMARK-U2",
                 "Benchmarks are automatically disabled because xdist plugin is active."
@@ -63,7 +63,7 @@ class BenchmarkSession(object):
             self.disabled = True
         if hasattr(config, "slaveinput"):
             self.disabled = True
-        if not statistics:
+        if not statistics and not self.disabled:
             self.logger.warn(
                 "BENCHMARK-U3",
                 "Benchmarks are automatically disabled because we could not import `statistics`\n\n%s" %
