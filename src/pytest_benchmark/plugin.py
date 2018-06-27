@@ -70,7 +70,7 @@ def add_display_options(addoption, prefix="benchmark-"):
         metavar="LABELS", type=parse_columns,
         default=["min", "max", "mean", "stddev", "median", "iqr", "outliers", "ops", "rounds", "iterations"],
         help="Comma-separated list of columns to show in the result table. Default: "
-             "'min, max, mean, stddev, median, iqr, outliers, rounds, iterations'"
+             "'min, max, mean, stddev, median, iqr, outliers, ops, rounds, iterations'"
     )
     addoption(
         "--{0}name".format(prefix),

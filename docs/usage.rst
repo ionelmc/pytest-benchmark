@@ -160,7 +160,7 @@ Commandline options
   --benchmark-columns=LABELS
                         Comma-separated list of columns to show in the result
                         table. Default: 'min, max, mean, stddev, median, iqr,
-                        outliers, rounds, iterations'
+                        outliers, ops, rounds, iterations'
   --benchmark-name=FORMAT
                         How to format names in results. Can be one of 'short',
                         'normal', 'long'. Default: 'normal'
