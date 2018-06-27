@@ -88,7 +88,7 @@ def test_help(testdir):
         "  --benchmark-columns=LABELS",
         "                        Comma-separated list of columns to show in the result",
         "                        table. Default: 'min, max, mean, stddev, median, iqr,",
-        "                        outliers, rounds, iterations'",
+        "                        outliers, ops, rounds, iterations'",
         "  --benchmark-histogram=[FILENAME-PREFIX]",
         "                        Plot graphs of min/max/avg/stddev over time in",
         "                        FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX",
