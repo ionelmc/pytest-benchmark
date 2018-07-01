@@ -76,7 +76,7 @@ class BenchmarkSession(object):
         self.sort = config.getoption("benchmark_sort")
         self.columns = config.getoption("benchmark_columns")
         if self.skip and self.only:
-            raise pytest.UsageError("Can't have both --benchmark-only and --benchmark-skip options.")
+            self.skip = False
         if self.disabled and self.only:
             raise pytest.UsageError(
                 "Can't have both --benchmark-only and --benchmark-disable options. Note that --benchmark-disable is "
