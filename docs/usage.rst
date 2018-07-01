@@ -109,7 +109,7 @@ Commandline options
   --benchmark-enable    Forcibly enable benchmarks. Use this option to
                         override --benchmark-disable (in case you have it in
                         pytest configuration).
-  --benchmark-only      Only run benchmarks.
+  --benchmark-only      Only run benchmarks. This overrides --benchmark-skip.
   --benchmark-save=NAME
                         Save the current run into 'STORAGE-PATH/counter-
                         NAME.json'. Default: '<commitid>_<date>_<time>_<isdirty>', example:
