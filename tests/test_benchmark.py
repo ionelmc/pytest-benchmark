@@ -438,11 +438,19 @@ def test_b(benchmark):
     ])
 
 
-def test_conflict_between_only_and_skip(testdir):
+def test_only_override_skip(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-only', '--benchmark-skip', test)
     result.stderr.fnmatch_lines([
-        "ERROR: Can't have both --benchmark-only and --benchmark-skip options."
+        "*collected 2 items",
+        "test_only_override_skip.py ..*",
+        "* benchmark: 2 tests *",
+        "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
+        "------*",
+        "test_fast          *",
+        "test_slow          *",
+        "------*",
+        "*====== 2 passed* seconds ======*",
     ])
 
 
