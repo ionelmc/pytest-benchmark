@@ -188,7 +188,7 @@ def pytest_addoption(parser):
     group.addoption(
         "--benchmark-only",
         action="store_true", default=False,
-        help="Only run benchmarks."
+        help="Only run benchmarks. This overrides --benchmark-skip."
     )
     group.addoption(
         "--benchmark-save",
