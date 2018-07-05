@@ -66,7 +66,7 @@ def test_help(testdir):
         "                        Can be used multiple times.",
         "  --benchmark-cprofile=COLUMN",
         "                        If specified measure one run with cProfile and stores",
-        "                        10 top functions. Argument is a column to sort by.",
+        "                        25 top functions. Argument is a column to sort by.",
         "                        Available columns: 'ncallls_recursion', 'ncalls',",
         "                        'tottime', 'tottime_per', 'cumtime', 'cumtime_per',",
         "                        'function_name'.",
