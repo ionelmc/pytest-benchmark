@@ -42,7 +42,7 @@ def test_help(testdir):
         "  --benchmark-disable-gc",
         "                        Disable GC during benchmarks.",
         "  --benchmark-skip      Skip running any tests that contain benchmarks.",
-        "  --benchmark-only      Only run benchmarks.",
+        "  --benchmark-only      Only run benchmarks. This overrides --benchmark-skip.",
         "  --benchmark-save=NAME",
         "                        Save the current run into 'STORAGE-",
         "                        PATH/counter_NAME.json'.",
