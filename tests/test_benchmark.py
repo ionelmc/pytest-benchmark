@@ -441,7 +441,7 @@ def test_b(benchmark):
 def test_only_override_skip(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest('--benchmark-only', '--benchmark-skip', test)
-    result.stderr.fnmatch_lines([
+    result.stdout.fnmatch_lines([
         "*collected 2 items",
         "test_only_override_skip.py ..*",
         "* benchmark: 2 tests *",
