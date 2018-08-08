@@ -110,11 +110,11 @@ class Fallback(object):
         for func in self.functions:
             try:
                 value = func(*args, **kwargs)
-            except self.exceptions:
+            except self.exceptions as exc:
                 continue
             else:
-                if not value:
-                    continue
+                if value:
+                    return value
         else:
             return self.fallback(*args, **kwargs)
 
@@ -141,7 +141,8 @@ def get_project_name_git():
 
 @get_project_name.register
 def get_project_name_hg():
-    project_address = check_output(['hg', 'path', 'default', '--quiet'])
+    with open(os.devnull, 'w') as devnull:
+        project_address = check_output(['hg', 'path', 'default'], stderr=devnull)
     project_address = project_address.decode()
     project_name = project_address.split("/")[-1]
     return project_name.strip()
