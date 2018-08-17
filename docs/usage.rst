@@ -163,7 +163,7 @@ Commandline options
                         outliers, rounds, iterations'
   --benchmark-name=FORMAT
                         How to format names in results. Can be one of 'short',
-                        'normal', 'long'. Default: 'normal'
+                        'normal', 'long', or 'trial'. Default: 'normal'
   --benchmark-histogram=FILENAME-PREFIX
                         Plot graphs of min/max/avg/stddev over time in
                         FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX
@@ -202,7 +202,7 @@ The compare ``command`` takes almost all the ``--benchmark`` options, minus the 
                             table. Default: 'min, max, mean, stddev, median, iqr,
                             outliers, rounds, iterations'
       --name=FORMAT         How to format names in results. Can be one of 'short',
-                            'normal', 'long'. Default: 'normal'
+                            'normal', 'long', or 'trial'. Default: 'normal'
       --histogram=FILENAME-PREFIX
                             Plot graphs of min/max/avg/stddev over time in
                             FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX
