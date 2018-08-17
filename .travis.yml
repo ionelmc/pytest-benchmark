@@ -206,51 +206,83 @@ matrix:
     - python: '3.7'
       env:
         - TOXENV=py37-pytest36-pygal23-nodist-cover,report,coveralls,codecov
+      sudo: required
+      dist: xenial
     - python: '3.7'
       env:
         - TOXENV=py37-pytest36-pygal23-nodist-nocov
+      sudo: required
+      dist: xenial
     - python: '3.7'
       env:
         - TOXENV=py37-pytest36-pygal23-xdist-cover,report,coveralls,codecov
+      sudo: required
+      dist: xenial
     - python: '3.7'
       env:
         - TOXENV=py37-pytest36-pygal23-xdist-nocov
+      sudo: required
+      dist: xenial
     - python: '3.7'
       env:
         - TOXENV=py37-pytest36-pygal24-nodist-cover,report,coveralls,codecov
+      sudo: required
+      dist: xenial
     - python: '3.7'
       env:
         - TOXENV=py37-pytest36-pygal24-nodist-nocov
+      sudo: required
+      dist: xenial
     - python: '3.7'
       env:
         - TOXENV=py37-pytest36-pygal24-xdist-cover,report,coveralls,codecov
+      sudo: required
+      dist: xenial
     - python: '3.7'
       env:
         - TOXENV=py37-pytest36-pygal24-xdist-nocov
+      sudo: required
+      dist: xenial
     - python: '3.7'
       env:
         - TOXENV=py37-pytest37-pygal23-nodist-cover,report,coveralls,codecov
+      sudo: required
+      dist: xenial
     - python: '3.7'
       env:
         - TOXENV=py37-pytest37-pygal23-nodist-nocov
+      sudo: required
+      dist: xenial
     - python: '3.7'
       env:
         - TOXENV=py37-pytest37-pygal23-xdist-cover,report,coveralls,codecov
+      sudo: required
+      dist: xenial
     - python: '3.7'
       env:
         - TOXENV=py37-pytest37-pygal23-xdist-nocov
+      sudo: required
+      dist: xenial
     - python: '3.7'
       env:
         - TOXENV=py37-pytest37-pygal24-nodist-cover,report,coveralls,codecov
+      sudo: required
+      dist: xenial
     - python: '3.7'
       env:
         - TOXENV=py37-pytest37-pygal24-nodist-nocov
+      sudo: required
+      dist: xenial
     - python: '3.7'
       env:
         - TOXENV=py37-pytest37-pygal24-xdist-cover,report,coveralls,codecov
+      sudo: required
+      dist: xenial
     - python: '3.7'
       env:
         - TOXENV=py37-pytest37-pygal24-xdist-nocov
+      sudo: required
+      dist: xenial
     - python: 'pypy'
       env:
         - TOXENV=pypy-pytest36-pygal23-nodist-cover,report,coveralls,codecov
