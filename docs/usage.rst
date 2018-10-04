@@ -152,8 +152,9 @@ Commandline options
   --benchmark-verbose   Dump diagnostic and progress information.
   --benchmark-sort=COL  Column to sort on. Can be one of: 'min', 'max',
                         'mean', 'stddev', 'name', 'fullname'. Default: 'min'
-  --benchmark-group-by=LABEL
-                        How to group tests. Can be one of: 'group', 'name',
+  --benchmark-group-by=LABELS
+                        Comma-separated list of categories by which to
+                        group tests. Can be one or more of: 'group', 'name',
                         'fullname', 'func', 'fullfunc', 'param' or
                         'param:NAME', where NAME is the name passed to
                         @pytest.parametrize. Default: 'group'
@@ -194,7 +195,8 @@ The compare ``command`` takes almost all the ``--benchmark`` options, minus the 
       -h, --help            show this help message and exit
       --sort=COL            Column to sort on. Can be one of: 'min', 'max',
                             'mean', 'stddev', 'name', 'fullname'. Default: 'min'
-      --group-by=LABEL      How to group tests. Can be one of: 'group', 'name',
+      --group-by=LABELS     Comma-separated list of categories by which to
+                            group tests. Can be one or more of: 'group', 'name',
                             'fullname', 'func', 'fullfunc', 'param' or
                             'param:NAME', where NAME is the name passed to
                             @pytest.parametrize. Default: 'group'
