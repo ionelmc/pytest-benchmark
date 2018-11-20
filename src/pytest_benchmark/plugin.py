@@ -388,7 +388,7 @@ def benchmark(request):
         pytest.skip("Benchmarks are skipped (--benchmark-skip was used).")
     else:
         node = request.node
-        marker = node.get_marker("benchmark")
+        marker = node.get_closest_marker("benchmark")
         options = marker.kwargs if marker else {}
         if "timer" in options:
             options["timer"] = NameWrapper(options["timer"])
@@ -410,7 +410,7 @@ def benchmark_weave(benchmark):
 
 
 def pytest_runtest_setup(item):
-    marker = item.get_marker("benchmark")
+    marker = item.get_closest_marker("benchmark")
     if marker:
         if marker.args:
             raise ValueError("benchmark mark can't have positional arguments.")
