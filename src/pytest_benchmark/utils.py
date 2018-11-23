@@ -110,7 +110,7 @@ class Fallback(object):
         for func in self.functions:
             try:
                 value = func(*args, **kwargs)
-            except self.exceptions as exc:
+            except self.exceptions:
                 continue
             else:
                 if value:
@@ -282,9 +282,9 @@ class DifferenceRegressionCheck(RegressionCheck):
 
 
 def parse_compare_fail(string,
-                       rex=re.compile('^(?P<field>min|max|mean|median|stddev|iqr):'
-                                      '((?P<percentage>[0-9]?[0-9])%|(?P<difference>[0-9]*\.?[0-9]+([eE][-+]?['
-                                      '0-9]+)?))$')):
+                       rex=re.compile(r'^(?P<field>min|max|mean|median|stddev|iqr):'
+                                      r'((?P<percentage>[0-9]?[0-9])%|(?P<difference>[0-9]*\.?[0-9]+([eE][-+]?['
+                                      r'0-9]+)?))$')):
     m = rex.match(string)
     if m:
         g = m.groupdict()
@@ -580,7 +580,7 @@ def report_noprogress(iterable, *args, **kwargs):
 
 
 def slugify(name):
-    for c in "\/:*?<>| ":
+    for c in r"\/:*?<>| ":
         name = name.replace(c, '_').replace('__', '_')
     return name
 
