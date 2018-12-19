@@ -119,9 +119,9 @@ def test_no_branch_info(testdir):
 def test_commit_info_error(testdir):
     testdir.mkdir('.git')
     info = get_commit_info()
-    assert info['branch'] == '(unknown)'
-    assert info['error'] == 'CalledProcessError(128, ' \
-                            '\'fatal: Not a git repository (or any of the parent directories): .git\\n\')'
+    assert info['branch'].lower() == '(unknown)'.lower()
+    assert info['error'].lower() == 'CalledProcessError(128, ' \
+                                    '\'fatal: Not a git repository (or any of the parent directories): .git\\n\')'.lower()
 
 
 def test_parse_warmup():
