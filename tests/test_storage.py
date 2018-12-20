@@ -11,6 +11,7 @@ import pytest
 from freezegun import freeze_time
 
 from pytest_benchmark import plugin
+from pytest_benchmark.compat import OPEN_MODE
 from pytest_benchmark.plugin import BenchmarkSession
 from pytest_benchmark.plugin import pytest_benchmark_compare_machine_info
 from pytest_benchmark.plugin import pytest_benchmark_generate_json
@@ -391,7 +392,7 @@ def test_save_with_name(sess, tmpdir, monkeypatch):
     files = list(Path(str(tmpdir)).rglob('*.json'))
     print(files)
     assert len(files) == 1
-    assert json.load(files[0].open('rU')) == JSON_DATA
+    assert json.load(files[0].open(OPEN_MODE)) == JSON_DATA
 
 
 @freeze_time("2015-08-15T00:04:18.687119")
@@ -405,7 +406,7 @@ def test_save_no_name(sess, tmpdir, monkeypatch):
     sess.handle_saving()
     files = list(Path(str(tmpdir)).rglob('*.json'))
     assert len(files) == 1
-    assert json.load(files[0].open('rU')) == JSON_DATA
+    assert json.load(files[0].open(OPEN_MODE)) == JSON_DATA
 
 
 @freeze_time("2015-08-15T00:04:18.687119")
@@ -421,7 +422,7 @@ def test_save_with_error(sess, tmpdir, monkeypatch):
     sess.handle_saving()
     files = list(Path(str(tmpdir)).rglob('*.json'))
     assert len(files) == 1
-    assert json.load(files[0].open('rU')) == {
+    assert json.load(files[0].open(OPEN_MODE)) == {
         'benchmarks': [],
         'commit_info': {'foo': 'bar'},
         'datetime': '2015-08-15T00:04:18.687119',
@@ -441,4 +442,4 @@ def test_autosave(sess, tmpdir, monkeypatch):
     sess.handle_saving()
     files = list(Path(str(tmpdir)).rglob('*.json'))
     assert len(files) == 1
-    assert json.load(files[0].open('rU')) == JSON_DATA
+    assert json.load(files[0].open(OPEN_MODE)) == JSON_DATA
