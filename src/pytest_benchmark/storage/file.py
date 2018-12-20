@@ -2,6 +2,7 @@ import json
 import os
 from pathlib import Path
 
+from ..compat import OPEN_MODE
 from ..stats import normalize_stats
 from ..utils import commonpath
 from ..utils import safe_dumps
@@ -100,7 +101,7 @@ class FileStorage(object):
             if file in self._cache:
                 data = self._cache[file]
             else:
-                with file.open("rU") as fh:
+                with file.open(OPEN_MODE) as fh:
                     try:
                         data = json.load(fh)
                         for bench in data["benchmarks"]:

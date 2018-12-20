@@ -12,6 +12,7 @@ import pytest
 from freezegun import freeze_time
 
 from pytest_benchmark import plugin
+from pytest_benchmark.compat import OPEN_MODE
 from pytest_benchmark.plugin import BenchmarkSession
 from pytest_benchmark.plugin import pytest_benchmark_compare_machine_info
 from pytest_benchmark.plugin import pytest_benchmark_generate_json
@@ -29,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 THIS = py.path.local(__file__)
 BENCHFILE = THIS.dirpath('test_storage/0030_5b78858eb718649a31fb93d8dc96ca2cee41a4cd_20150815_030419_uncommitted-changes.json')
-SAVE_DATA = json.load(BENCHFILE.open('rU'))
+SAVE_DATA = json.load(BENCHFILE.open(OPEN_MODE))
 SAVE_DATA["machine_info"] = {'foo': 'bar'}
 SAVE_DATA["commit_info"] = {'foo': 'bar'}
 
