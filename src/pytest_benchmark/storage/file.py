@@ -13,8 +13,10 @@ class FileStorage(object):
     def __init__(self, path, logger, default_machine_id=None):
         self.path = Path(path)
         self.default_machine_id = default_machine_id
-        if not self.path.exists():
+        try:
             self.path.mkdir(parents=True)
+        except OSError:
+            pass
         self.path = self.path.resolve()
         self.logger = logger
         self._cache = {}
@@ -28,8 +30,10 @@ class FileStorage(object):
 
     def get(self, name):
         path = self.path.joinpath(self.default_machine_id) if self.default_machine_id else self.path
-        if not path.exists():
+        try:
             path.mkdir(parents=True)
+        except OSError:
+            pass
         return path.joinpath(name)
 
     @property
