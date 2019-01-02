@@ -111,8 +111,7 @@ class FileStorage(object):
                         for bench in data["benchmarks"]:
                             normalize_stats(bench["stats"])
                     except Exception as exc:
-                        self.logger.warn("BENCHMARK-C5",
-                                         "Failed to load {0}: {1}".format(file, exc), fslocation=self.location)
+                        self.logger.warn("Failed to load {0}: {1}".format(file, exc))
                         continue
                 self._cache[file] = data
             try:

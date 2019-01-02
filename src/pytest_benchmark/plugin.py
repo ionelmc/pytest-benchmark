@@ -253,12 +253,11 @@ def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info
 
     if compared_machine_info != machine_info:
         benchmarksession.logger.warn(
-            "BENCHMARK-C6",
-            "Benchmark machine_info is different. Current: %s VS saved: %s." % (
+            "Benchmark machine_info is different. Current: %s VS saved: %s (location: %s)." % (
                 machine_info,
                 compared_machine_info,
-            ),
-            fslocation=benchmarksession.storage.location
+                benchmarksession.storage.location,
+            )
         )
 
 

@@ -55,20 +55,16 @@ class BenchmarkSession(object):
 
         if config.getoption("dist", "no") != "no" and not self.skip and not self.disabled:
             self.logger.warn(
-                "BENCHMARK-U2",
                 "Benchmarks are automatically disabled because xdist plugin is active."
                 "Benchmarks cannot be performed reliably in a parallelized environment.",
-                fslocation="::"
             )
             self.disabled = True
         if hasattr(config, "slaveinput"):
             self.disabled = True
         if not statistics and not self.disabled:
             self.logger.warn(
-                "BENCHMARK-U3",
                 "Benchmarks are automatically disabled because we could not import `statistics`\n\n%s" %
                 statistics_error,
-                fslocation="::"
             )
             self.disabled = True
 
@@ -132,7 +128,7 @@ class BenchmarkSession(object):
         save = self.save or self.autosave
         if save or self.json:
             if not self.benchmarks:
-                self.logger.warn("BENCHMARK-U2", "Not saving anything, no benchmarks have been run!")
+                self.logger.warn("Not saving anything, no benchmarks have been run!")
                 return
             machine_info = self.get_machine_info()
             commit_info = self.config.hook.pytest_benchmark_generate_commit_info(config=self.config)
@@ -180,11 +176,9 @@ class BenchmarkSession(object):
                 msg = "Can't compare. No benchmark files in %r" % str(self.storage)
                 if self.compare is True:
                     msg += ". Can't load the previous benchmark."
-                    code = "BENCHMARK-C2"
                 else:
                     msg += " match %r." % self.compare
-                    code = "BENCHMARK-C1"
-                self.logger.warn(code, msg, fslocation=self.storage.location)
+                self.logger.warn(msg)
 
             machine_info = self.get_machine_info()
             for path, compared_benchmark in compared_benchmarks:

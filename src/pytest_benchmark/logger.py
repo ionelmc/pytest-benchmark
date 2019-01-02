@@ -2,8 +2,14 @@ from __future__ import division
 from __future__ import print_function
 
 import sys
+import warnings
 
 import py
+from pytest import PytestWarning
+
+
+class PytestBenchmarkWarning(PytestWarning):
+    pass
 
 
 class Logger(object):
@@ -21,15 +27,8 @@ class Logger(object):
                 self.resume_capture = getattr(capman,
                                               'resume_global_capture',
                                               getattr('capman', 'resumecapture', None))
-            self.pytest_warn = config.warn
-        else:
-            self.pytest_warn = lambda **kwargs: None
-        try:
-            self.pytest_warn_has_fslocation = 'fslocation' in config.warn.func_code.co_varnames
-        except AttributeError:
-            self.pytest_warn_has_fslocation = False
 
-    def warn(self, code, text, warner=None, suspend=False, fslocation=None):
+    def warn(self, text, warner=None, suspend=False):
         if self.verbose:
             if suspend and self.suspend_capture:
                 self.suspend_capture(in_=True)
@@ -41,11 +40,8 @@ class Logger(object):
             if suspend and self.resume_capture:
                 self.resume_capture()
         if warner is None:
-            warner = self.pytest_warn
-        if fslocation and self.pytest_warn_has_fslocation:
-            warner(code=code, message=text, fslocation=fslocation)
-        else:
-            warner(code=code, message=text)
+            warner = warnings.warn
+        warner(PytestBenchmarkWarning(text))
 
     def error(self, text):
         self.term.line("")
