@@ -261,13 +261,7 @@ def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info
         )
 
 
-if hasattr(pytest, 'hookimpl'):
-    _hookwrapper = pytest.hookimpl(hookwrapper=True)
-else:
-    _hookwrapper = pytest.mark.hookwrapper
-
-
-@_hookwrapper
+@pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_call(item):
     bs = item.config._benchmarksession
     fixture = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
@@ -312,7 +306,7 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
     return sorted(groups.items(), key=lambda pair: pair[0] or "")
 
 
-@_hookwrapper
+@pytest.hookimpl(hookwrapper=True)
 def pytest_sessionfinish(session, exitstatus):
     session.config._benchmarksession.finish()
     yield
@@ -418,6 +412,14 @@ def pytest_runtest_setup(item):
                     "max_time", "min_rounds", "min_time", "timer", "group", "disable_gc", "warmup",
                     "warmup_iterations", "calibration_precision"):
                 raise ValueError("benchmark mark can't have %r keyword argument." % name)
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    fixture = item.funcargs.get("benchmark")
+    if fixture:
+        fixture.skipped = outcome.get_result().outcome == 'skipped'
 
 
 @pytest.mark.trylast  # force the other plugins to initialise, fixes issue with capture not being properly initialised

@@ -52,6 +52,7 @@ class BenchmarkFixture(object):
         self.group = group
         self.has_error = False
         self.extra_info = {}
+        self.skipped = False
 
         self._disable_gc = disable_gc
         self._timer = timer.target
@@ -247,7 +248,7 @@ class BenchmarkFixture(object):
         while self._cleanup_callbacks:
             callback = self._cleanup_callbacks.pop()
             callback()
-        if not self._mode:
+        if not self._mode and not self.skipped:
             self._logger.warn("Benchmark fixture was not used at all in this test!",
                               warner=self._warner, suspend=True)
 
