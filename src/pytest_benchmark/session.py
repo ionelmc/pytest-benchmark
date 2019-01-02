@@ -231,7 +231,7 @@ class BenchmarkSession(object):
             raise PerformanceRegression("Performance has regressed.")
 
     def display_cprofile(self, tr):
-        if self.options["cprofile"] or any(bench["cprofile"] for group in self.groups for bench in group[1]):
+        if self.options["cprofile"] or any(bench.get("cprofile") for group in self.groups for bench in group[1]):
             tr.section("cProfile (time in s)", sep="-", yellow=True)
             for group in self.groups:
                 group_name, benchmarks = group
