@@ -84,8 +84,9 @@ def test_iqr():
     assert stats.iqr == 32.0
 
     stats = Stats()
-    for i in 1, 2, 3, 10, 10.1234, 11, 12, 13., 10.1115, 11.1115, 12.1115, 13.5, 10.75, 11.75, 13.12175, 13.1175, 20, \
-             50, 52:
+    for i in [
+        1, 2, 3, 10, 10.1234, 11, 12, 13., 10.1115, 11.1115, 12.1115, 13.5, 10.75, 11.75, 13.12175, 13.1175, 20, 50, 52
+    ]:
         stats.update(i)
     assert stats.stddev == 13.518730097622106
     assert stats.iqr == 3.006212500000002  # close enough: http://www.wessa.net/rwasp_variability.wasp

@@ -1,3 +1,4 @@
+# flake8: noqa
 import json
 import logging
 import os
@@ -20,9 +21,9 @@ from pytest_benchmark.stats import normalize_stats
 from pytest_benchmark.storage.file import FileStorage
 from pytest_benchmark.utils import NAME_FORMATTERS
 from pytest_benchmark.utils import DifferenceRegressionCheck
+from pytest_benchmark.utils import Path
 from pytest_benchmark.utils import PercentageRegressionCheck
 from pytest_benchmark.utils import get_machine_id
-from pytest_benchmark.utils import Path
 
 pytest_plugins = "pytester"
 
@@ -367,6 +368,7 @@ def test_compare_2(sess, LineMatcher):
         '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
         '  OPS: Operations Per Second, computed as 1 / Mean',
     ])
+
 
 @freeze_time("2015-08-15T00:04:18.687119")
 def test_save_json(sess, tmpdir, monkeypatch):

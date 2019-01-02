@@ -15,7 +15,7 @@ from pytest_benchmark.utils import parse_warmup
 
 pytest_plugins = 'pytester',
 
-f1 = lambda a: a
+f1 = lambda a: a  # noqa
 
 
 def f2(a):

@@ -687,7 +687,6 @@ def test_save_extra_info(testdir):
     assert bench_info['extra_info'] == {'foo': 'bar'}
 
 
-
 def test_update_machine_info_hook_detection(testdir):
     """Tests detection and execution and update_machine_info_hooks.
 
@@ -713,10 +712,10 @@ def test_simple(benchmark):
     '''
 
     testdir.makepyfile(**{
-        "conftest" : record_path_conftest,
-        "test_module/conftest" : record_path_conftest,
-        "test_module/tests/conftest" : record_path_conftest,
-        "test_module/tests/simple_test.py" : simple_test,
+        "conftest": record_path_conftest,
+        "test_module/conftest": record_path_conftest,
+        "test_module/tests/conftest": record_path_conftest,
+        "test_module/tests/simple_test.py": simple_test,
     })
 
     def run_verify_pytest(*args):

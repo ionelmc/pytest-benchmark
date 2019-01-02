@@ -27,7 +27,8 @@ setup(
     name='pytest-benchmark',
     version='3.1.1',
     license='BSD 2-Clause License',
-    description='A ``py.test`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer. See calibration_ and FAQ_.',
+    description='A ``py.test`` fixture for benchmarking code. It will group the tests into rounds that are calibrated '
+                'to the chosen timer. See calibration_ and FAQ_.',
     long_description='%s\n%s' % (
         re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.rst')),
         re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))

@@ -5,7 +5,7 @@ Just to make sure the plugin doesn't choke on doctests::
     Yay, doctests!
 
 """
-import sys
+import sys  # noqa
 import time
 from functools import partial
 

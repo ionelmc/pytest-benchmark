@@ -3,10 +3,10 @@ import os
 
 from ..compat import OPEN_MODE
 from ..stats import normalize_stats
+from ..utils import Path
 from ..utils import commonpath
 from ..utils import safe_dumps
 from ..utils import short_filename
-from ..utils import Path
 
 
 class FileStorage(object):

@@ -47,7 +47,7 @@ def test_help(testdir):
     assert result.ret == 0
 
 
-def test_help(testdir):
+def test_help_command(testdir):
     result = testdir.run('py.test-benchmark', 'help')
     result.stdout.fnmatch_lines([
         'usage: py.test-benchmark help [-h] [command]',
