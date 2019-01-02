@@ -10,7 +10,6 @@ env:
     - TOXENV=docs
 matrix:
   include:
-
     - python: '2.7'
       env:
         - TOXENV=py27-pytest40-pygal23-nodist-cover,report,coveralls,codecov
@@ -204,85 +203,85 @@ matrix:
       env:
         - TOXENV=py36-pytest41-pygal24-xdist-nocov
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest40-pygal23-nodist-cover,report,coveralls,codecov
-      sudo: required
-      dist: xenial
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest40-pygal23-nodist-nocov
-      sudo: required
-      dist: xenial
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest40-pygal23-xdist-cover,report,coveralls,codecov
-      sudo: required
-      dist: xenial
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest40-pygal23-xdist-nocov
-      sudo: required
-      dist: xenial
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest40-pygal24-nodist-cover,report,coveralls,codecov
-      sudo: required
-      dist: xenial
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest40-pygal24-nodist-nocov
-      sudo: required
-      dist: xenial
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest40-pygal24-xdist-cover,report,coveralls,codecov
-      sudo: required
-      dist: xenial
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest40-pygal24-xdist-nocov
-      sudo: required
-      dist: xenial
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest41-pygal23-nodist-cover,report,coveralls,codecov
-      sudo: required
-      dist: xenial
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest41-pygal23-nodist-nocov
-      sudo: required
-      dist: xenial
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest41-pygal23-xdist-cover,report,coveralls,codecov
-      sudo: required
-      dist: xenial
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest41-pygal23-xdist-nocov
-      sudo: required
-      dist: xenial
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest41-pygal24-nodist-cover,report,coveralls,codecov
-      sudo: required
-      dist: xenial
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest41-pygal24-nodist-nocov
-      sudo: required
-      dist: xenial
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest41-pygal24-xdist-cover,report,coveralls,codecov
-      sudo: required
-      dist: xenial
     - python: '3.7'
+      dist: xenial
+      sudo: required
       env:
         - TOXENV=py37-pytest41-pygal24-xdist-nocov
-      sudo: required
-      dist: xenial
     - python: 'pypy'
       env:
         - TOXENV=pypy-pytest40-pygal23-nodist-cover,report,coveralls,codecov
@@ -384,7 +383,7 @@ before_install:
   - uname -a
   - lsb_release -a
 install:
-  - pip install -U tox wheel $(if python -V |& grep -q 'Python 3.2'; then echo 'pip<8.0 virtualenv<14.0 setuptools<30.0'; else echo setuptools; fi)
+  - pip install tox
   - virtualenv --version
   - easy_install --version
   - pip --version
@@ -393,21 +392,21 @@ install:
     set -ex
     if [[ $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then
         (cd $HOME
-         wget https://bitbucket.org/squeaky/portable-pypy/downloads/pypy-6.0.0-linux_x86_64-portable.tar.bz2
-         tar xf pypy-6.0.0-linux_x86_64-portable.tar.bz2
-         pypy-6.0.0-linux_x86_64-portable/bin/pypy -m ensurepip
-         pypy-6.0.0-linux_x86_64-portable/bin/pypy -m pip install -U virtualenv)
-        export PATH=$HOME/pypy-6.0.0-linux_x86_64-portable/bin/:$PATH
-        export TOXPYTHON=$HOME/pypy-6.0.0-linux_x86_64-portable/bin/pypy
+         wget https://bitbucket.org/pypy/pypy/downloads/pypy2-v6.0.0-linux64.tar.bz2
+         tar xf pypy2-*.tar.bz2
+         pypy2-*/bin/pypy -m ensurepip
+         pypy2-*/bin/pypy -m pip install -U virtualenv)
+        export PATH=$(echo $HOME/pypy2-*/bin):$PATH
+        export TOXPYTHON=$(echo $HOME/pypy2-*/bin/pypy)
     fi
     if [[ $TRAVIS_PYTHON_VERSION == 'pypy3' ]]; then
         (cd $HOME
-         wget https://bitbucket.org/squeaky/portable-pypy/downloads/pypy3.5-6.0.0-linux_x86_64-portable.tar.bz2
-         tar xf pypy3.5-6.0.0-linux_x86_64-portable.tar.bz2
-         pypy3.5-6.0.0-linux_x86_64-portable/bin/pypy3 -m ensurepip
-         pypy3.5-6.0.0-linux_x86_64-portable/bin/pypy3 -m pip install -U virtualenv)
-        export PATH=$HOME/pypy3.5-6.0.0-linux_x86_64-portable/bin/:$PATH
-        export TOXPYTHON=$HOME/pypy3.5-6.0.0-linux_x86_64-portable/bin/pypy3
+         wget https://bitbucket.org/pypy/pypy/downloads/pypy3-v6.0.0-linux64.tar.bz2
+         tar xf pypy3-*.tar.bz2
+         pypy3-*/bin/pypy3 -m ensurepip
+         pypy3-*/bin/pypy3 -m pip install -U virtualenv)
+        export PATH=$(echo $HOME/pypy3-*/bin):$PATH
+        export TOXPYTHON=$(echo $HOME/pypy3-*/bin/pypy3)
     fi
     set +x
 script:

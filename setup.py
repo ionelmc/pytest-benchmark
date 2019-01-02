@@ -16,19 +16,18 @@ from setuptools import setup
 
 
 def read(*names, **kwargs):
-    return io.open(
+    with io.open(
         join(dirname(__file__), *names),
         encoding=kwargs.get('encoding', 'utf8')
-    ).read()
+    ) as fh:
+        return fh.read()
 
 
 setup(
     name='pytest-benchmark',
     version='3.1.1',
-    license='BSD',
-    description='A ``py.test`` fixture for benchmarking code. '
-                'It will group the tests into rounds that are calibrated to the chosen timer. '
-                'See calibration_ and FAQ_.',
+    license='BSD 2-Clause License',
+    description='A ``py.test`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer. See calibration_ and FAQ_.',
     long_description='%s\n%s' % (
         re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.rst')),
         re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))
@@ -51,13 +50,12 @@ setup(
         'Operating System :: POSIX',
         'Operating System :: Unix',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Testing',

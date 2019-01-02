@@ -1,5 +1,4 @@
 graft docs
-graft examples
 graft src
 graft ci
 graft tests
@@ -8,7 +7,6 @@ include .bumpversion.cfg
 include .coveragerc
 include .cookiecutterrc
 include .editorconfig
-include .isort.cfg
 
 include AUTHORS.rst
 include CHANGELOG.rst

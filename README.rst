@@ -12,7 +12,6 @@ Overview
     * - tests
       - | |travis| |appveyor| |requires|
         | |coveralls| |codecov|
-        | |landscape| |scrutinizer| |codacy| |codeclimate|
     * - package
       - | |version| |wheel| |supported-versions| |supported-implementations|
         | |commits-since|
@@ -45,21 +44,9 @@ Overview
     :alt: Coverage Status
     :target: https://codecov.io/github/ionelmc/pytest-benchmark
 
-.. |landscape| image:: https://landscape.io/github/ionelmc/pytest-benchmark/master/landscape.svg?style=flat
-    :target: https://landscape.io/github/ionelmc/pytest-benchmark/master
-    :alt: Code Quality Status
-
-.. |codacy| image:: https://img.shields.io/codacy/80e2960677c24d5083a802dd57df17dc.svg?style=flat
-    :target: https://www.codacy.com/app/ionelmc/pytest-benchmark
-    :alt: Codacy Code Quality Status
-
-.. |codeclimate| image:: https://codeclimate.com/github/ionelmc/pytest-benchmark/badges/gpa.svg
-   :target: https://codeclimate.com/github/ionelmc/pytest-benchmark
-   :alt: CodeClimate Quality Status
-
 .. |version| image:: https://img.shields.io/pypi/v/pytest-benchmark.svg
     :alt: PyPI Package latest release
-    :target: https://pypi.python.org/pypi/pytest-benchmark
+    :target: https://pypi.org/project/pytest-benchmark
 
 .. |commits-since| image:: https://img.shields.io/github/commits-since/ionelmc/pytest-benchmark/v3.1.1.svg
     :alt: Commits since latest release
@@ -67,19 +54,15 @@ Overview
 
 .. |wheel| image:: https://img.shields.io/pypi/wheel/pytest-benchmark.svg
     :alt: PyPI Wheel
-    :target: https://pypi.python.org/pypi/pytest-benchmark
+    :target: https://pypi.org/project/pytest-benchmark
 
 .. |supported-versions| image:: https://img.shields.io/pypi/pyversions/pytest-benchmark.svg
     :alt: Supported versions
-    :target: https://pypi.python.org/pypi/pytest-benchmark
+    :target: https://pypi.org/project/pytest-benchmark
 
 .. |supported-implementations| image:: https://img.shields.io/pypi/implementation/pytest-benchmark.svg
     :alt: Supported implementations
-    :target: https://pypi.python.org/pypi/pytest-benchmark
-
-.. |scrutinizer| image:: https://img.shields.io/scrutinizer/g/ionelmc/pytest-benchmark/master.svg
-    :alt: Scrutinizer Status
-    :target: https://scrutinizer-ci.com/g/ionelmc/pytest-benchmark/
+    :target: https://pypi.org/project/pytest-benchmark
 
 
 .. end-badges
@@ -87,7 +70,7 @@ Overview
 A ``py.test`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen
 timer. See calibration_ and FAQ_.
 
-* Free software: BSD license
+* Free software: BSD 2-Clause License
 
 Installation
 ============
