@@ -36,6 +36,11 @@ class HelpAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         namespace.help = True
         namespace.command = values or 'help'
+        if values:
+            parser.parse_args([values, '--help'])
+        else:
+            parser.print_help()
+        parser.exit()
 
 
 class CommandArgumentParser(argparse.ArgumentParser):
@@ -75,19 +80,6 @@ class CommandArgumentParser(argparse.ArgumentParser):
         )
         self.commands_dispatch[name] = command
         return command
-
-    def parse_args(self):
-        args = super(CommandArgumentParser, self).parse_args()
-        if args.help:
-            if args.command:
-                return super(CommandArgumentParser, self).parse_args([args.command, '--help'])
-            else:
-                self.print_help()
-                self.exit()
-        elif not args.command:
-            self.error('the following arguments are required: COMMAND (choose from %s)' % ', '.join(
-                map(repr, self.commands.choices)))
-        return args
 
 
 def add_glob_or_file(addoption):
@@ -166,6 +158,8 @@ def main():
             results_csv.render(output_file, groups)
     elif args.command is None:
         parser.error("missing command (available commands: %s)" % ', '.join(map(repr, parser.commands.choices)))
+    else:
+        parser.error("unexpected command %r" % args.command)
 
 
 class TerminalReporter(object):
