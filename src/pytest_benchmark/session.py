@@ -231,11 +231,14 @@ class BenchmarkSession(object):
             raise PerformanceRegression("Performance has regressed.")
 
     def display_cprofile(self, tr):
-        if self.options["cprofile"] or any(bench.get("cprofile") for group in self.groups for bench in group[1]):
-            tr.section("cProfile (time in s)", sep="-", yellow=True)
-            for group in self.groups:
-                group_name, benchmarks = group
-                for benchmark in benchmarks:
+        section_displayed = False
+        for group in self.groups:
+            group_name, benchmarks = group
+            for benchmark in benchmarks:
+                if "cprofile" in benchmark:
+                    if not section_displayed:
+                        tr.section("cProfile (time in s)", sep="-", yellow=True)
+                        section_displayed = True
                     tr.write(benchmark["fullname"], yellow=True)
                     if benchmark["source"]:
                         tr.write_line(" ({})".format((benchmark["source"])))
