@@ -56,10 +56,10 @@ class Logger(object):
             self.term.line("")
         self.term.line(text, **kwargs)
 
-    def debug(self, text, **kwargs):
+    def debug(self, text, newline=False, **kwargs):
         if self.verbose:
             if self.suspend_capture:
                 self.suspend_capture(in_=True)
-            self.info(text, **kwargs)
+            self.info(text, newline=newline, **kwargs)
             if self.resume_capture:
                 self.resume_capture()

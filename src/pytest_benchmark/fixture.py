@@ -12,6 +12,7 @@ from math import ceil
 from .compat import INT
 from .compat import XRANGE
 from .timers import compute_timer_precision
+from .utils import NameWrapper
 from .utils import format_time
 
 try:
@@ -30,13 +31,6 @@ class FixtureAlreadyUsed(Exception):
 
 class BenchmarkFixture(object):
     _precisions = {}
-
-    @classmethod
-    def _get_precision(cls, timer):
-        if timer in cls._precisions:
-            return cls._precisions[timer]
-        else:
-            return cls._precisions.setdefault(timer, compute_timer_precision(timer))
 
     def __init__(self, node, disable_gc, timer, min_rounds, min_time, max_time, warmup, warmup_iterations,
                  calibration_precision, add_stats, logger, warner, disabled, cprofile, group=None):
@@ -72,6 +66,16 @@ class BenchmarkFixture(object):
     @property
     def enabled(self):
         return not self.disabled
+
+    def _get_precision(self, timer):
+        if timer in self._precisions:
+            timer_precision = self._precisions[timer]
+        else:
+            timer_precision = self._precisions[timer] = compute_timer_precision(timer)
+            self._logger.debug("")
+            self._logger.debug("Computing precision for %s ... %ss." % (
+                NameWrapper(timer), format_time(timer_precision)), blue=True, bold=True)
+        return timer_precision
 
     def _make_runner(self, function_to_benchmark, args, kwargs):
         def runner(loops_range, timer=self._timer):
@@ -258,9 +262,13 @@ class BenchmarkFixture(object):
         min_time = max(self._min_time, timer_precision * self._calibration_precision)
         min_time_estimate = min_time * 5 / self._calibration_precision
         self._logger.debug("")
-        self._logger.debug("  Timer precision: %ss" % format_time(timer_precision), yellow=True, bold=True)
-        self._logger.debug("  Calibrating to target round %ss; will estimate when reaching %ss." % (
-            format_time(min_time), format_time(min_time_estimate)), yellow=True, bold=True)
+        self._logger.debug("  Calibrating to target round %ss; will estimate when reaching %ss "
+                           "(using: %s, precision: %ss)." % (
+                               format_time(min_time),
+                               format_time(min_time_estimate),
+                               NameWrapper(self._timer),
+                               format_time(timer_precision)
+                           ), yellow=True, bold=True)
 
         loops = 1
         while True:
