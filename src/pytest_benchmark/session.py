@@ -47,7 +47,7 @@ class BenchmarkSession(object):
             disable_gc=config.getoption("benchmark_disable_gc"),
             warmup=config.getoption("benchmark_warmup"),
             warmup_iterations=config.getoption("benchmark_warmup_iterations"),
-            use_cprofile=bool(config.getoption("benchmark_cprofile")),
+            cprofile=bool(config.getoption("benchmark_cprofile")),
         )
         self.skip = config.getoption("benchmark_skip")
         self.disabled = config.getoption("benchmark_disable") and not config.getoption("benchmark_enable")
@@ -231,9 +231,8 @@ class BenchmarkSession(object):
             raise PerformanceRegression("Performance has regressed.")
 
     def display_cprofile(self, tr):
-        if self.options["use_cprofile"]:
-            tr.section("cProfile information")
-            tr.write_line("Time in s")
+        if self.options["cprofile"] or any(bench["cprofile"] for group in self.groups for bench in group[1]):
+            tr.section("cProfile (time in s)", sep="-", yellow=True)
             for group in self.groups:
                 group_name, benchmarks = group
                 for benchmark in benchmarks:

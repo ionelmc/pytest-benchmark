@@ -81,7 +81,7 @@ class MockSession(BenchmarkSession):
             'min_rounds': 123,
             'min_time': 234,
             'max_time': 345,
-            'use_cprofile': False,
+            'cprofile': False,
         }
         self.cprofile_sort_by = 'cumtime'
         self.compare_fail = []

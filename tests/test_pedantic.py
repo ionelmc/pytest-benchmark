@@ -1,3 +1,4 @@
+import pytest
 from pytest import mark
 from pytest import raises
 
@@ -19,6 +20,20 @@ def test_setup(benchmark):
 
     benchmark.pedantic(stuff, setup=setup)
     assert runs == [(1, 2)]
+
+
+@pytest.mark.benchmark(cprofile=True)
+def test_setup_cprofile(benchmark):
+    runs = []
+
+    def stuff(foo, bar=123):
+        runs.append((foo, bar))
+
+    def setup():
+        return [1], {"bar": 2}
+
+    benchmark.pedantic(stuff, setup=setup)
+    assert runs == [(1, 2), (1, 2)]
 
 
 def test_args_kwargs(benchmark):

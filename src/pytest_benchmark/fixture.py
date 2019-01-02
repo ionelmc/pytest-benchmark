@@ -39,7 +39,7 @@ class BenchmarkFixture(object):
             return cls._precisions.setdefault(timer, compute_timer_precision(timer))
 
     def __init__(self, node, disable_gc, timer, min_rounds, min_time, max_time, warmup, warmup_iterations,
-                 calibration_precision, add_stats, logger, warner, disabled, use_cprofile, group=None):
+                 calibration_precision, add_stats, logger, warner, disabled, cprofile, group=None):
         self.name = node.name
         self.fullname = node._nodeid
         self.disabled = disabled
@@ -66,7 +66,7 @@ class BenchmarkFixture(object):
         self._warner = warner
         self._cleanup_callbacks = []
         self._mode = None
-        self.use_cprofile = use_cprofile
+        self.cprofile = cprofile
         self.cprofile_stats = None
 
     @property
@@ -160,7 +160,7 @@ class BenchmarkFixture(object):
             for _ in XRANGE(rounds):
                 stats.update(runner(loops_range))
             self._logger.debug("  Ran for %ss." % format_time(time.time() - run_start), yellow=True, bold=True)
-        if self.use_cprofile:
+        if self.cprofile:
             profile = cProfile.Profile()
             function_result = profile.runcall(function_to_benchmark, *args, **kwargs)
             self.stats.cprofile_stats = pstats.Stats(profile)
@@ -221,8 +221,9 @@ class BenchmarkFixture(object):
             args, kwargs = make_arguments()
             result = target(*args, **kwargs)
 
-        if self.use_cprofile:
+        if self.cprofile:
             profile = cProfile.Profile()
+            args, kwargs = make_arguments()
             profile.runcall(target, *args, **kwargs)
             self.stats.cprofile_stats = pstats.Stats(profile)
 
