@@ -382,7 +382,7 @@ def benchmark(request):
     else:
         node = request.node
         marker = node.get_closest_marker("benchmark")
-        options = marker.kwargs if marker else {}
+        options = dict(marker.kwargs) if marker else {}
         if "timer" in options:
             options["timer"] = NameWrapper(options["timer"])
         fixture = BenchmarkFixture(
