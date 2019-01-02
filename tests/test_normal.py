@@ -31,9 +31,9 @@ def test_slower(benchmark):
     benchmark(lambda: time.sleep(0.01))
 
 
-# @pytest.mark.benchmark(min_rounds=2, timer=time.time, max_time=0.01)
-# def test_xfast(benchmark):
-#     benchmark(str)
+@pytest.mark.benchmark(min_rounds=2, timer=time.time, max_time=0.01)
+def test_xfast(benchmark):
+    benchmark(str)
 
 
 @pytest.fixture(params=range(5))
