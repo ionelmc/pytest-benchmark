@@ -3,7 +3,7 @@ import sys
 try:
     from collections.abc import Iterable
 except ImportError:
-    from collections import Iterable
+    from collections import Iterable  # noqa
 
 PY3 = sys.version_info[0] == 3
 

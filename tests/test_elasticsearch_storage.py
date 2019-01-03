@@ -139,12 +139,10 @@ def force_bytes(text):
 def make_logger(sess):
     output = StringIO()
     sess.logger = Namespace(
-        warn=lambda text, **opts: output.write(u"%s %s\n" % (code, force_text(text), opts)),
         info=lambda text, **opts: output.write(force_text(text) + u'\n'),
         error=lambda text: output.write(force_text(text) + u'\n'),
     )
     sess.storage.logger = Namespace(
-        warn=lambda text, **opts: output.write(u"%s %s\n" % (code, force_text(text), opts)),
         info=lambda text, **opts: output.write(force_text(text) + u'\n'),
         error=lambda text: output.write(force_text(text) + u'\n'),
     )
