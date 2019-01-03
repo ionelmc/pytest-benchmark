@@ -11,7 +11,6 @@ import pytest
 from freezegun import freeze_time
 
 from pytest_benchmark import plugin
-from pytest_benchmark.compat import OPEN_MODE
 from pytest_benchmark.plugin import BenchmarkSession
 from pytest_benchmark.plugin import pytest_benchmark_compare_machine_info
 from pytest_benchmark.plugin import pytest_benchmark_generate_json
@@ -31,7 +30,7 @@ pytest_plugins = "pytester"
 THIS = py.path.local(__file__)
 STORAGE = THIS.dirpath(THIS.purebasename)
 
-JSON_DATA = json.load(STORAGE.listdir('0030_*.json')[0].open())
+JSON_DATA = json.loads(STORAGE.listdir('0030_*.json')[0].read_text(encoding='utf8'))
 JSON_DATA["machine_info"] = {'foo': 'bar'}
 JSON_DATA["commit_info"] = {'foo': 'bar'}
 list(normalize_stats(bench['stats']) for bench in JSON_DATA["benchmarks"])
@@ -149,13 +148,8 @@ def sess(request, name_format):
 
 def make_logger(sess):
     output = StringIO()
-    sess.logger = Namespace(
-        warn=lambda code, text, **opts: output.write(u"%s: %s %s\n" % (code, force_text(text), opts)),
-        info=lambda text, **opts: output.write(force_text(text) + u'\n'),
-        error=lambda text: output.write(force_text(text) + u'\n'),
-    )
-    sess.storage.logger = Namespace(
-        warn=lambda code, text, **opts: output.write(u"%s: %s %s\n" % (code, force_text(text), opts)),
+    sess.logger = sess.storage.logger = Namespace(
+        warn=lambda text, **opts: output.write(force_text(text) + u'\n'),
         info=lambda text, **opts: output.write(force_text(text) + u'\n'),
         error=lambda text: output.write(force_text(text) + u'\n'),
     )
@@ -325,7 +319,7 @@ def test_compare_1(sess, LineMatcher):
     ))
     print(output.getvalue())
     LineMatcher(output.getvalue().splitlines()).fnmatch_lines([
-        'BENCHMARK-C6: Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"}. {\'fslocation\': \'tests*test_storage\'}',
+        'Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"} (location: tests*test_storage).',
         'Comparing against benchmarks from: 0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted'
         '-changes.json',
         '',
@@ -355,7 +349,7 @@ def test_compare_2(sess, LineMatcher):
     ))
     print(output.getvalue())
     LineMatcher(output.getvalue().splitlines()).fnmatch_lines([
-        'BENCHMARK-C6: Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"}. {\'fslocation\': \'tests*test_storage\'}',
+        'Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"} (location: tests*test_storage).',
         'Comparing against benchmarks from: 0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes.json',
         '',
         '*------------------------------------------------------------------------ benchmark: 2 tests -----------------------------------------------------------------------*',
@@ -394,7 +388,7 @@ def test_save_with_name(sess, tmpdir, monkeypatch):
     files = list(Path(str(tmpdir)).rglob('*.json'))
     print(files)
     assert len(files) == 1
-    assert json.load(files[0].open(OPEN_MODE)) == JSON_DATA
+    assert json.loads(files[0].read_text(encoding='utf8')) == JSON_DATA
 
 
 @freeze_time("2015-08-15T00:04:18.687119")
@@ -408,7 +402,7 @@ def test_save_no_name(sess, tmpdir, monkeypatch):
     sess.handle_saving()
     files = list(Path(str(tmpdir)).rglob('*.json'))
     assert len(files) == 1
-    assert json.load(files[0].open(OPEN_MODE)) == JSON_DATA
+    assert json.loads(files[0].read_text(encoding='utf8')) == JSON_DATA
 
 
 @freeze_time("2015-08-15T00:04:18.687119")
@@ -424,7 +418,7 @@ def test_save_with_error(sess, tmpdir, monkeypatch):
     sess.handle_saving()
     files = list(Path(str(tmpdir)).rglob('*.json'))
     assert len(files) == 1
-    assert json.load(files[0].open(OPEN_MODE)) == {
+    assert json.loads(files[0].read_text(encoding='utf8')) == {
         'benchmarks': [],
         'commit_info': {'foo': 'bar'},
         'datetime': '2015-08-15T00:04:18.687119',
@@ -444,4 +438,4 @@ def test_autosave(sess, tmpdir, monkeypatch):
     sess.handle_saving()
     files = list(Path(str(tmpdir)).rglob('*.json'))
     assert len(files) == 1
-    assert json.load(files[0].open(OPEN_MODE)) == JSON_DATA
+    assert json.loads(files[0].read_text(encoding='utf8')) == JSON_DATA

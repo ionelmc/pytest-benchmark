@@ -1,7 +1,6 @@
 import json
 import os
 
-from ..compat import OPEN_MODE
 from ..stats import normalize_stats
 from ..utils import Path
 from ..utils import commonpath
@@ -105,14 +104,13 @@ class FileStorage(object):
             if file in self._cache:
                 data = self._cache[file]
             else:
-                with file.open(OPEN_MODE) as fh:
-                    try:
-                        data = json.load(fh)
-                        for bench in data["benchmarks"]:
-                            normalize_stats(bench["stats"])
-                    except Exception as exc:
-                        self.logger.warn("Failed to load {0}: {1}".format(file, exc))
-                        continue
+                try:
+                    data = json.loads(file.read_text(encoding='utf8'))
+                    for bench in data["benchmarks"]:
+                        normalize_stats(bench["stats"])
+                except Exception as exc:
+                    self.logger.warn("Failed to load {0}: {1}".format(file, exc))
+                    continue
                 self._cache[file] = data
             try:
                 relpath = file.relative_to(self.path)

@@ -1,10 +1,14 @@
 import sys
 
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
 PY3 = sys.version_info[0] == 3
 
 XRANGE = range if PY3 else xrange  # noqa
 INT = (int,) if PY3 else (int, long)  # noqa
-OPEN_MODE = "r" if PY3 else "rU"  # noqa
 
 if PY3:
     import builtins

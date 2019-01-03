@@ -21,7 +21,7 @@ def testdir(testdir, monkeypatch):
 def test_help(testdir):
     result = testdir.run('py.test-benchmark', '--help')
     result.stdout.fnmatch_lines([
-        "usage: py.test-benchmark [-h [COMMAND]] [--storage URI] [--verbose]",
+        "usage: py.test-benchmark *",
         "                         {help,list,compare} ...",
         "",
         "pytest_benchmark's management commands.",

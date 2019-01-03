@@ -12,7 +12,6 @@ import pytest
 from freezegun import freeze_time
 
 from pytest_benchmark import plugin
-from pytest_benchmark.compat import OPEN_MODE
 from pytest_benchmark.plugin import BenchmarkSession
 from pytest_benchmark.plugin import pytest_benchmark_compare_machine_info
 from pytest_benchmark.plugin import pytest_benchmark_generate_json
@@ -30,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 THIS = py.path.local(__file__)
 BENCHFILE = THIS.dirpath('test_storage/0030_5b78858eb718649a31fb93d8dc96ca2cee41a4cd_20150815_030419_uncommitted-changes.json')
-SAVE_DATA = json.load(BENCHFILE.open(OPEN_MODE))
+SAVE_DATA = json.loads(BENCHFILE.read_text(encoding='utf8'))
 SAVE_DATA["machine_info"] = {'foo': 'bar'}
 SAVE_DATA["commit_info"] = {'foo': 'bar'}
 
@@ -100,8 +99,7 @@ class MockSession(BenchmarkSession):
         self.columns = ['min', 'max', 'mean', 'stddev', 'median', 'iqr',
                         'outliers', 'rounds', 'iterations']
         self.benchmarks = []
-        with BENCHFILE.open('rU') as fh:
-            data = json.load(fh)
+        data = json.loads(BENCHFILE.read_text(encoding='utf8'))
         self.benchmarks.extend(
             Namespace(
                 as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench:
@@ -141,12 +139,12 @@ def force_bytes(text):
 def make_logger(sess):
     output = StringIO()
     sess.logger = Namespace(
-        warn=lambda code, text, **opts: output.write(u"%s: %s %s\n" % (code, force_text(text), opts)),
+        warn=lambda text, **opts: output.write(u"%s %s\n" % (code, force_text(text), opts)),
         info=lambda text, **opts: output.write(force_text(text) + u'\n'),
         error=lambda text: output.write(force_text(text) + u'\n'),
     )
     sess.storage.logger = Namespace(
-        warn=lambda code, text, **opts: output.write(u"%s: %s %s\n" % (code, force_text(text), opts)),
+        warn=lambda text, **opts: output.write(u"%s %s\n" % (code, force_text(text), opts)),
         info=lambda text, **opts: output.write(force_text(text) + u'\n'),
         error=lambda text: output.write(force_text(text) + u'\n'),
     )

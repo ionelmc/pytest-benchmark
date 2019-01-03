@@ -1,7 +1,6 @@
-from collections import Iterable
-
 import py
 
+from .compat import Iterable
 from .utils import TIME_UNITS
 from .utils import slugify
 
