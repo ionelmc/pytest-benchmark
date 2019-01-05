@@ -67,7 +67,7 @@ Overview
 
 .. end-badges
 
-A ``py.test`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen
+A ``pytest`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen
 timer. See calibration_ and FAQ_.
 
 * Free software: BSD 2-Clause License
@@ -101,8 +101,8 @@ But first, a prologue:
       or whole programs you will need to write a wrapper function.
     * In a test you can only benchmark one function. If you want to benchmark many functions write more tests or 
       use `parametrization <http://docs.pytest.org/en/latest/parametrize.html>`.
-    * To run the benchmarks you simply use `py.test` to run your "tests". The plugin will automatically do the 
-      benchmarking and generate a result table. Run ``py.test --help`` for more details.
+    * To run the benchmarks you simply use `pytest` to run your "tests". The plugin will automatically do the 
+      benchmarking and generate a result table. Run ``pytest --help`` for more details.
 
 This plugin provides a `benchmark` fixture. This fixture is a callable object that will benchmark any function passed
 to it.
@@ -175,12 +175,12 @@ Screenshots
 Normal run:
 
 .. image:: https://github.com/ionelmc/pytest-benchmark/raw/master/docs/screenshot.png
-    :alt: Screenshot of py.test summary
+    :alt: Screenshot of pytest summary
 
 Compare mode (``--benchmark-compare``):
 
 .. image:: https://github.com/ionelmc/pytest-benchmark/raw/master/docs/screenshot-compare.png
-    :alt: Screenshot of py.test summary in compare mode
+    :alt: Screenshot of pytest summary in compare mode
 
 Histogram (``--benchmark-histogram``):
 
