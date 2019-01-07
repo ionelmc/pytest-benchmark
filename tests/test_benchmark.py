@@ -934,7 +934,7 @@ def test_ok(benchmark, bad_fixture):
         "*====== ERRORS ======*",
         "*______ ERROR at setup of test_ok[[]a[]] ______*",
 
-        "request = <SubRequest 'bad_fixture' for <Function 'test_ok[a]'>>",
+        "request = <SubRequest 'bad_fixture' for <Function *test_ok*>>",
 
         "    @pytest.fixture(params=['a', 'b', 'c'])",
         "    def bad_fixture(request):",
@@ -944,7 +944,7 @@ def test_ok(benchmark, bad_fixture):
         "test_abort_broken.py:22: ImportError",
         "*______ ERROR at setup of test_ok[[]b[]] ______*",
 
-        "request = <SubRequest 'bad_fixture' for <Function 'test_ok[b]'>>",
+        "request = <SubRequest 'bad_fixture' for <Function *test_ok*>>",
 
         "    @pytest.fixture(params=['a', 'b', 'c'])",
         "    def bad_fixture(request):",
@@ -954,7 +954,7 @@ def test_ok(benchmark, bad_fixture):
         "test_abort_broken.py:22: ImportError",
         "*______ ERROR at setup of test_ok[[]c[]] ______*",
 
-        "request = <SubRequest 'bad_fixture' for <Function 'test_ok[c]'>>",
+        "request = <SubRequest 'bad_fixture' for <Function *test_ok*>>",
 
         "    @pytest.fixture(params=['a', 'b', 'c'])",
         "    def bad_fixture(request):",
