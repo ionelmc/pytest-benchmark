@@ -15,6 +15,7 @@ from pytest_benchmark.plugin import BenchmarkSession
 from pytest_benchmark.plugin import pytest_benchmark_compare_machine_info
 from pytest_benchmark.plugin import pytest_benchmark_generate_json
 from pytest_benchmark.plugin import pytest_benchmark_group_stats
+from pytest_benchmark.plugin import pytest_benchmark_scale_unit
 from pytest_benchmark.session import PerformanceRegression
 from pytest_benchmark.stats import normalize_stats
 from pytest_benchmark.storage.file import FileStorage
@@ -85,6 +86,7 @@ class MockSession(BenchmarkSession):
         self.cprofile_sort_by = 'cumtime'
         self.compare_fail = []
         self.config = Namespace(hook=Namespace(
+            pytest_benchmark_scale_unit=pytest_benchmark_scale_unit,
             pytest_benchmark_group_stats=pytest_benchmark_group_stats,
             pytest_benchmark_generate_machine_info=lambda **kwargs: {'foo': 'bar'},
             pytest_benchmark_update_machine_info=lambda **kwargs: None,
