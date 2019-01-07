@@ -84,7 +84,11 @@ def test_missing_scm_bins(scm, crazytestdir, monkeypatch):
     subprocess.check_call([scm, 'commit', '-m', 'asdf'])
     monkeypatch.setenv('PATH', os.getcwd())
     out = get_commit_info()
-    assert 'No such file or directory' in out['error']
+    assert (
+        'No such file or directory' in out['error'] or
+        'The system cannot find the file specified' in out['error'] or
+        'FileNotFoundError' in out['error']
+    )
 
 
 def test_get_branch_info(scm, testdir):

@@ -736,7 +736,9 @@ def test_simple(benchmark):
         benchmark_json = json.loads(testdir.tmpdir.join('benchmark.json').read())
         machine_info = benchmark_json["machine_info"]
 
-        assert sorted(machine_info["conftest_path"]) == sorted([
+        assert sorted(
+            i.replace('\\', '/') for i in machine_info["conftest_path"]
+        ) == sorted([
             "conftest.py",
             "test_module/conftest.py",
             "test_module/tests/conftest.py",
