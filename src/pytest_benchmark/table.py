@@ -5,21 +5,20 @@ import operator
 import sys
 from math import isinf
 
-from .utils import operations_unit
 from .utils import report_progress
-from .utils import time_unit
 
 NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
 ALIGNED_NUMBER_FMT = "{0:>{1},.4f}{2:<{3}}" if sys.version_info[:2] > (2, 6) else "{0:>{1}.4f}{2:<{3}}"
 
 
 class TableResults(object):
-    def __init__(self, columns, sort, histogram, name_format, logger):
+    def __init__(self, columns, sort, histogram, name_format, logger, scale_unit):
         self.columns = columns
         self.sort = sort
         self.histogram = histogram
         self.name_format = name_format
         self.logger = logger
+        self.scale_unit = scale_unit
 
     def display(self, tr, groups, progress_reporter=report_progress):
         tr.write_line("")
@@ -48,11 +47,10 @@ class TableResults(object):
                 worst[prop] = max(benchmark[prop] for _, benchmark in progress_reporter(
                     benchmarks, tr, "{line} ({pos}/{total})", line=line))
 
-            time_unit_key = self.sort
-            if self.sort in ("name", "fullname"):
-                time_unit_key = "min"
-            unit, adjustment = time_unit(best.get(self.sort, benchmarks[0][time_unit_key]))
-            ops_unit, ops_adjustment = operations_unit(worst.get('ops', benchmarks[0]['ops']))
+            unit, adjustment = self.scale_unit(unit='seconds', benchmarks=benchmarks, best=best, worst=worst,
+                                               sort=self.sort)
+            ops_unit, ops_adjustment = self.scale_unit(unit='operations', benchmarks=benchmarks, best=best, worst=worst,
+                                                       sort=self.sort)
             labels = {
                 "name": "Name (time in {0}s)".format(unit),
                 "min": "Min",

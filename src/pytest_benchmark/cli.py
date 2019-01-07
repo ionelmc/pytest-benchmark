@@ -1,4 +1,5 @@
 import argparse
+from functools import partial
 
 import py
 
@@ -116,19 +117,17 @@ def make_parser():
     return parser
 
 
-def load(storage, glob_or_file, group_by):
-    conftest = py.path.local('conftest.py')
-    if conftest.check():
-        conftest = conftest.pyimport()
-    else:
-        conftest = None
+class HookDispatch(object):
+    def __init__(self):
+        conftest_file = py.path.local('conftest.py')
+        if conftest_file.check():
+            self.conftest = conftest_file.pyimport()
+        else:
+            self.conftest = None
 
-    groups = getattr(conftest, 'pytest_benchmark_group_stats', plugin.pytest_benchmark_group_stats)(
-        benchmarks=storage.load_benchmarks(*glob_or_file),
-        group_by=group_by,
-        config=None,
-    )
-    return groups
+    def __getattr__(self, item):
+        default = getattr(plugin, item)
+        return getattr(self.conftest, item, default)
 
 
 def main():
@@ -137,15 +136,25 @@ def main():
     logger = Logger(args.verbose)
     storage = load_storage(args.storage, logger=logger, netrc=args.netrc)
 
+    hook = HookDispatch()
+
     if args.command == 'list':
         for file in storage.query():
             print(file)
     elif args.command == 'compare':
         results_table = TableResults(
-            args.columns, args.sort, first_or_value(args.histogram, False), NAME_FORMATTERS[args.name], logger
+            columns=args.columns,
+            sort=args.sort,
+            histogram=first_or_value(args.histogram, False),
+            name_format=NAME_FORMATTERS[args.name],
+            logger=logger,
+            scale_unit=partial(hook.pytest_benchmark_scale_unit, config=None)
         )
-        groups = load(storage, args.glob_or_file, args.group_by)
-
+        groups = hook.pytest_benchmark_group_stats(
+            benchmarks=storage.load_benchmarks(*args.glob_or_file),
+            group_by=args.group_by,
+            config=None,
+        )
         results_table.display(TerminalReporter(), groups, progress_reporter=report_noprogress)
         if args.csv:
             results_csv = CSVResults(args.columns, args.sort, logger)

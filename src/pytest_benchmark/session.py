@@ -1,6 +1,8 @@
 from __future__ import division
 from __future__ import print_function
 
+from functools import partial
+
 import pytest
 
 from .fixture import statistics
@@ -214,7 +216,8 @@ class BenchmarkSession(object):
             sort=self.sort,
             histogram=self.histogram,
             name_format=self.name_format,
-            logger=self.logger
+            logger=self.logger,
+            scale_unit=partial(self.config.hook.pytest_benchmark_scale_unit, config=self.config),
         )
         results_table.display(tr, self.groups)
         self.check_regressions()

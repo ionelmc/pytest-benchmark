@@ -1,3 +1,24 @@
+def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
+    """
+    To have custom time scaling do something like this:
+
+    .. sourcecode:: python
+
+        def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
+            if unit == 'seconds':
+                prefix = ''
+                scale = 1.0
+            elif unit == 'operations':
+                prefix = 'K'
+                scale = 0.001
+            else:
+                raise RuntimeError("Unexpected measurement unit %r" % unit)
+
+            return prefix, scale
+    """
+    pass
+
+
 def pytest_benchmark_generate_machine_info(config):
     """
     To completely replace the generated machine_info do something like this:
@@ -124,6 +145,7 @@ def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info
     pass
 
 
+pytest_benchmark_scale_unit.firstresult = True
 pytest_benchmark_generate_commit_info.firstresult = True
 pytest_benchmark_generate_json.firstresult = True
 pytest_benchmark_generate_machine_info.firstresult = True

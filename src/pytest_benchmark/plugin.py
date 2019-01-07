@@ -21,6 +21,7 @@ from .utils import format_dict
 from .utils import get_commit_info
 from .utils import get_current_time
 from .utils import get_tag
+from .utils import operations_unit
 from .utils import parse_columns
 from .utils import parse_compare_fail
 from .utils import parse_name_format
@@ -30,6 +31,7 @@ from .utils import parse_seconds
 from .utils import parse_sort
 from .utils import parse_timer
 from .utils import parse_warmup
+from .utils import time_unit
 
 
 def pytest_report_header(config):
@@ -330,6 +332,18 @@ def get_cpu_info():
     for key in ('vendor_id', 'hardware', 'brand'):
         info[key] = all_info.get(key, 'unknown')
     return info
+
+
+def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
+    if unit == 'seconds':
+        time_unit_key = sort
+        if sort in ("name", "fullname"):
+            time_unit_key = "min"
+        return time_unit(best.get(sort, benchmarks[0][time_unit_key]))
+    elif unit == 'operations':
+        return operations_unit(worst.get('ops', benchmarks[0]['ops']))
+    else:
+        raise RuntimeError("Unexpected measurement unit %r" % unit)
 
 
 def pytest_benchmark_generate_machine_info():
