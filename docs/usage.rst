@@ -171,6 +171,8 @@ Commandline options
                         contains slashes ('/') then directories will be
                         created. Default: 'benchmark_<date>_<time>'
 
+.. _comparison-cli:
+
 Comparison CLI
 --------------
 

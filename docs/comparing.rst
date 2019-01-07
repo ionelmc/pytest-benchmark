@@ -29,6 +29,14 @@ Examples:
 * ``--benchmark-compare-fail=min:5%`` will make the suite fail if ``Min`` is 5% slower for any test.
 * ``--benchmark-compare-fail=mean:0.001`` will make the suite fail if ``Mean`` is 0.001 seconds slower for any test.
 
+Comparing outside of pytest
+---------------------------
+
+There is a convenience CLI for listing/comparing past runs: ``pytest-benchmark`` (:ref:`comparison-cli`_).
+
+Example::
+
+    pytest-benchmark compare 0001 0002
 
 Plotting
 --------
