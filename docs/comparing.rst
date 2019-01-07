@@ -32,7 +32,7 @@ Examples:
 Comparing outside of pytest
 ---------------------------
 
-There is a convenience CLI for listing/comparing past runs: ``pytest-benchmark`` (:ref:`comparison-cli`_).
+There is a convenience CLI for listing/comparing past runs: ``pytest-benchmark`` (:ref:`comparison-cli`).
 
 Example::
 
