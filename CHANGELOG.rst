@@ -2,15 +2,50 @@
 Changelog
 =========
 
-3.1.2-dev
----------
+3.2.1 (2017-01-10)
+------------------
 
-* Add note to docs on placement of ``--benchmark-histogram`` option
-  (see `#110 <https://github.com/ionelmc/pytest-benchmark/pull/110>`_).
-* Fix misspelled unit (see
-  `#97 <https://github.com/ionelmc/pytest-benchmark/issues/97>`_).
-* Support simple ``trial`` x-axis histogram label (see
-  `#95 <https://github.com/ionelmc/pytest-benchmark/issues/95>`_).
+* Update changelog entries for `3.2.0`. I made the release for pytest-cov on the same day and thought I updated the
+  changelogs for both plugins. Alas, I only updated pytest-cov.
+* Add missing version constraint change. Now pytest >= 3.8 is required (due to pytest 4.1 support).
+* Fixed some CI/test issues.
+
+3.2.0 (2017-01-07)
+------------------
+
+* Added support for simple ``trial`` x-axis histogram label. Contributed by Ken Crowell in
+  `#95 <https://github.com/ionelmc/pytest-benchmark/pull/95>`_).
+* Added support for Pytest 3.3+, Contributed by Julien Nicoulaud in
+  `#103 <https://github.com/ionelmc/pytest-benchmark/pull/103>`_.
+* Added support for Pytest 4.0. Contributed by Pablo Aguiar in
+  `#129 <https://github.com/ionelmc/pytest-benchmark/pull/129>`_ and
+  `#130 <https://github.com/ionelmc/pytest-benchmark/pull/130>`_.
+* Added support for Pytest 4.1.
+* Various formatting, spelling and documentation fixes. Contributed by
+  Ken Crowell, Ofek Lev, Matthew Feickert, Jose Eduardo, Anton Lodder, Alexander Duryagin and Grygorii Iermolenko in
+  `#97 <https://github.com/ionelmc/pytest-benchmark/pull/97>`_,
+  `#97 <https://github.com/ionelmc/pytest-benchmark/pull/97>`_,
+  `#105 <https://github.com/ionelmc/pytest-benchmark/pull/105>`_,
+  `#110 <https://github.com/ionelmc/pytest-benchmark/pull/110>`_,
+  `#111 <https://github.com/ionelmc/pytest-benchmark/pull/111>`_,
+  `#115 <https://github.com/ionelmc/pytest-benchmark/pull/115>`_,
+  `#123 <https://github.com/ionelmc/pytest-benchmark/pull/123>`_,
+  `#131 <https://github.com/ionelmc/pytest-benchmark/pull/131>`_ and
+  `#140 <https://github.com/ionelmc/pytest-benchmark/pull/140>`_.
+* Fixed broken ``pytest_benchmark_update_machine_info`` hook. Contributed by Alex Ford in
+  `#109 <https://github.com/ionelmc/pytest-benchmark/pull/109>`_.
+* Fixed bogus xdist warning when using ``--benchmark-disable``. Contributed by Francesco Ballarin in
+  `#113 <https://github.com/ionelmc/pytest-benchmark/pull/113>`_.
+* Added support for pathlib2. Contributed by Lincoln de Sousa in
+  `#114 <https://github.com/ionelmc/pytest-benchmark/pull/114>`_.
+* Changed handling so you can use ``--benchmark-skip`` and ``--benchmark-only``, with the later having priority.
+  Contributed by Ofek Lev in
+  `#116 <https://github.com/ionelmc/pytest-benchmark/pull/116>`_.
+* Fixed various CI/testing issues.
+  Contributed by Stanislav Levin in
+  `#134 <https://github.com/ionelmc/pytest-benchmark/pull/134>`_,
+  `#136 <https://github.com/ionelmc/pytest-benchmark/pull/136>`_ and
+  `#138 <https://github.com/ionelmc/pytest-benchmark/pull/138>`_.
 
 3.1.1 (2017-07-26)
 ------------------
