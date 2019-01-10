@@ -67,7 +67,7 @@ setup(
         'pytest', 'benchmark',
     ],
     install_requires=[
-        'pytest>=3.6',
+        'pytest>=3.8',
         'py-cpuinfo',
     ],
     extras_require={
