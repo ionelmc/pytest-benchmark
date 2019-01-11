@@ -53,6 +53,10 @@ if __name__ == "__main__":
     tox_environments_by_python = defaultdict(list)
     for env in tox_environments:
         parts = env.split('-')
+        if "pytest40" in parts:
+            continue
+        if "pygal23" in parts:
+            continue
         tox_environments_by_python[(parts[0], parts[-1])].append(env)
     for name in os.listdir(join("ci", "templates")):
         with open(join(base_path, name), "w") as fh:
