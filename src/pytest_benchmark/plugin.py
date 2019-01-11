@@ -431,7 +431,7 @@ def pytest_runtest_setup(item):
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     outcome = yield
-    fixture = item.funcargs.get("benchmark")
+    fixture = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
     if fixture:
         fixture.skipped = outcome.get_result().outcome == 'skipped'
 

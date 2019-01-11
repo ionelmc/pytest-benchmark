@@ -2,12 +2,17 @@
 Changelog
 =========
 
+3.2.1 (2017-01-11)
+------------------
+
+* Added support for pytest items without funcargs. Fixes interoperability with other pytest plugins like pytest-flake8.
+
 3.2.1 (2017-01-10)
 ------------------
 
 * Updated changelog entries for 3.2.0. I made the release for pytest-cov on the same day and thought I updated the
   changelogs for both plugins. Alas, I only updated pytest-cov.
-* Add missing version constraint change. Now pytest >= 3.8 is required (due to pytest 4.1 support).
+* Added missing version constraint change. Now pytest >= 3.8 is required (due to pytest 4.1 support).
 * Fixed couple CI/test issues.
 * Fixed broken ``pytest_benchmark.__version__``.
 
