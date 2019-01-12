@@ -2,7 +2,7 @@
 Changelog
 =========
 
-3.2.1 (2017-01-11)
+3.2.2 (2017-01-12)
 ------------------
 
 * Added support for pytest items without funcargs. Fixes interoperability with other pytest plugins like pytest-flake8.
