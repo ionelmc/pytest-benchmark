@@ -889,6 +889,14 @@ def test_cprofile(testdir):
     ])
 
 
+def test_disabled_and_cprofile(testdir):
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest_subprocess('--benchmark-disable', '--benchmark-cprofile=cumtime', test)
+    result.stdout.fnmatch_lines([
+        "*==== 2 passed*",
+    ])
+
+
 def test_abort_broken(testdir):
     """
     Test that we don't benchmark code that raises exceptions.
