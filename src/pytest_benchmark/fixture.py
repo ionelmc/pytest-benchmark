@@ -62,6 +62,7 @@ class BenchmarkFixture(object):
         self._mode = None
         self.cprofile = cprofile
         self.cprofile_stats = None
+        self.stats = None
 
     @property
     def enabled(self):
