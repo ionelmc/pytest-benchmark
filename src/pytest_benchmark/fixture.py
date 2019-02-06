@@ -142,7 +142,7 @@ class BenchmarkFixture(object):
             raise
 
     def _raw(self, function_to_benchmark, *args, **kwargs):
-        if not self.disabled:
+        if self.enabled:
             runner = self._make_runner(function_to_benchmark, args, kwargs)
 
             duration, iterations, loops_range = self._calibrate_timer(runner)
@@ -164,7 +164,7 @@ class BenchmarkFixture(object):
             for _ in XRANGE(rounds):
                 stats.update(runner(loops_range))
             self._logger.debug("  Ran for %ss." % format_time(time.time() - run_start), yellow=True, bold=True)
-        if self.cprofile:
+        if self.enabled and self.cprofile:
             profile = cProfile.Profile()
             function_result = profile.runcall(function_to_benchmark, *args, **kwargs)
             self.stats.cprofile_stats = pstats.Stats(profile)
