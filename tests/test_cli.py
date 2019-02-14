@@ -195,7 +195,6 @@ def test_compare(testdir, name, name_pattern_generator):
         ""
     ])
     result.stdout.fnmatch_lines([
-        'Computing stats ...',
         '---*--- benchmark: 3 tests ---*---',
         'Name (time in ns) * Min * Max          ',
         '---*---',

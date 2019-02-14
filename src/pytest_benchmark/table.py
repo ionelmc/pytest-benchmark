@@ -11,6 +11,10 @@ NUMBER_FMT = "{0:,.4f}" if sys.version_info[:2] > (2, 6) else "{0:.4f}"
 ALIGNED_NUMBER_FMT = "{0:>{1},.4f}{2:<{3}}" if sys.version_info[:2] > (2, 6) else "{0:>{1}.4f}{2:<{3}}"
 
 
+def _progress_rewrite(progress_reporter, tr, msg):
+    next(progress_reporter([msg], tr, "{value}"))
+
+
 class TableResults(object):
     def __init__(self, columns, sort, histogram, name_format, logger, scale_unit):
         self.columns = columns
@@ -22,7 +26,7 @@ class TableResults(object):
 
     def display(self, tr, groups, progress_reporter=report_progress):
         tr.write_line("")
-        tr.rewrite("Computing stats ...", black=True, bold=True)
+        _progress_rewrite(progress_reporter, tr, "Computing stats ...")
         for line, (group, benchmarks) in progress_reporter(groups, tr, "Computing stats ... group {pos}/{total}"):
             benchmarks = sorted(benchmarks, key=operator.itemgetter(self.sort))
             for bench in benchmarks:
@@ -86,7 +90,7 @@ class TableResults(object):
                 )
                 for prop in self.columns
             )
-            tr.rewrite("")
+            _progress_rewrite(progress_reporter, tr, "")
             tr.write_line(
                 " benchmark{name}: {count} tests ".format(
                     count=len(benchmarks),
