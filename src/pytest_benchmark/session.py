@@ -15,10 +15,10 @@ from .utils import first_or_value
 from .utils import get_machine_id
 from .utils import load_storage
 from .utils import load_timer
+from .utils import report_noprogress
+from .utils import report_progress
 from .utils import safe_dumps
 from .utils import short_filename
-from .utils import report_progress
-from .utils import report_noprogress
 
 
 class PerformanceRegression(pytest.UsageError):
