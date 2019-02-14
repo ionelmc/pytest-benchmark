@@ -17,6 +17,8 @@ from .utils import load_storage
 from .utils import load_timer
 from .utils import safe_dumps
 from .utils import short_filename
+from .utils import report_progress
+from .utils import report_noprogress
 
 
 class PerformanceRegression(pytest.UsageError):
@@ -219,7 +221,8 @@ class BenchmarkSession(object):
             logger=self.logger,
             scale_unit=partial(self.config.hook.pytest_benchmark_scale_unit, config=self.config),
         )
-        results_table.display(tr, self.groups)
+        progress_reporter = report_progress if self.verbose else report_noprogress
+        results_table.display(tr, self.groups, progress_reporter=progress_reporter)
         self.check_regressions()
         self.display_cprofile(tr)
 
