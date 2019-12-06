@@ -1,4 +1,5 @@
 *.py[cod]
+__pycache__
 
 # C extensions
 *.so
@@ -21,6 +22,7 @@ lib
 lib64
 venv*/
 pyvenv*/
+pip-wheel-metadata/
 
 # Installer logs
 pip-log.txt

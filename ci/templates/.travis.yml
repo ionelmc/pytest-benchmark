@@ -1,55 +1,40 @@
 language: python
-sudo: false
-cache: pip
+dist: xenial
+cache: false
 env:
   global:
     - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
     - SEGFAULT_SIGNALS=all
-  matrix:
-    - TOXENV=check
-    - TOXENV=docs
 matrix:
   include:
-{%- for env in tox_environments %}{{ '' }}
-    - python: '{{ env.split("-")[0] if env.startswith("pypy") else "{0[2]}.{0[3]}".format(env) }}'
-{% if env.startswith('py37') %}
-      dist: xenial
-      sudo: required
-{% endif %}
+    - python: '3.6'
       env:
-        - TOXENV={{ env }}{% if 'cover' in env %},report,coveralls,codecov{% endif -%}
+        - TOXENV=check
+    - python: '3.6'
+      env:
+        - TOXENV=docs
+{%- for env in tox_environments %}{{ '' }}
+    - env:
+        - TOXENV={{ env }}{% if 'cover' in env %},codecov,coveralls{% endif %}
+{%- if env.startswith('pypy3') %}{{ '' }}
+        - TOXPYTHON=pypy3
+      python: 'pypy3'
+{%- elif env.startswith('pypy') %}{{ '' }}
+      python: 'pypy'
+{%- else %}{{ '' }}
+      python: '{{ '{0[2]}.{0[3]}'.format(env) }}'
+{%- endif %}
 {%- endfor %}{{ '' }}
 before_install:
   - python --version
   - uname -a
-  - lsb_release -a
+  - lsb_release -a || true
 install:
-  - pip install tox
+  - python -mpip install --progress-bar=off tox -rci/requirements.txt
   - virtualenv --version
   - easy_install --version
   - pip --version
   - tox --version
-  - |
-    set -ex
-    if [[ $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then
-        (cd $HOME
-         wget https://bitbucket.org/pypy/pypy/downloads/pypy2-v6.0.0-linux64.tar.bz2
-         tar xf pypy2-*.tar.bz2
-         pypy2-*/bin/pypy -m ensurepip
-         pypy2-*/bin/pypy -m pip install -U virtualenv)
-        export PATH=$(echo $HOME/pypy2-*/bin):$PATH
-        export TOXPYTHON=$(echo $HOME/pypy2-*/bin/pypy)
-    fi
-    if [[ $TRAVIS_PYTHON_VERSION == 'pypy3' ]]; then
-        (cd $HOME
-         wget https://bitbucket.org/pypy/pypy/downloads/pypy3-v6.0.0-linux64.tar.bz2
-         tar xf pypy3-*.tar.bz2
-         pypy3-*/bin/pypy3 -m ensurepip
-         pypy3-*/bin/pypy3 -m pip install -U virtualenv)
-        export PATH=$(echo $HOME/pypy3-*/bin):$PATH
-        export TOXPYTHON=$(echo $HOME/pypy3-*/bin/pypy3)
-    fi
-    set +x
 script:
   - tox -v
 after_failure:

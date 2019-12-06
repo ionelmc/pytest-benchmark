@@ -24,7 +24,7 @@ Overview
     :alt: Join the chat at https://gitter.im/ionelmc/pytest-benchmark
     :target: https://gitter.im/ionelmc/pytest-benchmark
 
-.. |travis| image:: https://travis-ci.org/ionelmc/pytest-benchmark.svg?branch=master
+.. |travis| image:: https://api.travis-ci.org/ionelmc/pytest-benchmark.svg?branch=master
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/ionelmc/pytest-benchmark
 
@@ -48,10 +48,6 @@ Overview
     :alt: PyPI Package latest release
     :target: https://pypi.org/project/pytest-benchmark
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/ionelmc/pytest-benchmark/v3.2.2.svg
-    :alt: Commits since latest release
-    :target: https://github.com/ionelmc/pytest-benchmark/compare/v3.2.2...master
-
 .. |wheel| image:: https://img.shields.io/pypi/wheel/pytest-benchmark.svg
     :alt: PyPI Wheel
     :target: https://pypi.org/project/pytest-benchmark
@@ -63,6 +59,11 @@ Overview
 .. |supported-implementations| image:: https://img.shields.io/pypi/implementation/pytest-benchmark.svg
     :alt: Supported implementations
     :target: https://pypi.org/project/pytest-benchmark
+
+.. |commits-since| image:: https://img.shields.io/github/commits-since/ionelmc/pytest-benchmark/v3.2.2.svg
+    :alt: Commits since latest release
+    :target: https://github.com/ionelmc/pytest-benchmark/compare/v3.2.2...master
+
 
 
 .. end-badges
