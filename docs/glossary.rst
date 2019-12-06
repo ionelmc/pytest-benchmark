@@ -14,8 +14,7 @@ Mean
 Median
     TODO
 IQR
-    InterQuertile Range. This is a different way to measure variance. Good explanation `here
-    <https://www.dataz.io/display/Public/2013/03/20/Describing+Data%3A+Why+median+and+IQR+are+often+better+than+mean+and+standard+deviation>`__
+    InterQuertile Range. This is a different way to measure variance.
 StdDev
     TODO: Standard Deviation
 Outliers

@@ -17,8 +17,7 @@ Why is my ``StdDev`` so high?
       GC overhead.
 
       If you cannot make your tests more predictable and remove overhead you should look at different stats like: IQR and
-      Median. IQR is often `better than StdDev
-      <https://www.dataz.io/display/Public/2013/03/20/Describing+Data%3A+Why+median+and+IQR+are+often+better+than+mean+and+standard+deviation>`_.
+      Median. IQR is often better than StdDev.
 
 My is my ``Min`` way lower than ``Q1-1.5IQR``?
     You may see this issue in the histogram plot. This is another instance of *bad isolation*.
