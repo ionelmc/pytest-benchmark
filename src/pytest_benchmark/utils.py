@@ -21,7 +21,8 @@ from os.path import exists
 from os.path import join
 from os.path import split
 
-from .compat import PY3, PY38
+from .compat import PY3
+from .compat import PY38
 
 # This is here (in the utils module) because it might be used by
 # various other modules.
