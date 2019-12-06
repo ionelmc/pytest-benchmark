@@ -2,6 +2,13 @@
 Changelog
 =========
 
+3.2.3 (2019-12-06)
+------------------
+
+* Fixed "already-imported" pytest warning. Contributed by Jonathan Simon Prates in 
+  `#151 <https://github.com/ionelmc/pytest-benchmark/pull/151>`_.
+* Fixed breakage that occurs when benchmark is disabled while using cprofile feature (by disabling cprofile too).
+
 3.2.2 (2017-01-12)
 ------------------
 
