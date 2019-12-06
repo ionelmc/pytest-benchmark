@@ -6,6 +6,7 @@ except ImportError:
     from collections import Iterable  # noqa
 
 PY3 = sys.version_info[0] == 3
+PY38 = PY3 and sys.version_info[1] >= 8
 
 XRANGE = range if PY3 else xrange  # noqa
 INT = (int,) if PY3 else (int, long)  # noqa

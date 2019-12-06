@@ -13,87 +13,35 @@ def test_help(testdir):
         "*", "*",
         "benchmark:",
         "  --benchmark-min-time=SECONDS",
-        "                        Minimum time per round in seconds. Default: '0.000005'",
+        "                        *Default: '0.000005'",
         "  --benchmark-max-time=SECONDS",
-        "                        Maximum run time per test - it will be repeated until",
-        "                        this total time is reached. It may be exceeded if test",
-        "                        function is very slow or --benchmark-min-rounds is",
-        "                        large (it takes precedence). Default: '1.0'",
+        "                        *Default: '1.0'",
         "  --benchmark-min-rounds=NUM",
-        "                        Minimum rounds, even if total time would exceed",
-        "                        `--max-time`. Default: 5",
+        "                        *Default: 5",
         "  --benchmark-timer=FUNC",
-        "                        Timer to use when measuring time. Default:*",
         "  --benchmark-calibration-precision=NUM",
-        "                        Precision to use when calibrating number of",
-        "                        iterations. Precision of 10 will make the timer look",
-        "                        10 times more accurate, at a cost of less precise",
-        "                        measure of deviations. Default: 10",
+        "                        *Default: 10",
         "  --benchmark-warmup=[KIND]",
-        "                        Activates warmup. Will run the test function up to",
-        "                        number of times in the calibration phase. See",
-        "                        `--benchmark-warmup-iterations`. Note: Even the warmup",
-        "                        phase obeys --benchmark-max-time. Available KIND:",
-        "                        'auto', 'off', 'on'. Default: 'auto' (automatically",
-        "                        activate on PyPy).",
         "  --benchmark-warmup-iterations=NUM",
-        "                        Max number of iterations to run in the warmup phase.",
-        "                        Default: 100000",
+        "                        *Default: 100000",
         "  --benchmark-disable-gc",
-        "                        Disable GC during benchmarks.",
-        "  --benchmark-skip      Skip running any tests that contain benchmarks.",
-        "  --benchmark-only      Only run benchmarks. This overrides --benchmark-skip.",
+        "  --benchmark-skip      *",
+        "  --benchmark-only      *",
         "  --benchmark-save=NAME",
-        "                        Save the current run into 'STORAGE-",
-        "                        PATH/counter_NAME.json'.",
-        "  --benchmark-autosave  Autosave the current run into 'STORAGE-",
-        "                        PATH/counter*.json",
+        "  --benchmark-autosave  *",
         "  --benchmark-save-data",
-        "                        Use this to make --benchmark-save and --benchmark-",
-        "                        autosave include all the timing data, not just the",
-        "                        stats.",
         "  --benchmark-json=PATH",
-        "                        Dump a JSON report into PATH. Note that this will",
-        "                        include the complete data (all the timings, not just",
-        "                        the stats).",
         "  --benchmark-compare=[NUM|_ID]",
-        "                        Compare the current run against run NUM (or prefix of",
-        "                        _id in elasticsearch) or the latest saved run if",
-        "                        unspecified.",
         "  --benchmark-compare-fail=EXPR?[[]EXPR?...[]]",
-        "                        Fail test if performance regresses according to given",
-        "                        EXPR (eg: min:5% or mean:0.001 for number of seconds).",
-        "                        Can be used multiple times.",
         "  --benchmark-cprofile=COLUMN",
-        "                        If specified measure one run with cProfile and stores",
-        "                        25 top functions. Argument is a column to sort by.",
-        "                        Available columns: 'ncallls_recursion', 'ncalls',",
-        "                        'tottime', 'tottime_per', 'cumtime', 'cumtime_per',",
-        "                        'function_name'.",
         "  --benchmark-storage=URI",
-        "                        Specify a path to store the runs as uri in form",
-        "                        file://path or elasticsearch+http[s]://host1,host2/[in",
-        "                        dex/doctype?project_name=Project] (when --benchmark-",
-        "                        save or --benchmark-autosave are used). For backwards",
-        "                        compatibility unexpected values are converted to",
-        "                        file://<value>. Default: 'file://./.benchmarks'.",
-        "  --benchmark-verbose   Dump diagnostic and progress information.",
-        "  --benchmark-sort=COL  Column to sort on. Can be one of: 'min', 'max',",
-        "                        'mean', 'stddev', 'name', 'fullname'. Default: 'min'",
+        "                        *Default: 'file://./.benchmarks'.",
+        "  --benchmark-verbose   *",
+        "  --benchmark-sort=COL  *",
         "  --benchmark-group-by=LABEL",
-        "                        How to group tests. Can be one of: 'group', 'name',",
-        "                        'fullname', 'func', 'fullfunc', 'param' or",
-        "                        'param:NAME', where NAME is the name passed to",
-        "                        @pytest.parametrize. Default: 'group'",
+        "                        *Default: 'group'",
         "  --benchmark-columns=LABELS",
-        "                        Comma-separated list of columns to show in the result",
-        "                        table. Default: 'min, max, mean, stddev, median, iqr,",
-        "                        outliers, ops, rounds, iterations'",
         "  --benchmark-histogram=[FILENAME-PREFIX]",
-        "                        Plot graphs of min/max/avg/stddev over time in",
-        "                        FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX",
-        "                        contains slashes ('/') then directories will be",
-        "                        created. Default: '*'",
         "*",
     ])
 
@@ -138,7 +86,7 @@ def test_xfast(benchmark):
         "*",
         "* benchmark 'A': 2 tests *",
         "*",
-        "*====== 5 passed* seconds ======*",
+        "*====== 5 passed * ======*",
     ])
 
 
@@ -255,7 +203,7 @@ def test_group_by_func(testdir):
         'test_b[[]*[]]             *',
         '----------------------*',
         '*', '*',
-        '============* 8 passed* seconds ============*',
+        '============* 8 passed * ============*',
     ])
 
 
@@ -296,7 +244,7 @@ def test_group_by_fullfunc(testdir):
         '',
         'Legend:',
         '  Outliers: 1 Standard Deviation from M*',
-        '============* 8 passed* seconds ============*',
+        '============* 8 passed * ============*',
     ])
 
 
@@ -328,7 +276,7 @@ def test_group_by_param_all(testdir):
         'Legend:',
         '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '
         'Quartile.',
-        '============* 8 passed* seconds ============*',
+        '============* 8 passed * ============*',
     ])
 
 
@@ -361,7 +309,7 @@ def test_group_by_param_select(testdir):
         'Legend:',
         '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '
         'Quartile.',
-        '============* 8 passed* seconds ============*',
+        '============* 8 passed * ============*',
     ])
 
 
@@ -404,7 +352,7 @@ def test_group_by_param_select_multiple(testdir):
         'Legend:',
         '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd '
         'Quartile.',
-        '============* 8 passed* seconds ============*',
+        '============* 8 passed * ============*',
     ])
 
 
@@ -422,7 +370,7 @@ def test_group_by_fullname(testdir):
         "* benchmark 'test_y.py::test_a[[]1[]]': 1 tests *",
         "* benchmark 'test_y.py::test_b[[]0[]]': 1 tests *",
         "* benchmark 'test_y.py::test_b[[]1[]]': 1 tests *",
-        '============* 8 passed* seconds ============*',
+        '============* 8 passed * ============*',
     ])
 
 
@@ -455,7 +403,7 @@ def test_only_override_skip(testdir):
         "test_fast          *",
         "test_slow          *",
         "------*",
-        "*====== 2 passed* seconds ======*",
+        "*====== 2 passed * ======*",
     ])
 
 
@@ -481,7 +429,7 @@ def test_max_time_min_rounds(testdir):
         "test_fast          * 1  *",
         "test_slow          * 1  *",
         "------*",
-        "*====== 3 passed* seconds ======*",
+        "*====== 3 passed * ======*",
     ])
 
 
@@ -497,7 +445,7 @@ def test_max_time(testdir):
         "test_fast          * 5  *",
         "test_slow          * 5  *",
         "------*",
-        "*====== 3 passed* seconds ======*",
+        "*====== 3 passed * ======*",
     ])
 
 
@@ -505,7 +453,7 @@ def test_bogus_max_time(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-max-time=bogus', test)
     result.stderr.fnmatch_lines([
-        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*usage: *",
         "*py*: error: argument --benchmark-max-time: Invalid decimal value 'bogus': InvalidOperation*",
     ])
 
@@ -524,7 +472,7 @@ def test_bad_save(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-save=asd:f?', test)
     result.stderr.fnmatch_lines([
-        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*usage: *",
         "*py*: error: argument --benchmark-save: Must not contain any of these characters: /:*?<>|\\ (it has ':?')",
     ])
 
@@ -533,7 +481,7 @@ def test_bad_save_2(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-save=', test)
     result.stderr.fnmatch_lines([
-        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*usage: *",
         "*py*: error: argument --benchmark-save: Can't be empty.",
     ])
 
@@ -542,7 +490,7 @@ def test_bad_compare_fail(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-compare-fail=?', test)
     result.stderr.fnmatch_lines([
-        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*usage: *",
         "*py*: error: argument --benchmark-compare-fail: Could not parse value: '?'.",
     ])
 
@@ -551,7 +499,7 @@ def test_bad_rounds(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-min-rounds=asd', test)
     result.stderr.fnmatch_lines([
-        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*usage: *",
         "*py*: error: argument --benchmark-min-rounds: invalid literal for int() with base 10: 'asd'",
     ])
 
@@ -560,7 +508,7 @@ def test_bad_rounds_2(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-min-rounds=0', test)
     result.stderr.fnmatch_lines([
-        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*usage: *",
         "*py*: error: argument --benchmark-min-rounds: Value for --benchmark-rounds must be at least 1.",
     ])
 
@@ -775,7 +723,7 @@ def test_bogus_min_time(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-min-time=bogus', test)
     result.stderr.fnmatch_lines([
-        "usage: py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*usage: *",
         "py*: error: argument --benchmark-min-time: Invalid decimal value 'bogus': InvalidOperation*",
     ])
 
@@ -792,7 +740,7 @@ def test_disable_gc(testdir):
         "test_fast          *",
         "test_slow          *",
         "------*",
-        "*====== 2 passed* seconds ======*",
+        "*====== 2 passed * ======*",
     ])
 
 
@@ -808,7 +756,7 @@ def test_custom_timer(testdir):
         "test_fast          *",
         "test_slow          *",
         "------*",
-        "*====== 2 passed* seconds ======*",
+        "*====== 2 passed * ======*",
     ])
 
 
@@ -816,7 +764,7 @@ def test_bogus_timer(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-timer=bogus', test)
     result.stderr.fnmatch_lines([
-        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*usage: *",
         "*py*: error: argument --benchmark-timer: Value for --benchmark-timer must be in dotted form. Eg: "
         "'module.attr'.",
     ])
@@ -834,7 +782,7 @@ def test_sort_by_mean(testdir):
         "test_fast          *",
         "test_slow          *",
         "------*",
-        "*====== 2 passed* seconds ======*",
+        "*====== 2 passed * ======*",
     ])
 
 
@@ -842,7 +790,7 @@ def test_bogus_sort(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-sort=bogus', test)
     result.stderr.fnmatch_lines([
-        "usage: *py* [[]options[]] [[]file_or_dir[]] [[]file_or_dir[]] [[]...[]]",
+        "*usage: *",
         "*py*: error: argument --benchmark-sort: Unacceptable value: 'bogus'. Value for --benchmark-sort must be one "
         "of: 'min', 'max', 'mean', 'stddev', 'name', 'fullname'."
     ])
@@ -978,8 +926,8 @@ def test_ok(benchmark, bad_fixture):
         "benchmark = <pytest_benchmark.*.BenchmarkFixture object at *>",
 
         "    def test_bad(benchmark):",
-        ">       @benchmark",
-        "        def result():",
+        "?       @benchmark",
+        "?       def result():",
 
         "test_abort_broken.py:*",
         "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _*",
@@ -1013,7 +961,7 @@ def test_ok(benchmark, bad_fixture):
         "test_bad2           *",
         "------*",
 
-        "*====== 2 failed*, 3 error* seconds ======*",
+        "*====== 2 failed*, 3 error* ======*",
     ])
 
 
@@ -1069,7 +1017,7 @@ def test_basic(testdir):
         "test_*         *",
         "------*",
         "",
-        "*====== 5 passed* seconds ======*",
+        "*====== 5 passed * ======*",
     ])
 
 
@@ -1083,7 +1031,7 @@ def test_skip(testdir):
         "test_skip.py::test_slower SKIPPED*",
         "test_skip.py::test_xfast SKIPPED*",
         "test_skip.py::test_fast SKIPPED*",
-        "*====== 1 passed, 4 skipped* seconds ======*",
+        "*====== 1 passed, 4 skipped * ======*",
     ])
 
 
@@ -1097,7 +1045,7 @@ def test_disable(testdir):
         "test_disable.py::test_slower PASSED*",
         "test_disable.py::test_xfast PASSED*",
         "test_disable.py::test_fast PASSED*",
-        "*====== 5 passed* seconds ======*",
+        "*====== 5 passed * ======*",
     ])
 
 
@@ -1112,7 +1060,7 @@ def test_mark_selection(testdir):
         "------*",
         "test_xfast       *",
         "------*",
-        "*====== 1 passed, 4 deselected* seconds ======*",
+        "*====== 1 passed, 4 deselected * ======*",
     ])
 
 
@@ -1134,7 +1082,7 @@ def test_only_benchmarks(testdir):
         "test_*         *",
         "test_*         *",
         "------*",
-        "*====== 4 passed, 1 skipped* seconds ======*",
+        "*====== 4 passed, 1 skipped * ======*",
     ])
 
 

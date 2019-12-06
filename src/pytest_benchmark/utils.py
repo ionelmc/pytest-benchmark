@@ -21,7 +21,7 @@ from os.path import exists
 from os.path import join
 from os.path import split
 
-from .compat import PY3
+from .compat import PY3, PY38
 
 # This is here (in the utils module) because it might be used by
 # various other modules.
@@ -522,6 +522,7 @@ def funcname(f):
         return str(f)
 
 
+# from: https://bitbucket.org/antocuni/pypytools/src/tip/pypytools/util.py?at=default
 def clonefunc(f):
     """Deep clone the given function to create a new one.
 
@@ -533,27 +534,23 @@ def clonefunc(f):
 
     Use it with caution: if abused, this might easily produce an explosion of
     produced assembler.
-
-    from: https://bitbucket.org/antocuni/pypytools/src/tip/pypytools/util.py?at=default
     """
-
     # first of all, we clone the code object
-    try:
-        co = f.__code__
-        if PY3:
-            co2 = types.CodeType(co.co_argcount, co.co_kwonlyargcount,
-                                 co.co_nlocals, co.co_stacksize, co.co_flags, co.co_code,
-                                 co.co_consts, co.co_names, co.co_varnames, co.co_filename, co.co_name,
-                                 co.co_firstlineno, co.co_lnotab, co.co_freevars, co.co_cellvars)
-        else:
-            co2 = types.CodeType(co.co_argcount, co.co_nlocals, co.co_stacksize, co.co_flags, co.co_code,
-                                 co.co_consts, co.co_names, co.co_varnames, co.co_filename, co.co_name,
-                                 co.co_firstlineno, co.co_lnotab, co.co_freevars, co.co_cellvars)
-        #
-        # then, we clone the function itself, using the new co2
-        return types.FunctionType(co2, f.__globals__, f.__name__, f.__defaults__, f.__closure__)
-    except AttributeError:
+    if not hasattr(f, '__code__'):
         return f
+    co = f.__code__
+    args = [co.co_argcount, co.co_nlocals, co.co_stacksize, co.co_flags, co.co_code,
+            co.co_consts, co.co_names, co.co_varnames, co.co_filename, co.co_name,
+            co.co_firstlineno, co.co_lnotab, co.co_freevars, co.co_cellvars]
+    if PY38:
+        args.insert(1, co.co_posonlyargcount)
+    if PY3:
+        args.insert(1, co.co_kwonlyargcount)
+    co2 = types.CodeType(*args)
+    #
+    # then, we clone the function itself, using the new co2
+    f2 = types.FunctionType(co2, f.__globals__, f.__name__, f.__defaults__, f.__closure__)
+    return f2
 
 
 def format_dict(obj):

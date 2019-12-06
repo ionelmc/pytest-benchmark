@@ -9,6 +9,7 @@ Changelog
   `#151 <https://github.com/ionelmc/pytest-benchmark/pull/151>`_.
 * Fixed breakage that occurs when benchmark is disabled while using cprofile feature (by disabling cprofile too).
 * Dropped Python 3.4 from the test suite and updated test deps.
+* Fixed ``pytest_benchmark.utils.clonefunc`` to work on Python 3.8.
 
 3.2.2 (2017-01-12)
 ------------------
