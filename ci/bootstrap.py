@@ -69,6 +69,7 @@ def main():
         for line in subprocess.check_output([sys.executable, '-m', 'tox', '--listenvs'], universal_newlines=True).splitlines()
     ]
     tox_environments = [line for line in tox_environments if line.startswith('py')]
+    tox_environments.sort()
 
     for name in os.listdir(join("ci", "templates")):
         with open(join(base_path, name), "w") as fh:
