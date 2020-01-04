@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import os
 import subprocess
 import sys
+from collections import defaultdict
 from os.path import abspath
 from os.path import dirname
 from os.path import exists
@@ -47,6 +48,7 @@ def exec_in_env():
     print("+ exec", python_executable, __file__, "--no-env")
     os.execv(python_executable, [python_executable, __file__, "--no-env"])
 
+
 def main():
     import jinja2
 
@@ -70,12 +72,17 @@ def main():
     ]
     tox_environments = [line for line in tox_environments if line.startswith('py')]
     tox_environments.sort()
+    tox_environments_by_python = defaultdict(list)
+    for env in tox_environments:
+        parts = env.split('-')
+        tox_environments_by_python['{}-{}'.format(parts[0], parts[-1])].append(env)
 
     for name in os.listdir(join("ci", "templates")):
         with open(join(base_path, name), "w") as fh:
-            fh.write(jinja.get_template(name).render(tox_environments=tox_environments))
+            fh.write(jinja.get_template(name).render(tox_environments=tox_environments,
+                                                     tox_environments_by_python=tox_environments_by_python))
         print("Wrote {}".format(name))
-    print("DONE: {} envs.".format(len(tox_environments)))
+    print("DONE: {} envs (by python: {}).".format(len(tox_environments), len(tox_environments_by_python)))
 
 
 if __name__ == "__main__":
@@ -87,4 +94,3 @@ if __name__ == "__main__":
     else:
         print("Unexpected arguments {0}".format(args), file=sys.stderr)
         sys.exit(1)
-

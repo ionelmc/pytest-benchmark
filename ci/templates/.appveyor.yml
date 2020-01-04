@@ -10,9 +10,9 @@ environment:
       PYTHON_HOME: C:\Python36
       PYTHON_VERSION: '3.6'
       PYTHON_ARCH: '32'
-{% for env in tox_environments %}
+{% for env, tox_environments in tox_environments_by_python.items() %}
 {% if env.startswith(('py2', 'py3')) %}
-    - TOXENV: {{ env }}{% if env.endswith('-cover') %},codecov,coveralls{% endif %}{{ "" }}
+    - TOXENV: {{ tox_environments|join(',') }}{% if env.endswith('-cover') %},codecov,coveralls{% endif %}{{ "" }}
       TOXPYTHON: C:\Python{{ env[2:4] }}\python.exe
       PYTHON_HOME: C:\Python{{ env[2:4] }}
       PYTHON_VERSION: '{{ env[2] }}.{{ env[3] }}'

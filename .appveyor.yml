@@ -10,537 +10,113 @@ environment:
       PYTHON_HOME: C:\Python36
       PYTHON_VERSION: '3.6'
       PYTHON_ARCH: '32'
-    - TOXENV: py27-pytest46-pygal23-nodist-cover,codecov,coveralls
+    - TOXENV: py27-pytest46-pygal23-nodist-cover,py27-pytest46-pygal23-xdist-cover,py27-pytest46-pygal24-nodist-cover,py27-pytest46-pygal24-xdist-cover,codecov,coveralls
       TOXPYTHON: C:\Python27\python.exe
       PYTHON_HOME: C:\Python27
       PYTHON_VERSION: '2.7'
       PYTHON_ARCH: '32'
-    - TOXENV: py27-pytest46-pygal23-nodist-cover,codecov,coveralls
+    - TOXENV: py27-cover,codecov,coveralls
       TOXPYTHON: C:\Python27-x64\python.exe
       PYTHON_HOME: C:\Python27-x64
       PYTHON_VERSION: '2.7'
       PYTHON_ARCH: '64'
       WINDOWS_SDK_VERSION: v7.0
-    - TOXENV: py27-pytest46-pygal23-nodist-nocov
+    - TOXENV: py27-pytest46-pygal23-nodist-nocov,py27-pytest46-pygal23-xdist-nocov,py27-pytest46-pygal24-nodist-nocov,py27-pytest46-pygal24-xdist-nocov
       TOXPYTHON: C:\Python27\python.exe
       PYTHON_HOME: C:\Python27
       PYTHON_VERSION: '2.7'
       PYTHON_ARCH: '32'
       WHEEL_PATH: .tox/dist
-    - TOXENV: py27-pytest46-pygal23-nodist-nocov
-      TOXPYTHON: C:\Python27-x64\python.exe
-      PYTHON_HOME: C:\Python27-x64
-      PYTHON_VERSION: '2.7'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-      WINDOWS_SDK_VERSION: v7.0
-    - TOXENV: py27-pytest46-pygal23-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python27\python.exe
-      PYTHON_HOME: C:\Python27
-      PYTHON_VERSION: '2.7'
-      PYTHON_ARCH: '32'
-    - TOXENV: py27-pytest46-pygal23-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python27-x64\python.exe
-      PYTHON_HOME: C:\Python27-x64
-      PYTHON_VERSION: '2.7'
-      PYTHON_ARCH: '64'
-      WINDOWS_SDK_VERSION: v7.0
-    - TOXENV: py27-pytest46-pygal23-xdist-nocov
-      TOXPYTHON: C:\Python27\python.exe
-      PYTHON_HOME: C:\Python27
-      PYTHON_VERSION: '2.7'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py27-pytest46-pygal23-xdist-nocov
+    - TOXENV: py27-nocov
       TOXPYTHON: C:\Python27-x64\python.exe
       PYTHON_HOME: C:\Python27-x64
       PYTHON_VERSION: '2.7'
       PYTHON_ARCH: '64'
       WHEEL_PATH: .tox/dist
       WINDOWS_SDK_VERSION: v7.0
-    - TOXENV: py27-pytest46-pygal24-nodist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python27\python.exe
-      PYTHON_HOME: C:\Python27
-      PYTHON_VERSION: '2.7'
-      PYTHON_ARCH: '32'
-    - TOXENV: py27-pytest46-pygal24-nodist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python27-x64\python.exe
-      PYTHON_HOME: C:\Python27-x64
-      PYTHON_VERSION: '2.7'
-      PYTHON_ARCH: '64'
-      WINDOWS_SDK_VERSION: v7.0
-    - TOXENV: py27-pytest46-pygal24-nodist-nocov
-      TOXPYTHON: C:\Python27\python.exe
-      PYTHON_HOME: C:\Python27
-      PYTHON_VERSION: '2.7'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py27-pytest46-pygal24-nodist-nocov
-      TOXPYTHON: C:\Python27-x64\python.exe
-      PYTHON_HOME: C:\Python27-x64
-      PYTHON_VERSION: '2.7'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-      WINDOWS_SDK_VERSION: v7.0
-    - TOXENV: py27-pytest46-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python27\python.exe
-      PYTHON_HOME: C:\Python27
-      PYTHON_VERSION: '2.7'
-      PYTHON_ARCH: '32'
-    - TOXENV: py27-pytest46-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python27-x64\python.exe
-      PYTHON_HOME: C:\Python27-x64
-      PYTHON_VERSION: '2.7'
-      PYTHON_ARCH: '64'
-      WINDOWS_SDK_VERSION: v7.0
-    - TOXENV: py27-pytest46-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python27\python.exe
-      PYTHON_HOME: C:\Python27
-      PYTHON_VERSION: '2.7'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py27-pytest46-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python27-x64\python.exe
-      PYTHON_HOME: C:\Python27-x64
-      PYTHON_VERSION: '2.7'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-      WINDOWS_SDK_VERSION: v7.0
-    - TOXENV: py35-pytest46-pygal24-nodist-cover,codecov,coveralls
+    - TOXENV: py35-pytest46-pygal24-nodist-cover,py35-pytest46-pygal24-xdist-cover,py35-pytest5-pygal24-nodist-cover,py35-pytest5-pygal24-xdist-cover,codecov,coveralls
       TOXPYTHON: C:\Python35\python.exe
       PYTHON_HOME: C:\Python35
       PYTHON_VERSION: '3.5'
       PYTHON_ARCH: '32'
-    - TOXENV: py35-pytest46-pygal24-nodist-cover,codecov,coveralls
+    - TOXENV: py35-cover,codecov,coveralls
       TOXPYTHON: C:\Python35-x64\python.exe
       PYTHON_HOME: C:\Python35-x64
       PYTHON_VERSION: '3.5'
       PYTHON_ARCH: '64'
-    - TOXENV: py35-pytest46-pygal24-nodist-nocov
+    - TOXENV: py35-pytest46-pygal24-nodist-nocov,py35-pytest46-pygal24-xdist-nocov,py35-pytest5-pygal24-nodist-nocov,py35-pytest5-pygal24-xdist-nocov
       TOXPYTHON: C:\Python35\python.exe
       PYTHON_HOME: C:\Python35
       PYTHON_VERSION: '3.5'
       PYTHON_ARCH: '32'
       WHEEL_PATH: .tox/dist
-    - TOXENV: py35-pytest46-pygal24-nodist-nocov
+    - TOXENV: py35-nocov
       TOXPYTHON: C:\Python35-x64\python.exe
       PYTHON_HOME: C:\Python35-x64
       PYTHON_VERSION: '3.5'
       PYTHON_ARCH: '64'
       WHEEL_PATH: .tox/dist
-    - TOXENV: py35-pytest46-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python35\python.exe
-      PYTHON_HOME: C:\Python35
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '32'
-    - TOXENV: py35-pytest46-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python35-x64\python.exe
-      PYTHON_HOME: C:\Python35-x64
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '64'
-    - TOXENV: py35-pytest46-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python35\python.exe
-      PYTHON_HOME: C:\Python35
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py35-pytest46-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python35-x64\python.exe
-      PYTHON_HOME: C:\Python35-x64
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py35-pytest5-pygal24-nodist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python35\python.exe
-      PYTHON_HOME: C:\Python35
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '32'
-    - TOXENV: py35-pytest5-pygal24-nodist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python35-x64\python.exe
-      PYTHON_HOME: C:\Python35-x64
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '64'
-    - TOXENV: py35-pytest5-pygal24-nodist-nocov
-      TOXPYTHON: C:\Python35\python.exe
-      PYTHON_HOME: C:\Python35
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py35-pytest5-pygal24-nodist-nocov
-      TOXPYTHON: C:\Python35-x64\python.exe
-      PYTHON_HOME: C:\Python35-x64
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py35-pytest5-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python35\python.exe
-      PYTHON_HOME: C:\Python35
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '32'
-    - TOXENV: py35-pytest5-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python35-x64\python.exe
-      PYTHON_HOME: C:\Python35-x64
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '64'
-    - TOXENV: py35-pytest5-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python35\python.exe
-      PYTHON_HOME: C:\Python35
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py35-pytest5-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python35-x64\python.exe
-      PYTHON_HOME: C:\Python35-x64
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py36-pytest46-pygal24-nodist-cover,codecov,coveralls
+    - TOXENV: py36-pytest46-pygal24-nodist-cover,py36-pytest46-pygal24-xdist-cover,py36-pytest5-pygal24-nodist-cover,py36-pytest5-pygal24-xdist-cover,codecov,coveralls
       TOXPYTHON: C:\Python36\python.exe
       PYTHON_HOME: C:\Python36
       PYTHON_VERSION: '3.6'
       PYTHON_ARCH: '32'
-    - TOXENV: py36-pytest46-pygal24-nodist-cover,codecov,coveralls
+    - TOXENV: py36-cover,codecov,coveralls
       TOXPYTHON: C:\Python36-x64\python.exe
       PYTHON_HOME: C:\Python36-x64
       PYTHON_VERSION: '3.6'
       PYTHON_ARCH: '64'
-    - TOXENV: py36-pytest46-pygal24-nodist-nocov
+    - TOXENV: py36-pytest46-pygal24-nodist-nocov,py36-pytest46-pygal24-xdist-nocov,py36-pytest5-pygal24-nodist-nocov,py36-pytest5-pygal24-xdist-nocov
       TOXPYTHON: C:\Python36\python.exe
       PYTHON_HOME: C:\Python36
       PYTHON_VERSION: '3.6'
       PYTHON_ARCH: '32'
       WHEEL_PATH: .tox/dist
-    - TOXENV: py36-pytest46-pygal24-nodist-nocov
+    - TOXENV: py36-nocov
       TOXPYTHON: C:\Python36-x64\python.exe
       PYTHON_HOME: C:\Python36-x64
       PYTHON_VERSION: '3.6'
       PYTHON_ARCH: '64'
       WHEEL_PATH: .tox/dist
-    - TOXENV: py36-pytest46-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python36\python.exe
-      PYTHON_HOME: C:\Python36
-      PYTHON_VERSION: '3.6'
-      PYTHON_ARCH: '32'
-    - TOXENV: py36-pytest46-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python36-x64\python.exe
-      PYTHON_HOME: C:\Python36-x64
-      PYTHON_VERSION: '3.6'
-      PYTHON_ARCH: '64'
-    - TOXENV: py36-pytest46-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python36\python.exe
-      PYTHON_HOME: C:\Python36
-      PYTHON_VERSION: '3.6'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py36-pytest46-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python36-x64\python.exe
-      PYTHON_HOME: C:\Python36-x64
-      PYTHON_VERSION: '3.6'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py36-pytest5-pygal24-nodist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python36\python.exe
-      PYTHON_HOME: C:\Python36
-      PYTHON_VERSION: '3.6'
-      PYTHON_ARCH: '32'
-    - TOXENV: py36-pytest5-pygal24-nodist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python36-x64\python.exe
-      PYTHON_HOME: C:\Python36-x64
-      PYTHON_VERSION: '3.6'
-      PYTHON_ARCH: '64'
-    - TOXENV: py36-pytest5-pygal24-nodist-nocov
-      TOXPYTHON: C:\Python36\python.exe
-      PYTHON_HOME: C:\Python36
-      PYTHON_VERSION: '3.6'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py36-pytest5-pygal24-nodist-nocov
-      TOXPYTHON: C:\Python36-x64\python.exe
-      PYTHON_HOME: C:\Python36-x64
-      PYTHON_VERSION: '3.6'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py36-pytest5-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python36\python.exe
-      PYTHON_HOME: C:\Python36
-      PYTHON_VERSION: '3.6'
-      PYTHON_ARCH: '32'
-    - TOXENV: py36-pytest5-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python36-x64\python.exe
-      PYTHON_HOME: C:\Python36-x64
-      PYTHON_VERSION: '3.6'
-      PYTHON_ARCH: '64'
-    - TOXENV: py36-pytest5-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python36\python.exe
-      PYTHON_HOME: C:\Python36
-      PYTHON_VERSION: '3.6'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py36-pytest5-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python36-x64\python.exe
-      PYTHON_HOME: C:\Python36-x64
-      PYTHON_VERSION: '3.6'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py37-pytest46-pygal24-nodist-cover,codecov,coveralls
+    - TOXENV: py37-pytest46-pygal24-nodist-cover,py37-pytest46-pygal24-xdist-cover,py37-pytest5-pygal24-nodist-cover,py37-pytest5-pygal24-xdist-cover,codecov,coveralls
       TOXPYTHON: C:\Python37\python.exe
       PYTHON_HOME: C:\Python37
       PYTHON_VERSION: '3.7'
       PYTHON_ARCH: '32'
-    - TOXENV: py37-pytest46-pygal24-nodist-cover,codecov,coveralls
+    - TOXENV: py37-cover,codecov,coveralls
       TOXPYTHON: C:\Python37-x64\python.exe
       PYTHON_HOME: C:\Python37-x64
       PYTHON_VERSION: '3.7'
       PYTHON_ARCH: '64'
-    - TOXENV: py37-pytest46-pygal24-nodist-nocov
+    - TOXENV: py37-pytest46-pygal24-nodist-nocov,py37-pytest46-pygal24-xdist-nocov,py37-pytest5-pygal24-nodist-nocov,py37-pytest5-pygal24-xdist-nocov
       TOXPYTHON: C:\Python37\python.exe
       PYTHON_HOME: C:\Python37
       PYTHON_VERSION: '3.7'
       PYTHON_ARCH: '32'
       WHEEL_PATH: .tox/dist
-    - TOXENV: py37-pytest46-pygal24-nodist-nocov
+    - TOXENV: py37-nocov
       TOXPYTHON: C:\Python37-x64\python.exe
       PYTHON_HOME: C:\Python37-x64
       PYTHON_VERSION: '3.7'
       PYTHON_ARCH: '64'
       WHEEL_PATH: .tox/dist
-    - TOXENV: py37-pytest46-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python37\python.exe
-      PYTHON_HOME: C:\Python37
-      PYTHON_VERSION: '3.7'
-      PYTHON_ARCH: '32'
-    - TOXENV: py37-pytest46-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python37-x64\python.exe
-      PYTHON_HOME: C:\Python37-x64
-      PYTHON_VERSION: '3.7'
-      PYTHON_ARCH: '64'
-    - TOXENV: py37-pytest46-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python37\python.exe
-      PYTHON_HOME: C:\Python37
-      PYTHON_VERSION: '3.7'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py37-pytest46-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python37-x64\python.exe
-      PYTHON_HOME: C:\Python37-x64
-      PYTHON_VERSION: '3.7'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py37-pytest5-pygal24-nodist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python37\python.exe
-      PYTHON_HOME: C:\Python37
-      PYTHON_VERSION: '3.7'
-      PYTHON_ARCH: '32'
-    - TOXENV: py37-pytest5-pygal24-nodist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python37-x64\python.exe
-      PYTHON_HOME: C:\Python37-x64
-      PYTHON_VERSION: '3.7'
-      PYTHON_ARCH: '64'
-    - TOXENV: py37-pytest5-pygal24-nodist-nocov
-      TOXPYTHON: C:\Python37\python.exe
-      PYTHON_HOME: C:\Python37
-      PYTHON_VERSION: '3.7'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py37-pytest5-pygal24-nodist-nocov
-      TOXPYTHON: C:\Python37-x64\python.exe
-      PYTHON_HOME: C:\Python37-x64
-      PYTHON_VERSION: '3.7'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py37-pytest5-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python37\python.exe
-      PYTHON_HOME: C:\Python37
-      PYTHON_VERSION: '3.7'
-      PYTHON_ARCH: '32'
-    - TOXENV: py37-pytest5-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python37-x64\python.exe
-      PYTHON_HOME: C:\Python37-x64
-      PYTHON_VERSION: '3.7'
-      PYTHON_ARCH: '64'
-    - TOXENV: py37-pytest5-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python37\python.exe
-      PYTHON_HOME: C:\Python37
-      PYTHON_VERSION: '3.7'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py37-pytest5-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python37-x64\python.exe
-      PYTHON_HOME: C:\Python37-x64
-      PYTHON_VERSION: '3.7'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest46-pygal23-nodist-cover,codecov,coveralls
+    - TOXENV: py38-pytest46-pygal23-nodist-cover,py38-pytest46-pygal23-xdist-cover,py38-pytest46-pygal24-nodist-cover,py38-pytest46-pygal24-xdist-cover,py38-pytest5-pygal23-nodist-cover,py38-pytest5-pygal23-xdist-cover,py38-pytest5-pygal24-nodist-cover,py38-pytest5-pygal24-xdist-cover,codecov,coveralls
       TOXPYTHON: C:\Python38\python.exe
       PYTHON_HOME: C:\Python38
       PYTHON_VERSION: '3.8'
       PYTHON_ARCH: '32'
-    - TOXENV: py38-pytest46-pygal23-nodist-cover,codecov,coveralls
+    - TOXENV: py38-cover,codecov,coveralls
       TOXPYTHON: C:\Python38-x64\python.exe
       PYTHON_HOME: C:\Python38-x64
       PYTHON_VERSION: '3.8'
       PYTHON_ARCH: '64'
-    - TOXENV: py38-pytest46-pygal23-nodist-nocov
+    - TOXENV: py38-pytest46-pygal23-nodist-nocov,py38-pytest46-pygal23-xdist-nocov,py38-pytest46-pygal24-nodist-nocov,py38-pytest46-pygal24-xdist-nocov,py38-pytest5-pygal23-nodist-nocov,py38-pytest5-pygal23-xdist-nocov,py38-pytest5-pygal24-nodist-nocov,py38-pytest5-pygal24-xdist-nocov
       TOXPYTHON: C:\Python38\python.exe
       PYTHON_HOME: C:\Python38
       PYTHON_VERSION: '3.8'
       PYTHON_ARCH: '32'
       WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest46-pygal23-nodist-nocov
-      TOXPYTHON: C:\Python38-x64\python.exe
-      PYTHON_HOME: C:\Python38-x64
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest46-pygal23-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python38\python.exe
-      PYTHON_HOME: C:\Python38
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '32'
-    - TOXENV: py38-pytest46-pygal23-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python38-x64\python.exe
-      PYTHON_HOME: C:\Python38-x64
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '64'
-    - TOXENV: py38-pytest46-pygal23-xdist-nocov
-      TOXPYTHON: C:\Python38\python.exe
-      PYTHON_HOME: C:\Python38
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest46-pygal23-xdist-nocov
-      TOXPYTHON: C:\Python38-x64\python.exe
-      PYTHON_HOME: C:\Python38-x64
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest46-pygal24-nodist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python38\python.exe
-      PYTHON_HOME: C:\Python38
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '32'
-    - TOXENV: py38-pytest46-pygal24-nodist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python38-x64\python.exe
-      PYTHON_HOME: C:\Python38-x64
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '64'
-    - TOXENV: py38-pytest46-pygal24-nodist-nocov
-      TOXPYTHON: C:\Python38\python.exe
-      PYTHON_HOME: C:\Python38
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest46-pygal24-nodist-nocov
-      TOXPYTHON: C:\Python38-x64\python.exe
-      PYTHON_HOME: C:\Python38-x64
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest46-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python38\python.exe
-      PYTHON_HOME: C:\Python38
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '32'
-    - TOXENV: py38-pytest46-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python38-x64\python.exe
-      PYTHON_HOME: C:\Python38-x64
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '64'
-    - TOXENV: py38-pytest46-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python38\python.exe
-      PYTHON_HOME: C:\Python38
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest46-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python38-x64\python.exe
-      PYTHON_HOME: C:\Python38-x64
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest5-pygal23-nodist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python38\python.exe
-      PYTHON_HOME: C:\Python38
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '32'
-    - TOXENV: py38-pytest5-pygal23-nodist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python38-x64\python.exe
-      PYTHON_HOME: C:\Python38-x64
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '64'
-    - TOXENV: py38-pytest5-pygal23-nodist-nocov
-      TOXPYTHON: C:\Python38\python.exe
-      PYTHON_HOME: C:\Python38
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest5-pygal23-nodist-nocov
-      TOXPYTHON: C:\Python38-x64\python.exe
-      PYTHON_HOME: C:\Python38-x64
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest5-pygal23-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python38\python.exe
-      PYTHON_HOME: C:\Python38
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '32'
-    - TOXENV: py38-pytest5-pygal23-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python38-x64\python.exe
-      PYTHON_HOME: C:\Python38-x64
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '64'
-    - TOXENV: py38-pytest5-pygal23-xdist-nocov
-      TOXPYTHON: C:\Python38\python.exe
-      PYTHON_HOME: C:\Python38
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest5-pygal23-xdist-nocov
-      TOXPYTHON: C:\Python38-x64\python.exe
-      PYTHON_HOME: C:\Python38-x64
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest5-pygal24-nodist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python38\python.exe
-      PYTHON_HOME: C:\Python38
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '32'
-    - TOXENV: py38-pytest5-pygal24-nodist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python38-x64\python.exe
-      PYTHON_HOME: C:\Python38-x64
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '64'
-    - TOXENV: py38-pytest5-pygal24-nodist-nocov
-      TOXPYTHON: C:\Python38\python.exe
-      PYTHON_HOME: C:\Python38
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest5-pygal24-nodist-nocov
-      TOXPYTHON: C:\Python38-x64\python.exe
-      PYTHON_HOME: C:\Python38-x64
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest5-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python38\python.exe
-      PYTHON_HOME: C:\Python38
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '32'
-    - TOXENV: py38-pytest5-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python38-x64\python.exe
-      PYTHON_HOME: C:\Python38-x64
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '64'
-    - TOXENV: py38-pytest5-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python38\python.exe
-      PYTHON_HOME: C:\Python38
-      PYTHON_VERSION: '3.8'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py38-pytest5-pygal24-xdist-nocov
+    - TOXENV: py38-nocov
       TOXPYTHON: C:\Python38-x64\python.exe
       PYTHON_HOME: C:\Python38-x64
       PYTHON_VERSION: '3.8'
