@@ -74,7 +74,7 @@ def main():
         with open(join(base_path, name), "w") as fh:
             fh.write(jinja.get_template(name).render(tox_environments=tox_environments))
         print("Wrote {}".format(name))
-    print("DONE.")
+    print("DONE: {} envs.".format(len(tox_environments)))
 
 
 if __name__ == "__main__":
