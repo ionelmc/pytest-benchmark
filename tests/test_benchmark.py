@@ -454,7 +454,7 @@ def test_bogus_max_time(testdir):
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-max-time=bogus', test)
     result.stderr.fnmatch_lines([
         "*usage: *",
-        "*py*: error: argument --benchmark-max-time: Invalid decimal value 'bogus': InvalidOperation*",
+        "*: error: argument --benchmark-max-time: Invalid decimal value 'bogus': InvalidOperation*",
     ])
 
 
@@ -473,7 +473,7 @@ def test_bad_save(testdir):
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-save=asd:f?', test)
     result.stderr.fnmatch_lines([
         "*usage: *",
-        "*py*: error: argument --benchmark-save: Must not contain any of these characters: /:*?<>|\\ (it has ':?')",
+        "*: error: argument --benchmark-save: Must not contain any of these characters: /:*?<>|\\ (it has ':?')",
     ])
 
 
@@ -482,7 +482,7 @@ def test_bad_save_2(testdir):
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-save=', test)
     result.stderr.fnmatch_lines([
         "*usage: *",
-        "*py*: error: argument --benchmark-save: Can't be empty.",
+        "*: error: argument --benchmark-save: Can't be empty.",
     ])
 
 
@@ -491,7 +491,7 @@ def test_bad_compare_fail(testdir):
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-compare-fail=?', test)
     result.stderr.fnmatch_lines([
         "*usage: *",
-        "*py*: error: argument --benchmark-compare-fail: Could not parse value: '?'.",
+        "*: error: argument --benchmark-compare-fail: Could not parse value: '?'.",
     ])
 
 
@@ -500,7 +500,7 @@ def test_bad_rounds(testdir):
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-min-rounds=asd', test)
     result.stderr.fnmatch_lines([
         "*usage: *",
-        "*py*: error: argument --benchmark-min-rounds: invalid literal for int() with base 10: 'asd'",
+        "*: error: argument --benchmark-min-rounds: invalid literal for int() with base 10: 'asd'",
     ])
 
 
@@ -509,7 +509,7 @@ def test_bad_rounds_2(testdir):
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-min-rounds=0', test)
     result.stderr.fnmatch_lines([
         "*usage: *",
-        "*py*: error: argument --benchmark-min-rounds: Value for --benchmark-rounds must be at least 1.",
+        "*: error: argument --benchmark-min-rounds: Value for --benchmark-rounds must be at least 1.",
     ])
 
 
@@ -765,7 +765,7 @@ def test_bogus_timer(testdir):
     result = testdir.runpytest_subprocess('--benchmark-timer=bogus', test)
     result.stderr.fnmatch_lines([
         "*usage: *",
-        "*py*: error: argument --benchmark-timer: Value for --benchmark-timer must be in dotted form. Eg: "
+        "*: error: argument --benchmark-timer: Value for --benchmark-timer must be in dotted form. Eg: "
         "'module.attr'.",
     ])
 
@@ -791,7 +791,7 @@ def test_bogus_sort(testdir):
     result = testdir.runpytest_subprocess('--benchmark-sort=bogus', test)
     result.stderr.fnmatch_lines([
         "*usage: *",
-        "*py*: error: argument --benchmark-sort: Unacceptable value: 'bogus'. Value for --benchmark-sort must be one "
+        "*: error: argument --benchmark-sort: Unacceptable value: 'bogus'. Value for --benchmark-sort must be one "
         "of: 'min', 'max', 'mean', 'stddev', 'name', 'fullname'."
     ])
 
