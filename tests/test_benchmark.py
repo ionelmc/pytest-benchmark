@@ -724,7 +724,7 @@ def test_bogus_min_time(testdir):
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-min-time=bogus', test)
     result.stderr.fnmatch_lines([
         "*usage: *",
-        "py*: error: argument --benchmark-min-time: Invalid decimal value 'bogus': InvalidOperation*",
+        "*: error: argument --benchmark-min-time: Invalid decimal value 'bogus': InvalidOperation*",
     ])
 
 
