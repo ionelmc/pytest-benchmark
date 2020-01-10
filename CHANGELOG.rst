@@ -2,7 +2,7 @@
 Changelog
 =========
 
-3.2.3 (2019-12-06)
+3.2.3 (2020-01-10)
 ------------------
 
 * Fixed "already-imported" pytest warning. Contributed by Jonathan Simon Prates in
