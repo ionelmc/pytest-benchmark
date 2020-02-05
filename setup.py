@@ -80,7 +80,8 @@ setup(
         'aspect': ['aspectlib'],
         'histogram': ['pygal', 'pygaljs'],
         ':python_version < "3.4"': ['statistics', 'pathlib2'],
-        'elasticsearch': ['elasticsearch']
+        'elasticsearch': ['elasticsearch'],
+        's3': ['boto3'],
     },
     entry_points={
         'pytest11': [
