@@ -17,7 +17,7 @@ saved in a path like ``.benchmarks/Linux-CPython-3.4-64bit``.
   You should add ``--benchmark-autosave`` to ``addopts`` in you pytest configuration so you dont have to specify it all
   the time.
 
-* ``--benchmark-name=foobar`` works similarly, but saves a file like ``0001_foobar.json``. It's there in case you want to
+* ``--benchmark-save=foobar`` works similarly, but saves a file like ``0001_foobar.json``. It's there in case you want to
   give specific name to the run.
 
 After you have saved your first run you can compare against it with ``--benchmark-compare=0001``. You will get an additional
