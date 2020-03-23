@@ -165,7 +165,7 @@ def test_handle_saving(sess, tmpdir, monkeypatch):
     args = sess.storage.client.put_object.call_args[1]
     assert args["Bucket"] == "mocked"
     assert args["Key"] == "dir/FoobarOS/0001_commitId.json"
-    assert json.loads(args["Body"]) == SAVE_DATA
+    assert json.loads(args["Body"].decode()) == SAVE_DATA
 
 
 def test_s3_list_files():

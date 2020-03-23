@@ -66,7 +66,7 @@ class S3Storage(object):
 
     def load_from_s3(self, key):
         response = self.client.get_object(Bucket=self.bucket, Key=key)
-        return response["Body"].read()
+        return response["Body"].read().decode()
 
     def _create_s3_url(self, key):
         return "s3://%s/%s" % (self.bucket, key)
