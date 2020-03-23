@@ -2,7 +2,6 @@ from __future__ import absolute_import
 
 import json
 import logging
-import os
 from io import BytesIO
 from io import StringIO
 
