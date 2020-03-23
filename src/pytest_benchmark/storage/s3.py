@@ -154,6 +154,6 @@ class S3Storage(object):
 
             for bench in data["benchmarks"]:
                 bench.update(bench.pop("stats"))
-                bench['path'] = str(path)
+                bench['path'] = os.path.join(self.store.geturl(), str(path))
                 bench['source'] = source
                 yield bench
