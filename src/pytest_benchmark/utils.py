@@ -32,9 +32,9 @@ except ImportError:
     from pathlib import Path    # noqa: F401
 
 try:
-    from urllib.parse import urlparse, parse_qs, urlunparse
+    from urllib.parse import urlparse, parse_qs
 except ImportError:
-    from urlparse import urlparse, parse_qs, urlunparse
+    from urlparse import urlparse, parse_qs
 
 try:
     from subprocess import check_output, CalledProcessError

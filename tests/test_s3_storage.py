@@ -218,7 +218,7 @@ def test_s3_load_single():
     )
     b = list(storage.load_benchmarks("0001"))
     assert b[0]["path"] == "s3://my-bucket/FoobarOS/0001_commitId.json"
-    m.get_object.assert_called_once()
+    assert m.get_object.call_count == 1
 
 
 def test_s3_load_multi():
