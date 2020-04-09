@@ -1096,3 +1096,26 @@ def test_columns(testdir):
         "Name (time in ?s) * Max * Iterations * Min *",
         "------*",
     ])
+
+
+def test_report_table_order(testdir):
+    test = testdir.makepyfile('''
+import time
+import pytest
+
+@pytest.mark.benchmark(baseline=False)
+def test_fast(benchmark):
+    @benchmark
+    def result():
+        return time.sleep(0.000001)
+    assert result == None
+
+def test_slow(benchmark):
+    benchmark(lambda: time.sleep(0.1))
+    assert 1 == 1
+''')
+    result = testdir.runpytest_subprocess(test)
+    result.stdout.fnmatch_lines([
+        "test_fast         * (0.*)  *",
+        "test_slow         * (1.0)  *"
+    ])

@@ -33,8 +33,9 @@ class BenchmarkFixture(object):
     _precisions = {}
 
     def __init__(self, node, disable_gc, timer, min_rounds, min_time, max_time, warmup, warmup_iterations,
-                 calibration_precision, add_stats, logger, warner, disabled, cprofile, group=None):
+                 calibration_precision, add_stats, logger, warner, disabled, cprofile, group=None, baseline=True):
         self.name = node.name
+        self.baseline = baseline
         self.fullname = node._nodeid
         self.disabled = disabled
         if hasattr(node, 'callspec'):

@@ -240,6 +240,7 @@ You can set per-test options with the ``benchmark`` marker:
 
     @pytest.mark.benchmark(
         group="group-name",
+        baseline=True,
         min_time=0.1,
         max_time=0.5,
         min_rounds=5,
@@ -258,6 +259,20 @@ You can set per-test options with the ``benchmark`` marker:
         # Note: this code is not measured.
         assert result is None
 
+Additionally to the options whose name coincides with the relevant
+command-line options, this allows modifying the following values:
+
+``group``
+    A user-defined group name that this benchmark belongs to. Use this
+    to group related benchmarks for comparing values in the results
+    printed by pytest.
+
+``baseline``
+    Whether this benchmark's results should be considered as possible
+    base line values when comparing them to other results of the same
+    group? Use this if you want to include some results just for
+    comparison, without them affecting the relative scores displayed
+    for other results.
 
 Extra info
 ==========

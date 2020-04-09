@@ -172,6 +172,7 @@ class Stats(object):
 class Metadata(object):
     def __init__(self, fixture, iterations, options):
         self.name = fixture.name
+        self.baseline = fixture.baseline
         self.fullname = fixture.fullname
         self.group = fixture.group
         self.param = fixture.param
@@ -210,6 +211,7 @@ class Metadata(object):
         result = {
             "group": self.group,
             "name": self.name,
+            "baseline": self.baseline,
             "fullname": self.fullname,
             "params": self.params,
             "param": self.param,

@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Future
+------
+
+* Add ``baseline`` boolean option to benchmark options to allow adding benchmarks
+  for comparision that do not affect relative scores.
+
 3.2.3 (2020-01-10)
 ------------------
 
