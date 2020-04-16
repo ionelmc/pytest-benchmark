@@ -1,18 +1,17 @@
 from __future__ import absolute_import
 
+import json
 import os
 import re
 import sys
-import json
 
+from ..compat import reraise
 from ..stats import normalize_stats
 from ..utils import Path
-from ..utils import urlparse
 from ..utils import commonpath
 from ..utils import safe_dumps
 from ..utils import short_filename
-
-from ..compat import reraise
+from ..utils import urlparse
 
 try:
     from boto3.session import Session as boto3_session
