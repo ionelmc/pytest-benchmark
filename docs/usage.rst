@@ -104,7 +104,7 @@ Commandline options
                         Disable GC during benchmarks.
   --benchmark-skip      Skip running any tests that contain benchmarks.
   --benchmark-disable   Disable benchmarks. Benchmarked functions are only ran
-                        once and no stats are reported. Use this is you want
+                        once and no stats are reported. Use this if you want
                         to run the test but don't do any benchmarking.
   --benchmark-enable    Forcibly enable benchmarks. Use this option to
                         override --benchmark-disable (in case you have it in
