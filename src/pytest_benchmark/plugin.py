@@ -388,7 +388,12 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_inf
 
 
 @pytest.fixture(scope="function")
-def benchmark(request):
+def benchmark_type():
+    return BenchmarkFixture
+
+
+@pytest.fixture(scope="function")
+def benchmark(request, benchmark_type):
     bs = request.config._benchmarksession
 
     if bs.skip:
@@ -399,7 +404,7 @@ def benchmark(request):
         options = dict(marker.kwargs) if marker else {}
         if "timer" in options:
             options["timer"] = NameWrapper(options["timer"])
-        fixture = BenchmarkFixture(
+        fixture = benchmark_type(
             node,
             add_stats=bs.benchmarks.append,
             logger=bs.logger,
