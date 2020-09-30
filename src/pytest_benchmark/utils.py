@@ -466,6 +466,10 @@ def load_storage(storage, **kwargs):
     if storage.startswith("file://"):
         from .storage.file import FileStorage
         return FileStorage(storage[len("file://"):], **kwargs)
+    elif storage.startswith("s3://"):
+        from .storage.s3 import S3Storage
+        # TODO update benchmark_autosave
+        return S3Storage(storage, **kwargs)
     elif storage.startswith("elasticsearch+"):
         from .storage.elasticsearch import ElasticsearchStorage
         # TODO update benchmark_autosave
@@ -473,7 +477,7 @@ def load_storage(storage, **kwargs):
                                            netrc_file=netrc_file)
         return ElasticsearchStorage(*args, **kwargs)
     else:
-        raise argparse.ArgumentTypeError("Storage must be in form of file://path or "
+        raise argparse.ArgumentTypeError("Storage must be in form of file://path or s3://path or"
                                          "elasticsearch+http[s]://host1,host2/index/doctype")
 
 
