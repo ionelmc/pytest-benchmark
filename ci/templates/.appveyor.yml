@@ -3,7 +3,7 @@ build: off
 environment:
   global:
     COVERALLS_EXTRAS: '-v'
-    COVERALLS_REPO_TOKEN: IoRlAEvnKbwbhBJ2jrWPqzAnE2jobA0I3
+    COVERALLS_REPO_TOKEN: GvSJKUlHuUxUg43UwNngqvKlJpVKCPMHj
   matrix:
     - TOXENV: check
       TOXPYTHON: C:\Python36\python.exe

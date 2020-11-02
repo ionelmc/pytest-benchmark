@@ -40,7 +40,7 @@ Overview
     :alt: Coverage Status
     :target: https://coveralls.io/r/ionelmc/pytest-benchmark
 
-.. |codecov| image:: https://codecov.io/github/ionelmc/pytest-benchmark/coverage.svg?branch=master
+.. |codecov| image:: https://codecov.io/gh/ionelmc/pytest-benchmark/branch/master/graphs/badge.svg?branch=master
     :alt: Coverage Status
     :target: https://codecov.io/github/ionelmc/pytest-benchmark
 
@@ -69,7 +69,9 @@ Overview
 .. end-badges
 
 A ``pytest`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen
-timer. See calibration_ and FAQ_.
+timer.
+
+See calibration_ and FAQ_.
 
 * Free software: BSD 2-Clause License
 

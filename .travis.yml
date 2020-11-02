@@ -1,10 +1,12 @@
 language: python
 dist: xenial
+virt: lxd
 cache: false
 env:
   global:
     - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
     - SEGFAULT_SIGNALS=all
+    - LANG=en_US.UTF-8
 matrix:
   include:
     - python: '3.6'
@@ -258,8 +260,8 @@ install:
 script:
   - tox -v
 after_failure:
-  - more .tox/log/* | cat
-  - more .tox/*/log/* | cat
+  - cat .tox/log/*
+  - cat .tox/*/log/*
 notifications:
   email:
     on_success: never

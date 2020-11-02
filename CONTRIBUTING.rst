@@ -41,7 +41,7 @@ To set up `pytest-benchmark` for local development:
    (look for the "Fork" button).
 2. Clone your fork locally::
 
-    git clone git@github.com:ionelmc/pytest-benchmark.git
+    git clone git@github.com:YOURGITHUBNAME/pytest-benchmark.git
 
 3. Create a branch for local development::
 
@@ -85,6 +85,6 @@ To run a subset of tests::
 
     tox -e envname -- pytest -k test_myfeature
 
-To run all the test environments in *parallel* (you need to ``pip install detox``)::
+To run all the test environments in *parallel*::
 
-    detox
+    tox -p auto
