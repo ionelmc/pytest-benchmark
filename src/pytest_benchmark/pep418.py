@@ -43,7 +43,8 @@ CLOCK_PROF = None
 try:
     import ctypes
     import ctypes.util
-    from ctypes import byref, POINTER
+    from ctypes import POINTER
+    from ctypes import byref
 except ImportError as err:
     pass
 else:
@@ -55,8 +56,11 @@ else:
     time_t = ctypes.c_long
 
     if os.name == "nt":
-        from ctypes.wintypes import BOOL, DWORD, HANDLE, FILETIME
         from ctypes import windll
+        from ctypes.wintypes import BOOL
+        from ctypes.wintypes import DWORD
+        from ctypes.wintypes import FILETIME
+        from ctypes.wintypes import HANDLE
         LARGEINTEGER = ctypes.c_int64
         LARGEINTEGER_p = POINTER(LARGEINTEGER)
         FILETIME_p = POINTER(FILETIME)
@@ -690,9 +694,9 @@ def get_clock_info(name):
     return clock_info(**info)
 
 if __name__ == "__main__":
-    from errno import EPERM
     import threading
     import unittest
+    from errno import EPERM
 
     class TestPEP418(unittest.TestCase):
         if not hasattr(unittest.TestCase, 'assertIsInstance'):

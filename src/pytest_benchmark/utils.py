@@ -2,7 +2,6 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
-import genericpath
 import json
 import netrc
 import ntpath
@@ -21,23 +20,28 @@ from os.path import exists
 from os.path import join
 from os.path import split
 
+import genericpath
+
 from .compat import PY3
 from .compat import PY38
 
 # This is here (in the utils module) because it might be used by
 # various other modules.
 try:
-    from pathlib2 import Path   # noqa: F401
+    from pathlib2 import Path  # noqa: F401
 except ImportError:
-    from pathlib import Path    # noqa: F401
+    from pathlib import Path  # noqa: F401
 
 try:
-    from urllib.parse import urlparse, parse_qs
+    from urllib.parse import parse_qs
+    from urllib.parse import urlparse
 except ImportError:
-    from urlparse import urlparse, parse_qs
+    from urlparse import parse_qs
+    from urlparse import urlparse
 
 try:
-    from subprocess import check_output, CalledProcessError
+    from subprocess import CalledProcessError
+    from subprocess import check_output
 except ImportError:
     class CalledProcessError(subprocess.CalledProcessError):
         def __init__(self, returncode, cmd, output=None):
@@ -468,6 +472,7 @@ def load_storage(storage, **kwargs):
         return FileStorage(storage[len("file://"):], **kwargs)
     elif storage.startswith("elasticsearch+"):
         from .storage.elasticsearch import ElasticsearchStorage
+
         # TODO update benchmark_autosave
         args = parse_elasticsearch_storage(storage[len("elasticsearch+"):],
                                            netrc_file=netrc_file)

@@ -3,8 +3,8 @@ from time import time as timeout_timer
 from .compat import XRANGE
 
 try:
-    from __pypy__.time import clock_gettime
     from __pypy__.time import CLOCK_MONOTONIC
+    from __pypy__.time import clock_gettime
 
     def monotonic():
         return clock_gettime(CLOCK_MONOTONIC)
