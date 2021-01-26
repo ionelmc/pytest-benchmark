@@ -122,6 +122,32 @@ environment:
       PYTHON_VERSION: '3.8'
       PYTHON_ARCH: '64'
       WHEEL_PATH: .tox/dist
+    - TOXENV: py39-pytest6-pygal24-nodist-cover,py39-pytest6-pygal24-xdist-cover,codecov,coveralls
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      TOXPYTHON: C:\Python39\python.exe
+      PYTHON_HOME: C:\Python39
+      PYTHON_VERSION: '3.9'
+      PYTHON_ARCH: '32'
+    - TOXENV: py39-pytest6-pygal24-nodist-cover,py39-pytest6-pygal24-xdist-cover,codecov,coveralls
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      TOXPYTHON: C:\Python39-x64\python.exe
+      PYTHON_HOME: C:\Python39-x64
+      PYTHON_VERSION: '3.9'
+      PYTHON_ARCH: '64'
+    - TOXENV: py39-pytest6-pygal24-nodist-nocov,py39-pytest6-pygal24-xdist-nocov
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      TOXPYTHON: C:\Python39\python.exe
+      PYTHON_HOME: C:\Python39
+      PYTHON_VERSION: '3.9'
+      PYTHON_ARCH: '32'
+      WHEEL_PATH: .tox/dist
+    - TOXENV: py39-pytest6-pygal24-nodist-nocov,py39-pytest6-pygal24-xdist-nocov
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      TOXPYTHON: C:\Python39-x64\python.exe
+      PYTHON_HOME: C:\Python39-x64
+      PYTHON_VERSION: '3.9'
+      PYTHON_ARCH: '64'
+      WHEEL_PATH: .tox/dist
 init:
   - ps: echo $env:TOXENV
   - ps: ls C:\Python*
