@@ -5,7 +5,7 @@ Changelog
 Unreleased
 ----------
 
-* Added Python 3.9 support.
+* Added Python 3.9, dropped Python 3.5.
 
 3.2.3 (2020-01-10)
 ------------------

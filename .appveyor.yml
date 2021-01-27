@@ -34,28 +34,6 @@ environment:
       PYTHON_ARCH: '64'
       WHEEL_PATH: .tox/dist
       WINDOWS_SDK_VERSION: v7.0
-    - TOXENV: py35-pytest6-pygal24-nodist-cover,py35-pytest6-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python35\python.exe
-      PYTHON_HOME: C:\Python35
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '32'
-    - TOXENV: py35-pytest6-pygal24-nodist-cover,py35-pytest6-pygal24-xdist-cover,codecov,coveralls
-      TOXPYTHON: C:\Python35-x64\python.exe
-      PYTHON_HOME: C:\Python35-x64
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '64'
-    - TOXENV: py35-pytest6-pygal24-nodist-nocov,py35-pytest6-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python35\python.exe
-      PYTHON_HOME: C:\Python35
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '32'
-      WHEEL_PATH: .tox/dist
-    - TOXENV: py35-pytest6-pygal24-nodist-nocov,py35-pytest6-pygal24-xdist-nocov
-      TOXPYTHON: C:\Python35-x64\python.exe
-      PYTHON_HOME: C:\Python35-x64
-      PYTHON_VERSION: '3.5'
-      PYTHON_ARCH: '64'
-      WHEEL_PATH: .tox/dist
     - TOXENV: py36-pytest6-pygal24-nodist-cover,py36-pytest6-pygal24-xdist-cover,codecov,coveralls
       TOXPYTHON: C:\Python36\python.exe
       PYTHON_HOME: C:\Python36

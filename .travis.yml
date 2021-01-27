@@ -28,18 +28,6 @@ matrix:
         - TOXENV=py27-pytest46-pygal24-xdist-nocov
       python: '2.7'
     - env:
-        - TOXENV=py35-pytest6-pygal24-nodist-cover,codecov,coveralls
-      python: '3.5'
-    - env:
-        - TOXENV=py35-pytest6-pygal24-nodist-nocov
-      python: '3.5'
-    - env:
-        - TOXENV=py35-pytest6-pygal24-xdist-cover,codecov,coveralls
-      python: '3.5'
-    - env:
-        - TOXENV=py35-pytest6-pygal24-xdist-nocov
-      python: '3.5'
-    - env:
         - TOXENV=py36-pytest6-pygal24-nodist-cover,codecov,coveralls
       python: '3.6'
     - env:
