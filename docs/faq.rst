@@ -19,7 +19,7 @@ Why is my ``StdDev`` so high?
       If you cannot make your tests more predictable and remove overhead you should look at different stats like: IQR and
       Median. IQR is often better than StdDev.
 
-Why my ``Min`` way lower than ``Q1-1.5IQR``?
+Why is my ``Min`` way lower than ``Q1-1.5IQR``?
     You may see this issue in the histogram plot. This is another instance of *bad isolation*.
 
     For example, Intel CPUs have a feature called `Turbo Boost <https://en.wikipedia.org/wiki/Intel_Turbo_Boost>`_ wich
