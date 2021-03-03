@@ -204,6 +204,8 @@ To run the all tests run::
 Credits
 =======
 
+* Timing code and ideas taken from: https://github.com/vstinner/misc/blob/34d3128468e450dad15b6581af96a790f8bd58ce/python/benchmark.py
+
 .. _FAQ: http://pytest-benchmark.readthedocs.org/en/latest/faq.html
 .. _calibration: http://pytest-benchmark.readthedocs.org/en/latest/calibration.html
 .. _pedantic: http://pytest-benchmark.readthedocs.org/en/latest/pedantic.html
