@@ -424,7 +424,7 @@ def pytest_runtest_setup(item):
         for name in marker.kwargs:
             if name not in (
                     "max_time", "min_rounds", "min_time", "timer", "group", "disable_gc", "warmup",
-                    "warmup_iterations", "calibration_precision", "cprofile"):
+                    "warmup_iterations", "calibration_precision", "cprofile", "baseline"):
                 raise ValueError("benchmark mark can't have %r keyword argument." % name)
 
 

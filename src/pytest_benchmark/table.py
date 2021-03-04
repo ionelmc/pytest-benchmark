@@ -29,6 +29,7 @@ class TableResults(object):
                 bench["name"] = self.name_format(bench)
 
             worst = {}
+            baseline = {}
             best = {}
             solo = len(benchmarks) == 1
             for line, prop in progress_reporter(("min", "max", "mean", "median", "iqr", "stddev", "ops"),
@@ -38,11 +39,23 @@ class TableResults(object):
                         benchmarks, tr, "{line} ({pos}/{total})", line=line))
                     best[prop] = max(bench[prop] for _, bench in progress_reporter(
                         benchmarks, tr, "{line} ({pos}/{total})", line=line))
+                    try:
+                        baseline[prop] = max(bench[prop] for _, bench in progress_reporter(
+                            benchmarks, tr, "{line} ({pos}/{total})", line=line)
+                            if bench.get("baseline", True))
+                    except ValueError:
+                        baseline[prop] = None
                 else:
                     worst[prop] = max(bench[prop] for _, bench in progress_reporter(
                         benchmarks, tr, "{line} ({pos}/{total})", line=line))
                     best[prop] = min(bench[prop] for _, bench in progress_reporter(
                         benchmarks, tr, "{line} ({pos}/{total})", line=line))
+                    try:
+                        baseline[prop] = min(bench[prop] for _, bench in progress_reporter(
+                            benchmarks, tr, "{line} ({pos}/{total})", line=line)
+                            if bench.get("baseline", True))
+                    except ValueError:
+                        baseline[prop] = None
             for line, prop in progress_reporter(("outliers", "rounds", "iterations"), tr, "{line}: {value}", line=line):
                 worst[prop] = max(benchmark[prop] for _, benchmark in progress_reporter(
                     benchmarks, tr, "{line} ({pos}/{total})", line=line))
@@ -106,7 +119,7 @@ class TableResults(object):
                             ALIGNED_NUMBER_FMT.format(
                                 bench[prop] * adjustment,
                                 widths[prop],
-                                compute_baseline_scale(best[prop], bench[prop], rpadding),
+                                compute_baseline_scale(baseline[prop], bench[prop], rpadding),
                                 rpadding
                             ),
                             green=not solo and bench[prop] == best.get(prop),
@@ -118,7 +131,7 @@ class TableResults(object):
                             ALIGNED_NUMBER_FMT.format(
                                 bench[prop] * ops_adjustment,
                                 widths[prop],
-                                compute_baseline_scale(best[prop], bench[prop], rpadding),
+                                compute_baseline_scale(baseline[prop], bench[prop], rpadding),
                                 rpadding
                             ),
                             green=not solo and bench[prop] == best.get(prop),
@@ -147,7 +160,7 @@ class TableResults(object):
 
 
 def compute_baseline_scale(baseline, value, width):
-    if not width:
+    if not width or baseline is None:
         return ""
     if value == baseline:
         return " (1.0)".ljust(width)

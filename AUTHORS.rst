@@ -28,3 +28,4 @@ Authors
 * Stanislav Levin - https://github.com/stanislavlevin
 * Grygorii Iermolenko - https://github.com/gyermolenko
 * Jonathan Simon Prates - https://github.com/jonathansp
+* Alexander Schlarb – https://ninetailed.ninja/
