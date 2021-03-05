@@ -2,6 +2,13 @@
 Changelog
 =========
 
+3.3.0 (2020-03-00)
+------------------
+
+* Changed the "cpu" data in the json output to include everything that cpuinfo outputs, for better or worse as cpuinfo 6.0 changed some
+  fields. Users should now ensure they are an adequate cpuinfo package installed.
+  **MAY BE BACKWARDS INCOMPATIBLE**
+
 3.2.3 (2020-01-10)
 ------------------
 
