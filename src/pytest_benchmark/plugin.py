@@ -326,12 +326,7 @@ def pytest_terminal_summary(terminalreporter):
 
 def get_cpu_info():
     import cpuinfo
-    all_info = cpuinfo.get_cpu_info()
-    all_info = all_info or {}
-    info = {}
-    for key in ('vendor_id', 'hardware', 'brand'):
-        info[key] = all_info.get(key, 'unknown')
-    return info
+    return cpuinfo.get_cpu_info() or {}
 
 
 def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
