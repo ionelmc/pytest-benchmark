@@ -109,6 +109,20 @@ def test_slow(benchmark):
     assert 1 == 1
 '''
 
+FIXTURES_ALSO_SKIPPED_TEST = '''
+import pytest
+
+@pytest.fixture
+def dep():
+    print('dep created')
+
+def test_normal(dep):
+    pass
+
+def test_bench(benchmark):
+    benchmark.pedantic(lambda: None)
+'''
+
 GROUPING_TEST = '''
 import pytest
 
@@ -405,6 +419,16 @@ def test_only_override_skip(testdir):
         "------*",
         "*====== 2 passed * ======*",
     ])
+
+
+def test_fixtures_also_skipped(testdir):
+    test = testdir.makepyfile(FIXTURES_ALSO_SKIPPED_TEST)
+    result = testdir.runpytest_subprocess('--benchmark-only', '-s', test)
+    result.stdout.fnmatch_lines([
+        "*collected 2 items",
+        "*====== 1 passed, 1 skipped in * ======*",
+    ])
+    result.stdout.no_fnmatch_line('dep created')
 
 
 def test_conflict_between_only_and_disable(testdir):
