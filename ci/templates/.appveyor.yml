@@ -1,5 +1,6 @@
 version: '{branch}-{build}'
 build: off
+image: Visual Studio 2019
 environment:
   global:
     COVERALLS_EXTRAS: '-v'

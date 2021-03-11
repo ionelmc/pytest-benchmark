@@ -24,9 +24,9 @@ Overview
     :alt: Join the chat at https://gitter.im/ionelmc/pytest-benchmark
     :target: https://gitter.im/ionelmc/pytest-benchmark
 
-.. |travis| image:: https://api.travis-ci.org/ionelmc/pytest-benchmark.svg?branch=master
+.. |travis| image:: https://api.travis-ci.com/ionelmc/pytest-benchmark.svg?branch=master
     :alt: Travis-CI Build Status
-    :target: https://travis-ci.org/ionelmc/pytest-benchmark
+    :target: https://travis-ci.com/github/ionelmc/pytest-benchmark
 
 .. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/ionelmc/pytest-benchmark?branch=master&svg=true
     :alt: AppVeyor Build Status

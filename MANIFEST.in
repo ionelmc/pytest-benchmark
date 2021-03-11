@@ -6,7 +6,6 @@ graft tests
 include .bumpversion.cfg
 include .coveragerc
 include .cookiecutterrc
-include .cruft.json
 include .editorconfig
 
 include AUTHORS.rst
