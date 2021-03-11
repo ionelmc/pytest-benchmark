@@ -141,11 +141,11 @@ Commandline options
                         'function_name'.
   --benchmark-storage=URI
                         Specify a path to store the runs as uri in form
-                        file://path or elasticsearch+http[s]://host1,host2/[in
+                        file\:\/\/path or elasticsearch+http[s]\:\/\/host1,host2/[in
                         dex/doctype?project_name=Project] (when --benchmark-
                         save or --benchmark-autosave are used). For backwards
                         compatibility unexpected values are converted to
-                        file://<value>. Default: 'file://./.benchmarks'.
+                        file\:\/\/<value>. Default: 'file\:\/\/./.benchmarks'.
   --benchmark-netrc=BENCHMARK_NETRC
                         Load elasticsearch credentials from a netrc file.
                         Default: ''.
