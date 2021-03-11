@@ -2,10 +2,13 @@
 Changelog
 =========
 
-Unreleased
-----------
+3.3.0 (2021-03-12)
+------------------
 
+* Disable progress indication unless ``--benchmark-verbose`` is used.
+  Contributed by Dimitris Rozakis in `#149 <https://github.com/ionelmc/pytest-benchmark/pull/149>`_.
 * Added Python 3.9, dropped Python 3.5.
+  Contributed by Miroslav Šedivý in `#189 <https://github.com/ionelmc/pytest-benchmark/pull/189>`_.
 
 3.2.3 (2020-01-10)
 ------------------
