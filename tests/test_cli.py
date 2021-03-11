@@ -84,7 +84,7 @@ def test_help_compare(testdir, args):
         "                                 [--columns LABELS] [--name FORMAT]",
         "                                 [--histogram [FILENAME-PREFIX]]",
         "                                 [--csv [FILENAME]]",
-        "                                 [glob_or_file [glob_or_file ...]]",
+        "                                 [[]glob_or_file *[]]",
         "",
         "Compare saved runs.",
         "",
