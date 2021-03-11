@@ -12,6 +12,11 @@ Changelog
 * Changed the "cpu" data in the json output to include everything that cpuinfo outputs, for better or worse as cpuinfo 6.0 changed some
   fields. Users should now ensure they are an adequate cpuinfo package installed.
   **MAY BE BACKWARDS INCOMPATIBLE**
+* Changed behavior of ``--benchmark-skip`` and ``--benchmark-only`` to apply early in the collection phase.
+  This means skipped tests won't make pytest run fixtures for said tests unnecessarily, but unfortunately this also means
+  the skipping behavior will be applied to any tests that requires a "benchmark" fixture, regardless if it would come from pytest-benchmark
+  or not.
+  **MAY BE BACKWARDS INCOMPATIBLE**
 
 3.2.3 (2020-01-10)
 ------------------
