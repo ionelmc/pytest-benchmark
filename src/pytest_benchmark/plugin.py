@@ -263,20 +263,18 @@ def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info
         )
 
 
-@pytest.hookimpl(hookwrapper=True)
-def pytest_runtest_call(item):
-    bs = item.config._benchmarksession
-    fixture = hasattr(item, "funcargs") and item.funcargs.get("benchmark")
-    if isinstance(fixture, BenchmarkFixture):
-        if bs.skip:
-            pytest.skip("Skipping benchmark (--benchmark-skip active).")
+def pytest_collection_modifyitems(config, items):
+    bs = config._benchmarksession
+    skip_bench = pytest.mark.skip(reason="Skipping benchmark (--benchmark-skip active).")
+    skip_other = pytest.mark.skip(reason="Skipping non-benchmark (--benchmark-only active).")
+    for item in items:
+        has_benchmark = hasattr(item, "fixturenames") and "benchmark" in item.fixturenames
+        if has_benchmark:
+            if bs.skip:
+                item.add_marker(skip_bench)
         else:
-            yield
-    else:
-        if bs.only:
-            pytest.skip("Skipping non-benchmark (--benchmark-only active).")
-        else:
-            yield
+            if bs.only:
+                item.add_marker(skip_other)
 
 
 def pytest_benchmark_group_stats(config, benchmarks, group_by):
