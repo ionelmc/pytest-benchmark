@@ -589,6 +589,10 @@ def report_noprogress(iterable, *args, **kwargs):
         yield "", item
 
 
+def report_online_progress(progress_reporter, tr, line):
+    next(progress_reporter([line], tr, "{value}"))
+
+
 def slugify(name):
     for c in r"\/:*?<>| ":
         name = name.replace(c, '_').replace('__', '_')
