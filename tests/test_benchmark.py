@@ -428,7 +428,7 @@ def test_fixtures_also_skipped(testdir):
         "*collected 2 items",
         "*====== 1 passed, 1 skipped in * ======*",
     ])
-    result.stdout.no_fnmatch_line('dep created')
+    assert 'dep created' not in result.stdout.lines
 
 
 def test_conflict_between_only_and_disable(testdir):
