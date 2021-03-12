@@ -114,7 +114,8 @@ import pytest
 
 @pytest.fixture
 def dep():
-    print('dep created')
+    print("""
+dep created""")
 
 def test_normal(dep):
     pass
