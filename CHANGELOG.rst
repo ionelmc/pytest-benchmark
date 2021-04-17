@@ -2,7 +2,7 @@
 Changelog
 =========
 
-3.3.0 (2021-03-12)
+3.3.0 (2021-04-17)
 ------------------
 
 * Disable progress indication unless ``--benchmark-verbose`` is used.
@@ -17,6 +17,10 @@ Changelog
   the skipping behavior will be applied to any tests that requires a "benchmark" fixture, regardless if it would come from pytest-benchmark
   or not.
   **MAY BE BACKWARDS INCOMPATIBLE**
+* Added ``--benchmark-quiet`` - option to disable reporting and other information output.
+* Squelched unnecessary warning when ``--benchmark-disable`` and save options are used.
+  Fixes `#199 <https://github.com/ionelmc/pytest-benchmark/issues/199>`_.
+* ``PerformanceRegression`` exception no longer inherits ``pytest.UsageError`` (apparently a *final* class).
 
 3.2.3 (2020-01-10)
 ------------------
