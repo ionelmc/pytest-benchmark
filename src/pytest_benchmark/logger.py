@@ -13,7 +13,7 @@ class PytestBenchmarkWarning(PytestWarning):
 
 
 class Logger(object):
-    VERBOSE, NORMAL, QUIET = range(3)
+    QUIET, NORMAL, VERBOSE = range(3)
 
     def __init__(self, level=NORMAL, config=None):
         self.level = level
@@ -31,7 +31,7 @@ class Logger(object):
                                               getattr('capman', 'resumecapture', None))
 
     def warn(self, text, warner=None, suspend=False):
-        if self.level == self.VERBOSE:
+        if self.level >= self.VERBOSE:
             if suspend and self.suspend_capture:
                 self.suspend_capture(in_=True)
             self.term.line("")
@@ -60,7 +60,7 @@ class Logger(object):
             self.term.line(text, **kwargs)
 
     def debug(self, text, newline=False, **kwargs):
-        if self.level == self.VERBOSE:
+        if self.level >= self.VERBOSE:
             if self.suspend_capture:
                 self.suspend_capture(in_=True)
             self.info(text, newline=newline, **kwargs)
