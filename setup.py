@@ -25,7 +25,7 @@ def read(*names, **kwargs):
 
 setup(
     name='pytest-benchmark',
-    version='3.4.0',
+    version='3.4.1',
     license='BSD-2-Clause',
     description='A ``pytest`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer.',
     long_description='%s\n%s' % (
