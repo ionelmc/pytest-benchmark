@@ -13,8 +13,10 @@ class PytestBenchmarkWarning(PytestWarning):
 
 
 class Logger(object):
-    def __init__(self, verbose, config=None):
-        self.verbose = verbose
+    VERBOSE, NORMAL, QUIET = range(3)
+
+    def __init__(self, level=NORMAL, config=None):
+        self.level = level
         self.term = py.io.TerminalWriter(file=sys.stderr)
         self.suspend_capture = None
         self.resume_capture = None
@@ -29,7 +31,7 @@ class Logger(object):
                                               getattr('capman', 'resumecapture', None))
 
     def warn(self, text, warner=None, suspend=False):
-        if self.verbose:
+        if self.level == self.VERBOSE:
             if suspend and self.suspend_capture:
                 self.suspend_capture(in_=True)
             self.term.line("")
@@ -50,14 +52,15 @@ class Logger(object):
         self.term.sep("-", red=True, bold=True)
 
     def info(self, text, newline=True, **kwargs):
-        if not kwargs or kwargs == {'bold': True}:
-            kwargs['purple'] = True
-        if newline:
-            self.term.line("")
-        self.term.line(text, **kwargs)
+        if self.level >= self.NORMAL:
+            if not kwargs or kwargs == {'bold': True}:
+                kwargs['purple'] = True
+            if newline:
+                self.term.line("")
+            self.term.line(text, **kwargs)
 
     def debug(self, text, newline=False, **kwargs):
-        if self.verbose:
+        if self.level == self.VERBOSE:
             if self.suspend_capture:
                 self.suspend_capture(in_=True)
             self.info(text, newline=newline, **kwargs)

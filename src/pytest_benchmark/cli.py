@@ -133,7 +133,10 @@ class HookDispatch(object):
 def main():
     parser = make_parser()
     args = parser.parse_args()
-    logger = Logger(args.verbose)
+    level = Logger.QUIET if args.quiet else Logger.NORMAL
+    if args.verbose:
+        level = Logger.VERBOSE
+    logger = Logger(level)
     storage = load_storage(args.storage, logger=logger, netrc=args.netrc)
 
     hook = HookDispatch()

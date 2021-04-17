@@ -121,6 +121,11 @@ def add_global_options(addoption, prefix="benchmark-"):
         action="store_true", default=False,
         help="Dump diagnostic and progress information."
     )
+    addoption(
+        "--{0}quiet".format(prefix), *[] if prefix else ['-q'],
+        action="store_true", default=False,
+        help="Disable reporting. Verbose mode takes precedence."
+    )
 
 
 def pytest_addoption(parser):

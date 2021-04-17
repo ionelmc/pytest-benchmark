@@ -31,7 +31,11 @@ class BenchmarkSession(object):
 
     def __init__(self, config):
         self.verbose = config.getoption("benchmark_verbose")
-        self.logger = Logger(self.verbose, config)
+        self.quiet = False if self.verbose else config.getoption("benchmark_quiet")
+        level = Logger.QUIET if self.quiet else Logger.NORMAL
+        if self.verbose:
+            level = Logger.VERBOSE
+        self.logger = Logger(level, config=config)
         self.config = config
         self.performance_regressions = []
         self.benchmarks = []
@@ -222,9 +226,11 @@ class BenchmarkSession(object):
             scale_unit=partial(self.config.hook.pytest_benchmark_scale_unit, config=self.config),
         )
         progress_reporter = report_progress if self.verbose else report_noprogress
-        results_table.display(tr, self.groups, progress_reporter=progress_reporter)
+        if not self.quiet:
+            results_table.display(tr, self.groups, progress_reporter=progress_reporter)
         self.check_regressions()
-        self.display_cprofile(tr)
+        if not self.quiet:
+            self.display_cprofile(tr)
 
     def check_regressions(self):
         if self.compare_fail and not self.compared_mapping:
