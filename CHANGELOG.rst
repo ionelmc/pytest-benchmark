@@ -2,7 +2,17 @@
 Changelog
 =========
 
-3.3.0 (2021-04-17)
+
+3.4.1 (2021-04-17)
+------------------
+
+* Republished with updated changelog.
+
+  I intended to publish a ``3.3.0`` release but I messed it up because bumpversion doesn't work well with pre-commit
+  apparently... thus ``3.4.0`` was set in by accident.
+
+
+3.4.0 (2021-04-17)
 ------------------
 
 * Disable progress indication unless ``--benchmark-verbose`` is used.
