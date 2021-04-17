@@ -62,6 +62,7 @@ class MockSession(BenchmarkSession):
     def __init__(self, name_format):
         self.histogram = True
         self.verbose = False
+        self.quiet = False
         self.benchmarks = []
         self.performance_regressions = []
         self.sort = u"min"
