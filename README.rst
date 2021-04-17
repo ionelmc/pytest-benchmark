@@ -60,7 +60,7 @@ Overview
     :alt: Supported implementations
     :target: https://pypi.org/project/pytest-benchmark
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/ionelmc/pytest-benchmark/v3.2.3.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/ionelmc/pytest-benchmark/v3.4.0.svg
     :alt: Commits since latest release
     :target: https://github.com/ionelmc/pytest-benchmark/compare/v3.2.3...master
 
@@ -94,17 +94,17 @@ Examples
 
 But first, a prologue:
 
-    This plugin tightly integrates into pytest. To use this effectively you should know a thing or two about pytest first. 
-    Take a look at the `introductory material <http://docs.pytest.org/en/latest/getting-started.html>`_ 
+    This plugin tightly integrates into pytest. To use this effectively you should know a thing or two about pytest first.
+    Take a look at the `introductory material <http://docs.pytest.org/en/latest/getting-started.html>`_
     or watch `talks <http://docs.pytest.org/en/latest/talks.html>`_.
-    
+
     Few notes:
-    
+
     * This plugin benchmarks functions and only that. If you want to measure block of code
       or whole programs you will need to write a wrapper function.
-    * In a test you can only benchmark one function. If you want to benchmark many functions write more tests or 
+    * In a test you can only benchmark one function. If you want to benchmark many functions write more tests or
       use `parametrization <http://docs.pytest.org/en/latest/parametrize.html>`.
-    * To run the benchmarks you simply use `pytest` to run your "tests". The plugin will automatically do the 
+    * To run the benchmarks you simply use `pytest` to run your "tests". The plugin will automatically do the
       benchmarking and generate a result table. Run ``pytest --help`` for more details.
 
 This plugin provides a `benchmark` fixture. This fixture is a callable object that will benchmark any function passed
@@ -209,8 +209,3 @@ Credits
 .. _FAQ: http://pytest-benchmark.readthedocs.org/en/latest/faq.html
 .. _calibration: http://pytest-benchmark.readthedocs.org/en/latest/calibration.html
 .. _pedantic: http://pytest-benchmark.readthedocs.org/en/latest/pedantic.html
-
-
-
-
-
