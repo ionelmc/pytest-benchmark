@@ -66,6 +66,7 @@ class MockStorage(ElasticsearchStorage):
 class MockSession(BenchmarkSession):
     def __init__(self):
         self.verbose = False
+        self.quiet = False
         self.histogram = True
         self.benchmarks = []
         self.performance_regressions = []
