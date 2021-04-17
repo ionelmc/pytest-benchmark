@@ -21,7 +21,7 @@ from .utils import safe_dumps
 from .utils import short_filename
 
 
-class PerformanceRegression(pytest.UsageError):
+class PerformanceRegression(Exception):
     pass
 
 
