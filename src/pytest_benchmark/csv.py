@@ -17,7 +17,7 @@ class CSVResults(object):
         if not output_file.ext:
             output_file = output_file.new(ext='csv')
         with output_file.open('w', ensure=True) as stream:
-            writer = csv.writer(stream)
+            writer = csv.writer(stream, lineterminator="\n")
             params = sorted(set(
                 param
                 for group, benchmarks in groups
