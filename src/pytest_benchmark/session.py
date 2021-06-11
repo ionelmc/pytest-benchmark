@@ -136,7 +136,7 @@ class BenchmarkSession(object):
         save = self.save or self.autosave
         if save or self.json:
             if not self.benchmarks:
-                if not self.disabled
+                if not self.disabled:
                     self.logger.warn("Not saving anything, no benchmarks have been run!")
                 return
             machine_info = self.get_machine_info()
