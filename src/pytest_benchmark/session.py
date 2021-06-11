@@ -135,8 +135,9 @@ class BenchmarkSession(object):
     def handle_saving(self):
         save = self.save or self.autosave
         if save or self.json:
-            if not self.benchmarks and not self.disabled:
-                self.logger.warn("Not saving anything, no benchmarks have been run!")
+            if not self.benchmarks:
+                if not self.disabled:
+                    self.logger.warn("Not saving anything, no benchmarks have been run!")
                 return
             machine_info = self.get_machine_info()
             commit_info = self.config.hook.pytest_benchmark_generate_commit_info(config=self.config)
