@@ -30,3 +30,4 @@ Authors
 * Jonathan Simon Prates - https://github.com/jonathansp
 * Miroslav Šedivý - https://github.com/eumiro
 * Dimitris Rozakis - https://github.com/dimrozakis
+* Friedrich Delgado - https://github.com/TauPan
