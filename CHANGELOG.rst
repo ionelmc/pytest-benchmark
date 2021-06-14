@@ -2,6 +2,12 @@
 Changelog
 =========
 
+3.4.2 (2021-06-15)
+------------------
+
+* Don't save if ``--benchmark-disable`` is used.
+  Fixes `#205 <https://github.com/ionelmc/pytest-benchmark/issues/205`_.
+  Contributed by Friedrich Delgado in `#207 <https://github.com/ionelmc/pytest-benchmark/pull/207>`_.
 
 3.4.1 (2021-04-17)
 ------------------
