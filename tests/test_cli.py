@@ -9,6 +9,7 @@ pytest_plugins = 'pytester',
 
 THIS = py.path.local(__file__)
 STORAGE = THIS.dirpath('test_storage')
+OPTIONS = 'options' if sys.version_info >= (3, 10) else 'optional arguments'
 
 
 @pytest.fixture
@@ -26,7 +27,7 @@ def test_help(testdir):
         "",
         "pytest_benchmark's management commands.",
         "",
-        "optional arguments:",
+        "%s:" % OPTIONS,
         "  -h [COMMAND], --help [COMMAND]",
         "                        Display help and exit.",
         "  --storage URI, -s URI",
@@ -57,7 +58,7 @@ def test_help_command(testdir):
         'positional arguments:',
         '  command',
         '',
-        'optional arguments:',
+        '%s:' % OPTIONS,
         '  -h, --help  show this help message and exit',
     ])
 
@@ -70,7 +71,7 @@ def test_help_list(testdir, args):
         "",
         "List saved runs.",
         "",
-        "optional arguments:",
+        "%s:" % OPTIONS,
         "  -h, --help  show this help message and exit",
     ])
     assert result.ret == 0
@@ -92,7 +93,7 @@ def test_help_compare(testdir, args):
         "  glob_or_file          Glob or exact path for json files. If not specified",
         "                        all runs are loaded.",
         "",
-        "optional arguments:",
+        "%s:" % OPTIONS,
         "  -h, --help            show this help message and exit",
         "  --sort COL            Column to sort on. Can be one of: 'min', 'max',",
         "                        'mean', 'stddev', 'name', 'fullname'. Default: 'min'",
