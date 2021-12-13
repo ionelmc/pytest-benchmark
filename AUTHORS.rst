@@ -31,3 +31,4 @@ Authors
 * Miroslav Šedivý - https://github.com/eumiro
 * Dimitris Rozakis - https://github.com/dimrozakis
 * Friedrich Delgado - https://github.com/TauPan
+* Sam James - https://github.com/thesamesam
