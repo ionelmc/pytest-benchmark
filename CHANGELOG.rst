@@ -6,6 +6,9 @@ Changelog
 ------------------
 * Fix skipping test in `test_utils.py` if appropriate VCS not available. Also fix typo.
   Contributed by Sam James in `#211 <https://github.com/ionelmc/pytest-benchmark/pull/211>`_.
+* Use ``pytest.hookimpl`` and ``pytest.hookspec`` to configure hooks,
+  avoiding a deprecation warning in the upcoming pytest 7.2.0.
+  Contributed by Florian Bruhin in `#224 <https://github.com/ionelmc/pytest-benchmark/pull/224>`_.
 
 3.4.2 (2021-06-15)
 ------------------

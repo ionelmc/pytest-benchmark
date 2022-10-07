@@ -1,3 +1,6 @@
+import pytest
+
+@pytest.hookspec(firstresult=True)
 def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
     """
     To have custom time scaling do something like this:
@@ -19,6 +22,7 @@ def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
     pass
 
 
+@pytest.hookspec(firstresult=True)
 def pytest_benchmark_generate_machine_info(config):
     """
     To completely replace the generated machine_info do something like this:
@@ -45,6 +49,7 @@ def pytest_benchmark_update_machine_info(config, machine_info):
     pass
 
 
+@pytest.hookspec(firstresult=True)
 def pytest_benchmark_generate_commit_info(config):
     """
     To completely replace the generated commit_info do something like this:
@@ -69,6 +74,7 @@ def pytest_benchmark_update_commit_info(config, commit_info):
     pass
 
 
+@pytest.hookspec(firstresult=True)
 def pytest_benchmark_group_stats(config, benchmarks, group_by):
     """
     You may perform grouping customization here, in case the builtin grouping doesn't suit you.
@@ -90,6 +96,7 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
     pass
 
 
+@pytest.hookspec(firstresult=True)
 def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_info, commit_info):
     """
     You should read pytest-benchmark's code if you really need to wholly customize the json.
@@ -143,10 +150,3 @@ def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info
             )
     """
     pass
-
-
-pytest_benchmark_scale_unit.firstresult = True
-pytest_benchmark_generate_commit_info.firstresult = True
-pytest_benchmark_generate_json.firstresult = True
-pytest_benchmark_generate_machine_info.firstresult = True
-pytest_benchmark_group_stats.firstresult = True

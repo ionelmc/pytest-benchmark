@@ -434,7 +434,7 @@ def pytest_runtest_makereport(item, call):
         fixture.skipped = outcome.get_result().outcome == 'skipped'
 
 
-@pytest.mark.trylast  # force the other plugins to initialise, fixes issue with capture not being properly initialised
+@pytest.hookimpl(trylast=True)  # force the other plugins to initialise, fixes issue with capture not being properly initialised
 def pytest_configure(config):
     config.addinivalue_line("markers", "benchmark: mark a test with custom benchmark settings.")
     bs = config._benchmarksession = BenchmarkSession(config)
