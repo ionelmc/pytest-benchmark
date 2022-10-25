@@ -1,22 +1,19 @@
 from __future__ import absolute_import
 
 import re
-import sys
 import uuid
 from datetime import date
 from datetime import datetime
 from decimal import Decimal
 from functools import partial
 
-from ..compat import reraise
 from ..stats import normalize_stats
 
 try:
     import elasticsearch
     from elasticsearch.serializer import JSONSerializer
-except ImportError as exc:
-    reraise(ImportError, ImportError("Please install elasticsearch or pytest-benchmark[elasticsearch]", exc.args),
-            sys.exc_info()[2])
+except ImportError:
+    raise ImportError("Please install elasticsearch or pytest-benchmark[elasticsearch]")
 
 
 class BenchmarkJSONSerializer(JSONSerializer):

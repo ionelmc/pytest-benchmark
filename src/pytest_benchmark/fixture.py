@@ -9,8 +9,6 @@ import time
 import traceback
 from math import ceil
 
-from .compat import INT
-from .compat import XRANGE
 from .timers import compute_timer_precision
 from .utils import NameWrapper
 from .utils import format_time
@@ -160,9 +158,9 @@ class BenchmarkFixture(object):
             if self._warmup:
                 warmup_rounds = min(rounds, max(1, int(self._warmup / iterations)))
                 self._logger.debug("  Warmup %s rounds x %s iterations ..." % (warmup_rounds, iterations))
-                for _ in XRANGE(warmup_rounds):
+                for _ in range(warmup_rounds):
                     runner(loops_range)
-            for _ in XRANGE(rounds):
+            for _ in range(rounds):
                 stats.update(runner(loops_range))
             self._logger.debug("  Ran for %ss." % format_time(time.time() - run_start), yellow=True, bold=True)
         if self.enabled and self.cprofile:
@@ -179,13 +177,13 @@ class BenchmarkFixture(object):
 
         has_args = bool(args or kwargs)
 
-        if not isinstance(iterations, INT) or iterations < 1:
+        if not isinstance(iterations, int) or iterations < 1:
             raise ValueError("Must have positive int for `iterations`.")
 
-        if not isinstance(rounds, INT) or rounds < 1:
+        if not isinstance(rounds, int) or rounds < 1:
             raise ValueError("Must have positive int for `rounds`.")
 
-        if not isinstance(warmup_rounds, INT) or warmup_rounds < 0:
+        if not isinstance(warmup_rounds, int) or warmup_rounds < 0:
             raise ValueError("Must have positive int for `warmup_rounds`.")
 
         if iterations > 1 and setup:
@@ -205,14 +203,14 @@ class BenchmarkFixture(object):
             return target(*args, **kwargs)
 
         stats = self._make_stats(iterations)
-        loops_range = XRANGE(iterations) if iterations > 1 else None
-        for _ in XRANGE(warmup_rounds):
+        loops_range = range(iterations) if iterations > 1 else None
+        for _ in range(warmup_rounds):
             args, kwargs = make_arguments()
 
             runner = self._make_runner(target, args, kwargs)
             runner(loops_range)
 
-        for _ in XRANGE(rounds):
+        for _ in range(rounds):
             args, kwargs = make_arguments()
 
             runner = self._make_runner(target, args, kwargs)
@@ -273,7 +271,7 @@ class BenchmarkFixture(object):
 
         loops = 1
         while True:
-            loops_range = XRANGE(loops)
+            loops_range = range(loops)
             duration = runner(loops_range)
             if self._warmup:
                 warmup_start = time.time()
@@ -299,7 +297,7 @@ class BenchmarkFixture(object):
                 if loops == 1:
                     # If we got a single loop then bail early - nothing to calibrate if the the
                     # test function is 100 times slower than the timer resolution.
-                    loops_range = XRANGE(loops)
+                    loops_range = range(loops)
                     break
             else:
                 loops *= 10

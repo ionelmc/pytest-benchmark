@@ -1,5 +1,6 @@
 import pytest
 
+
 @pytest.hookspec(firstresult=True)
 def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
     """

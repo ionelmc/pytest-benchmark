@@ -19,10 +19,13 @@ from os.path import dirname
 from os.path import exists
 from os.path import join
 from os.path import split
+from subprocess import CalledProcessError
+from subprocess import check_output
+from urllib.parse import parse_qs
+from urllib.parse import urlparse
 
 import genericpath
 
-from .compat import PY3
 from .compat import PY38
 
 # This is here (in the utils module) because it might be used by
@@ -32,34 +35,6 @@ try:
 except ImportError:
     from pathlib import Path  # noqa: F401
 
-try:
-    from urllib.parse import parse_qs
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import parse_qs
-    from urlparse import urlparse
-
-try:
-    from subprocess import CalledProcessError
-    from subprocess import check_output
-except ImportError:
-    class CalledProcessError(subprocess.CalledProcessError):
-        def __init__(self, returncode, cmd, output=None):
-            super(CalledProcessError, self).__init__(returncode, cmd)
-            self.output = output
-
-    def check_output(*popenargs, **kwargs):
-        if 'stdout' in kwargs:
-            raise ValueError('stdout argument not allowed, it will be overridden.')
-        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
-        output, unused_err = process.communicate()
-        retcode = process.poll()
-        if retcode:
-            cmd = kwargs.get("args")
-            if cmd is None:
-                cmd = popenargs[0]
-            raise CalledProcessError(retcode, cmd, output)
-        return output
 
 TIME_UNITS = {
     "": "Seconds",
@@ -255,12 +230,8 @@ def load_timer(string):
         raise argparse.ArgumentTypeError("Value for --benchmark-timer must be in dotted form. Eg: 'module.attr'.")
     mod, attr = string.rsplit(".", 1)
     if mod == 'pep418':
-        if PY3:
-            import time
-            return NameWrapper(getattr(time, attr))
-        else:
-            from . import pep418
-            return NameWrapper(getattr(pep418, attr))
+        import time
+        return NameWrapper(getattr(time, attr))
     else:
         __import__(mod)
         mod = sys.modules[mod]
@@ -545,13 +516,11 @@ def clonefunc(f):
     if not hasattr(f, '__code__'):
         return f
     co = f.__code__
-    args = [co.co_argcount, co.co_nlocals, co.co_stacksize, co.co_flags, co.co_code,
+    args = [co.co_argcount, co.co_kwonlyargcount, co.co_nlocals, co.co_stacksize, co.co_flags, co.co_code,
             co.co_consts, co.co_names, co.co_varnames, co.co_filename, co.co_name,
             co.co_firstlineno, co.co_lnotab, co.co_freevars, co.co_cellvars]
     if PY38:
         args.insert(1, co.co_posonlyargcount)
-    if PY3:
-        args.insert(1, co.co_kwonlyargcount)
     co2 = types.CodeType(*args)
     #
     # then, we clone the function itself, using the new co2

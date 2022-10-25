@@ -32,7 +32,7 @@ def test_clonefunc_not_function():
     assert clonefunc(1) == 1
 
 
-@pytest.yield_fixture(params=(True, False))
+@pytest.fixture(params=(True, False))
 def crazytestdir(request, testdir):
     if request.param:
         testdir.tmpdir.join('foo', 'bar').ensure(dir=1).chdir()

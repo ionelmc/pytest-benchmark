@@ -1,7 +1,5 @@
 from time import time as timeout_timer
 
-from .compat import XRANGE
-
 try:
     from __pypy__.time import CLOCK_MONOTONIC
     from __pypy__.time import clock_gettime
@@ -20,7 +18,7 @@ def compute_timer_precision(timer):
     timeout = timeout_timer() + 1.0
     previous = timer()
     while timeout_timer() < timeout or points < 5:
-        for _ in XRANGE(10):
+        for _ in range(10):
             t1 = timer()
             t2 = timer()
             dt = t2 - t1

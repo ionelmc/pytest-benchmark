@@ -1028,10 +1028,10 @@ def test_basic(testdir):
     result.stdout.fnmatch_lines([
         "*collected 5 items",
         "test_basic.py::*test_basic PASSED*",
+        "test_basic.py::test_fast PASSED*",
         "test_basic.py::test_slow PASSED*",
         "test_basic.py::test_slower PASSED*",
         "test_basic.py::test_xfast PASSED*",
-        "test_basic.py::test_fast PASSED*",
         "",
         "* benchmark: 4 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
@@ -1052,10 +1052,10 @@ def test_skip(testdir):
     result.stdout.fnmatch_lines([
         "*collected 5 items",
         "test_skip.py::*test_skip PASSED*",
+        "test_skip.py::test_fast SKIPPED*",
         "test_skip.py::test_slow SKIPPED*",
         "test_skip.py::test_slower SKIPPED*",
         "test_skip.py::test_xfast SKIPPED*",
-        "test_skip.py::test_fast SKIPPED*",
         "*====== 1 passed, 4 skipped * ======*",
     ])
 
@@ -1066,10 +1066,10 @@ def test_disable(testdir):
     result.stdout.fnmatch_lines([
         "*collected 5 items",
         "test_disable.py::*test_disable PASSED*",
+        "test_disable.py::test_fast PASSED*",
         "test_disable.py::test_slow PASSED*",
         "test_disable.py::test_slower PASSED*",
         "test_disable.py::test_xfast PASSED*",
-        "test_disable.py::test_fast PASSED*",
         "*====== 5 passed * ======*",
     ])
 
@@ -1095,10 +1095,10 @@ def test_only_benchmarks(testdir):
     result.stdout.fnmatch_lines([
         "*collected 5 items",
         "test_only_benchmarks.py::*test_only_benchmarks SKIPPED*",
+        "test_only_benchmarks.py::test_fast PASSED*",
         "test_only_benchmarks.py::test_slow PASSED*",
         "test_only_benchmarks.py::test_slower PASSED*",
         "test_only_benchmarks.py::test_xfast PASSED*",
-        "test_only_benchmarks.py::test_fast PASSED*",
         "* benchmark: 4 tests *",
         "Name (time in ?s) * Min * Max * Mean * StdDev * Rounds * Iterations",
         "------*",

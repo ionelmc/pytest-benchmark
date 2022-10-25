@@ -193,7 +193,7 @@ The compare ``command`` takes almost all the ``--benchmark`` options, minus the 
       glob_or_file          Glob or exact path for json files. If not specified
                             all runs are loaded.
 
-    optional arguments:
+    options:
       -h, --help            show this help message and exit
       --sort=COL            Column to sort on. Can be one of: 'min', 'max',
                             'mean', 'stddev', 'name', 'fullname'. Default: 'min'
