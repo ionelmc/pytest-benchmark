@@ -74,6 +74,7 @@ setup(
     install_requires=[
         'pytest>=3.8',
         'py-cpuinfo',
+        'py>=1.8.2',
     ],
     extras_require={
         'aspect': ['aspectlib'],
