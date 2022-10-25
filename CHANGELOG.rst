@@ -2,17 +2,17 @@
 Changelog
 =========
 
-4.0.0 (2022-10-25)
+4.0.0 (2022-10-26)
 ------------------
 
 * Dropped support for legacy Pythons (2.7, 3.6 or older).
 * Switched CI to GitHub Actions.
+* Removed dependency on the ``py`` library (that was not properly specified as a dependency anyway).
 * Fix skipping test in `test_utils.py` if appropriate VCS not available. Also fix typo.
   Contributed by Sam James in `#211 <https://github.com/ionelmc/pytest-benchmark/pull/211>`_.
-* Use ``pytest.hookimpl`` and ``pytest.hookspec`` to configure hooks,
-  avoiding a deprecation warning in the upcoming pytest 7.2.0.
+* Added support for pytest 7.2.0 by using ``pytest.hookimpl`` and ``pytest.hookspec`` to configure hooks.
   Contributed by Florian Bruhin in `#224 <https://github.com/ionelmc/pytest-benchmark/pull/224>`_.
-* Don't save if ``--benchmark-disable`` is used.
+* Now no save is attempted if ``--benchmark-disable`` is used.
   Fixes `#205 <https://github.com/ionelmc/pytest-benchmark/issues/205>`_.
   Contributed by Friedrich Delgado in `#207 <https://github.com/ionelmc/pytest-benchmark/pull/207>`_.
 
