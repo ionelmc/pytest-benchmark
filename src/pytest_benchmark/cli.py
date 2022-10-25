@@ -126,8 +126,6 @@ class HookDispatch(object):
         else:
             self.conftest = None
 
-        print(f'>>>>>>>>>> {self.conftest}')
-
     def __getattr__(self, item):
         default = getattr(plugin, item)
         return getattr(self.conftest, item, default)
