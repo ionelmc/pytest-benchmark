@@ -10,37 +10,31 @@ Overview
     * - docs
       - |docs| |gitter|
     * - tests
-      - | |travis| |appveyor| |requires|
+      - | |github-actions| |requires|
         | |coveralls| |codecov|
     * - package
       - | |version| |wheel| |supported-versions| |supported-implementations|
         | |commits-since|
-
 .. |docs| image:: https://readthedocs.org/projects/pytest-benchmark/badge/?style=flat
-    :target: https://readthedocs.org/projects/pytest-benchmark
+    :target: https://pytest-benchmark.readthedocs.io/
     :alt: Documentation Status
 
+.. |github-actions| image:: https://github.com/ionelmc/pytest-benchmark/actions/workflows/github-actions.yml/badge.svg
+    :alt: GitHub Actions Build Status
+    :target: https://github.com/ionelmc/pytest-benchmark/actions
 .. |gitter| image:: https://badges.gitter.im/ionelmc/pytest-benchmark.svg
     :alt: Join the chat at https://gitter.im/ionelmc/pytest-benchmark
     :target: https://gitter.im/ionelmc/pytest-benchmark
 
-.. |travis| image:: https://api.travis-ci.com/ionelmc/pytest-benchmark.svg?branch=master
-    :alt: Travis-CI Build Status
-    :target: https://travis-ci.com/github/ionelmc/pytest-benchmark
-
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/ionelmc/pytest-benchmark?branch=master&svg=true
-    :alt: AppVeyor Build Status
-    :target: https://ci.appveyor.com/project/ionelmc/pytest-benchmark
-
-.. |requires| image:: https://requires.io/github/ionelmc/pytest-benchmark/requirements.svg?branch=master
+.. |requires| image:: https://requires.io/github/ionelmc/pytest-benchmark/requirements.svg?branch=main
     :alt: Requirements Status
-    :target: https://requires.io/github/ionelmc/pytest-benchmark/requirements/?branch=master
+    :target: https://requires.io/github/ionelmc/pytest-benchmark/requirements/?branch=main
 
-.. |coveralls| image:: https://coveralls.io/repos/ionelmc/pytest-benchmark/badge.svg?branch=master&service=github
+.. |coveralls| image:: https://coveralls.io/repos/ionelmc/pytest-benchmark/badge.svg?branch=main&service=github
     :alt: Coverage Status
     :target: https://coveralls.io/r/ionelmc/pytest-benchmark
 
-.. |codecov| image:: https://codecov.io/gh/ionelmc/pytest-benchmark/branch/master/graphs/badge.svg?branch=master
+.. |codecov| image:: https://codecov.io/gh/ionelmc/pytest-benchmark/branch/main/graphs/badge.svg?branch=main
     :alt: Coverage Status
     :target: https://codecov.io/github/ionelmc/pytest-benchmark
 
@@ -62,7 +56,7 @@ Overview
 
 .. |commits-since| image:: https://img.shields.io/github/commits-since/ionelmc/pytest-benchmark/v3.4.1.svg
     :alt: Commits since latest release
-    :target: https://github.com/ionelmc/pytest-benchmark/compare/v3.2.3...master
+    :target: https://github.com/ionelmc/pytest-benchmark/compare/v3.4.1...main
 
 
 
