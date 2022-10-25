@@ -13,7 +13,7 @@ Changelog
   avoiding a deprecation warning in the upcoming pytest 7.2.0.
   Contributed by Florian Bruhin in `#224 <https://github.com/ionelmc/pytest-benchmark/pull/224>`_.
 * Don't save if ``--benchmark-disable`` is used.
-  Fixes `#205 <https://github.com/ionelmc/pytest-benchmark/issues/205`_.
+  Fixes `#205 <https://github.com/ionelmc/pytest-benchmark/issues/205>`_.
   Contributed by Friedrich Delgado in `#207 <https://github.com/ionelmc/pytest-benchmark/pull/207>`_.
 
 3.4.1 (2021-04-17)
@@ -81,7 +81,6 @@ Changelog
 * Added support for Pytest 4.1.
 * Various formatting, spelling and documentation fixes. Contributed by
   Ken Crowell, Ofek Lev, Matthew Feickert, Jose Eduardo, Anton Lodder, Alexander Duryagin and Grygorii Iermolenko in
-  `#97 <https://github.com/ionelmc/pytest-benchmark/pull/97>`_,
   `#97 <https://github.com/ionelmc/pytest-benchmark/pull/97>`_,
   `#105 <https://github.com/ionelmc/pytest-benchmark/pull/105>`_,
   `#110 <https://github.com/ionelmc/pytest-benchmark/pull/110>`_,
@@ -156,7 +155,7 @@ Changelog
 * Added ``--benchmark-colums`` command line option. It selects what columns are displayed in the result table. Contributed by
   Antonio Cuni in `#34 <https://github.com/ionelmc/pytest-benchmark/pull/34>`_.
 * Added support for grouping by specific test parametrization (``--benchmark-group-by=param:NAME`` where ``NAME`` is your
-  param name). Contributed by Antonio Cuni in `#37 <https://github.com/ionelmc/pytest-benchmark/pull/37>`_.
+  param name). Contributed by Antonio Cuni in `#37 <https://github.com/ionelmc/pytest-benchmark/pull/37>`__.
 * Added support for ``name`` or ``fullname`` in ``--benchmark-sort``.
   Contributed by Antonio Cuni in `#37 <https://github.com/ionelmc/pytest-benchmark/pull/37>`_.
 * Changed signature for ``pytest_benchmark_generate_json`` hook to take 2 new arguments: ``machine_info`` and ``commit_info``.
