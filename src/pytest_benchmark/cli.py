@@ -1,7 +1,8 @@
 import argparse
 from functools import partial
 
-import py
+from _pytest import pathlib
+from _pytest._io import TerminalWriter
 
 from pytest_benchmark.csv import CSVResults
 
@@ -118,12 +119,14 @@ def make_parser():
 
 
 class HookDispatch(object):
-    def __init__(self):
-        conftest_file = py.path.local('conftest.py')
-        if conftest_file.check():
-            self.conftest = conftest_file.pyimport()
+    def __init__(self, **kwargs):
+        conftest_file = pathlib.Path('conftest.py')
+        if conftest_file.exists():
+            self.conftest = pathlib.import_path(conftest_file, **kwargs)
         else:
             self.conftest = None
+
+        print(f'>>>>>>>>>> {self.conftest}')
 
     def __getattr__(self, item):
         default = getattr(plugin, item)
@@ -139,7 +142,7 @@ def main():
     logger = Logger(level)
     storage = load_storage(args.storage, logger=logger, netrc=args.netrc)
 
-    hook = HookDispatch()
+    hook = HookDispatch(mode=args.importmode, root=pathlib.Path('.'))
 
     if args.command == 'list':
         for file in storage.query():
@@ -172,7 +175,7 @@ def main():
 
 class TerminalReporter(object):
     def __init__(self):
-        self._tw = py.io.TerminalWriter()
+        self._tw = TerminalWriter()
 
     def ensure_newline(self):
         pass
@@ -181,8 +184,8 @@ class TerminalReporter(object):
         self._tw.write(content, **markup)
 
     def write_line(self, line, **markup):
-        if not py.builtin._istext(line):
-            line = py.builtin.text(line, errors="replace")
+        if not isinstance(line, str):
+            line = line.decode(errors="replace")
         self._tw.line(line, **markup)
 
     def rewrite(self, line, **markup):

@@ -4,7 +4,7 @@ from __future__ import print_function
 import sys
 import warnings
 
-import py
+from _pytest._io import TerminalWriter
 from pytest import PytestWarning
 
 
@@ -17,7 +17,7 @@ class Logger(object):
 
     def __init__(self, level=NORMAL, config=None):
         self.level = level
-        self.term = py.io.TerminalWriter(file=sys.stderr)
+        self.term = TerminalWriter(file=sys.stderr)
         self.suspend_capture = None
         self.resume_capture = None
         if config:

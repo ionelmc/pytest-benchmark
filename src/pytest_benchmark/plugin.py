@@ -126,6 +126,14 @@ def add_global_options(addoption, prefix="benchmark-"):
         action="store_true", default=False,
         help="Disable reporting. Verbose mode takes precedence."
     )
+    if not prefix:
+        addoption(
+            "--import-mode",
+            default="prepend",
+            choices=["prepend", "append", "importlib"],
+            dest="importmode",
+            help="How to attempt loading hooks from conftest. Akin to pytest's --import-mode. Default: %(default)r.",
+        )
 
 
 def pytest_addoption(parser):
