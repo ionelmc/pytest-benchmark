@@ -26,7 +26,7 @@ from urllib.parse import urlparse
 
 import genericpath
 
-from .compat import PY38
+from .compat import PY38, PY311
 
 # This is here (in the utils module) because it might be used by
 # various other modules.
@@ -521,6 +521,10 @@ def clonefunc(f):
             co.co_firstlineno, co.co_lnotab, co.co_freevars, co.co_cellvars]
     if PY38:
         args.insert(1, co.co_posonlyargcount)
+
+    if PY311:
+        args.insert(12, co.co_qualname)
+        args.insert(15, co.co_exceptiontable)
     co2 = types.CodeType(*args)
     #
     # then, we clone the function itself, using the new co2
