@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Added Python 3.11 support.
+
 4.0.0 (2022-10-26)
 ------------------
 
