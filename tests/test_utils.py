@@ -1,6 +1,6 @@
 import argparse
-import distutils.spawn
 import os
+import shutil
 import subprocess
 
 import pytest
@@ -43,7 +43,7 @@ def crazytestdir(request, testdir):
 @pytest.fixture(params=('git', 'hg'))
 def scm(request, testdir):
     scm = request.param
-    if not distutils.spawn.find_executable(scm):
+    if not shutil.which(scm):
         pytest.skip("%r not available on $PATH" % (scm,))
     subprocess.check_call([scm, 'init', '.'])
     if scm == 'git':
@@ -156,7 +156,7 @@ def test_get_project_name(scm, set_remote, testdir):
     if scm is None:
         assert get_project_name().startswith("test_get_project_name")
         return
-    if not distutils.spawn.find_executable(scm):
+    if not shutil.which(scm):
         pytest.skip("%r not available on $PATH" % (scm,))
     subprocess.check_call([scm, 'init', '.'])
     if scm == 'git' and set_remote:
