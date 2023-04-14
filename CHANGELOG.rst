@@ -152,7 +152,7 @@ Changelog
 3.1.0a1 (2016-10-29)
 --------------------
 
-* Added ``--benchmark-colums`` command line option. It selects what columns are displayed in the result table. Contributed by
+* Added ``--benchmark-columns`` command line option. It selects what columns are displayed in the result table. Contributed by
   Antonio Cuni in `#34 <https://github.com/ionelmc/pytest-benchmark/pull/34>`_.
 * Added support for grouping by specific test parametrization (``--benchmark-group-by=param:NAME`` where ``NAME`` is your
   param name). Contributed by Antonio Cuni in `#37 <https://github.com/ionelmc/pytest-benchmark/pull/37>`__.
