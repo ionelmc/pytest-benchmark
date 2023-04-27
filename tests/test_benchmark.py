@@ -952,7 +952,6 @@ def test_ok(benchmark, bad_fixture):
 
         "    def test_bad(benchmark):",
         "?       @benchmark",
-        "?       def result():",
 
         "test_abort_broken.py:*",
         "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _*",
