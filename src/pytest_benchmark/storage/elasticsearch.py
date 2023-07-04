@@ -10,8 +10,11 @@ from ..stats import normalize_stats
 try:
     import elasticsearch
     from elasticsearch.serializer import JSONSerializer
-except ImportError as exc:
-    raise ImportError('Please install elasticsearch or pytest-benchmark[elasticsearch]') from exc
+    api_version = elasticsearch.__version__
+    if api_version[0] > 7:
+        NO_DOC_TYPE_ARG_TO_INDEX_FUNC = True
+except ImportError:
+    raise ImportError("Please install elasticsearch or pytest-benchmark[elasticsearch]")
 
 
 class BenchmarkJSONSerializer(JSONSerializer):
@@ -23,7 +26,7 @@ class BenchmarkJSONSerializer(JSONSerializer):
         elif isinstance(data, uuid.UUID):
             return str(data)
         else:
-            return 'UNSERIALIZABLE[%r]' % data
+            return "UNSERIALIZABLE[%r]" % data
 
 
 def _mask_hosts(hosts):
@@ -132,18 +135,23 @@ class ElasticsearchStorage:
             bench.update(output_json)
             benchmark_id = save
             if self.default_machine_id:
-                benchmark_id = self.default_machine_id + '_' + benchmark_id
-            doc_id = benchmark_id + '_' + bench['fullname']
-            bench['benchmark_id'] = benchmark_id
-            self._es.index(
-                index=self._es_index,
-                doc_type=self._es_doctype,
+                benchmark_id = self.default_machine_id + "_" + benchmark_id
+            doc_id = benchmark_id + "_" + bench["fullname"]
+            bench["benchmark_id"] = benchmark_id
+            self._index_call(
                 body=bench,
                 id=doc_id,
             )
         # hide user's credentials before logging
         masked_hosts = _mask_hosts(self._es_hosts)
         self.logger.info(f'Saved benchmark data to {masked_hosts} to index {self._es_index} as doctype {self._es_doctype}')
+    
+    if NO_DOC_TYPE_ARG_TO_INDEX_FUNC:
+        def _index_call(self, body, id):
+            return self._es.index(index=self._es_index, body=body, id=id)
+    else:
+        def _index_call(self, body, id):
+            return self._es.index(index=self._es_index, doc_type=self._es_doctype, body=body, id=id)
 
     def _create_index(self):
         mapping = {
