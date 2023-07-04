@@ -168,12 +168,21 @@ def test_handle_saving(sess, logger_output, monkeypatch):
     sess.json = None
     sess.save_data = False
     sess.handle_saving()
-    sess.storage._es.index.assert_called_with(
-        index='mocked',
-        doc_type='mocked',
-        body=ES_DATA,
-        id='FoobarOS_commitId_tests/test_normal.py::test_xfast_parametrized[0]',
-    )
+
+    if elasticsearch.__version__[0] > 7:
+        sess.storage._es.index.assert_called_with(
+            index='mocked',
+            # doc_type='mocked',
+            body=ES_DATA,
+            id='FoobarOS_commitId_tests/test_normal.py::test_xfast_parametrized[0]',
+        )
+    else:
+        sess.storage._es.index.assert_called_with(
+            index='mocked',
+            doc_type='mocked',
+            body=ES_DATA,
+            id='FoobarOS_commitId_tests/test_normal.py::test_xfast_parametrized[0]',
+        )
 
 
 def test_parse_with_no_creds():
