@@ -11,6 +11,7 @@ try:
     import elasticsearch
     from elasticsearch.serializer import JSONSerializer
     api_version = elasticsearch.__version__
+    NO_DOC_TYPE_ARG_TO_INDEX_FUNC = False
     if api_version[0] > 7:
         NO_DOC_TYPE_ARG_TO_INDEX_FUNC = True
 except ImportError:
