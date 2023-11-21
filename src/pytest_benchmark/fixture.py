@@ -68,7 +68,7 @@ class BenchmarkFixture(object):
         return not self.disabled
 
     @property
-    def statistics(self):
+    def statistics(self) -> Stats:
         """Make statistics of the benchmarked function easier to access."""
         return self.stats.stats
 
