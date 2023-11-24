@@ -14,6 +14,7 @@ from bisect import bisect_right
 
 from .utils import funcname
 from .utils import get_cprofile_functions
+from .utils import cached_property
 
 
 class Stats(object):
