@@ -42,7 +42,7 @@ class Stats(object):
     def update(self, duration):
         self.data.append(duration)
 
-    @property
+    @cached_property
     def sorted_data(self):
         return sorted(self.data)
 
