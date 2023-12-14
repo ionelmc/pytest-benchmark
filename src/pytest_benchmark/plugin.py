@@ -7,7 +7,7 @@ import platform
 import sys
 import traceback
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, UTC
 
 import pytest
 
@@ -384,7 +384,7 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_inf
         "machine_info": machine_info,
         "commit_info": commit_info,
         "benchmarks": benchmarks_json,
-        "datetime": datetime.utcnow().isoformat(),
+        "datetime": datetime.now(UTC).isoformat(),
         "version": __version__,
     }
     for bench in benchmarks:
