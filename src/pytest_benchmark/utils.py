@@ -11,7 +11,7 @@ import re
 import subprocess
 import sys
 import types
-from datetime import datetime
+from datetime import datetime, UTC
 from decimal import Decimal
 from functools import partial
 from os.path import basename
@@ -198,7 +198,7 @@ def get_commit_info(project_name=None):
 
 
 def get_current_time():
-    return datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    return datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
 
 
 def first_or_value(obj, value):
