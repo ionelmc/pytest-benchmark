@@ -1,3 +1,9 @@
+"""
+Don't use cached_property because we want a typing for getter and setter,
+and we can't use iqr_outliers.setter with cached_property because Python apply the
+decorator on cached_property and not on the property.
+"""
+
 from __future__ import division
 from __future__ import print_function
 
@@ -6,9 +12,9 @@ import statistics
 from bisect import bisect_left
 from bisect import bisect_right
 
-from .utils import cached_property
 from .utils import funcname
 from .utils import get_cprofile_functions
+from .utils import cached_property
 
 
 class Stats(object):
@@ -19,6 +25,7 @@ class Stats(object):
 
     def __init__(self):
         self.data = []
+        self.cache = {}
 
     def __bool__(self):
         return bool(self.data)
@@ -39,34 +46,97 @@ class Stats(object):
     def sorted_data(self):
         return sorted(self.data)
 
-    @cached_property
-    def total(self):
+    @property
+    def total(self) -> float or int:
+        """ Return the total time of round / iterations."""
+        cache_value = self.cache.get('total')
+
+        if cache_value is not None:
+            return cache_value
+
         return sum(self.data)
 
-    @cached_property
-    def min(self):
+    @total.setter
+    def total(self, value: float or int) -> None:
+        """ Set the total time of round / iterations."""
+        self.cache['total'] = value
+
+    @property
+    def min(self) -> float or int:
+        """ Return the minimum observed time of round / iterations."""
+        cache_value = self.cache.get('min')
+
+        if cache_value is not None:
+            return cache_value
+
         return min(self.data)
 
-    @cached_property
-    def max(self):
+    @min.setter
+    def min(self, value: float or int) -> None:
+        """ Set the minimum observed time of round / iterations."""
+        self.cache['min'] = value
+
+    @property
+    def max(self) -> float or int:
+        """ Return the maximum observed time of round / iterations"""
+        cache_value = self.cache.get('max')
+
+        if cache_value is not None:
+            return cache_value
+
         return max(self.data)
 
-    @cached_property
-    def mean(self):
+    @max.setter
+    def max(self, value: float or int) -> None:
+        """ Set the maximum observed time of round / iterations."""
+        self.cache['max'] = value
+
+    @property
+    def mean(self) -> float or int:
+        """ Return the mean of time of round / iterations."""
+        cache_value = self.cache.get('mean')
+
+        if cache_value is not None:
+            return cache_value
+
         return statistics.mean(self.data)
 
-    @cached_property
-    def stddev(self):
+    @mean.setter
+    def mean(self, value: float or int) -> None:
+        """ Set the mean. """
+        self.cache['mean'] = value
+
+    @property
+    def stddev(self) -> float or int:
+        """ Return the standard deviation. """
+        cache_value = self.cache.get('stddev')
+
+        if cache_value is not None:
+            return cache_value
+
         if len(self.data) > 1:
             return statistics.stdev(self.data)
         else:
             return 0
 
+    @stddev.setter
+    def stddev(self, value: float or int) -> None:
+        """ Set the standard deviation. """
+        self.cache['stddev'] = value
+
     @property
-    def stddev_outliers(self):
+    def stddev_outliers(self) -> float or int:
         """
-        Count of StdDev outliers: what's beyond (Mean - StdDev, Mean - StdDev)
+        Return the number of outliers (StdDev-style).
+
+        Notes:
+            Count of StdDev outliers: what's beyond (Mean - StdDev, Mean - StdDev)
         """
+        cache_value = self.cache.get('stddev_outliers')
+
+        if cache_value is not None:
+            return cache_value
+
         count = 0
         q0 = self.mean - self.stddev
         q4 = self.mean + self.stddev
@@ -75,29 +145,57 @@ class Stats(object):
                 count += 1
         return count
 
-    @cached_property
-    def rounds(self):
+    @stddev_outliers.setter
+    def stddev_outliers(self, value: str) -> None:
+        """ Set the number of outliers. """
+        self.cache['stddev_outliers'] = value
+
+    @property
+    def rounds(self) -> float or int:
+        """ Return the number of rounds, can't be changed by setter."""
         return len(self.data)
 
-    @cached_property
-    def median(self):
+    @property
+    def median(self) -> float or int:
+        """ Return the median of time of round / iterations. """
+        cache_value = self.cache.get('median')
+
+        if cache_value is not None:
+            return cache_value
+
         return statistics.median(self.data)
 
-    @cached_property
-    def ld15iqr(self):
-        """
-        Tukey-style Lowest Datum within 1.5 IQR under Q1.
-        """
+    @median.setter
+    def median(self, value: float or int) -> None:
+        """ Set the median of time of round / iterations."""
+        self.cache['median'] = value
+
+    @property
+    def ld15iqr(self) -> float or int:
+        """ Return the lowest datum within 1.5 IQR under Q1 (Tukey-style). """
+        cache_value = self.cache.get('ld15iqr')
+
+        if cache_value is not None:
+            return cache_value
+
         if len(self.data) == 1:
             return self.data[0]
         else:
             return self.sorted_data[bisect_left(self.sorted_data, self.q1 - 1.5 * self.iqr)]
 
-    @cached_property
-    def hd15iqr(self):
-        """
-        Tukey-style Highest Datum within 1.5 IQR over Q3.
-        """
+    @ld15iqr.setter
+    def ld15iqr(self, value: int or float) -> None:
+        """ Set the lowest datum within 1.5 IQR under Q1 (Tukey-style). """
+        self.cache['ld15iqr'] = value
+
+    @property
+    def hd15iqr(self) -> float or int:
+        """ Return the highest datum within 1.5 IQR over Q3 (Tukey-style). """
+        cache_value = self.cache.get('hd15iqr')
+
+        if cache_value is not None:
+            return cache_value
+
         if len(self.data) == 1:
             return self.data[0]
         else:
@@ -107,8 +205,19 @@ class Stats(object):
             else:
                 return self.sorted_data[pos]
 
-    @cached_property
-    def q1(self):
+    @hd15iqr.setter
+    def hd15iqr(self, value: int or float) -> None:
+        """ Set the highest datum within 1.5 IQR over Q3 (Tukey-style). """
+        self.cache['hd15iqr'] = value
+
+    @property
+    def q1(self) -> float or int:
+        """ Return the first quartile. """
+        cache_value = self.cache.get('q1')
+
+        if cache_value is not None:
+            return cache_value
+
         rounds = self.rounds
         data = self.sorted_data
 
@@ -124,8 +233,19 @@ class Stats(object):
         else:  # Method 2
             return statistics.median(data[:rounds // 2])
 
-    @cached_property
-    def q3(self):
+    @q1.setter
+    def q1(self, value: int or float) -> None:
+        """ Set the first quartile. """
+        self.cache['q1'] = value
+
+    @property
+    def q3(self) -> float or int:
+        """ Return the third quartile. """
+        cache_value = self.cache.get('q3')
+
+        if cache_value is not None:
+            return cache_value
+
         rounds = self.rounds
         data = self.sorted_data
 
@@ -141,15 +261,39 @@ class Stats(object):
         else:  # Method 2
             return statistics.median(data[rounds // 2:])
 
-    @cached_property
-    def iqr(self):
-        return self.q3 - self.q1
+    @q3.setter
+    def q3(self, value: int or float) -> None:
+        """ Set the third quartile. """
+        self.cache['q3'] = value
 
     @property
-    def iqr_outliers(self):
+    def iqr(self) -> float or int:
+        """ Return the interquartile range. """
+        cache_value = self.cache.get('iqr')
+
+        if cache_value is not None:
+            return cache_value
+
+        return self.q3 - self.q1
+
+    @iqr.setter
+    def iqr(self, value) -> None:
+        """ Set the interquartile range. """
+        self.cache['iqr'] = value
+
+    @property
+    def iqr_outliers(self) -> float or int:
         """
-        Count of Tukey outliers: what's beyond (Q1 - 1.5IQR, Q3 + 1.5IQR)
+        Return the number of outliers (Tukey-style).
+
+        Notes:
+            Count of Tukey outliers: what's beyond (Q1 - 1.5IQR, Q3 + 1.5IQR)
         """
+        cache_value = self.cache.get('iqr_outliers')
+
+        if cache_value is not None:
+            return cache_value
+
         count = 0
         q0 = self.q1 - 1.5 * self.iqr
         q4 = self.q3 + 1.5 * self.iqr
@@ -158,15 +302,49 @@ class Stats(object):
                 count += 1
         return count
 
-    @cached_property
-    def outliers(self):
+    @iqr_outliers.setter
+    def iqr_outliers(self, value: str) -> None:
+        """ Set the number of outliers. """
+        self.cache['iqr_outliers'] = value
+
+    @property
+    def outliers(self) -> str:
+        """
+        Return the number of outliers.
+
+        Notes:
+            This is a string because it is used in a template.
+            The separator is a semicolon ';' because it is used in a template.
+        """
+
+        cache_value = self.cache.get('outliers')
+
+        if cache_value is not None:
+            return cache_value
+
         return "%s;%s" % (self.stddev_outliers, self.iqr_outliers)
 
-    @cached_property
-    def ops(self):
+    @outliers.setter
+    def outliers(self, value: str) -> None:
+        """ Set the number of outliers. """
+        self.cache['outliers'] = value
+
+    @property
+    def ops(self) -> float or int:
+        """ Return the average of operations per second of round / iterations."""
+        cache_value = self.cache.get('ops')
+
+        if cache_value is not None:
+            return cache_value
+
         if self.total:
             return self.rounds / self.total
         return 0
+
+    @ops.setter
+    def ops(self, value: float or int) -> None:
+        """Set the average of operations per second of round / iterations."""
+        self.cache['ops'] = value
 
 
 class Metadata(object):

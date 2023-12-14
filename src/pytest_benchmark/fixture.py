@@ -8,9 +8,10 @@ import sys
 import time
 import traceback
 from math import ceil
+from typing import Any
 
 from .timers import compute_timer_precision
-from .utils import NameWrapper
+from .utils import NameWrapper, cached_property
 from .utils import format_time
 
 try:
@@ -20,7 +21,7 @@ except (ImportError, SyntaxError):
     statistics = None
 else:
     statistics_error = None
-    from .stats import Metadata
+    from .stats import Metadata, Stats
 
 
 class FixtureAlreadyUsed(Exception):
@@ -65,6 +66,11 @@ class BenchmarkFixture(object):
     @property
     def enabled(self):
         return not self.disabled
+
+    @property
+    def statistics(self) -> Stats:
+        """Make statistics of the benchmarked function easier to access."""
+        return self.stats.stats
 
     def _get_precision(self, timer):
         if timer in self._precisions:
