@@ -1,20 +1,22 @@
-# To install the git pre-commit hook run:
-#   pre-commit install
-# To update the pre-commit hooks run:
-#   pre-commit install-hooks
+# To install the git pre-commit hooks run:
+#   pre-commit install --install-hooks
+# To update the versions:
+#   pre-commit autoupdate
 exclude: '^(\.tox|ci/templates|\.bumpversion\.cfg)(/|$)'
+# Note the order is intentional to avoid multiple passes of the hooks
 repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.8
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix, --show-fixes]
+  - repo: https://github.com/psf/black
+    rev: 23.12.0
+    hooks:
+      - id: black
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+    rev: v4.5.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: debug-statements
-  - repo: https://github.com/timothycrosley/isort
-    rev: 5.10.1
-    hooks:
-      - id: isort
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.9.2
-    hooks:
-      - id: flake8

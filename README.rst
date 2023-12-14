@@ -10,7 +10,7 @@ Overview
     * - docs
       - |docs| |gitter|
     * - tests
-      - | |github-actions| |requires|
+      - | |github-actions|
         | |coveralls| |codecov|
     * - package
       - | |version| |wheel| |supported-versions| |supported-implementations|
@@ -26,17 +26,13 @@ Overview
     :alt: Join the chat at https://gitter.im/ionelmc/pytest-benchmark
     :target: https://gitter.im/ionelmc/pytest-benchmark
 
-.. |requires| image:: https://requires.io/github/ionelmc/pytest-benchmark/requirements.svg?branch=main
-    :alt: Requirements Status
-    :target: https://requires.io/github/ionelmc/pytest-benchmark/requirements/?branch=main
-
-.. |coveralls| image:: https://coveralls.io/repos/ionelmc/pytest-benchmark/badge.svg?branch=main&service=github
+.. |coveralls| image:: https://coveralls.io/repos/github/ionelmc/pytest-benchmark/badge.svg?branch=main
     :alt: Coverage Status
-    :target: https://coveralls.io/r/ionelmc/pytest-benchmark
+    :target: https://coveralls.io/github/ionelmc/pytest-benchmark?branch=main
 
 .. |codecov| image:: https://codecov.io/gh/ionelmc/pytest-benchmark/branch/main/graphs/badge.svg?branch=main
     :alt: Coverage Status
-    :target: https://codecov.io/github/ionelmc/pytest-benchmark
+    :target: https://app.codecov.io/github/ionelmc/pytest-benchmark
 
 .. |version| image:: https://img.shields.io/pypi/v/pytest-benchmark.svg
     :alt: PyPI Package latest release

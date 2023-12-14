@@ -2,13 +2,10 @@
 
 default_context:
     allow_tests_inside_package: 'no'
-    appveyor: 'no'
     c_extension_function: '-'
     c_extension_module: '-'
     c_extension_optional: 'no'
     c_extension_support: 'no'
-    c_extension_test_pypi: 'no'
-    c_extension_test_pypi_username: '-'
     codacy: 'no'
     codacy_projectid: '[Get ID from https://app.codacy.com/app/ionelmc/pytest-benchmark/settings]'
     codeclimate: 'no'
@@ -18,40 +15,33 @@ default_context:
     coveralls: 'yes'
     distribution_name: pytest-benchmark
     email: contact@ionelmc.ro
+    formatter_quote_style: single
     full_name: Ionel Cristian Mărieș
     github_actions: 'yes'
     github_actions_osx: 'yes'
     github_actions_windows: 'yes'
-    legacy_python: 'no'
     license: BSD 2-Clause License
-    linter: flake8
     package_name: pytest_benchmark
     pre_commit: 'yes'
-    pre_commit_formatter: 'no'
     project_name: pytest-benchmark
     project_short_description: A ``pytest`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer.
     pypi_badge: 'yes'
     pypi_disable_upload: 'no'
-    release_date: '2021-06-15'
+    release_date: '2022-10-26'
     repo_hosting: github.com
     repo_hosting_domain: github.com
     repo_main_branch: main
     repo_name: pytest-benchmark
     repo_username: ionelmc
-    requiresio: 'yes'
     scrutinizer: 'no'
-    setup_py_uses_pytest_runner: 'no'
     setup_py_uses_setuptools_scm: 'no'
     sphinx_docs: 'yes'
     sphinx_docs_hosting: https://pytest-benchmark.readthedocs.io/
     sphinx_doctest: 'no'
     sphinx_theme: sphinx-py3doc-enhanced-theme
-    test_matrix_configurator: 'no'
     test_matrix_separate_coverage: 'yes'
-    travis: 'no'
-    travis_osx: 'no'
-    version: 3.4.1
+    version: 4.0.0
     version_manager: bump2version
     website: http://blog.ionelmc.ro
     year_from: '2014'
-    year_to: '2022'
+    year_to: '2023'

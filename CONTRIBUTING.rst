@@ -49,7 +49,7 @@ To set up `pytest-benchmark` for local development:
 
    Now you can make your changes locally.
 
-4. When you're done making changes run all the checks and docs builder with `tox <https://tox.wiki/en/latest/installation.html>`_ one command::
+4. When you're done making changes run all the checks and docs builder with one command::
 
     tox
 
@@ -72,8 +72,6 @@ For merging, you should:
 2. Update documentation when there's new API, functionality etc.
 3. Add a note to ``CHANGELOG.rst`` about the changes.
 4. Add yourself to ``AUTHORS.rst``.
-
-
 
 Tips
 ----
