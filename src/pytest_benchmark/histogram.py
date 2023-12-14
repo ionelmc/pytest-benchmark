@@ -9,7 +9,7 @@ try:
     from pygal.graph.box import Box
     from pygal.style import DefaultStyle
 except ImportError as exc:
-    raise ImportError(exc.args, 'Please install pygal and pygaljs or pytest-benchmark[histogram]')
+    raise ImportError(exc.args, 'Please install pygal and pygaljs or pytest-benchmark[histogram]') from exc
 
 
 class CustomBox(Box):
@@ -37,13 +37,13 @@ class CustomBox(Box):
             return sup(x, *args)
 
     def _tooltip_data(self, node, value, x, y, classes=None, xlabel=None):
-        super(CustomBox, self)._tooltip_data(node, value[0], x, y, classes=classes, xlabel=None)
+        super()._tooltip_data(node, value[0], x, y, classes=classes, xlabel=None)
         self.svg.node(node, 'desc', class_='x_label').text = value[1]
 
 
 def make_plot(benchmarks, title, adjustment):
     class Style(DefaultStyle):
-        colors = ['#000000' if row['path'] else DefaultStyle.colors[1] for row in benchmarks]
+        colors = tuple('#000000' if row['path'] else DefaultStyle.colors[1] for row in benchmarks)
         font_family = 'Consolas, "Deja Vu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace'
 
     minimum = int(min(row['min'] * adjustment for row in benchmarks))

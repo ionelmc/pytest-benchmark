@@ -1,7 +1,6 @@
 import argparse
 import json
 import netrc
-import ntpath
 import os
 import platform
 import re
@@ -21,8 +20,6 @@ from subprocess import CalledProcessError
 from subprocess import check_output
 from urllib.parse import parse_qs
 from urllib.parse import urlparse
-
-import genericpath
 
 from .compat import PY38
 from .compat import PY311
@@ -48,7 +45,7 @@ class SecondsDecimal(Decimal):
 
     @property
     def as_string(self):
-        return super(SecondsDecimal, self).__str__()
+        return super().__str__()
 
 
 class NameWrapper:
@@ -73,7 +70,7 @@ def get_tag(project_name=None):
 
 
 def get_machine_id():
-    return '%s-%s-%s-%s' % (
+    return '{}-{}-{}-{}'.format(
         platform.system(),
         platform.python_implementation(),
         '.'.join(platform.python_version_tuple()[:2]),
@@ -240,7 +237,7 @@ class RegressionCheck:
     def fails(self, current, compared):
         val = self.compute(current, compared)
         if val > self.threshold:
-            return 'Field %r has failed %s: %.9f > %.9f' % (self.field, self.__class__.__name__, val, self.threshold)
+            return f'Field {self.field!r} has failed {self.__class__.__name__}: {val:.9f} > {self.threshold:.9f}'
 
 
 class PercentageRegressionCheck(RegressionCheck):
@@ -290,7 +287,7 @@ def parse_warmup(string):
 def name_formatter_short(bench):
     name = bench['name']
     if bench['source']:
-        name = '%s (%.4s)' % (name, split(bench['source'])[-1])
+        name = '{} ({:.4})'.format(name, split(bench['source'])[-1])
     if name.startswith('test_'):
         name = name[5:]
     return name
@@ -301,13 +298,13 @@ def name_formatter_normal(bench):
     if bench['source']:
         parts = bench['source'].split('/')
         parts[-1] = parts[-1][:12]
-        name = '%s (%s)' % (name, '/'.join(parts))
+        name = '{} ({})'.format(name, '/'.join(parts))
     return name
 
 
 def name_formatter_long(bench):
     if bench['source']:
-        return '%(fullname)s (%(source)s)' % bench
+        return '{fullname} ({source})'.format(**bench)
     else:
         return bench['fullname']
 
@@ -365,7 +362,7 @@ def parse_rounds(string):
     try:
         value = int(string)
     except ValueError as exc:
-        raise argparse.ArgumentTypeError(exc)
+        raise argparse.ArgumentTypeError(exc) from None
     else:
         if value < 1:
             raise argparse.ArgumentTypeError('Value for --benchmark-rounds must be at least 1.')
@@ -376,7 +373,7 @@ def parse_seconds(string):
     try:
         return SecondsDecimal(string).as_string
     except Exception as exc:
-        raise argparse.ArgumentTypeError('Invalid decimal value %r: %r' % (string, exc))
+        raise argparse.ArgumentTypeError(f'Invalid decimal value {string!r}: {exc!r}') from None
 
 
 def parse_save(string):
@@ -539,7 +536,7 @@ def clonefunc(f):
 
 
 def format_dict(obj):
-    return '{%s}' % ', '.join('%s: %s' % (k, json.dumps(v)) for k, v in sorted(obj.items()))
+    return '{%s}' % ', '.join(f'{k}: {json.dumps(v)}' for k, v in sorted(obj.items()))
 
 
 class SafeJSONEncoder(json.JSONEncoder):
@@ -564,7 +561,7 @@ def report_progress(iterable, terminal_reporter, format_string, **kwargs):
 
 
 def report_noprogress(iterable, *args, **kwargs):
-    for pos, item in enumerate(iterable):
+    for item in iterable:
         yield '', item
 
 
@@ -576,57 +573,6 @@ def slugify(name):
     for c in r'\/:*?<>| ':
         name = name.replace(c, '_').replace('__', '_')
     return name
-
-
-def commonpath(paths):
-    """Given a sequence of path names, returns the longest common sub-path."""
-
-    if not paths:
-        raise ValueError('commonpath() arg is an empty sequence')
-
-    if isinstance(paths[0], bytes):
-        sep = b'\\'
-        altsep = b'/'
-        curdir = b'.'
-    else:
-        sep = '\\'
-        altsep = '/'
-        curdir = '.'
-
-    try:
-        drivesplits = [ntpath.splitdrive(p.replace(altsep, sep).lower()) for p in paths]
-        split_paths = [p.split(sep) for d, p in drivesplits]
-
-        try:
-            (isabs,) = set(p[:1] == sep for d, p in drivesplits)
-        except ValueError:
-            raise ValueError("Can't mix absolute and relative paths")
-
-        # Check that all drive letters or UNC paths match. The check is made only
-        # now otherwise type errors for mixing strings and bytes would not be
-        # caught.
-        if len(set(d for d, p in drivesplits)) != 1:
-            raise ValueError("Paths don't have the same drive")
-
-        drive, path = ntpath.splitdrive(paths[0].replace(altsep, sep))
-        common = path.split(sep)
-        common = [c for c in common if c and c != curdir]
-
-        split_paths = [[c for c in s if c and c != curdir] for s in split_paths]
-        s1 = min(split_paths)
-        s2 = max(split_paths)
-        for i, c in enumerate(s1):
-            if c != s2[i]:
-                common = common[:i]
-                break
-        else:
-            common = common[: len(s1)]
-
-        prefix = drive + sep if isabs else drive
-        return prefix + sep.join(common)
-    except (TypeError, AttributeError):
-        genericpath._check_arg_types('commonpath', *paths)
-        raise
 
 
 def get_cprofile_functions(stats):
@@ -650,15 +596,15 @@ def get_cprofile_functions(stats):
             calls = f'{run_info[1]}/{run_info[0]}'
 
         result.append(
-            dict(
-                ncalls_recursion=calls,
-                ncalls=run_info[1],
-                tottime=run_info[2],
-                tottime_per=run_info[2] / run_info[0] if run_info[0] > 0 else 0,
-                cumtime=run_info[3],
-                cumtime_per=run_info[3] / run_info[0] if run_info[0] > 0 else 0,
-                function_name=function_name,
-            )
+            {
+                'ncalls_recursion': calls,
+                'ncalls': run_info[1],
+                'tottime': run_info[2],
+                'tottime_per': run_info[2] / run_info[0] if run_info[0] > 0 else 0,
+                'cumtime': run_info[3],
+                'cumtime_per': run_info[3] / run_info[0] if run_info[0] > 0 else 0,
+                'function_name': function_name,
+            }
         )
 
     return result

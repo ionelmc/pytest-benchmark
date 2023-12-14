@@ -38,7 +38,7 @@ class Stats:
         return bool(self.data)
 
     def as_dict(self):
-        return dict((field, getattr(self, field)) for field in self.fields)
+        return {field: getattr(self, field) for field in self.fields}
 
     def update(self, duration):
         self.data.append(duration)
@@ -168,7 +168,7 @@ class Stats:
 
     @cached_property
     def outliers(self):
-        return '%s;%s' % (self.stddev_outliers, self.iqr_outliers)
+        return f'{self.stddev_outliers};{self.iqr_outliers}'
 
     @cached_property
     def ops(self):
@@ -222,7 +222,7 @@ class Metadata:
             'params': self.params,
             'param': self.param,
             'extra_info': self.extra_info,
-            'options': dict((k, funcname(v) if callable(v) else v) for k, v in self.options.items()),
+            'options': {k: funcname(v) if callable(v) else v for k, v in self.options.items()},
         }
         if self.cprofile_stats:
             cprofile_list = result['cprofile'] = []

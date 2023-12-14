@@ -29,16 +29,18 @@ class TableResults:
             worst = {}
             best = {}
             solo = len(benchmarks) == 1
-            for line, prop in progress_reporter(('min', 'max', 'mean', 'median', 'iqr', 'stddev', 'ops'), tr, '{line}: {value}', line=line):
+            for line1, prop in progress_reporter(
+                ('min', 'max', 'mean', 'median', 'iqr', 'stddev', 'ops'), tr, '{line}: {value}', line=line
+            ):
                 if prop == 'ops':
-                    worst[prop] = min(bench[prop] for _, bench in progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line))
-                    best[prop] = max(bench[prop] for _, bench in progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line))
+                    worst[prop] = min(bench[prop] for _, bench in progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line1))
+                    best[prop] = max(bench[prop] for _, bench in progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line1))
                 else:
-                    worst[prop] = max(bench[prop] for _, bench in progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line))
-                    best[prop] = min(bench[prop] for _, bench in progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line))
-            for line, prop in progress_reporter(('outliers', 'rounds', 'iterations'), tr, '{line}: {value}', line=line):
+                    worst[prop] = max(bench[prop] for _, bench in progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line1))
+                    best[prop] = min(bench[prop] for _, bench in progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line1))
+            for line1, prop in progress_reporter(('outliers', 'rounds', 'iterations'), tr, '{line}: {value}', line=line):
                 worst[prop] = max(
-                    benchmark[prop] for _, benchmark in progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line)
+                    benchmark[prop] for _, benchmark in progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line1)
                 )
 
             unit, adjustment = self.scale_unit(unit='seconds', benchmarks=benchmarks, best=best, worst=worst, sort=self.sort)

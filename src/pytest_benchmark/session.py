@@ -43,17 +43,17 @@ class BenchmarkSession:
             default_machine_id=self.machine_id,
             netrc=config.getoption('benchmark_netrc'),
         )
-        self.options = dict(
-            min_time=SecondsDecimal(config.getoption('benchmark_min_time')),
-            min_rounds=config.getoption('benchmark_min_rounds'),
-            max_time=SecondsDecimal(config.getoption('benchmark_max_time')),
-            timer=load_timer(config.getoption('benchmark_timer')),
-            calibration_precision=config.getoption('benchmark_calibration_precision'),
-            disable_gc=config.getoption('benchmark_disable_gc'),
-            warmup=config.getoption('benchmark_warmup'),
-            warmup_iterations=config.getoption('benchmark_warmup_iterations'),
-            cprofile=bool(config.getoption('benchmark_cprofile')),
-        )
+        self.options = {
+            'min_time': SecondsDecimal(config.getoption('benchmark_min_time')),
+            'min_rounds': config.getoption('benchmark_min_rounds'),
+            'max_time': SecondsDecimal(config.getoption('benchmark_max_time')),
+            'timer': load_timer(config.getoption('benchmark_timer')),
+            'calibration_precision': config.getoption('benchmark_calibration_precision'),
+            'disable_gc': config.getoption('benchmark_disable_gc'),
+            'warmup': config.getoption('benchmark_warmup'),
+            'warmup_iterations': config.getoption('benchmark_warmup_iterations'),
+            'cprofile': bool(config.getoption('benchmark_cprofile')),
+        }
         self.skip = config.getoption('benchmark_skip')
         self.disabled = config.getoption('benchmark_disable') and not config.getoption('benchmark_enable')
         self.cprofile_sort_by = config.getoption('benchmark_cprofile')
@@ -191,7 +191,7 @@ class BenchmarkSession:
                     machine_info=machine_info,
                     compared_benchmark=compared_benchmark,
                 )
-                compared_mapping[path] = dict((bench['fullname'], bench) for bench in compared_benchmark['benchmarks'])
+                compared_mapping[path] = {bench['fullname']: bench for bench in compared_benchmark['benchmarks']}
                 self.logger.info('Comparing against benchmarks from: %s' % path, newline=False)
         self.compared_mapping = compared_mapping
 
@@ -228,7 +228,9 @@ class BenchmarkSession:
             raise pytest.UsageError('--benchmark-compare-fail requires valid --benchmark-compare.')
 
         if self.performance_regressions:
-            self.logger.error('Performance has regressed:\n%s' % '\n'.join('\t%s - %s' % line for line in self.performance_regressions))
+            self.logger.error(
+                'Performance has regressed:\n%s' % '\n'.join('\t{} - {}'.format(*line) for line in self.performance_regressions)
+            )
             raise PerformanceRegression('Performance has regressed.')
 
     def display_cprofile(self, tr):

@@ -4,6 +4,7 @@ import pstats
 import sys
 import time
 import traceback
+import typing
 from math import ceil
 
 from .timers import compute_timer_precision
@@ -25,7 +26,7 @@ class FixtureAlreadyUsed(Exception):
 
 
 class BenchmarkFixture:
-    _precisions = {}
+    _precisions: typing.ClassVar = {}
 
     def __init__(
         self,
@@ -85,9 +86,7 @@ class BenchmarkFixture:
         else:
             timer_precision = self._precisions[timer] = compute_timer_precision(timer)
             self._logger.debug('')
-            self._logger.debug(
-                'Computing precision for %s ... %ss.' % (NameWrapper(timer), format_time(timer_precision)), blue=True, bold=True
-            )
+            self._logger.debug(f'Computing precision for {NameWrapper(timer)} ... {format_time(timer_precision)}s.', blue=True, bold=True)
         return timer_precision
 
     def _make_runner(self, function_to_benchmark, args, kwargs):
@@ -170,11 +169,11 @@ class BenchmarkFixture:
 
             stats = self._make_stats(iterations)
 
-            self._logger.debug('  Running %s rounds x %s iterations ...' % (rounds, iterations), yellow=True, bold=True)
+            self._logger.debug(f'  Running {rounds} rounds x {iterations} iterations ...', yellow=True, bold=True)
             run_start = time.time()
             if self._warmup:
                 warmup_rounds = min(rounds, max(1, int(self._warmup / iterations)))
-                self._logger.debug('  Warmup %s rounds x %s iterations ...' % (warmup_rounds, iterations))
+                self._logger.debug(f'  Warmup {warmup_rounds} rounds x {iterations} iterations ...')
                 for _ in range(warmup_rounds):
                     runner(loops_range)
             for _ in range(rounds):
@@ -253,7 +252,7 @@ class BenchmarkFixture:
         try:
             import aspectlib
         except ImportError as exc:
-            raise ImportError(exc.args, 'Please install aspectlib or pytest-benchmark[aspect]')
+            raise ImportError(exc.args, 'Please install aspectlib or pytest-benchmark[aspect]') from exc
 
         def aspect(function):
             def wrapper(*args, **kwargs):
@@ -278,9 +277,8 @@ class BenchmarkFixture:
         min_time_estimate = min_time * 5 / self._calibration_precision
         self._logger.debug('')
         self._logger.debug(
-            '  Calibrating to target round %ss; will estimate when reaching %ss '
-            '(using: %s, precision: %ss).'
-            % (format_time(min_time), format_time(min_time_estimate), NameWrapper(self._timer), format_time(timer_precision)),
+            f'  Calibrating to target round {format_time(min_time)}s; will estimate when reaching {format_time(min_time_estimate)}s '
+            f'(using: {NameWrapper(self._timer)}, precision: {format_time(timer_precision)}s).',
             yellow=True,
             bold=True,
         )
@@ -297,11 +295,9 @@ class BenchmarkFixture:
                     duration = min(duration, runner(loops_range))
                     warmup_rounds += 1
                     warmup_iterations += loops
-                self._logger.debug(
-                    '    Warmup: %ss (%s x %s iterations).' % (format_time(time.time() - warmup_start), warmup_rounds, loops)
-                )
+                self._logger.debug(f'    Warmup: {format_time(time.time() - warmup_start)}s ({warmup_rounds} x {loops} iterations).')
 
-            self._logger.debug('    Measured %s iterations: %ss.' % (loops, format_time(duration)), yellow=True)
+            self._logger.debug(f'    Measured {loops} iterations: {format_time(duration)}s.', yellow=True)
             if duration >= min_time:
                 break
 

@@ -17,7 +17,7 @@ class CSVResults:
         with output_file.open('w', ensure=True) as stream:
             writer = csv.writer(stream)
             params = sorted(
-                set(param for group, benchmarks in groups for benchmark in benchmarks for param in benchmark.get('params', {}) or ())
+                {param for group, benchmarks in groups for benchmark in benchmarks for param in benchmark.get('params', {}) or ()}
             )
             writer.writerow(
                 [
@@ -27,7 +27,7 @@ class CSVResults:
                 + self.columns
             )
 
-            for group, benchmarks in groups:
+            for _, benchmarks in groups:
                 benchmarks = sorted(benchmarks, key=operator.itemgetter(self.sort))
 
                 for bench in benchmarks:

@@ -4,7 +4,7 @@ import platform
 import pytest
 
 pytest_plugins = ('pytester',)
-platform
+platform  # noqa: B018
 
 
 def test_help(testdir):

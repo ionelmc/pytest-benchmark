@@ -1,9 +1,9 @@
 import json
 import os
+from os.path import commonpath
 
 from ..stats import normalize_stats
 from ..utils import Path
-from ..utils import commonpath
 from ..utils import safe_dumps
 from ..utils import short_filename
 
@@ -48,7 +48,7 @@ class FileStorage:
                 raise
 
     def save(self, output_json, save):
-        output_file = self.get('%s_%s.json' % (self._next_num, save))
+        output_file = self.get(f'{self._next_num}_{save}.json')
         assert not output_file.exists()
         with output_file.open('wb') as fh:
             fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())

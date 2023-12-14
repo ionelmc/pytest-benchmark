@@ -293,8 +293,7 @@ def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info
 
     if compared_machine_info != machine_info:
         benchmarksession.logger.warning(
-            'Benchmark machine_info is different. Current: %s VS saved: %s (location: %s).'
-            % (
+            'Benchmark machine_info is different. Current: {} VS saved: {} (location: {}).'.format(
                 machine_info,
                 compared_machine_info,
                 benchmarksession.storage.location,
@@ -335,7 +334,7 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
                 key += (bench['param'],)
             elif grouping.startswith('param:'):
                 param_name = grouping[len('param:') :]
-                key += ('%s=%s' % (param_name, bench['params'][param_name]),)
+                key += ('{}={}'.format(param_name, bench['params'][param_name]),)
             else:
                 raise NotImplementedError('Unsupported grouping %r.' % group_by)
         groups[' '.join(str(p) for p in key if p) or None].append(bench)
@@ -420,7 +419,7 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_inf
     return output_json
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def benchmark(request):
     bs = request.config._benchmarksession
 
@@ -440,11 +439,11 @@ def benchmark(request):
             disabled=bs.disabled,
             **dict(bs.options, **options),
         )
-        request.addfinalizer(fixture._cleanup)
-        return fixture
+        yield fixture
+        fixture._cleanup()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def benchmark_weave(benchmark):
     return benchmark.weave
 

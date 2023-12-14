@@ -10,8 +10,8 @@ from ..stats import normalize_stats
 try:
     import elasticsearch
     from elasticsearch.serializer import JSONSerializer
-except ImportError:
-    raise ImportError('Please install elasticsearch or pytest-benchmark[elasticsearch]')
+except ImportError as exc:
+    raise ImportError('Please install elasticsearch or pytest-benchmark[elasticsearch]') from exc
 
 
 class BenchmarkJSONSerializer(JSONSerializer):
@@ -66,8 +66,8 @@ class ElasticsearchStorage:
         """
         r = self._search(self._project_name, id_prefix)
         groupped_data = self._group_by_commit_and_time(r['hits']['hits'])
-        result = [(key, value) for key, value in groupped_data.items()]
-        result.sort(key=lambda x: datetime.strptime(x[1]['datetime'], '%Y-%m-%dT%H:%M:%S.%f'))
+        result = list(groupped_data.items())
+        result.sort(key=lambda x: datetime.strptime(x[1]['datetime'], '%Y-%m-%dT%H:%M:%S.%f'))  # noqa: DTZ007
         for key, data in result:
             for bench in data['benchmarks']:
                 normalize_stats(bench['stats'])
@@ -102,7 +102,7 @@ class ElasticsearchStorage:
         result = {}
         for hit in hits:
             source_hit = hit['_source']
-            key = '%s_%s' % (source_hit['commit_info']['id'], source_hit['datetime'])
+            key = '{}_{}'.format(source_hit['commit_info']['id'], source_hit['datetime'])
             benchmark = self._benchmark_from_es_record(source_hit)
             if key in result:
                 result[key]['benchmarks'].append(benchmark)
@@ -143,7 +143,7 @@ class ElasticsearchStorage:
             )
         # hide user's credentials before logging
         masked_hosts = _mask_hosts(self._es_hosts)
-        self.logger.info('Saved benchmark data to %s to index %s as doctype %s' % (masked_hosts, self._es_index, self._es_doctype))
+        self.logger.info(f'Saved benchmark data to {masked_hosts} to index {self._es_index} as doctype {self._es_doctype}')
 
     def _create_index(self):
         mapping = {

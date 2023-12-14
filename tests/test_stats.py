@@ -51,7 +51,7 @@ def test_single_item():
 @mark.parametrize('length', range(1, 10))
 def test_length(length):
     stats = Stats()
-    for i in range(length):
+    for _ in range(length):
         stats.update(1)
 
     assert stats.as_dict()

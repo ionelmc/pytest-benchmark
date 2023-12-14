@@ -44,7 +44,7 @@ def crazytestdir(request, testdir):
 def scm(request, testdir):
     scm = request.param
     if not shutil.which(scm):
-        pytest.skip('%r not available on $PATH' % (scm,))
+        pytest.skip(f'{scm!r} not available on $PATH')
     subprocess.check_call([scm, 'init', '.'])
     if scm == 'git':
         subprocess.check_call('git config user.email you@example.com'.split())
@@ -162,7 +162,7 @@ def test_get_project_name(scm, set_remote, testdir):
         assert get_project_name().startswith('test_get_project_name')
         return
     if not shutil.which(scm):
-        pytest.skip('%r not available on $PATH' % (scm,))
+        pytest.skip(f'{scm!r} not available on $PATH')
     subprocess.check_call([scm, 'init', '.'])
     if scm == 'git' and set_remote:
         subprocess.check_call(['git', 'config', 'remote.origin.url', set_remote])

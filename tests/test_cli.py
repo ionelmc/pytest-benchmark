@@ -181,7 +181,7 @@ def test_list(testdir):
 
 
 @pytest.mark.parametrize(
-    'name,name_pattern_generator',
+    ('name', 'name_pattern_generator'),
     [
         ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n),
         ('long', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n),
