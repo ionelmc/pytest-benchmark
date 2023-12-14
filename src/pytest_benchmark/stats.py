@@ -1,6 +1,3 @@
-from __future__ import division
-from __future__ import print_function
-
 import operator
 import statistics
 from bisect import bisect_left
@@ -11,10 +8,24 @@ from .utils import funcname
 from .utils import get_cprofile_functions
 
 
-class Stats(object):
+class Stats:
     fields = (
-        "min", "max", "mean", "stddev", "rounds", "median", "iqr", "q1", "q3", "iqr_outliers", "stddev_outliers",
-        "outliers", "ld15iqr", "hd15iqr", "ops", "total"
+        'min',
+        'max',
+        'mean',
+        'stddev',
+        'rounds',
+        'median',
+        'iqr',
+        'q1',
+        'q3',
+        'iqr_outliers',
+        'stddev_outliers',
+        'outliers',
+        'ld15iqr',
+        'hd15iqr',
+        'ops',
+        'total',
     )
 
     def __init__(self):
@@ -27,10 +38,7 @@ class Stats(object):
         return bool(self.data)
 
     def as_dict(self):
-        return dict(
-            (field, getattr(self, field))
-            for field in self.fields
-        )
+        return dict((field, getattr(self, field)) for field in self.fields)
 
     def update(self, duration):
         self.data.append(duration)
@@ -122,7 +130,7 @@ class Stats(object):
             else:
                 return 0.75 * data[n] + 0.25 * data[n + 1]
         else:  # Method 2
-            return statistics.median(data[:rounds // 2])
+            return statistics.median(data[: rounds // 2])
 
     @cached_property
     def q3(self):
@@ -139,7 +147,7 @@ class Stats(object):
             else:
                 return 0.25 * data[3 * n + 1] + 0.75 * data[3 * n + 2]
         else:  # Method 2
-            return statistics.median(data[rounds // 2:])
+            return statistics.median(data[rounds // 2 :])
 
     @cached_property
     def iqr(self):
@@ -160,7 +168,7 @@ class Stats(object):
 
     @cached_property
     def outliers(self):
-        return "%s;%s" % (self.stddev_outliers, self.iqr_outliers)
+        return '%s;%s' % (self.stddev_outliers, self.iqr_outliers)
 
     @cached_property
     def ops(self):
@@ -169,7 +177,7 @@ class Stats(object):
         return 0
 
 
-class Metadata(object):
+class Metadata:
     def __init__(self, fixture, iterations, options):
         self.name = fixture.name
         self.fullname = fixture.fullname
@@ -208,21 +216,18 @@ class Metadata(object):
 
     def as_dict(self, include_data=True, flat=False, stats=True, cprofile=None):
         result = {
-            "group": self.group,
-            "name": self.name,
-            "fullname": self.fullname,
-            "params": self.params,
-            "param": self.param,
-            "extra_info": self.extra_info,
-            "options": dict(
-                (k, funcname(v) if callable(v) else v) for k, v in self.options.items()
-            )
+            'group': self.group,
+            'name': self.name,
+            'fullname': self.fullname,
+            'params': self.params,
+            'param': self.param,
+            'extra_info': self.extra_info,
+            'options': dict((k, funcname(v) if callable(v) else v) for k, v in self.options.items()),
         }
         if self.cprofile_stats:
-            cprofile_list = result["cprofile"] = []
+            cprofile_list = result['cprofile'] = []
             cprofile_functions = get_cprofile_functions(self.cprofile_stats)
-            stats_columns = ["cumtime", "tottime", "ncalls", "ncalls_recursion",
-                             "tottime_per", "cumtime_per", "function_name"]
+            stats_columns = ['cumtime', 'tottime', 'ncalls', 'ncalls_recursion', 'tottime_per', 'cumtime_per', 'function_name']
             # move column first
             if cprofile is not None:
                 stats_columns.remove(cprofile)
@@ -238,12 +243,12 @@ class Metadata(object):
         if stats:
             stats = self.stats.as_dict()
             if include_data:
-                stats["data"] = self.stats.data
-            stats["iterations"] = self.iterations
+                stats['data'] = self.stats.data
+            stats['iterations'] = self.iterations
             if flat:
                 result.update(stats)
             else:
-                result["stats"] = stats
+                result['stats'] = stats
         return result
 
     def update(self, duration):

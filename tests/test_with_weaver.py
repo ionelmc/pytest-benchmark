@@ -3,7 +3,7 @@ import time
 import pytest
 
 
-class Foo(object):
+class Foo:
     def __init__(self, arg=0.01):
         self.arg = arg
 

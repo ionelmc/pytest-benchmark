@@ -5,7 +5,7 @@ import pytest
 empty = object()
 
 
-class cached_property(object):
+class cached_property:
     def __init__(self, func):
         self.func = func
 
@@ -14,7 +14,7 @@ class cached_property(object):
         return value
 
 
-class SimpleProxy(object):
+class SimpleProxy:
     def __init__(self, factory):
         self.factory = factory
         self.object = empty
@@ -25,7 +25,7 @@ class SimpleProxy(object):
         return str(self.object)
 
 
-class CachedPropertyProxy(object):
+class CachedPropertyProxy:
     def __init__(self, factory):
         self.factory = factory
 
@@ -37,7 +37,7 @@ class CachedPropertyProxy(object):
         return str(self.object)
 
 
-class LocalsSimpleProxy(object):
+class LocalsSimpleProxy:
     def __init__(self, factory):
         self.factory = factory
         self.object = empty
@@ -48,7 +48,7 @@ class LocalsSimpleProxy(object):
         return func(self.object)
 
 
-class LocalsCachedPropertyProxy(object):
+class LocalsCachedPropertyProxy:
     def __init__(self, factory):
         self.factory = factory
 
@@ -60,13 +60,13 @@ class LocalsCachedPropertyProxy(object):
         return func(self.object)
 
 
-@pytest.fixture(scope="module", params=["SimpleProxy", "CachedPropertyProxy", "LocalsSimpleProxy", "LocalsCachedPropertyProxy"])
+@pytest.fixture(scope='module', params=['SimpleProxy', 'CachedPropertyProxy', 'LocalsSimpleProxy', 'LocalsCachedPropertyProxy'])
 def impl(request):
     return globals()[request.param]
 
 
 def test_proto(benchmark, impl):
-    obj = "foobar"
+    obj = 'foobar'
     proxied = impl(lambda: obj)
     result = benchmark(partial(str, proxied))
     assert result == obj

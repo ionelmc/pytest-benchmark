@@ -17,6 +17,7 @@ def test_fast(benchmark):
     @benchmark
     def result():
         return time.sleep(0.000001)
+
     assert result is None
 
     if not benchmark.disabled:

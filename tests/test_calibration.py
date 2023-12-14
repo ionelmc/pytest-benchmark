@@ -10,22 +10,22 @@ def slow_warmup():
         x *= 1
 
 
-@pytest.mark.benchmark(warmup=True, warmup_iterations=10 ** 8, max_time=10)
+@pytest.mark.benchmark(warmup=True, warmup_iterations=10**8, max_time=10)
 def test_calibrate(benchmark):
     benchmark(slow_warmup)
 
 
-@pytest.mark.benchmark(warmup=True, warmup_iterations=10 ** 8, max_time=10)
+@pytest.mark.benchmark(warmup=True, warmup_iterations=10**8, max_time=10)
 def test_calibrate_fast(benchmark):
     benchmark(lambda: [int] * 100)
 
 
-@pytest.mark.benchmark(warmup=True, warmup_iterations=10 ** 8, max_time=10)
+@pytest.mark.benchmark(warmup=True, warmup_iterations=10**8, max_time=10)
 def test_calibrate_xfast(benchmark):
     benchmark(lambda: None)
 
 
-@pytest.mark.benchmark(warmup=True, warmup_iterations=10 ** 8, max_time=10)
+@pytest.mark.benchmark(warmup=True, warmup_iterations=10**8, max_time=10)
 def test_calibrate_slow(benchmark):
     benchmark(partial(time.sleep, 0.00001))
 
@@ -44,9 +44,9 @@ def timer(ratio, step, additive):
             t += step
 
 
-@pytest.mark.parametrize("minimum", [1, 0.01, 0.000000001, 0.0000000001, 1.000000000000001])
-@pytest.mark.parametrize("skew_ratio", [0, 1, -1])
-@pytest.mark.parametrize("additive", [True, False])
+@pytest.mark.parametrize('minimum', [1, 0.01, 0.000000001, 0.0000000001, 1.000000000000001])
+@pytest.mark.parametrize('skew_ratio', [0, 1, -1])
+@pytest.mark.parametrize('additive', [True, False])
 @pytest.mark.benchmark(max_time=0, min_rounds=1, calibration_precision=100)
 def test_calibrate_stuck(benchmark, minimum, additive, skew_ratio):
     # if skew_ratio:

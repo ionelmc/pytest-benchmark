@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import json
 import logging
 import os
@@ -23,24 +21,24 @@ from pytest_benchmark.utils import parse_elasticsearch_storage
 try:
     import unittest.mock as mock
 except ImportError:
-    import mock
+    from unittest import mock
 
 logger = logging.getLogger(__name__)
 
 THIS = py.path.local(__file__)
 BENCHFILE = THIS.dirpath('test_storage/0030_5b78858eb718649a31fb93d8dc96ca2cee41a4cd_20150815_030419_uncommitted-changes.json')
 SAVE_DATA = json.loads(BENCHFILE.read_text(encoding='utf8'))
-SAVE_DATA["machine_info"] = {'foo': 'bar'}
-SAVE_DATA["commit_info"] = {'foo': 'bar'}
+SAVE_DATA['machine_info'] = {'foo': 'bar'}
+SAVE_DATA['commit_info'] = {'foo': 'bar'}
 
 tmp = SAVE_DATA.copy()
 
-ES_DATA = tmp.pop("benchmarks")[0]
+ES_DATA = tmp.pop('benchmarks')[0]
 ES_DATA.update(tmp)
-ES_DATA["benchmark_id"] = "FoobarOS_commitId"
+ES_DATA['benchmark_id'] = 'FoobarOS_commitId'
 
 
-class Namespace(object):
+class Namespace:
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
@@ -51,7 +49,7 @@ class Namespace(object):
 class LooseFileLike(BytesIO):
     def close(self):
         value = self.getvalue()
-        super(LooseFileLike, self).close()
+        super().close()
         self.getvalue = lambda: value
 
 
@@ -60,7 +58,7 @@ class MockStorage(ElasticsearchStorage):
         self._es = mock.Mock(spec=elasticsearch.Elasticsearch)
         self._es_hosts = self._es_index = self._es_doctype = 'mocked'
         self.logger = logger
-        self.default_machine_id = "FoobarOS"
+        self.default_machine_id = 'FoobarOS'
 
 
 class MockSession(BenchmarkSession):
@@ -70,10 +68,10 @@ class MockSession(BenchmarkSession):
         self.histogram = True
         self.benchmarks = []
         self.performance_regressions = []
-        self.sort = u"min"
+        self.sort = 'min'
         self.compare = '0001'
         self.logger = logging.getLogger(__name__)
-        self.machine_id = "FoobarOS"
+        self.machine_id = 'FoobarOS'
         self.machine_info = {'foo': 'bar'}
         self.save = self.autosave = self.json = False
         self.options = {
@@ -82,36 +80,38 @@ class MockSession(BenchmarkSession):
             'max_time': 345,
         }
         self.compare_fail = []
-        self.config = Namespace(hook=Namespace(
-            pytest_benchmark_group_stats=pytest_benchmark_group_stats,
-            pytest_benchmark_generate_machine_info=lambda **kwargs: {'foo': 'bar'},
-            pytest_benchmark_update_machine_info=lambda **kwargs: None,
-            pytest_benchmark_compare_machine_info=pytest_benchmark_compare_machine_info,
-            pytest_benchmark_generate_json=pytest_benchmark_generate_json,
-            pytest_benchmark_update_json=lambda **kwargs: None,
-            pytest_benchmark_generate_commit_info=lambda **kwargs: {'foo': 'bar'},
-            pytest_benchmark_update_commit_info=lambda **kwargs: None,
-        ))
-        self.elasticsearch_host = "localhost:9200"
-        self.elasticsearch_index = "benchmark"
-        self.elasticsearch_doctype = "benchmark"
+        self.config = Namespace(
+            hook=Namespace(
+                pytest_benchmark_group_stats=pytest_benchmark_group_stats,
+                pytest_benchmark_generate_machine_info=lambda **kwargs: {'foo': 'bar'},
+                pytest_benchmark_update_machine_info=lambda **kwargs: None,
+                pytest_benchmark_compare_machine_info=pytest_benchmark_compare_machine_info,
+                pytest_benchmark_generate_json=pytest_benchmark_generate_json,
+                pytest_benchmark_update_json=lambda **kwargs: None,
+                pytest_benchmark_generate_commit_info=lambda **kwargs: {'foo': 'bar'},
+                pytest_benchmark_update_commit_info=lambda **kwargs: None,
+            )
+        )
+        self.elasticsearch_host = 'localhost:9200'
+        self.elasticsearch_index = 'benchmark'
+        self.elasticsearch_doctype = 'benchmark'
         self.storage = MockStorage()
         self.group_by = 'group'
-        self.columns = ['min', 'max', 'mean', 'stddev', 'median', 'iqr',
-                        'outliers', 'rounds', 'iterations']
+        self.columns = ['min', 'max', 'mean', 'stddev', 'median', 'iqr', 'outliers', 'rounds', 'iterations']
         self.benchmarks = []
         data = json.loads(BENCHFILE.read_text(encoding='utf8'))
         self.benchmarks.extend(
             Namespace(
-                as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench:
-                    dict(_bench, **_bench["stats"]) if flat else dict(_bench),
+                as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench: dict(_bench, **_bench['stats'])
+                if flat
+                else dict(_bench),
                 name=bench['name'],
                 fullname=bench['fullname'],
                 group=bench['group'],
                 options=bench['options'],
                 has_error=False,
                 params=None,
-                **bench['stats']
+                **bench['stats'],
             )
             for bench in data['benchmarks']
         )
@@ -140,12 +140,12 @@ def force_bytes(text):
 def make_logger(sess):
     output = StringIO()
     sess.logger = Namespace(
-        info=lambda text, **opts: output.write(force_text(text) + u'\n'),
-        error=lambda text: output.write(force_text(text) + u'\n'),
+        info=lambda text, **opts: output.write(force_text(text) + '\n'),
+        error=lambda text: output.write(force_text(text) + '\n'),
     )
     sess.storage.logger = Namespace(
-        info=lambda text, **opts: output.write(force_text(text) + u'\n'),
-        error=lambda text: output.write(force_text(text) + u'\n'),
+        info=lambda text, **opts: output.write(force_text(text) + '\n'),
+        error=lambda text: output.write(force_text(text) + '\n'),
     )
     return output
 
@@ -160,10 +160,10 @@ def logger_output(sess):
     return make_logger(sess)
 
 
-@freeze_time("2015-08-15T00:04:18.687119")
+@freeze_time('2015-08-15T00:04:18.687119')
 def test_handle_saving(sess, logger_output, monkeypatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
-    sess.save = "commitId"
+    sess.save = 'commitId'
     sess.autosave = True
     sess.json = None
     sess.save_data = False

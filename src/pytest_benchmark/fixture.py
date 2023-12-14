@@ -1,6 +1,3 @@
-from __future__ import division
-from __future__ import print_function
-
 import cProfile
 import gc
 import pstats
@@ -27,11 +24,27 @@ class FixtureAlreadyUsed(Exception):
     pass
 
 
-class BenchmarkFixture(object):
+class BenchmarkFixture:
     _precisions = {}
 
-    def __init__(self, node, disable_gc, timer, min_rounds, min_time, max_time, warmup, warmup_iterations,
-                 calibration_precision, add_stats, logger, warner, disabled, cprofile, group=None):
+    def __init__(
+        self,
+        node,
+        disable_gc,
+        timer,
+        min_rounds,
+        min_time,
+        max_time,
+        warmup,
+        warmup_iterations,
+        calibration_precision,
+        add_stats,
+        logger,
+        warner,
+        disabled,
+        cprofile,
+        group=None,
+    ):
         self.name = node.name
         self.fullname = node._nodeid
         self.disabled = disabled
@@ -71,9 +84,10 @@ class BenchmarkFixture(object):
             timer_precision = self._precisions[timer]
         else:
             timer_precision = self._precisions[timer] = compute_timer_precision(timer)
-            self._logger.debug("")
-            self._logger.debug("Computing precision for %s ... %ss." % (
-                NameWrapper(timer), format_time(timer_precision)), blue=True, bold=True)
+            self._logger.debug('')
+            self._logger.debug(
+                'Computing precision for %s ... %ss.' % (NameWrapper(timer), format_time(timer_precision)), blue=True, bold=True
+            )
         return timer_precision
 
     def _make_runner(self, function_to_benchmark, args, kwargs):
@@ -103,14 +117,18 @@ class BenchmarkFixture(object):
         return runner
 
     def _make_stats(self, iterations):
-        bench_stats = Metadata(self, iterations=iterations, options={
-            "disable_gc": self._disable_gc,
-            "timer": self._timer,
-            "min_rounds": self._min_rounds,
-            "max_time": self._max_time,
-            "min_time": self._min_time,
-            "warmup": self._warmup,
-        })
+        bench_stats = Metadata(
+            self,
+            iterations=iterations,
+            options={
+                'disable_gc': self._disable_gc,
+                'timer': self._timer,
+                'min_rounds': self._min_rounds,
+                'max_time': self._max_time,
+                'min_time': self._min_time,
+                'warmup': self._warmup,
+            },
+        )
         self._add_stats(bench_stats)
         self.stats = bench_stats
         return bench_stats
@@ -118,8 +136,7 @@ class BenchmarkFixture(object):
     def __call__(self, function_to_benchmark, *args, **kwargs):
         if self._mode:
             self.has_error = True
-            raise FixtureAlreadyUsed(
-                "Fixture can only be used once. Previously it was used in %s mode." % self._mode)
+            raise FixtureAlreadyUsed('Fixture can only be used once. Previously it was used in %s mode.' % self._mode)
         try:
             self._mode = 'benchmark(...)'
             return self._raw(function_to_benchmark, *args, **kwargs)
@@ -130,12 +147,12 @@ class BenchmarkFixture(object):
     def pedantic(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
         if self._mode:
             self.has_error = True
-            raise FixtureAlreadyUsed(
-                "Fixture can only be used once. Previously it was used in %s mode." % self._mode)
+            raise FixtureAlreadyUsed('Fixture can only be used once. Previously it was used in %s mode.' % self._mode)
         try:
             self._mode = 'benchmark.pedantic(...)'
-            return self._raw_pedantic(target, args=args, kwargs=kwargs, setup=setup, rounds=rounds,
-                                      warmup_rounds=warmup_rounds, iterations=iterations)
+            return self._raw_pedantic(
+                target, args=args, kwargs=kwargs, setup=setup, rounds=rounds, warmup_rounds=warmup_rounds, iterations=iterations
+            )
         except Exception:
             self.has_error = True
             raise
@@ -153,16 +170,16 @@ class BenchmarkFixture(object):
 
             stats = self._make_stats(iterations)
 
-            self._logger.debug("  Running %s rounds x %s iterations ..." % (rounds, iterations), yellow=True, bold=True)
+            self._logger.debug('  Running %s rounds x %s iterations ...' % (rounds, iterations), yellow=True, bold=True)
             run_start = time.time()
             if self._warmup:
                 warmup_rounds = min(rounds, max(1, int(self._warmup / iterations)))
-                self._logger.debug("  Warmup %s rounds x %s iterations ..." % (warmup_rounds, iterations))
+                self._logger.debug('  Warmup %s rounds x %s iterations ...' % (warmup_rounds, iterations))
                 for _ in range(warmup_rounds):
                     runner(loops_range)
             for _ in range(rounds):
                 stats.update(runner(loops_range))
-            self._logger.debug("  Ran for %ss." % format_time(time.time() - run_start), yellow=True, bold=True)
+            self._logger.debug('  Ran for %ss.' % format_time(time.time() - run_start), yellow=True, bold=True)
         if self.enabled and self.cprofile:
             profile = cProfile.Profile()
             function_result = profile.runcall(function_to_benchmark, *args, **kwargs)
@@ -178,13 +195,13 @@ class BenchmarkFixture(object):
         has_args = bool(args or kwargs)
 
         if not isinstance(iterations, int) or iterations < 1:
-            raise ValueError("Must have positive int for `iterations`.")
+            raise ValueError('Must have positive int for `iterations`.')
 
         if not isinstance(rounds, int) or rounds < 1:
-            raise ValueError("Must have positive int for `rounds`.")
+            raise ValueError('Must have positive int for `rounds`.')
 
         if not isinstance(warmup_rounds, int) or warmup_rounds < 0:
-            raise ValueError("Must have positive int for `warmup_rounds`.")
+            raise ValueError('Must have positive int for `warmup_rounds`.')
 
         if iterations > 1 and setup:
             raise ValueError("Can't use more than 1 `iterations` with a `setup` function.")
@@ -236,7 +253,7 @@ class BenchmarkFixture(object):
         try:
             import aspectlib
         except ImportError as exc:
-            raise ImportError(exc.args, "Please install aspectlib or pytest-benchmark[aspect]")
+            raise ImportError(exc.args, 'Please install aspectlib or pytest-benchmark[aspect]')
 
         def aspect(function):
             def wrapper(*args, **kwargs):
@@ -253,21 +270,20 @@ class BenchmarkFixture(object):
             callback = self._cleanup_callbacks.pop()
             callback()
         if not self._mode and not self.skipped:
-            self._logger.warning("Benchmark fixture was not used at all in this test!",
-                              warner=self._warner, suspend=True)
+            self._logger.warning('Benchmark fixture was not used at all in this test!', warner=self._warner, suspend=True)
 
     def _calibrate_timer(self, runner):
         timer_precision = self._get_precision(self._timer)
         min_time = max(self._min_time, timer_precision * self._calibration_precision)
         min_time_estimate = min_time * 5 / self._calibration_precision
-        self._logger.debug("")
-        self._logger.debug("  Calibrating to target round %ss; will estimate when reaching %ss "
-                           "(using: %s, precision: %ss)." % (
-                               format_time(min_time),
-                               format_time(min_time_estimate),
-                               NameWrapper(self._timer),
-                               format_time(timer_precision)
-                           ), yellow=True, bold=True)
+        self._logger.debug('')
+        self._logger.debug(
+            '  Calibrating to target round %ss; will estimate when reaching %ss '
+            '(using: %s, precision: %ss).'
+            % (format_time(min_time), format_time(min_time_estimate), NameWrapper(self._timer), format_time(timer_precision)),
+            yellow=True,
+            bold=True,
+        )
 
         loops = 1
         while True:
@@ -281,19 +297,18 @@ class BenchmarkFixture(object):
                     duration = min(duration, runner(loops_range))
                     warmup_rounds += 1
                     warmup_iterations += loops
-                self._logger.debug("    Warmup: %ss (%s x %s iterations)." % (
-                    format_time(time.time() - warmup_start),
-                    warmup_rounds, loops
-                ))
+                self._logger.debug(
+                    '    Warmup: %ss (%s x %s iterations).' % (format_time(time.time() - warmup_start), warmup_rounds, loops)
+                )
 
-            self._logger.debug("    Measured %s iterations: %ss." % (loops, format_time(duration)), yellow=True)
+            self._logger.debug('    Measured %s iterations: %ss.' % (loops, format_time(duration)), yellow=True)
             if duration >= min_time:
                 break
 
             if duration >= min_time_estimate:
                 # coarse estimation of the number of loops
                 loops = int(ceil(min_time * loops / duration))
-                self._logger.debug("    Estimating %s iterations." % loops, green=True)
+                self._logger.debug('    Estimating %s iterations.' % loops, green=True)
                 if loops == 1:
                     # If we got a single loop then bail early - nothing to calibrate if the the
                     # test function is 100 times slower than the timer resolution.
