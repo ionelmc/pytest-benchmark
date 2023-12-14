@@ -384,7 +384,7 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_inf
         "machine_info": machine_info,
         "commit_info": commit_info,
         "benchmarks": benchmarks_json,
-        "datetime": datetime.now(timezone.UTC).isoformat(),
+        "datetime": datetime.now(timezone.utc).isoformat(),
         "version": __version__,
     }
     for bench in benchmarks:
