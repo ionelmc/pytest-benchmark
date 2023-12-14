@@ -253,7 +253,7 @@ class BenchmarkFixture(object):
             callback = self._cleanup_callbacks.pop()
             callback()
         if not self._mode and not self.skipped:
-            self._logger.warn("Benchmark fixture was not used at all in this test!",
+            self._logger.warning("Benchmark fixture was not used at all in this test!",
                               warner=self._warner, suspend=True)
 
     def _calibrate_timer(self, runner):

@@ -62,7 +62,7 @@ class BenchmarkSession(object):
         self.cprofile_sort_by = config.getoption("benchmark_cprofile")
 
         if config.getoption("dist", "no") != "no" and not self.skip and not self.disabled:
-            self.logger.warn(
+            self.logger.warning(
                 "Benchmarks are automatically disabled because xdist plugin is active."
                 "Benchmarks cannot be performed reliably in a parallelized environment.",
             )
@@ -70,7 +70,7 @@ class BenchmarkSession(object):
         if hasattr(config, "slaveinput"):
             self.disabled = True
         if not statistics and not self.disabled:
-            self.logger.warn(
+            self.logger.warning(
                 "Benchmarks are automatically disabled because we could not import `statistics`\n\n%s" %
                 statistics_error,
             )
@@ -137,7 +137,7 @@ class BenchmarkSession(object):
         if save or self.json:
             if not self.benchmarks:
                 if not self.disabled:
-                    self.logger.warn("Not saving anything, no benchmarks have been run!")
+                    self.logger.warning("Not saving anything, no benchmarks have been run!")
                 return
             machine_info = self.get_machine_info()
             commit_info = self.config.hook.pytest_benchmark_generate_commit_info(config=self.config)
@@ -187,7 +187,7 @@ class BenchmarkSession(object):
                     msg += ". Can't load the previous benchmark."
                 else:
                     msg += " match %r." % self.compare
-                self.logger.warn(msg)
+                self.logger.warning(msg)
 
             machine_info = self.get_machine_info()
             for path, compared_benchmark in compared_benchmarks:

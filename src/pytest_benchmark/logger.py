@@ -30,7 +30,7 @@ class Logger(object):
                                               'resume_global_capture',
                                               getattr('capman', 'resumecapture', None))
 
-    def warn(self, text, warner=None, suspend=False):
+    def warning(self, text, warner=None, suspend=False):
         if self.level >= self.VERBOSE:
             if suspend and self.suspend_capture:
                 self.suspend_capture(in_=True)

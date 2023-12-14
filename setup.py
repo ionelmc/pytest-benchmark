@@ -67,7 +67,7 @@ setup(
     ],
     extras_require={
         'aspect': ['aspectlib'],
-        'histogram': ['pygal', 'pygaljs'],
+        'histogram': ['pygal', 'pygaljs', 'setuptools'],
         ':python_version < "3.4"': ['statistics', 'pathlib2'],
         'elasticsearch': ['elasticsearch'],
     },

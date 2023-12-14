@@ -71,7 +71,7 @@ class MockSession(BenchmarkSession):
         self.logger = Namespace(
             debug=lambda *args, **_kwargs: logger.debug(*args),
             info=lambda *args, **_kwargs: logger.info(*args),
-            warn=lambda *args, **_kwargs: logger.warn(*args),
+            warning=lambda *args, **_kwargs: logger.warning(*args),
             error=lambda *args, **_kwargs: logger.error(*args),
         )
         self.machine_id = "FoobarOS"
@@ -152,7 +152,7 @@ def sess(request, name_format):
 def make_logger(sess):
     output = StringIO()
     sess.logger = sess.storage.logger = Namespace(
-        warn=lambda text, **opts: output.write(force_text(text) + u'\n'),
+        warning=lambda text, **opts: output.write(force_text(text) + u'\n'),
         info=lambda text, **opts: output.write(force_text(text) + u'\n'),
         error=lambda text: output.write(force_text(text) + u'\n'),
     )
@@ -424,7 +424,7 @@ def test_save_with_error(sess, tmpdir, monkeypatch):
     assert json.loads(files[0].read_text(encoding='utf8')) == {
         'benchmarks': [],
         'commit_info': {'foo': 'bar'},
-        'datetime': '2015-08-15T00:04:18.687119',
+        'datetime': '2015-08-15T00:04:18.687119+00:00',
         'machine_info': {'foo': 'bar'},
         'version': '2.5.0'
     }

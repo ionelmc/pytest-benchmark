@@ -31,7 +31,7 @@
             }
         }
     ],
-    "datetime": "2015-08-15T00:01:46.250433",
+    "datetime": "2015-08-15T00:01:46.250433+00:00",
     "commit_info": {
         "dirty": true,
         "id": "5b78858eb718649a31fb93d8dc96ca2cee41a4cd"
