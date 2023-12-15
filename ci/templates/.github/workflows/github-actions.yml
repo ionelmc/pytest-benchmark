@@ -51,6 +51,7 @@ jobs:
       with:
         python-version: {{ '${{ matrix.python }}' }}
         architecture: {{ '${{ matrix.python_arch }}' }}
+        check-latest: true
     - name: install dependencies
       run: |
         python -mpip install --progress-bar=off -r ci/requirements.txt
