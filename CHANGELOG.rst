@@ -2,6 +2,10 @@
 Changelog
 =========
 
+4.0.1 (2023-12-17)
+------------------
+* Added support for ElasticSearch python clients 8.x
+
 4.0.0 (2022-10-26)
 ------------------
 

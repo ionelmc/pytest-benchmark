@@ -33,3 +33,4 @@ Authors
 * Friedrich Delgado - https://github.com/TauPan
 * Sam James - https://github.com/thesamesam
 * Florian Bruhin - https://github.com/The-Compiler
+* Çağlar Kutlu - https://github.com/ckutlu
