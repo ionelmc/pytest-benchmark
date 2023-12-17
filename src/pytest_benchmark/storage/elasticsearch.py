@@ -10,12 +10,13 @@ from ..stats import normalize_stats
 try:
     import elasticsearch
     from elasticsearch.serializer import JSONSerializer
+
     api_version = elasticsearch.__version__
     NO_DOC_TYPE_ARG = False
     if api_version[0] > 7:
         NO_DOC_TYPE_ARG = True
-except ImportError:
-    raise ImportError("Please install elasticsearch or pytest-benchmark[elasticsearch]")
+except ImportError as err:
+    raise ImportError('Please install elasticsearch or pytest-benchmark[elasticsearch]') from err
 
 
 class BenchmarkJSONSerializer(JSONSerializer):
@@ -27,7 +28,7 @@ class BenchmarkJSONSerializer(JSONSerializer):
         elif isinstance(data, uuid.UUID):
             return str(data)
         else:
-            return "UNSERIALIZABLE[%r]" % data
+            return 'UNSERIALIZABLE[%r]' % data
 
 
 def _mask_hosts(hosts):
@@ -62,7 +63,7 @@ class ElasticsearchStorage:
         """
         body = {'size': 0, 'aggs': {'benchmark_ids': {'terms': {'field': 'benchmark_id'}}}}
         result = self._search_call(body=body)
-        return sorted([record["key"] for record in result["aggregations"]["benchmark_ids"]["buckets"]])
+        return sorted([record['key'] for record in result['aggregations']['benchmark_ids']['buckets']])
 
     def load(self, id_prefix=None):
         """
@@ -138,25 +139,27 @@ class ElasticsearchStorage:
             bench.update(output_json)
             benchmark_id = save
             if self.default_machine_id:
-                benchmark_id = self.default_machine_id + "_" + benchmark_id
-            doc_id = benchmark_id + "_" + bench["fullname"]
-            bench["benchmark_id"] = benchmark_id
+                benchmark_id = self.default_machine_id + '_' + benchmark_id
+            doc_id = benchmark_id + '_' + bench['fullname']
+            bench['benchmark_id'] = benchmark_id
             self._index_call(
                 body=bench,
                 id=doc_id,
             )
         # hide user's credentials before logging
         masked_hosts = _mask_hosts(self._es_hosts)
-        self.logger.info("Saved benchmark data to %s to index %s as doctype %s" % (
-            masked_hosts, self._es_index, self._es_doctype))
-    
+        self.logger.info(f'Saved benchmark data to {masked_hosts} to index {self._es_index} as doctype {self._es_doctype}')
+
     if NO_DOC_TYPE_ARG:
+
         def _index_call(self, body, id):
             return self._es.index(index=self._es_index, body=body, id=id)
 
         def _search_call(self, body):
             return self._es.search(index=self._es_index, body=body)
+
     else:
+
         def _index_call(self, body, id):
             return self._es.index(index=self._es_index, doc_type=self._es_doctype, body=body, id=id)
 
