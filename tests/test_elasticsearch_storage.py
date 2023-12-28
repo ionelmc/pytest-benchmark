@@ -175,6 +175,7 @@ def test_handle_saving(sess, logger_output, monkeypatch):
         id='FoobarOS_commitId_tests/test_normal.py::test_xfast_parametrized[0]',
     )
 
+
 def test_parse_with_no_creds():
     string = 'https://example.org,another.org'
     hosts, _, _, _ = parse_elasticsearch_storage(string)
