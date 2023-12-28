@@ -3,7 +3,7 @@ Authors
 =======
 
 * Ionel Cristian Mărieș - https://blog.ionelmc.ro
-* Marc Abramowitz - http://marc-abramowitz.com
+* Marc Abramowitz - https://github.com/msabramo
 * Dave Collins - https://github.com/thedavecollins
 * Stefan Krastanov - http://blog.krastanov.org
 * Thomas Waldmann - https://github.com/ThomasWaldmann
