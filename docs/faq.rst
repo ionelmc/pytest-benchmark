@@ -22,7 +22,7 @@ Why is my ``StdDev`` so high?
 Why is my ``Min`` way lower than ``Q1-1.5IQR``?
     You may see this issue in the histogram plot. This is another instance of *bad isolation*.
 
-    For example, Intel CPUs have a feature called `Turbo Boost <https://en.wikipedia.org/wiki/Intel_Turbo_Boost>`_ wich
+    For example, Intel CPUs have a feature called `Turbo Boost <https://en.wikipedia.org/wiki/Intel_Turbo_Boost>`_ which
     overclocks your CPU depending on how many cores you have at that time and how hot your CPU is. If your CPU is too hot you get
     no Turbo Boost. If you get Turbo Boost active then the CPU quickly gets hot. You can see how this won't work for sustained
     workloads.

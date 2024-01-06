@@ -20,3 +20,10 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: debug-statements
+  # Configuration for codespell is in pyproject.toml
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.6
+    hooks:
+    - id: codespell
+      additional_dependencies:
+      - tomli
