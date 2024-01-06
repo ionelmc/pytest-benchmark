@@ -759,7 +759,7 @@ def pytest_benchmark_update_machine_info(config, machine_info):
     simple_test = """
 def test_simple(benchmark):
     @benchmark
-    def resuilt():
+    def result():
         1+1
     """
 
