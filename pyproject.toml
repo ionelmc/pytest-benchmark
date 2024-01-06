@@ -65,4 +65,5 @@ inline-quotes = "single"
 skip = '.git,*.pdf,*.svg,go.sum'
 check-hidden = true
 # ignore-regex = ''
-# ignore-words-list = ''
+# name and unfortunate choices for a few variables
+ignore-words-list = 'daa,serie,splitted'
