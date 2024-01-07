@@ -69,7 +69,7 @@ setup(
         'aspect': ['aspectlib'],
         'histogram': ['pygal', 'pygaljs', 'setuptools'],
         ':python_version < "3.4"': ['statistics', 'pathlib2'],
-        'elasticsearch': ['elasticsearch'],
+        'elasticsearch': ['elasticsearch>=7.15.0'],  # See https://github.com/elastic/elasticsearch-py/issues/1698
     },
     entry_points={
         'pytest11': ['benchmark = pytest_benchmark.plugin'],

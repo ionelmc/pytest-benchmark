@@ -10,8 +10,10 @@ from ..stats import normalize_stats
 try:
     import elasticsearch
     from elasticsearch.serializer import JSONSerializer
-except ImportError as exc:
-    raise ImportError('Please install elasticsearch or pytest-benchmark[elasticsearch]') from exc
+
+    ES_VERSION_7 = elasticsearch.__version__[0] == 7
+except ImportError as err:
+    raise ImportError('Please install elasticsearch or pytest-benchmark[elasticsearch]') from err
 
 
 class BenchmarkJSONSerializer(JSONSerializer):
@@ -56,8 +58,7 @@ class ElasticsearchStorage:
         """
         Returns sorted records names (ids) that corresponds with project.
         """
-        body = {'size': 0, 'aggs': {'benchmark_ids': {'terms': {'field': 'benchmark_id'}}}}
-        result = self._es.search(index=self._es_index, doc_type=self._es_doctype, body=body)
+        result = self._es.search(index=self._es_index, aggs={'benchmark_ids': {'terms': {'field': 'benchmark_id'}}})
         return sorted([record['key'] for record in result['aggregations']['benchmark_ids']['buckets']])
 
     def load(self, id_prefix=None):
@@ -74,15 +75,18 @@ class ElasticsearchStorage:
             yield key, data
 
     def _search(self, project, id_prefix=None):
-        body = {
-            'size': 1000,
-            'sort': [{'datetime': {'order': 'desc'}}],
-            'query': {'bool': {'filter': {'term': {'commit_info.project': project}}}},
-        }
-        if id_prefix:
-            body['query']['bool']['must'] = {'prefix': {'_id': id_prefix}}
+        query = {'bool': {'filter': {'term': {'commit_info.project': project}}}}
+        if id_prefix is not None:
+            query['bool']['must'] = {'prefix': {'_id': id_prefix}}
 
-        return self._es.search(index=self._es_index, doc_type=self._es_doctype, body=body)
+        result = self._es.search(
+            index=self._es_index,
+            size=1000,
+            sort=[{'datetime': {'order': 'desc'}}],
+            query=query,
+        )
+
+        return result
 
     @staticmethod
     def _benchmark_from_es_record(source_es_record):
@@ -137,8 +141,7 @@ class ElasticsearchStorage:
             bench['benchmark_id'] = benchmark_id
             self._es.index(
                 index=self._es_index,
-                doc_type=self._es_doctype,
-                body=bench,
+                document=bench,
                 id=doc_id,
             )
         # hide user's credentials before logging
@@ -213,4 +216,7 @@ class ElasticsearchStorage:
                 }
             }
         }
-        self._es.indices.create(index=self._es_index, ignore=400, body=mapping)
+        if ES_VERSION_7:
+            self._es.indices.create(index=self._es_index, ignore=400, mappings=mapping)
+        else:
+            self._es.options(ignore_status=400).indices.create(index=self._es_index, mappings=mapping)
