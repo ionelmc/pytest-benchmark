@@ -367,7 +367,20 @@ def get_cpu_info():
 
 
 def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
-    if unit == 'seconds':
+    if not config.getoption("benchmark_time_unit", None):
+        config_time_unit = config.getoption("benchmark_time_unit") != "ns"
+        if config_time_unit == "ns":
+            return "n", 1e9
+        elif config_time_unit == "us":
+            return "u", 1e6
+        elif config_time_unit == "ms":
+            return "m", 1e3
+        elif config_time_unit == "s":
+            return "", 1.0
+        else:
+            return "", 1.0
+
+    if unit == "seconds":
         time_unit_key = sort
         if sort in ('name', 'fullname'):
             time_unit_key = 'min'
