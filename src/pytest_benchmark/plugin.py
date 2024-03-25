@@ -273,6 +273,12 @@ def pytest_addoption(parser):
         " Argument is a column to sort by. Available columns: 'ncallls_recursion',"
         " 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'.",
     )
+    group.addoption(
+        "--benchmark-time-unit",
+        metavar="COLUMN", default=None,
+        choices=['ns', 'us', 'ms', 's', 'auto'],
+        help="Unit to scale the results to. Available units: 'ns', 'us', 'ms', 's'. Default: 'auto'."
+    )
     add_global_options(group.addoption)
     add_display_options(group.addoption)
     add_histogram_options(group.addoption)
@@ -367,7 +373,20 @@ def get_cpu_info():
 
 
 def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
-    if unit == 'seconds':
+    if config.getoption("benchmark_time_unit", None):
+        config_time_unit = config.getoption("benchmark_time_unit")
+        if config_time_unit == "ns":
+            return "n", 1e9
+        elif config_time_unit == "us":
+            return "u", 1e6
+        elif config_time_unit == "ms":
+            return "m", 1e3
+        elif config_time_unit == "s":
+            return "", 1.0
+        else:
+            return "", 1.0
+
+    if unit == "seconds":
         time_unit_key = sort
         if sort in ('name', 'fullname'):
             time_unit_key = 'min'
