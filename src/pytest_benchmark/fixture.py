@@ -158,14 +158,21 @@ class BenchmarkFixture:
             self.has_error = True
             raise
 
-    def pedantic(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
+    def pedantic(self, target, args=(), kwargs=None, setup=None, teardown=None, rounds=1, warmup_rounds=0, iterations=1):
         if self._mode:
             self.has_error = True
             raise FixtureAlreadyUsed(f'Fixture can only be used once. Previously it was used in {self._mode} mode.')
         try:
             self._mode = 'benchmark.pedantic(...)'
             return self._raw_pedantic(
-                target, args=args, kwargs=kwargs, setup=setup, rounds=rounds, warmup_rounds=warmup_rounds, iterations=iterations
+                target,
+                args=args,
+                kwargs=kwargs,
+                setup=setup,
+                teardown=teardown,
+                rounds=rounds,
+                warmup_rounds=warmup_rounds,
+                iterations=iterations,
             )
         except Exception:
             self.has_error = True
@@ -209,7 +216,7 @@ class BenchmarkFixture:
             function_result = function_to_benchmark(*args, **kwargs)
         return function_result
 
-    def _raw_pedantic(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
+    def _raw_pedantic(self, target, args=(), kwargs=None, setup=None, teardown=None, rounds=1, warmup_rounds=0, iterations=1):
         if kwargs is None:
             kwargs = {}
 
@@ -248,6 +255,9 @@ class BenchmarkFixture:
             runner = self._make_runner(target, args, kwargs)
             runner(loops_range)
 
+            if teardown is not None:
+                teardown(*args, **kwargs)
+
         for _ in range(rounds):
             args, kwargs = make_arguments()
 
@@ -258,10 +268,15 @@ class BenchmarkFixture:
                 duration, result = runner(loops_range)
             stats.update(duration)
 
+            if teardown is not None:
+                teardown(*args, **kwargs)
+
         if loops_range:
             # if it has been looped then we don't have the result, we need to do 1 extra run for it
             args, kwargs = make_arguments()
             result = target(*args, **kwargs)
+            if teardown is not None:
+                teardown(*args, **kwargs)
 
         if self.cprofile:
             if self.cprofile_loops is None:
@@ -273,6 +288,8 @@ class BenchmarkFixture:
             args, kwargs = make_arguments()
             for _ in cprofile_loops:
                 profile.runcall(target, *args, **kwargs)
+                if teardown is not None:
+                    teardown(*args, **kwargs)
             self._save_cprofile(profile)
 
         return result

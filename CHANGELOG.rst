@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Add support for a per-round ``teardown`` function to pedantic mode.
+
 5.1.0 (2024-10-30)
 ------------------
 
