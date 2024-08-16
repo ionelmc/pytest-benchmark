@@ -22,6 +22,21 @@ def test_setup(benchmark):
     assert runs == [(1, 2)]
 
 
+def test_teardown(benchmark):
+    runs = []
+
+    def stuff(foo, bar=1234):
+        runs.append((foo, bar))
+
+    def teardown(foo, bar=1234):
+        assert foo == 1
+        assert bar == 2
+        runs.append('teardown')
+
+    benchmark.pedantic(stuff, args=[1], kwargs={'bar': 2}, teardown=teardown)
+    assert runs == [(1, 2), 'teardown']
+
+
 @pytest.mark.benchmark(cprofile=True)
 def test_setup_cprofile(benchmark):
     runs = []
@@ -34,6 +49,22 @@ def test_setup_cprofile(benchmark):
 
     benchmark.pedantic(stuff, setup=setup)
     assert runs == [(1, 2), (1, 2)]
+
+
+@pytest.mark.benchmark(cprofile=True)
+def test_teardown_cprofile(benchmark):
+    runs = []
+
+    def stuff():
+        runs.append('stuff')
+
+    def teardown():
+        runs.append('teardown')
+
+    benchmark.pedantic(stuff, teardown=teardown)
+    assert runs == ['stuff', 'teardown', 'stuff', 'teardown']
+
+    runs = []
 
 
 def test_args_kwargs(benchmark):
@@ -99,6 +130,39 @@ def test_setup_many_rounds(benchmark):
 
     benchmark.pedantic(stuff, setup=setup, rounds=10)
     assert runs == [(1, 2)] * 10
+
+
+def test_teardown_many_rounds(benchmark):
+    runs = []
+
+    def stuff():
+        runs.append('stuff')
+
+    def teardown():
+        runs.append('teardown')
+
+    benchmark.pedantic(stuff, teardown=teardown, rounds=10)
+    assert runs == ['stuff', 'teardown'] * 10
+
+
+def test_teardown_many_iterations(benchmark):
+    runs = []
+
+    def stuff():
+        runs.append('stuff')
+
+    def teardown():
+        runs.append('teardown')
+
+    benchmark.pedantic(stuff, teardown=teardown, iterations=3)
+    assert runs == [
+        'stuff',
+        'stuff',
+        'stuff',
+        'teardown',  # first round
+        'stuff',
+        'teardown',  # computing the final result
+    ]
 
 
 def test_cant_use_both_args_and_setup_with_return(benchmark):
