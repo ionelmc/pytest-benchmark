@@ -136,7 +136,7 @@ Commandline options
   --benchmark-cprofile=COLUMN
                         If specified measure one run with cProfile and stores
                         10 top functions. Argument is a column to sort by.
-                        Available columns: 'ncallls_recursion', 'ncalls',
+                        Available columns: 'ncalls_recursion', 'ncalls',
                         'tottime', 'tottime_per', 'cumtime', 'cumtime_per',
                         'function_name'.
   --benchmark-storage=URI
