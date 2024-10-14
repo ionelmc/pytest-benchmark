@@ -32,7 +32,9 @@ class CSVResults:
 
                 for bench in benchmarks:
                     row = [bench.get('fullfunc', bench['fullname'])]
-                    row.extend(bench.get('params', {}).get(param, '') for param in params)
+                    bench_params = bench.get('params', {})
+                    bench_params = bench_params if bench_params is not None else {}
+                    row.extend(bench_params.get(param, "") for param in params)
                     row.extend(bench[prop] for prop in self.columns)
                     writer.writerow(row)
         self.logger.info(f'Generated csv: {output_file}', bold=True)
