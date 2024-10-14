@@ -1,6 +1,9 @@
 
 Changelog
 =========
+4.0.1
+------------------
+* Fix generate parametrize tests benchmark csv report errors `#268 <https://github.com/ionelmc/pytest-benchmark/issues/268>`_.
 
 4.0.0 (2022-10-26)
 ------------------
