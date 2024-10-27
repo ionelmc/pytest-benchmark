@@ -535,14 +535,13 @@ def clonefunc(f):
     return f2
 
 
-def format_dict(obj):
-    value = ', '.join(f'{k}: {json.dumps(v)}' for k, v in sorted(obj.items()))
-    return f'{value}'
-
-
 class SafeJSONEncoder(json.JSONEncoder):
     def default(self, o):
         return f'UNSERIALIZABLE[{o!r}]'
+
+
+def consistent_dumps(value):
+    return json.dumps(value, sort_keys=True)
 
 
 def safe_dumps(obj, **kwargs):

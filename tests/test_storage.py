@@ -348,7 +348,7 @@ def test_compare_1(sess, LineMatcher):
     print(output.getvalue())
     LineMatcher(output.getvalue().splitlines()).fnmatch_lines(
         [
-            'Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"} (location: tests*test_storage).',
+            'Benchmark machine_info is different. Current: {"foo": "bar"} VS saved: {"machine": "x86_64", "node": "minibox", "processor": "x86_64", "python_compiler": "GCC 4.6.3", "python_implementation": "CPython", "python_version": "2.7.3", "release": "3.13.0-55-generic", "system": "Linux"} (location: tests/test_storage).',
             'Comparing against benchmarks from: 0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted' '-changes.json',
             '',
             '*------------------------------------------------------------------------ benchmark: 2 tests -----------------------------------------------------------------------*',
@@ -381,7 +381,7 @@ def test_compare_2(sess, LineMatcher):
     print(output.getvalue())
     LineMatcher(output.getvalue().splitlines()).fnmatch_lines(
         [
-            'Benchmark machine_info is different. Current: {foo: "bar"} VS saved: {machine: "x86_64", node: "minibox", processor: "x86_64", python_compiler: "GCC 4.6.3", python_implementation: "CPython", python_version: "2.7.3", release: "3.13.0-55-generic", system: "Linux"} (location: tests*test_storage).',
+            'Benchmark machine_info is different. Current: {"foo": "bar"} VS saved: {"machine": "x86_64", "node": "minibox", "processor": "x86_64", "python_compiler": "GCC 4.6.3", "python_implementation": "CPython", "python_version": "2.7.3", "release": "3.13.0-55-generic", "system": "Linux"} (location: tests/test_storage).',
             'Comparing against benchmarks from: 0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes.json',
             '',
             '*------------------------------------------------------------------------ benchmark: 2 tests -----------------------------------------------------------------------*',

@@ -15,7 +15,7 @@ from .session import BenchmarkSession
 from .session import PerformanceRegression
 from .timers import default_timer
 from .utils import NameWrapper
-from .utils import format_dict
+from .utils import consistent_dumps
 from .utils import get_commit_info
 from .utils import get_current_time
 from .utils import get_tag
@@ -295,8 +295,8 @@ def pytest_addhooks(pluginmanager):
 
 
 def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark):
-    machine_info = format_dict(machine_info)
-    compared_machine_info = format_dict(compared_benchmark['machine_info'])
+    machine_info = consistent_dumps(machine_info)
+    compared_machine_info = consistent_dumps(compared_benchmark['machine_info'])
 
     if compared_machine_info != machine_info:
         benchmarksession.logger.warning(
