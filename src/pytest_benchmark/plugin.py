@@ -489,6 +489,11 @@ def pytest_runtest_setup(item):
 def pytest_runtest_makereport(item, call):
     outcome = yield
     fixture = hasattr(item, 'funcargs') and item.funcargs.get('benchmark')
+    if fixture is not None and not isinstance(fixture, BenchmarkFixture):
+        raise TypeError(
+            f'unexpected type for `benchmark` in funcargs, {fixture!r} must be a BenchmarkFixture instance.'
+            'You should not use other plugins that define a `benchmark` fixture, or return and unexpected value if you do redefine it.'
+        )
     if fixture:
         fixture.skipped = outcome.get_result().outcome == 'skipped'
 
