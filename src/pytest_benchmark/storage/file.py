@@ -52,7 +52,7 @@ class FileStorage:
         assert not output_file.exists()
         with output_file.open('wb') as fh:
             fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())
-        self.logger.info('Saved benchmark data in: %s' % output_file)
+        self.logger.info(f'Saved benchmark data in: {output_file}')
 
     def query(self, *globs_or_files):
         files = []

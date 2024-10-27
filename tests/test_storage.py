@@ -25,16 +25,16 @@ from pytest_benchmark.utils import Path
 from pytest_benchmark.utils import PercentageRegressionCheck
 from pytest_benchmark.utils import get_machine_id
 
-pytest_plugins = "pytester"
+pytest_plugins = 'pytester'
 
 
 THIS = py.path.local(__file__)
 STORAGE = THIS.dirpath(THIS.purebasename)
 
 JSON_DATA = json.loads(STORAGE.listdir('0030_*.json')[0].read_text(encoding='utf8'))
-JSON_DATA["machine_info"] = {'foo': 'bar'}
-JSON_DATA["commit_info"] = {'foo': 'bar'}
-list(normalize_stats(bench['stats']) for bench in JSON_DATA["benchmarks"])
+JSON_DATA['machine_info'] = {'foo': 'bar'}
+JSON_DATA['commit_info'] = {'foo': 'bar'}
+list(normalize_stats(bench['stats']) for bench in JSON_DATA['benchmarks'])
 
 
 class Namespace(object):
@@ -65,7 +65,7 @@ class MockSession(BenchmarkSession):
         self.quiet = False
         self.benchmarks = []
         self.performance_regressions = []
-        self.sort = u"min"
+        self.sort = 'min'
         self.compare = '0001'
         logger = logging.getLogger(__name__)
         self.logger = Namespace(
@@ -74,7 +74,7 @@ class MockSession(BenchmarkSession):
             warning=lambda *args, **_kwargs: logger.warning(*args),
             error=lambda *args, **_kwargs: logger.error(*args),
         )
-        self.machine_id = "FoobarOS"
+        self.machine_id = 'FoobarOS'
         self.machine_info = {'foo': 'bar'}
         self.save = self.autosave = self.json = False
         self.name_format = NAME_FORMATTERS[name_format]
@@ -102,11 +102,11 @@ class MockSession(BenchmarkSession):
         self.storage = FileStorage(str(STORAGE), default_machine_id=get_machine_id(), logger=self.logger)
         self.group_by = 'group'
         self.columns = ['min', 'max', 'mean', 'stddev', 'median', 'iqr', 'outliers', 'rounds', 'iterations', 'ops']
-        for bench_file, data in reversed(list(self.storage.load("[0-9][0-9][0-9][0-9]_*"))):
+        for bench_file, data in reversed(list(self.storage.load('[0-9][0-9][0-9][0-9]_*'))):
             self.benchmarks.extend(
                 Namespace(
                     as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench, cprofile='cumtime': dict(
-                        _bench, **_bench["stats"]
+                        _bench, **_bench['stats']
                     )
                     if flat
                     else dict(_bench),
@@ -156,9 +156,9 @@ def sess(request, name_format):
 def make_logger(sess):
     output = StringIO()
     sess.logger = sess.storage.logger = Namespace(
-        warning=lambda text, **opts: output.write(force_text(text) + u'\n'),
-        info=lambda text, **opts: output.write(force_text(text) + u'\n'),
-        error=lambda text: output.write(force_text(text) + u'\n'),
+        warning=lambda text, **opts: output.write(force_text(text) + '\n'),
+        info=lambda text, **opts: output.write(force_text(text) + '\n'),
+        error=lambda text: output.write(force_text(text) + '\n'),
     )
     return output
 
@@ -173,7 +173,7 @@ def test_rendering(sess):
     sess.display(
         Namespace(
             ensure_newline=lambda: None,
-            write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
+            write_line=lambda line, **opts: output.write(force_text(line) + '\n'),
             write=lambda text, **opts: output.write(force_text(text)),
             rewrite=lambda text, **opts: output.write(force_text(text)),
         )
@@ -184,14 +184,14 @@ def test_regression_checks(sess, name_format):
     output = make_logger(sess)
     sess.handle_loading()
     sess.performance_regressions = []
-    sess.compare_fail = [PercentageRegressionCheck("stddev", 5), DifferenceRegressionCheck("max", 0.000001)]
+    sess.compare_fail = [PercentageRegressionCheck('stddev', 5), DifferenceRegressionCheck('max', 0.000001)]
     sess.finish()
     pytest.raises(
         PerformanceRegression,
         sess.display,
         Namespace(
             ensure_newline=lambda: None,
-            write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
+            write_line=lambda line, **opts: output.write(force_text(line) + '\n'),
             write=lambda text, **opts: output.write(force_text(text)),
             rewrite=lambda text, **opts: output.write(force_text(text)),
         ),
@@ -256,20 +256,20 @@ def test_regression_checks(sess, name_format):
     )
 
 
-@pytest.mark.skipif(sys.version_info[:2] < (2, 7), reason="Something weird going on, see: https://bugs.python.org/issue4482")
+@pytest.mark.skipif(sys.version_info[:2] < (2, 7), reason='Something weird going on, see: https://bugs.python.org/issue4482')
 def test_regression_checks_inf(sess, name_format):
     output = make_logger(sess)
     sess.compare = '0002'
     sess.handle_loading()
     sess.performance_regressions = []
-    sess.compare_fail = [PercentageRegressionCheck("stddev", 5), DifferenceRegressionCheck("max", 0.000001)]
+    sess.compare_fail = [PercentageRegressionCheck('stddev', 5), DifferenceRegressionCheck('max', 0.000001)]
     sess.finish()
     pytest.raises(
         PerformanceRegression,
         sess.display,
         Namespace(
             ensure_newline=lambda: None,
-            write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
+            write_line=lambda line, **opts: output.write(force_text(line) + '\n'),
             write=lambda text, **opts: output.write(force_text(text)),
             rewrite=lambda text, **opts: output.write(force_text(text)),
         ),
@@ -340,7 +340,7 @@ def test_compare_1(sess, LineMatcher):
     sess.display(
         Namespace(
             ensure_newline=lambda: None,
-            write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
+            write_line=lambda line, **opts: output.write(force_text(line) + '\n'),
             write=lambda text, **opts: output.write(force_text(text)),
             rewrite=lambda text, **opts: output.write(force_text(text)),
         )
@@ -372,8 +372,8 @@ def test_compare_2(sess, LineMatcher):
     sess.display(
         Namespace(
             ensure_newline=lambda: None,
-            write_line=lambda line, **opts: output.write(force_text(line) + u'\n'),
-            section=lambda line, **opts: output.write(force_text(line) + u'\n'),
+            write_line=lambda line, **opts: output.write(force_text(line) + '\n'),
+            section=lambda line, **opts: output.write(force_text(line) + '\n'),
             write=lambda text, **opts: output.write(force_text(text)),
             rewrite=lambda text, **opts: output.write(force_text(text)),
         )
@@ -397,7 +397,7 @@ def test_compare_2(sess, LineMatcher):
     )
 
 
-@freeze_time("2015-08-15T00:04:18.687119")
+@freeze_time('2015-08-15T00:04:18.687119')
 def test_save_json(sess, tmpdir, monkeypatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = False
@@ -409,7 +409,7 @@ def test_save_json(sess, tmpdir, monkeypatch):
     assert json.loads(sess.json.getvalue().decode()) == JSON_DATA
 
 
-@freeze_time("2015-08-15T00:04:18.687119")
+@freeze_time('2015-08-15T00:04:18.687119')
 def test_save_with_name(sess, tmpdir, monkeypatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = 'foobar'
@@ -424,7 +424,7 @@ def test_save_with_name(sess, tmpdir, monkeypatch):
     assert json.loads(files[0].read_text(encoding='utf8')) == JSON_DATA
 
 
-@freeze_time("2015-08-15T00:04:18.687119")
+@freeze_time('2015-08-15T00:04:18.687119')
 def test_save_no_name(sess, tmpdir, monkeypatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = True
@@ -438,7 +438,7 @@ def test_save_no_name(sess, tmpdir, monkeypatch):
     assert json.loads(files[0].read_text(encoding='utf8')) == JSON_DATA
 
 
-@freeze_time("2015-08-15T00:04:18.687119")
+@freeze_time('2015-08-15T00:04:18.687119')
 def test_save_with_error(sess, tmpdir, monkeypatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = True
@@ -460,7 +460,7 @@ def test_save_with_error(sess, tmpdir, monkeypatch):
     }
 
 
-@freeze_time("2015-08-15T00:04:18.687119")
+@freeze_time('2015-08-15T00:04:18.687119')
 def test_autosave(sess, tmpdir, monkeypatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = False

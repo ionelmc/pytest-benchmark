@@ -10,13 +10,11 @@ Overview
     * - docs
       - |docs| |gitter|
     * - tests
-      - | |github-actions|
-        | |coveralls| |codecov|
+      - |github-actions| |coveralls| |codecov|
     * - package
-      - | |version| |wheel| |supported-versions| |supported-implementations|
-        | |commits-since|
+      - |version| |wheel| |supported-versions| |supported-implementations| |commits-since|
 .. |docs| image:: https://readthedocs.org/projects/pytest-benchmark/badge/?style=flat
-    :target: https://pytest-benchmark.readthedocs.io/
+    :target: https://readthedocs.org/projects/pytest-benchmark/
     :alt: Documentation Status
 
 .. |github-actions| image:: https://github.com/ionelmc/pytest-benchmark/actions/workflows/github-actions.yml/badge.svg

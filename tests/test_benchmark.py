@@ -868,7 +868,7 @@ def test_bogus_timer(testdir):
     result.stderr.fnmatch_lines(
         [
             '*usage: *',
-            "*: error: argument --benchmark-timer: Value for --benchmark-timer must be in dotted form. Eg: " "'module.attr'.",
+            '*: error: argument --benchmark-timer: Value for --benchmark-timer must be in dotted form. Eg: ' "'module.attr'.",
         ]
     )
 

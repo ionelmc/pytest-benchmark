@@ -23,7 +23,7 @@ class BenchmarkJSONSerializer(JSONSerializer):
         elif isinstance(data, uuid.UUID):
             return str(data)
         else:
-            return 'UNSERIALIZABLE[%r]' % data
+            return f'UNSERIALIZABLE[{data!r}]'
 
 
 def _mask_hosts(hosts):

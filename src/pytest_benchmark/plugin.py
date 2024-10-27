@@ -67,14 +67,14 @@ def add_display_options(addoption, prefix='benchmark-'):
         default='group',
         help="How to group tests. Can be one of: 'group', 'name', 'fullname', 'func', 'fullfunc', "
         "'param' or 'param:NAME', where NAME is the name passed to @pytest.parametrize."
-        " Default: %(default)r",
+        ' Default: %(default)r',
     )
     addoption(
         f'--{prefix}columns',
         metavar='LABELS',
         type=parse_columns,
         default=['min', 'max', 'mean', 'stddev', 'median', 'iqr', 'outliers', 'ops', 'rounds', 'iterations'],
-        help="Comma-separated list of columns to show in the result table. Default: "
+        help='Comma-separated list of columns to show in the result table. Default: '
         "'min, max, mean, stddev, median, iqr, outliers, ops, rounds, iterations'",
     )
     addoption(
@@ -87,7 +87,7 @@ def add_display_options(addoption, prefix='benchmark-'):
 
 
 def add_histogram_options(addoption, prefix='benchmark-'):
-    filename_prefix = 'benchmark_%s' % get_current_time()
+    filename_prefix = f'benchmark_{get_current_time()}'
     addoption(
         f'--{prefix}histogram',
         action='append',
@@ -95,13 +95,13 @@ def add_histogram_options(addoption, prefix='benchmark-'):
         nargs='?',
         default=[],
         const=filename_prefix,
-        help="Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX contains"
-        " slashes ('/') then directories will be created. Default: %r" % filename_prefix,
+        help='Plot graphs of min/max/avg/stddev over time in FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX contains'
+        f" slashes ('/') then directories will be created. Default: {filename_prefix!r}",
     )
 
 
 def add_csv_options(addoption, prefix='benchmark-'):
-    filename_prefix = 'benchmark_%s' % get_current_time()
+    filename_prefix = f'benchmark_{get_current_time()}'
     addoption(
         f'--{prefix}csv',
         action='append',
@@ -109,7 +109,7 @@ def add_csv_options(addoption, prefix='benchmark-'):
         nargs='?',
         default=[],
         const=filename_prefix,
-        help="Save a csv report. If FILENAME contains" " slashes ('/') then directories will be created. Default: %r" % filename_prefix,
+        help='Save a csv report. If FILENAME contains' f" slashes ('/') then directories will be created. Default: {filename_prefix!r}",
     )
 
 
@@ -201,8 +201,8 @@ def pytest_addoption(parser):
         nargs='?',
         default=parse_warmup('auto'),
         type=parse_warmup,
-        help="Activates warmup. Will run the test function up to number of times in the calibration phase. "
-        "See `--benchmark-warmup-iterations`. Note: Even the warmup phase obeys --benchmark-max-time. "
+        help='Activates warmup. Will run the test function up to number of times in the calibration phase. '
+        'See `--benchmark-warmup-iterations`. Note: Even the warmup phase obeys --benchmark-max-time. '
         "Available KIND: 'auto', 'off', 'on'. Default: 'auto' (automatically activate on PyPy).",
     )
     group.addoption(
@@ -218,7 +218,7 @@ def pytest_addoption(parser):
         '--benchmark-disable',
         action='store_true',
         default=False,
-        help="Disable benchmarks. Benchmarked functions are only ran once and no stats are reported. Use this is you "
+        help='Disable benchmarks. Benchmarked functions are only ran once and no stats are reported. Use this is you '
         "want to run the test but don't do any benchmarking.",
     )
     group.addoption(
@@ -235,7 +235,7 @@ def pytest_addoption(parser):
         '--benchmark-autosave',
         action='store_const',
         const=tag,
-        help="Autosave the current run into 'STORAGE-PATH/counter_%s.json" % tag,
+        help=f"Autosave the current run into 'STORAGE-PATH/counter_{tag}.json",
     )
     group.addoption(
         '--benchmark-save-data',
@@ -269,15 +269,16 @@ def pytest_addoption(parser):
         metavar='COLUMN',
         default=None,
         choices=['ncalls_recursion', 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'],
-        help="If specified measure one run with cProfile and stores 25 top functions."
+        help='If specified measure one run with cProfile and stores 25 top functions.'
         " Argument is a column to sort by. Available columns: 'ncalls_recursion',"
         " 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'.",
     )
     group.addoption(
-        "--benchmark-time-unit",
-        metavar="COLUMN", default=None,
+        '--benchmark-time-unit',
+        metavar='COLUMN',
+        default=None,
         choices=['ns', 'us', 'ms', 's', 'auto'],
-        help="Unit to scale the results to. Available units: 'ns', 'us', 'ms', 's'. Default: 'auto'."
+        help="Unit to scale the results to. Available units: 'ns', 'us', 'ms', 's'. Default: 'auto'.",
     )
     add_global_options(group.addoption)
     add_display_options(group.addoption)
@@ -299,11 +300,7 @@ def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info
 
     if compared_machine_info != machine_info:
         benchmarksession.logger.warning(
-            'Benchmark machine_info is different. Current: {} VS saved: {} (location: {}).'.format(
-                machine_info,
-                compared_machine_info,
-                benchmarksession.storage.location,
-            )
+            f'Benchmark machine_info is different. Current: {machine_info} VS saved: {compared_machine_info} (location: {benchmarksession.storage.location}).'
         )
 
 
@@ -342,7 +339,7 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
                 param_name = grouping[len('param:') :]
                 key += ('{}={}'.format(param_name, bench['params'][param_name]),)
             else:
-                raise NotImplementedError('Unsupported grouping %r.' % group_by)
+                raise NotImplementedError(f'Unsupported grouping {group_by!r}.')
         groups[' '.join(str(p) for p in key if p) or None].append(bench)
 
     for grouped_benchmarks in groups.values():
@@ -362,7 +359,7 @@ def pytest_terminal_summary(terminalreporter):
     except PerformanceRegression:
         raise
     except Exception:
-        terminalreporter.config._benchmarksession.logger.error('\n%s' % traceback.format_exc())
+        terminalreporter.config._benchmarksession.logger.error(f'\n{traceback.format_exc()}')
         raise
 
 
@@ -373,20 +370,20 @@ def get_cpu_info():
 
 
 def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
-    if config.getoption("benchmark_time_unit", None):
-        config_time_unit = config.getoption("benchmark_time_unit")
-        if config_time_unit == "ns":
-            return "n", 1e9
-        elif config_time_unit == "us":
-            return "u", 1e6
-        elif config_time_unit == "ms":
-            return "m", 1e3
-        elif config_time_unit == "s":
-            return "", 1.0
+    if config.getoption('benchmark_time_unit', None):
+        config_time_unit = config.getoption('benchmark_time_unit')
+        if config_time_unit == 'ns':
+            return 'n', 1e9
+        elif config_time_unit == 'us':
+            return 'u', 1e6
+        elif config_time_unit == 'ms':
+            return 'm', 1e3
+        elif config_time_unit == 's':
+            return '', 1.0
         else:
-            return "", 1.0
+            return '', 1.0
 
-    if unit == "seconds":
+    if unit == 'seconds':
         time_unit_key = sort
         if sort in ('name', 'fullname'):
             time_unit_key = 'min'
@@ -394,7 +391,7 @@ def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
     elif unit == 'operations':
         return operations_unit(worst.get('ops', benchmarks[0]['ops']))
     else:
-        raise RuntimeError('Unexpected measurement unit %r' % unit)
+        raise RuntimeError(f'Unexpected measurement unit {unit!r}')
 
 
 def pytest_benchmark_generate_machine_info():
@@ -485,7 +482,7 @@ def pytest_runtest_setup(item):
                 'calibration_precision',
                 'cprofile',
             ):
-                raise ValueError("benchmark mark can't have %r keyword argument." % name)
+                raise ValueError(f"benchmark mark can't have {name!r} keyword argument.")
 
 
 @pytest.hookimpl(hookwrapper=True)

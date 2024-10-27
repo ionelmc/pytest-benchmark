@@ -135,7 +135,7 @@ class BenchmarkFixture:
     def __call__(self, function_to_benchmark, *args, **kwargs):
         if self._mode:
             self.has_error = True
-            raise FixtureAlreadyUsed('Fixture can only be used once. Previously it was used in %s mode.' % self._mode)
+            raise FixtureAlreadyUsed(f'Fixture can only be used once. Previously it was used in {self._mode} mode.')
         try:
             self._mode = 'benchmark(...)'
             return self._raw(function_to_benchmark, *args, **kwargs)
@@ -146,7 +146,7 @@ class BenchmarkFixture:
     def pedantic(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
         if self._mode:
             self.has_error = True
-            raise FixtureAlreadyUsed('Fixture can only be used once. Previously it was used in %s mode.' % self._mode)
+            raise FixtureAlreadyUsed(f'Fixture can only be used once. Previously it was used in {self._mode} mode.')
         try:
             self._mode = 'benchmark.pedantic(...)'
             return self._raw_pedantic(
@@ -178,7 +178,7 @@ class BenchmarkFixture:
                     runner(loops_range)
             for _ in range(rounds):
                 stats.update(runner(loops_range))
-            self._logger.debug('  Ran for %ss.' % format_time(time.time() - run_start), yellow=True, bold=True)
+            self._logger.debug(f'  Ran for {format_time(time.time() - run_start)}s.', yellow=True, bold=True)
         if self.enabled and self.cprofile:
             profile = cProfile.Profile()
             function_result = profile.runcall(function_to_benchmark, *args, **kwargs)
@@ -304,7 +304,7 @@ class BenchmarkFixture:
             if duration >= min_time_estimate:
                 # coarse estimation of the number of loops
                 loops = int(ceil(min_time * loops / duration))
-                self._logger.debug('    Estimating %s iterations.' % loops, green=True)
+                self._logger.debug(f'    Estimating {loops} iterations.', green=True)
                 if loops == 1:
                     # If we got a single loop then bail early - nothing to calibrate if the the
                     # test function is 100 times slower than the timer resolution.

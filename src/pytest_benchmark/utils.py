@@ -58,7 +58,7 @@ class NameWrapper:
         return name
 
     def __repr__(self):
-        return 'NameWrapper(%s)' % repr(self.target)
+        return f'NameWrapper({self.target!r})'
 
 
 def get_tag(project_name=None):
@@ -111,7 +111,7 @@ def get_project_name_git():
     is_git = check_output(['git', 'rev-parse', '--git-dir'], stderr=subprocess.STDOUT)
     if is_git:
         project_address = check_output(['git', 'config', '--local', 'remote.origin.url'])
-        if isinstance(project_address, bytes) and str != bytes:
+        if isinstance(project_address, bytes):
             project_address = project_address.decode()
         project_name = [i for i in re.split(r'[/:\s\\]|\.git', project_address) if i][-1]
         return project_name.strip()
@@ -269,7 +269,7 @@ def parse_compare_fail(
         elif g['difference']:
             return DifferenceRegressionCheck(g['field'], float(g['difference']))
 
-    raise argparse.ArgumentTypeError('Could not parse value: %r.' % string)
+    raise argparse.ArgumentTypeError(f'Could not parse value: {string!r}.')
 
 
 def parse_warmup(string):
@@ -281,7 +281,7 @@ def parse_warmup(string):
     elif string in ['on', 'true', 'yes', '']:
         return True
     else:
-        raise argparse.ArgumentTypeError('Could not parse value: %r.' % string)
+        raise argparse.ArgumentTypeError(f'Could not parse value: {string!r}.')
 
 
 def name_formatter_short(bench):
@@ -311,7 +311,7 @@ def name_formatter_long(bench):
 
 def name_formatter_trial(bench):
     if bench['source']:
-        return '%.4s' % split(bench['source'])[-1]
+        return '{:.4}'.format(split(bench['source'])[-1])
     else:
         return '????'
 
@@ -329,7 +329,7 @@ def parse_name_format(string):
     if string in NAME_FORMATTERS:
         return string
     else:
-        raise argparse.ArgumentTypeError('Could not parse value: %r.' % string)
+        raise argparse.ArgumentTypeError(f'Could not parse value: {string!r}.')
 
 
 def parse_timer(string):
@@ -340,9 +340,9 @@ def parse_sort(string):
     string = string.lower().strip()
     if string not in ('min', 'max', 'mean', 'stddev', 'name', 'fullname'):
         raise argparse.ArgumentTypeError(
-            "Unacceptable value: %r. "
+            f'Unacceptable value: {string!r}. '
             "Value for --benchmark-sort must be one of: 'min', 'max', 'mean', "
-            "'stddev', 'name', 'fullname'." % string
+            "'stddev', 'name', 'fullname'."
         )
     return string
 
@@ -352,8 +352,8 @@ def parse_columns(string):
     invalid = set(columns) - set(ALLOWED_COLUMNS)
     if invalid:
         # there are extra items in columns!
-        msg = 'Invalid column name(s): %s. ' % ', '.join(invalid)
-        msg += 'The only valid column names are: %s' % ', '.join(ALLOWED_COLUMNS)
+        msg = 'Invalid column name(s): {}. '.format(', '.join(invalid))
+        msg += 'The only valid column names are: {}'.format(', '.join(ALLOWED_COLUMNS))
         raise argparse.ArgumentTypeError(msg)
     return columns
 
@@ -381,7 +381,7 @@ def parse_save(string):
         raise argparse.ArgumentTypeError("Can't be empty.")
     illegal = ''.join(c for c in r'\/:*?<>|' if c in string)
     if illegal:
-        raise argparse.ArgumentTypeError('Must not contain any of these characters: /:*?<>|\\ (it has %r)' % illegal)
+        raise argparse.ArgumentTypeError(f'Must not contain any of these characters: /:*?<>|\\ (it has {illegal!r})')
     return string
 
 
@@ -536,12 +536,13 @@ def clonefunc(f):
 
 
 def format_dict(obj):
-    return '{%s}' % ', '.join(f'{k}: {json.dumps(v)}' for k, v in sorted(obj.items()))
+    value = ', '.join(f'{k}: {json.dumps(v)}' for k, v in sorted(obj.items()))
+    return f'{value}'
 
 
 class SafeJSONEncoder(json.JSONEncoder):
     def default(self, o):
-        return 'UNSERIALIZABLE[%r]' % o
+        return f'UNSERIALIZABLE[{o!r}]'
 
 
 def safe_dumps(obj, **kwargs):

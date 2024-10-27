@@ -1,5 +1,5 @@
 name: build
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 jobs:
   test:
     name: {{ '${{ matrix.name }}' }}
@@ -33,7 +33,7 @@ jobs:
 {% for os, python_arch in [
     ['ubuntu', 'x64'],
     ['windows', 'x64'],
-    ['macos', 'x64'],
+    ['macos', 'arm64'],
 ] %}
           - name: '{{ env }} ({{ os }})'
             python: '{{ python }}'
@@ -51,7 +51,6 @@ jobs:
       with:
         python-version: {{ '${{ matrix.python }}' }}
         architecture: {{ '${{ matrix.python_arch }}' }}
-        check-latest: true
     - name: install dependencies
       run: |
         python -mpip install --progress-bar=off -r ci/requirements.txt
@@ -72,3 +71,6 @@ jobs:
     - uses: coverallsapp/github-action@v2
       with:
         parallel-finished: true
+    - uses: codecov/codecov-action@v3
+      with:
+        CODECOV_TOKEN: {% raw %}${{ secrets.CODECOV_TOKEN }}{% endraw %}

@@ -1,5 +1,3 @@
-import sphinx_py3doc_enhanced_theme
-
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
@@ -22,25 +20,18 @@ version = release = '4.0.0'
 pygments_style = 'trac'
 templates_path = ['.']
 extlinks = {
-    'issue': ('https://github.com/ionelmc/pytest-benchmark/issues/%s', '#'),
-    'pr': ('https://github.com/ionelmc/pytest-benchmark/pull/%s', 'PR #'),
+    'issue': ('https://github.com/ionelmc/pytest-benchmark/issues/%s', '#%s'),
+    'pr': ('https://github.com/ionelmc/pytest-benchmark/pull/%s', 'PR #%s'),
 }
-html_theme = 'sphinx_py3doc_enhanced_theme'
-html_theme_path = [sphinx_py3doc_enhanced_theme.get_html_theme_path()]
+
+html_theme = 'furo'
 html_theme_options = {
     'githuburl': 'https://github.com/ionelmc/pytest-benchmark/',
-    'appendcss': """
-        div.body code.descclassname { display: none }
-        div.body #pedantic-mode code.descclassname { display: inline-block }
-    """,
 }
 
 html_use_smartypants = True
 html_last_updated_fmt = '%b %d, %Y'
 html_split_index = False
-html_sidebars = {
-    '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html'],
-}
 html_short_title = f'{project}-{version}'
 
 napoleon_use_ivar = True

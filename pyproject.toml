@@ -3,11 +3,16 @@ requires = [
     "setuptools>=30.3.0",
 ]
 
-[tool.ruff.per-file-ignores]
-"ci/*" = ["S"]
-
 [tool.ruff]
 extend-exclude = ["static", "ci/templates"]
+line-length = 140
+src = ["src", "tests"]
+target-version = "py39"
+
+[tool.ruff.lint.per-file-ignores]
+"ci/*" = ["S"]
+
+[tool.ruff.lint]
 ignore = [
     "RUF001", # ruff-specific rules ambiguous-unicode-character-string
     "S101", # flake8-bandit assert
@@ -19,7 +24,6 @@ ignore = [
     "S603",
     "S607",
 ]
-line-length = 140
 select = [
     "B", # flake8-bugbear
     "C4", # flake8-comprehensions
@@ -34,28 +38,20 @@ select = [
     "PLE", # pylint errors
     "PT", # flake8-pytest-style
 #    "PTH", # flake8-use-pathlib
-    "Q", # flake8-quotes
     "RSE", # flake8-raise
     "RUF", # ruff-specific rules
     "S", # flake8-bandit
     "UP", # pyupgrade
     "W", # pycodestyle warnings
 ]
-src = ["src", "tests"]
-target-version = "py38"
 
-[tool.ruff.flake8-pytest-style]
+[tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 mark-parentheses = false
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 forced-separate = ["conftest"]
 force-single-line = true
 
-[tool.black]
-line-length = 140
-target-version = ["py38"]
-skip-string-normalization = true
-
-[tool.ruff.flake8-quotes]
-inline-quotes = "single"
+[tool.ruff.format]
+quote-style = "single"

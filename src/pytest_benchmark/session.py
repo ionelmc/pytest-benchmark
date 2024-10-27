@@ -68,7 +68,7 @@ class BenchmarkSession:
             self.disabled = True
         if not statistics and not self.disabled:
             self.logger.warning(
-                'Benchmarks are automatically disabled because we could not import `statistics`\n\n%s' % statistics_error,
+                f'Benchmarks are automatically disabled because we could not import `statistics`\n\n{statistics_error}',
             )
             self.disabled = True
 
@@ -124,7 +124,7 @@ class BenchmarkSession:
     def save_json(self, output_json):
         with self.json as fh:
             fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())
-        self.logger.info('Wrote benchmark data in: %s' % self.json, purple=True)
+        self.logger.info(f'Wrote benchmark data in: {self.json}', purple=True)
 
     def handle_saving(self):
         save = self.save or self.autosave
@@ -176,11 +176,11 @@ class BenchmarkSession:
                 compared_benchmarks = list(self.storage.load(self.compare))
 
             if not compared_benchmarks:
-                msg = "Can't compare. No benchmark files in %r" % str(self.storage)
+                msg = f"Can't compare. No benchmark files in {str(self.storage)!r}"
                 if self.compare is True:
                     msg += ". Can't load the previous benchmark."
                 else:
-                    msg += ' match %r.' % self.compare
+                    msg += f' match {self.compare!r}.'
                 self.logger.warning(msg)
 
             machine_info = self.get_machine_info()
@@ -192,7 +192,7 @@ class BenchmarkSession:
                     compared_benchmark=compared_benchmark,
                 )
                 compared_mapping[path] = {bench['fullname']: bench for bench in compared_benchmark['benchmarks']}
-                self.logger.info('Comparing against benchmarks from: %s' % path, newline=False)
+                self.logger.info(f'Comparing against benchmarks from: {path}', newline=False)
         self.compared_mapping = compared_mapping
 
     def finish(self):
@@ -229,7 +229,7 @@ class BenchmarkSession:
 
         if self.performance_regressions:
             self.logger.error(
-                'Performance has regressed:\n%s' % '\n'.join('\t{} - {}'.format(*line) for line in self.performance_regressions)
+                'Performance has regressed:\n{}'.format('\n'.join('\t{} - {}'.format(*line) for line in self.performance_regressions))
             )
             raise PerformanceRegression('Performance has regressed.')
 

@@ -169,7 +169,12 @@ def test_get_project_name(scm, set_remote, testdir):
     elif scm == 'hg' and set_remote:
         set_remote = set_remote.replace('.git', '')
         set_remote = set_remote.replace('.com:', '/')
-        testdir.tmpdir.join('.hg', 'hgrc').write('[ui]\n' 'username = you <you@example.com>\n' '[paths]\n' 'default = %s\n' % set_remote)
+        testdir.tmpdir.join('.hg', 'hgrc').write(f"""
+[ui]
+username = you <you@example.com>
+[paths]
+default = {set_remote}
+""")
     if set_remote:
         assert get_project_name() == 'pytest_benchmark_repo'
     else:
