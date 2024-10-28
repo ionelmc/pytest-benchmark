@@ -263,6 +263,19 @@ def parse_compare_fail(
     raise argparse.ArgumentTypeError(f'Could not parse value: {string!r}.')
 
 
+def parse_cprofile_loops(string):
+    if string == 'auto':
+        return None
+    else:
+        try:
+            value = int(string)
+        except ValueError:
+            raise argparse.ArgumentTypeError(f'Could not parse value: {string!r}. Expected an integer or `auto`.') from None
+        if value < 1:
+            raise argparse.ArgumentTypeError(f'Invalid value: {string!r}. Must be greater than 0.') from None
+        return value
+
+
 def parse_warmup(string):
     string = string.lower().strip()
     if string == 'auto':

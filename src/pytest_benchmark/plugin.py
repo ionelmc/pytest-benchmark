@@ -22,6 +22,7 @@ from .utils import get_tag
 from .utils import operations_unit
 from .utils import parse_columns
 from .utils import parse_compare_fail
+from .utils import parse_cprofile_loops
 from .utils import parse_name_format
 from .utils import parse_rounds
 from .utils import parse_save
@@ -269,9 +270,22 @@ def pytest_addoption(parser):
         metavar='COLUMN',
         default=None,
         choices=['ncalls_recursion', 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'],
-        help='If specified measure one run with cProfile and stores 25 top functions.'
-        " Argument is a column to sort by. Available columns: 'ncalls_recursion',"
-        " 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'.",
+        help='If specified cProfile will be enabled. Top functions will be stored for the given column. Available columns: '
+        "'ncalls_recursion', 'ncalls', 'tottime', 'tottime_per', 'cumtime', 'cumtime_per', 'function_name'.",
+    )
+    group.addoption(
+        '--benchmark-cprofile-loops',
+        metavar='LOOPS',
+        default=1,
+        type=parse_cprofile_loops,
+        help="How many times to run the function in cprofile. Available options: 'auto', or an integer. ",
+    )
+    group.addoption(
+        '--benchmark-cprofile-top',
+        metavar='COUNT',
+        default=25,
+        type=int,
+        help='How many rows to display.',
     )
     group.addoption(
         '--benchmark-time-unit',
@@ -434,14 +448,14 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_inf
 
 @pytest.fixture
 def benchmark(request):
-    bs = request.config._benchmarksession
+    bs: BenchmarkSession = request.config._benchmarksession
 
     if bs.skip:
         pytest.skip('Benchmarks are skipped (--benchmark-skip was used).')
     else:
         node = request.node
         marker = node.get_closest_marker('benchmark')
-        options = dict(marker.kwargs) if marker else {}
+        options: dict[str, object] = dict(marker.kwargs) if marker else {}
         if 'timer' in options:
             options['timer'] = NameWrapper(options['timer'])
         fixture = BenchmarkFixture(

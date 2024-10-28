@@ -53,10 +53,13 @@ class BenchmarkSession:
             'warmup': config.getoption('benchmark_warmup'),
             'warmup_iterations': config.getoption('benchmark_warmup_iterations'),
             'cprofile': bool(config.getoption('benchmark_cprofile')),
+            'cprofile_loops': config.getoption('benchmark_cprofile_loops'),
         }
         self.skip = config.getoption('benchmark_skip')
         self.disabled = config.getoption('benchmark_disable') and not config.getoption('benchmark_enable')
         self.cprofile_sort_by = config.getoption('benchmark_cprofile')
+        self.cprofile_loops = config.getoption('benchmark_cprofile_loops')
+        self.cprofile_top = config.getoption('benchmark_cprofile_top')
 
         if config.getoption('dist', 'no') != 'no' and not self.skip and not self.disabled:
             self.logger.warning(
@@ -106,7 +109,7 @@ class BenchmarkSession:
                     if bench.fullname in compared_mapping:
                         compared = compared_mapping[bench.fullname]
                         source = short_filename(path, self.machine_id)
-                        flat_bench = bench.as_dict(include_data=False, stats=False, cprofile=self.cprofile_sort_by)
+                        flat_bench = bench.as_dict(include_data=False, stats=False, cprofile=(self.cprofile_sort_by, self.cprofile_top))
                         flat_bench.update(compared['stats'])
                         flat_bench['path'] = str(path)
                         flat_bench['source'] = source
@@ -116,7 +119,7 @@ class BenchmarkSession:
                                 if fail:
                                     self.performance_regressions.append((self.name_format(flat_bench), fail))
                         yield flat_bench
-                flat_bench = bench.as_dict(include_data=False, flat=True, cprofile=self.cprofile_sort_by)
+                flat_bench = bench.as_dict(include_data=False, flat=True, cprofile=(self.cprofile_sort_by, self.cprofile_top))
                 flat_bench['path'] = None
                 flat_bench['source'] = compared and 'NOW'
                 yield flat_bench

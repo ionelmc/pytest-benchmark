@@ -44,6 +44,7 @@ class BenchmarkFixture:
         warner,
         disabled,
         cprofile,
+        cprofile_loops,
         group=None,
     ):
         self.name = node.name
@@ -73,6 +74,7 @@ class BenchmarkFixture:
         self._cleanup_callbacks = []
         self._mode = None
         self.cprofile = cprofile
+        self.cprofile_loops = cprofile_loops
         self.cprofile_stats = None
         self.stats = None
 
@@ -157,12 +159,14 @@ class BenchmarkFixture:
             raise
 
     def _raw(self, function_to_benchmark, *args, **kwargs):
+        loops_range = None
+
         if self.enabled:
             runner = self._make_runner(function_to_benchmark, args, kwargs)
 
             duration, iterations, loops_range = self._calibrate_timer(runner)
 
-            # Choose how many time we must repeat the test
+            # Choose how many times we must repeat the test
             rounds = int(ceil(self._max_time / duration))
             rounds = max(rounds, self._min_rounds)
             rounds = min(rounds, sys.maxsize)
@@ -179,9 +183,14 @@ class BenchmarkFixture:
             for _ in range(rounds):
                 stats.update(runner(loops_range))
             self._logger.debug(f'  Ran for {format_time(time.time() - run_start)}s.', yellow=True, bold=True)
+        if self.cprofile_loops is None:
+            cprofile_loops = loops_range or range(1)
+        else:
+            cprofile_loops = range(self.cprofile_loops)
         if self.enabled and self.cprofile:
             profile = cProfile.Profile()
-            function_result = profile.runcall(function_to_benchmark, *args, **kwargs)
+            for _ in cprofile_loops:
+                function_result = profile.runcall(function_to_benchmark, *args, **kwargs)
             self.stats.cprofile_stats = pstats.Stats(profile)
         else:
             function_result = function_to_benchmark(*args, **kwargs)
@@ -237,13 +246,20 @@ class BenchmarkFixture:
             stats.update(duration)
 
         if loops_range:
+            # if it has been looped then we don't have the result, we need to do 1 extra run for it
             args, kwargs = make_arguments()
             result = target(*args, **kwargs)
 
         if self.cprofile:
+            if self.cprofile_loops is None:
+                cprofile_loops = loops_range or range(1)
+            else:
+                cprofile_loops = range(self.cprofile_loops)
+
             profile = cProfile.Profile()
             args, kwargs = make_arguments()
-            profile.runcall(target, *args, **kwargs)
+            for _ in cprofile_loops:
+                profile.runcall(target, *args, **kwargs)
             self.stats.cprofile_stats = pstats.Stats(profile)
 
         return result

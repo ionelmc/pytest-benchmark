@@ -1,4 +1,5 @@
 import operator
+import pstats
 import statistics
 from bisect import bisect_left
 from bisect import bisect_right
@@ -178,6 +179,8 @@ class Stats:
 
 
 class Metadata:
+    cprofile_stats: pstats.Stats
+
     def __init__(self, fixture, iterations, options):
         self.name = fixture.name
         self.fullname = fixture.fullname
@@ -228,17 +231,18 @@ class Metadata:
             cprofile_list = result['cprofile'] = []
             cprofile_functions = get_cprofile_functions(self.cprofile_stats)
             stats_columns = ['cumtime', 'tottime', 'ncalls', 'ncalls_recursion', 'tottime_per', 'cumtime_per', 'function_name']
+            cprofile_sort_by, cprofile_top = (None, 25) if cprofile is None else cprofile
             # move column first
-            if cprofile is not None:
-                stats_columns.remove(cprofile)
-                stats_columns.insert(0, cprofile)
+            if cprofile_sort_by is not None:
+                stats_columns.remove(cprofile_sort_by)
+                stats_columns.insert(0, cprofile_sort_by)
             for column in stats_columns:
                 cprofile_functions.sort(key=operator.itemgetter(column), reverse=True)
-                for cprofile_function in cprofile_functions[:25]:
+                for cprofile_function in cprofile_functions[:cprofile_top]:
                     if cprofile_function not in cprofile_list:
                         cprofile_list.append(cprofile_function)
-                # if we want only one column or we already have all available functions
-                if cprofile is None or len(cprofile_functions) == len(cprofile_list):
+                # if we want only one column, or we already have all available functions
+                if cprofile_sort_by is None or len(cprofile_functions) == len(cprofile_list):
                     break
         if stats:
             stats = self.stats.as_dict()
