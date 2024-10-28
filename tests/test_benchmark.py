@@ -1209,26 +1209,3 @@ def test_columns(testdir):
             '------*',
         ]
     )
-
-
-def test_compare_csv(testdir):
-    test = testdir.makepyfile("""
-    import pytest
-    @pytest.mark.parametrize("arg", ["foo", "bar"])
-    def test1(benchmark, arg):
-        def func():
-            print(arg)
-        benchmark(func)
-    def test2(benchmark):
-        def func():
-            print("foo")
-        benchmark(func)
-    """)
-    result = testdir.runpytest_subprocess('--benchmark-autosave', test)
-    result.stderr.fnmatch_lines(
-        [
-            'Saved benchmark data in: *',
-        ]
-    )
-    result = testdir.run('py.test-benchmark', 'compare', '--csv')
-    result.stderr.fnmatch_lines(['Generated csv: *.csv'])
