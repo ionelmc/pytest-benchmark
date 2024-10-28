@@ -2,7 +2,7 @@
 Changelog
 =========
 
-4.1.0 (2024-10-28)
+5.0.0 (2024-10-29)
 ------------------
 
 * Dropped support for now EOL Python 3.8. Also moved tests suite to only test the latest pytest versions (8.3.x).
@@ -16,7 +16,7 @@ Changelog
 
   - ``--benchmark-cprofile-loops=LOOPS`` - previously profiling only ran the function once, this allow customization.
   - ``--benchmark-cprofile-top=COUNT`` - allows showing more rows.
-  - ``--benchmark-cprofile-dump=[FILENAME-PREFIX]`` - allows saving to a file (that you can load in `snakeviz <https://pypi.org/project/snakeviz/>`_ or other tools).
+  - ``--benchmark-cprofile-dump=[FILENAME-PREFIX]`` - allows saving to a file (that you can load in `snakeviz <https://pypi.org/project/snakeviz/>`_, `RunSnakeRun <https://pypi.org/project/RunSnakeRun/>`_ or other tools).
 
 
 4.0.0 (2022-10-26)
