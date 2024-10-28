@@ -512,6 +512,7 @@ def clonefunc(f):
     co = f.__code__
     args = [
         co.co_argcount,
+        co.co_posonlyargcount,
         co.co_kwonlyargcount,
         co.co_nlocals,
         co.co_stacksize,
