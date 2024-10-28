@@ -3,9 +3,9 @@ import logging
 import os
 from io import BytesIO
 from io import StringIO
+from pathlib import Path
 
 import elasticsearch
-import py
 import pytest
 from freezegun import freeze_time
 
@@ -25,8 +25,8 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-THIS = py.path.local(__file__)
-BENCHFILE = THIS.dirpath('test_storage/0030_5b78858eb718649a31fb93d8dc96ca2cee41a4cd_20150815_030419_uncommitted-changes.json')
+THIS = Path(__file__)
+BENCHFILE = THIS.with_name('test_storage') / '0030_5b78858eb718649a31fb93d8dc96ca2cee41a4cd_20150815_030419_uncommitted-changes.json'
 SAVE_DATA = json.loads(BENCHFILE.read_text(encoding='utf8'))
 SAVE_DATA['machine_info'] = {'foo': 'bar'}
 SAVE_DATA['commit_info'] = {'foo': 'bar'}

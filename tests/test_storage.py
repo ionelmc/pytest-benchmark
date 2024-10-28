@@ -28,10 +28,10 @@ from pytest_benchmark.utils import get_machine_id
 pytest_plugins = 'pytester'
 
 
-THIS = py.path.local(__file__)
-STORAGE = THIS.dirpath(THIS.purebasename)
+THIS = Path(__file__)
+STORAGE = THIS.with_suffix('')
 
-JSON_DATA = json.loads(STORAGE.listdir('0030_*.json')[0].read_text(encoding='utf8'))
+JSON_DATA = json.loads(next(STORAGE.glob('0030_*.json')).read_text(encoding='utf8'))
 JSON_DATA['machine_info'] = {'foo': 'bar'}
 JSON_DATA['commit_info'] = {'foo': 'bar'}
 list(normalize_stats(bench['stats']) for bench in JSON_DATA['benchmarks'])

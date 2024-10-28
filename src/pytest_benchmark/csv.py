@@ -1,7 +1,6 @@
 import csv
 import operator
-
-import py
+from pathlib import Path
 
 
 class CSVResults:
@@ -11,10 +10,12 @@ class CSVResults:
         self.logger = logger
 
     def render(self, output_file, groups):
-        output_file = py.path.local(output_file)
-        if not output_file.ext:
-            output_file = output_file.new(ext='csv')
-        with output_file.open('w', ensure=True) as stream:
+        output_file = Path(output_file)
+        output_file.parent.mkdir(exist_ok=True, parents=True)
+
+        if not output_file.suffix:
+            output_file = output_file.with_suffix('.csv')
+        with output_file.open('w') as stream:
             writer = csv.writer(stream)
             params = sorted(
                 {param for group, benchmarks in groups for benchmark in benchmarks for param in benchmark.get('params', {}) or ()}

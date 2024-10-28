@@ -1,6 +1,5 @@
 from collections.abc import Iterable
-
-import py
+from pathlib import Path
 
 from .utils import TIME_UNITS
 from .utils import slugify
@@ -100,7 +99,8 @@ def make_histogram(output_prefix, name, benchmarks, unit, adjustment):
         path = f'{output_prefix}.svg'
         title = f'Speed in {TIME_UNITS[unit]}'
 
-    output_file = py.path.local(path).ensure()
+    output_file = Path(path)
+    output_file.parent.mkdir(exist_ok=True, parents=True)
 
     plot = make_plot(
         benchmarks=benchmarks,

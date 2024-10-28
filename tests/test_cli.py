@@ -1,14 +1,14 @@
 import sys
 from collections import namedtuple
+from pathlib import Path
 
-import py
 import pytest
 from _pytest.pytester import LineMatcher
 
 pytest_plugins = ('pytester',)
 
-THIS = py.path.local(__file__)
-STORAGE = THIS.dirpath('test_storage')
+THIS = Path(__file__)
+STORAGE = THIS.with_name('test_storage')
 
 
 @pytest.fixture
