@@ -1211,7 +1211,7 @@ def test_columns(testdir):
     )
 
 
-def test_generate_csv_report_for_parametrize_tests(testdir):
+def test_compare_csv(testdir):
     test = testdir.makepyfile("""
     import pytest
     @pytest.mark.parametrize("arg", ["foo", "bar"])
@@ -1230,9 +1230,5 @@ def test_generate_csv_report_for_parametrize_tests(testdir):
             'Saved benchmark data in: *',
         ]
     )
-    result = testdir.run(
-        'py.test-benchmark',
-        'compare',
-        '--csv',
-    )
+    result = testdir.run('py.test-benchmark', 'compare', '--csv')
     result.stderr.fnmatch_lines(['Generated csv: *.csv'])
