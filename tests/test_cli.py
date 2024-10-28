@@ -13,8 +13,11 @@ STORAGE = THIS.dirpath('test_storage')
 
 @pytest.fixture
 def testdir(testdir, monkeypatch):
-    return namedtuple('testdir', 'tmpdir,run')(
-        testdir.tmpdir, lambda bin, *args: testdir.run(bin + '.exe' if sys.platform == 'win32' else bin, *args)
+    return namedtuple('testdir', ['makepyfile', 'runpytest_subprocess', 'tmpdir', 'run'])(
+        testdir.makepyfile,
+        testdir.runpytest_subprocess,
+        testdir.tmpdir,
+        lambda bin, *args: testdir.run(bin + '.exe' if sys.platform == 'win32' else bin, *args),
     )
 
 
