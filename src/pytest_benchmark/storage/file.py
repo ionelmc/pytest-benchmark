@@ -1,9 +1,9 @@
 import json
 import os
 from os.path import commonpath
+from pathlib import Path
 
 from ..stats import normalize_stats
-from ..utils import Path
 from ..utils import safe_dumps
 from ..utils import short_filename
 

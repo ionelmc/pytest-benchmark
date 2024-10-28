@@ -21,7 +21,7 @@ from pytest_benchmark.stats import normalize_stats
 from pytest_benchmark.storage.file import FileStorage
 from pytest_benchmark.utils import NAME_FORMATTERS
 from pytest_benchmark.utils import DifferenceRegressionCheck
-from pytest_benchmark.utils import Path
+from pathlib import Path
 from pytest_benchmark.utils import PercentageRegressionCheck
 from pytest_benchmark.utils import get_machine_id
 

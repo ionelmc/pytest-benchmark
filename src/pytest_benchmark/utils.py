@@ -21,16 +21,7 @@ from subprocess import check_output
 from urllib.parse import parse_qs
 from urllib.parse import urlparse
 
-from .compat import PY38
 from .compat import PY311
-
-# This is here (in the utils module) because it might be used by
-# various other modules.
-try:
-    from pathlib2 import Path
-except ImportError:
-    from pathlib import Path  # noqa: F401
-
 
 TIME_UNITS = {'': 'Seconds', 'm': 'Milliseconds (ms)', 'u': 'Microseconds (us)', 'n': 'Nanoseconds (ns)'}
 ALLOWED_COLUMNS = ['min', 'max', 'mean', 'stddev', 'median', 'iqr', 'ops', 'outliers', 'rounds', 'iterations']
@@ -523,8 +514,6 @@ def clonefunc(f):
         co.co_freevars,
         co.co_cellvars,
     ]
-    if PY38:
-        args.insert(1, co.co_posonlyargcount)
     if PY311:
         args.insert(12, co.co_qualname)
         args.insert(15, co.co_exceptiontable)
