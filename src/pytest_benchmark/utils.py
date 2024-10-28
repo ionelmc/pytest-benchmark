@@ -578,20 +578,22 @@ def get_cprofile_functions(stats):
             file_path = file_path[len(project_dir_parent) :].lstrip('/')
         function_name = f'{file_path}:{function_info[1]}({function_info[2]})'
 
-        # if the function is recursive write number of 'total calls/primitive calls'
-        if run_info[0] == run_info[1]:
-            calls = str(run_info[0])
+        pcalls, ncalls, tottime, cumtime = run_info[:4]
+
+        # if the function is recursive, write number of 'total calls/primitive calls'
+        if pcalls == ncalls:
+            calls = str(pcalls)
         else:
-            calls = f'{run_info[1]}/{run_info[0]}'
+            calls = f'{ncalls}/{pcalls}'
 
         result.append(
             {
                 'ncalls_recursion': calls,
-                'ncalls': run_info[1],
-                'tottime': run_info[2],
-                'tottime_per': run_info[2] / run_info[0] if run_info[0] > 0 else 0,
-                'cumtime': run_info[3],
-                'cumtime_per': run_info[3] / run_info[0] if run_info[0] > 0 else 0,
+                'ncalls': ncalls,
+                'tottime': tottime,
+                'tottime_per': tottime / pcalls if pcalls > 0 else 0,
+                'cumtime': cumtime,
+                'cumtime_per': cumtime / pcalls if pcalls > 0 else 0,
                 'function_name': function_name,
             }
         )
