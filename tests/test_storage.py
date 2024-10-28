@@ -85,6 +85,8 @@ class MockSession(BenchmarkSession):
             'cprofile': False,
         }
         self.cprofile_sort_by = 'cumtime'
+        self.cprofile_loops = 1
+        self.cprofile_top = 25
         self.compare_fail = []
         self.config = Namespace(
             hook=Namespace(
