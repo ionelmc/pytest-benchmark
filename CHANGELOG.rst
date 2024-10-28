@@ -1,9 +1,17 @@
 
 Changelog
 =========
-4.0.1
+
+4.1.0 (2024-10-28)
 ------------------
-* Fix generate parametrize tests benchmark csv report errors `#268 <https://github.com/ionelmc/pytest-benchmark/issues/268>`_.
+
+* Dropped support for now EOL Python 3.8. Also moved tests suite to only test the latest pytest versions (8.3.x).
+* Fix generate parametrize tests benchmark csv report errors (issue `#268 <https://github.com/ionelmc/pytest-benchmark/issues/268>`_).
+  Contributed by Johnny Huang in `#269 <https://github.com/ionelmc/pytest-benchmark/pull/269>`_.
+* Added the ``--benchmark-time-unit`` cli option for overriding the measurement unit used for display.
+  Contributed by Tony Kuo in `#257 <https://github.com/ionelmc/pytest-benchmark/pull/257>`_.
+* Fixes spelling in some help texts.
+  Contributed by Eugeniy in `#267 <https://github.com/ionelmc/pytest-benchmark/pull/267>`_.
 
 4.0.0 (2022-10-26)
 ------------------
