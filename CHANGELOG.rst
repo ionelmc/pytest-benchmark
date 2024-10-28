@@ -12,6 +12,12 @@ Changelog
   Contributed by Tony Kuo in `#257 <https://github.com/ionelmc/pytest-benchmark/pull/257>`_.
 * Fixes spelling in some help texts.
   Contributed by Eugeniy in `#267 <https://github.com/ionelmc/pytest-benchmark/pull/267>`_.
+* Added new cprofile options:
+
+  - ``--benchmark-cprofile-loops=LOOPS`` - previously profiling only ran the function once, this allow customization.
+  - ``--benchmark-cprofile-top=COUNT`` - allows showing more rows.
+  - ``--benchmark-cprofile-dump=[FILENAME-PREFIX]`` - allows saving to a file (that you can load in `snakeviz <https://pypi.org/project/snakeviz/>`_ or other tools).
+
 
 4.0.0 (2022-10-26)
 ------------------

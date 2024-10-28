@@ -287,6 +287,17 @@ def pytest_addoption(parser):
         type=int,
         help='How many rows to display.',
     )
+    cprofile_dump_prefix = f'benchmark_{get_current_time()}'
+    group.addoption(
+        '--benchmark-cprofile-dump',
+        action='append',
+        metavar='FILENAME-PREFIX',
+        nargs='?',
+        default=[],
+        const=cprofile_dump_prefix,
+        help='Save cprofile dumps as FILENAME-PREFIX-test_name.prof. If FILENAME-PREFIX contains'
+        f" slashes ('/') then directories will be created. Default: {cprofile_dump_prefix!r}",
+    )
     group.addoption(
         '--benchmark-time-unit',
         metavar='COLUMN',

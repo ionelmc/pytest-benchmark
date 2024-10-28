@@ -6,10 +6,12 @@ import time
 import traceback
 import typing
 from math import ceil
+from pathlib import Path
 
 from .timers import compute_timer_precision
 from .utils import NameWrapper
 from .utils import format_time
+from .utils import slugify
 
 try:
     import statistics
@@ -45,6 +47,7 @@ class BenchmarkFixture:
         disabled,
         cprofile,
         cprofile_loops,
+        cprofile_dump,
         group=None,
     ):
         self.name = node.name
@@ -75,6 +78,7 @@ class BenchmarkFixture:
         self._mode = None
         self.cprofile = cprofile
         self.cprofile_loops = cprofile_loops
+        self.cprofile_dump = cprofile_dump
         self.cprofile_stats = None
         self.stats = None
 
@@ -134,6 +138,15 @@ class BenchmarkFixture:
         self.stats = bench_stats
         return bench_stats
 
+    def _save_cprofile(self, profile: cProfile.Profile):
+        stats = pstats.Stats(profile)
+        self.stats.cprofile_stats = stats
+        if self.cprofile_dump:
+            output_file = Path(f'{self.cprofile_dump}-{slugify(self.name)}.prof')
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+            stats.dump_stats(output_file)
+            self._logger.info(f'Saved profile: {output_file}', bold=True)
+
     def __call__(self, function_to_benchmark, *args, **kwargs):
         if self._mode:
             self.has_error = True
@@ -191,7 +204,7 @@ class BenchmarkFixture:
             profile = cProfile.Profile()
             for _ in cprofile_loops:
                 function_result = profile.runcall(function_to_benchmark, *args, **kwargs)
-            self.stats.cprofile_stats = pstats.Stats(profile)
+            self._save_cprofile(profile)
         else:
             function_result = function_to_benchmark(*args, **kwargs)
         return function_result
@@ -260,7 +273,7 @@ class BenchmarkFixture:
             args, kwargs = make_arguments()
             for _ in cprofile_loops:
                 profile.runcall(target, *args, **kwargs)
-            self.stats.cprofile_stats = pstats.Stats(profile)
+            self._save_cprofile(profile)
 
         return result
 

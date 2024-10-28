@@ -43,6 +43,10 @@ class BenchmarkSession:
             default_machine_id=self.machine_id,
             netrc=config.getoption('benchmark_netrc'),
         )
+        self.cprofile_sort_by = config.getoption('benchmark_cprofile')
+        self.cprofile_loops = config.getoption('benchmark_cprofile_loops')
+        self.cprofile_top = config.getoption('benchmark_cprofile_top')
+        self.cprofile_dump = first_or_value(config.getoption('benchmark_cprofile_dump'), False)
         self.options = {
             'min_time': SecondsDecimal(config.getoption('benchmark_min_time')),
             'min_rounds': config.getoption('benchmark_min_rounds'),
@@ -52,14 +56,12 @@ class BenchmarkSession:
             'disable_gc': config.getoption('benchmark_disable_gc'),
             'warmup': config.getoption('benchmark_warmup'),
             'warmup_iterations': config.getoption('benchmark_warmup_iterations'),
-            'cprofile': bool(config.getoption('benchmark_cprofile')),
-            'cprofile_loops': config.getoption('benchmark_cprofile_loops'),
+            'cprofile': bool(self.cprofile_sort_by),
+            'cprofile_loops': self.cprofile_loops,
+            'cprofile_dump': self.cprofile_dump,
         }
         self.skip = config.getoption('benchmark_skip')
         self.disabled = config.getoption('benchmark_disable') and not config.getoption('benchmark_enable')
-        self.cprofile_sort_by = config.getoption('benchmark_cprofile')
-        self.cprofile_loops = config.getoption('benchmark_cprofile_loops')
-        self.cprofile_top = config.getoption('benchmark_cprofile_top')
 
         if config.getoption('dist', 'no') != 'no' and not self.skip and not self.disabled:
             self.logger.warning(
@@ -93,7 +95,6 @@ class BenchmarkSession:
         self.compare = config.getoption('benchmark_compare')
         self.compare_fail = config.getoption('benchmark_compare_fail')
         self.name_format = NAME_FORMATTERS[config.getoption('benchmark_name')]
-
         self.histogram = first_or_value(config.getoption('benchmark_histogram'), False)
 
     def get_machine_info(self):
