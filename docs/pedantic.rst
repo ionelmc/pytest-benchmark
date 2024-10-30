@@ -24,7 +24,7 @@ Reference
     :param kwargs: Named arguments to the ``target`` function.
 
     :type  setup: callable
-    :param setup: A function to call right before calling the ``target`` function.
+    :param setup: A function to call right before calling the ``target`` function in the first iteration of every round.
 
         The setup function can also return the arguments for the function (in case you need to create new arguments every time).
 
@@ -42,6 +42,24 @@ Reference
         .. note::
 
             if you use a ``setup`` function then you cannot use the ``args``, ``kwargs`` and ``iterations`` options.
+
+    :type  teardown: callable
+    :param teardown: A function to call after the last iteration of every round.
+
+        .. sourcecode:: python
+
+            def stuff(a, b, c, foo):
+                pass
+
+            def test_with_teardown(benchmark):
+                def teardown():
+                    # cleanup the side effect of the previous bench mark round.
+                    pass
+                benchmark.pedantic(stuff, teardown=teardown, rounds=100)
+
+        .. note::
+
+            the ``teardown`` function receives the same ``args`` and ``kwargs`` as the ``target``.
 
     :type  rounds: int
     :param rounds: Number of rounds to run.

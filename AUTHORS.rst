@@ -36,3 +36,4 @@ Authors
 * Johnny Huang - https://github.com/jnhyperion
 * Tony Kuo - https://github.com/tony92151
 * Eugeniy - https://github.com/zcoder
+* Patrick Winter - https://github.com/winpat
