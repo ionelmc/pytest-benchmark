@@ -2,6 +2,11 @@
 Changelog
 =========
 
+5.0.1 (2024-10-30)
+------------------
+
+* Fixed bad fixture check that broke down then `nbmake <https://pypi.org/project/nbmake/>`_ was enabled.
+
 5.0.0 (2024-10-29)
 ------------------
 
@@ -17,7 +22,7 @@ Changelog
   - ``--benchmark-cprofile-loops=LOOPS`` - previously profiling only ran the function once, this allow customization.
   - ``--benchmark-cprofile-top=COUNT`` - allows showing more rows.
   - ``--benchmark-cprofile-dump=[FILENAME-PREFIX]`` - allows saving to a file (that you can load in `snakeviz <https://pypi.org/project/snakeviz/>`_, `RunSnakeRun <https://pypi.org/project/RunSnakeRun/>`_ or other tools).
-
+* Removed hidden dependency on `py.path <https://pypi.org/project/py/>`_ (replaced with pathlib).
 
 4.0.0 (2022-10-26)
 ------------------
