@@ -62,7 +62,7 @@ setup(
     ],
     python_requires='>=3.9',
     install_requires=[
-        'pytest>=3.8',
+        'pytest>=8.1',
         'py-cpuinfo',
     ],
     extras_require={

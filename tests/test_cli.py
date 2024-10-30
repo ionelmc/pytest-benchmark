@@ -3,6 +3,7 @@ from collections import namedtuple
 from pathlib import Path
 
 import pytest
+from _pytest.legacypath import Testdir
 from _pytest.pytester import LineMatcher
 
 pytest_plugins = ('pytester',)
@@ -138,6 +139,52 @@ def test_help_compare(testdir, args):
             '    pytest-benchmark compare /foo/bar/0001_abc.json /lorem/ipsum/0001_sir_dolor.json',
             '',
             '        Loads runs from exactly those files.',
+        ]
+    )
+    assert result.ret == 0
+
+
+def test_hooks(testdir: Testdir):
+    testdir.makepyfile(
+        conftest="""
+def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
+    return '', 1
+    """
+    )
+    result = testdir.run('py.test-benchmark', '--storage', STORAGE, 'list')
+    assert result.stderr.lines == []
+    result.stdout.fnmatch_lines(
+        [
+            '*0001_*.json',
+            '*0002_*.json',
+            '*0003_*.json',
+            '*0004_*.json',
+            '*0005_*.json',
+            '*0006_*.json',
+            '*0007_*.json',
+            '*0008_*.json',
+            '*0009_*.json',
+            '*0010_*.json',
+            '*0011_*.json',
+            '*0012_*.json',
+            '*0013_*.json',
+            '*0014_*.json',
+            '*0015_*.json',
+            '*0016_*.json',
+            '*0017_*.json',
+            '*0018_*.json',
+            '*0019_*.json',
+            '*0020_*.json',
+            '*0021_*.json',
+            '*0022_*.json',
+            '*0023_*.json',
+            '*0024_*.json',
+            '*0025_*.json',
+            '*0026_*.json',
+            '*0027_*.json',
+            '*0028_*.json',
+            '*0029_*.json',
+            '*0030_*.json',
         ]
     )
     assert result.ret == 0

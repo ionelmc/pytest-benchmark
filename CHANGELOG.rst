@@ -2,6 +2,12 @@
 Changelog
 =========
 
+5.1.0 (2024-10-30)
+------------------
+
+* Fixed broken hooks handling on pytest 8.1 or later (the ``TypeError: import_path() missing 1 required keyword-only argument: 'consider_namespace_packages'`` issue).
+  Unfortunately this sets the minimum supported pytest version to 8.1.
+
 5.0.1 (2024-10-30)
 ------------------
 
