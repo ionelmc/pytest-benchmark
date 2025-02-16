@@ -93,6 +93,7 @@ def test_help_compare(testdir, args):
         [
             'usage: py.test-benchmark compare [-h] [--sort COL] [--group-by LABEL]',
             '                                 [--columns LABELS] [--name FORMAT]',
+            '                                 [--time-unit COLUMN]',
             '                                 [--histogram [FILENAME-PREFIX]]',
             '                                 [--csv [FILENAME]]',
             '                                 [[]glob_or_file *[]]',
@@ -116,6 +117,8 @@ def test_help_compare(testdir, args):
             "                        outliers, ops, rounds, iterations'",
             "  --name FORMAT         How to format names in results. Can be one of 'short',",
             "                        'normal', 'long', or 'trial'. Default: 'normal'",
+            "  --time-unit COLUMN    Unit to scale the results to. Available units: 'ns',",
+            "                        'us', 'ms', 's'. Default: 'auto'.",
             '  --histogram [FILENAME-PREFIX]',
             '                        Plot graphs of min/max/avg/stddev over time in',
             '                        FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX',
