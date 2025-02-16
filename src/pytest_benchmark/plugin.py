@@ -394,39 +394,26 @@ def get_cpu_info():
     return cpuinfo.get_cpu_info() or {}
 
 
-def _scale_unit(config_time_unit, unit, benchmarks, best, worst, sort):
-    if config_time_unit == "ns":
-        return "n", 1e9
-    elif config_time_unit == "us":
-        return "u", 1e6
-    elif config_time_unit == "ms":
-        return "m", 1e3
-    elif config_time_unit == "s":
-        return "", 1.0
-    assert config_time_unit in ("auto", None)
-    if unit == "seconds":
-        time_unit_key = sort
-        if sort in ("name", "fullname"):
-            time_unit_key = "min"
-        return time_unit(best.get(sort, benchmarks[0][time_unit_key]))
-    elif unit == "operations":
-        return operations_unit(worst.get("ops", benchmarks[0]["ops"]))
-    else:
-        raise RuntimeError(f"Unexpected measurement unit {unit!r}")
-
-
-def pytest_compare_scale_unit(config, unit, benchmarks, best, worst, sort):
-    config_time_unit = config.getoption("time_unit", None) if config else None
-    scale_result = _scale_unit(config_time_unit, unit, benchmarks, best, worst, sort)
-    if scale_result is not None:
-        return scale_result
-
-
 def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
-    config_time_unit = config.getoption("benchmark_time_unit", None) if config else None
-    scale_result = _scale_unit(config_time_unit, unit, benchmarks, best, worst, sort)
-    if scale_result is not None:
-        return scale_result
+    config_time_unit = config.getoption('benchmark_time_unit', None) if config else None
+    if config_time_unit == 'ns':
+        return 'n', 1e9
+    elif config_time_unit == 'us':
+        return 'u', 1e6
+    elif config_time_unit == 'ms':
+        return 'm', 1e3
+    elif config_time_unit == 's':
+        return '', 1.0
+    assert config_time_unit in ('auto', None)
+    if unit == 'seconds':
+        time_unit_key = sort
+        if sort in ('name', 'fullname'):
+            time_unit_key = 'min'
+        return time_unit(best.get(sort, benchmarks[0][time_unit_key]))
+    elif unit == 'operations':
+        return operations_unit(worst.get('ops', benchmarks[0]['ops']))
+    else:
+        raise RuntimeError(f'Unexpected measurement unit {unit!r}')
 
 
 def pytest_benchmark_generate_machine_info():
