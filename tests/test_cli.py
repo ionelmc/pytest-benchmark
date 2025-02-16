@@ -289,6 +289,56 @@ def test_compare(testdir, name, name_pattern_generator):
     assert result.ret == 0
 
 
+@pytest.mark.parametrize(
+    ('name', 'name_pattern_generator', 'unit'),
+    [
+        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, "s"),
+        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, "ms"),
+        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, "us"),
+        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, "ns"),
+    ],
+)
+def test_compare_with_unit_scale(testdir, name, name_pattern_generator, unit):
+    result = testdir.run(
+        'py.test-benchmark',
+        '--storage',
+        STORAGE,
+        'compare',
+        '0001',
+        '0002',
+        '0003',
+        '--sort',
+        'min',
+        '--columns',
+        'min,max',
+        '--name',
+        name,
+        '--histogram',
+        'foobar',
+        '--csv',
+        'foobar',
+        '--time-unit',
+        unit
+    )
+    result.stderr.fnmatch_lines(['Generated csv: *foobar.csv'])
+    LineMatcher(testdir.tmpdir.join('foobar.csv').readlines(cr=0)).fnmatch_lines(
+        [
+            'name,min,max',
+            'tests/test_normal.py::test_xfast_parametrized[[]0[]],2.15628567*e-07,1.03186158*e-05',
+            'tests/test_normal.py::test_xfast_parametrized[[]0[]],2.16902756*e-07,7.73929968*e-06',
+            'tests/test_normal.py::test_xfast_parametrized[[]0[]],2.17314542*e-07,1.14473891*e-05',
+            '',
+        ]
+    )
+    result.stdout.fnmatch_lines(
+        [
+            '---*--- benchmark: 3 tests ---*---',
+            f'Name (time in {unit}) * Min * Max          ',
+        ]
+    )
+    assert result.ret == 0
+
+
 def test_compare_csv(testdir):
     test = testdir.makepyfile("""
     import pytest
