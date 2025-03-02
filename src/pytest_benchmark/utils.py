@@ -248,7 +248,7 @@ def parse_compare_fail(
     string,
     rex=re.compile(
         r'^(?P<field>min|max|mean|median|stddev|iqr):'
-        r'((?P<percentage>[0-9]?[0-9])%|(?P<difference>[0-9]*\.?[0-9]+([eE][-+]?['
+        r'((?P<percentage>[0-9]+)%|(?P<difference>[0-9]*\.?[0-9]+([eE][-+]?['
         r'0-9]+)?))$'
     ),
 ):
