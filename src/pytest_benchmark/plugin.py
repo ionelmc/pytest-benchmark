@@ -85,6 +85,13 @@ def add_display_options(addoption, prefix='benchmark-'):
         default='normal',
         help="How to format names in results. Can be one of 'short', 'normal', 'long', or 'trial'. Default: %(default)r",
     )
+    addoption(
+        f'--{prefix}time-unit',
+        metavar='COLUMN',
+        default=None,
+        choices=['ns', 'us', 'ms', 's', 'auto'],
+        help="Unit to scale the results to. Available units: 'ns', 'us', 'ms', 's'. Default: 'auto'.",
+    )
 
 
 def add_histogram_options(addoption, prefix='benchmark-'):
@@ -297,13 +304,6 @@ def pytest_addoption(parser):
         const=cprofile_dump_prefix,
         help='Save cprofile dumps as FILENAME-PREFIX-test_name.prof. If FILENAME-PREFIX contains'
         f" slashes ('/') then directories will be created. Default: {cprofile_dump_prefix!r}",
-    )
-    group.addoption(
-        '--benchmark-time-unit',
-        metavar='COLUMN',
-        default=None,
-        choices=['ns', 'us', 'ms', 's', 'auto'],
-        help="Unit to scale the results to. Available units: 'ns', 'us', 'ms', 's'. Default: 'auto'.",
     )
     add_global_options(group.addoption)
     add_display_options(group.addoption)

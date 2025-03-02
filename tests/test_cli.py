@@ -93,6 +93,7 @@ def test_help_compare(testdir, args):
         [
             'usage: py.test-benchmark compare [-h] [--sort COL] [--group-by LABEL]',
             '                                 [--columns LABELS] [--name FORMAT]',
+            '                                 [--time-unit COLUMN]',
             '                                 [--histogram [FILENAME-PREFIX]]',
             '                                 [--csv [FILENAME]]',
             '                                 [[]glob_or_file *[]]',
@@ -116,6 +117,8 @@ def test_help_compare(testdir, args):
             "                        outliers, ops, rounds, iterations'",
             "  --name FORMAT         How to format names in results. Can be one of 'short',",
             "                        'normal', 'long', or 'trial'. Default: 'normal'",
+            "  --time-unit COLUMN    Unit to scale the results to. Available units: 'ns',",
+            "                        'us', 'ms', 's'. Default: 'auto'.",
             '  --histogram [FILENAME-PREFIX]',
             '                        Plot graphs of min/max/avg/stddev over time in',
             '                        FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX',
@@ -281,6 +284,56 @@ def test_compare(testdir, name, name_pattern_generator):
             '',
             'Legend:',
             '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
+        ]
+    )
+    assert result.ret == 0
+
+
+@pytest.mark.parametrize(
+    ('name', 'name_pattern_generator', 'unit'),
+    [
+        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, "s"),
+        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, "ms"),
+        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, "us"),
+        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, "ns"),
+    ],
+)
+def test_compare_with_unit_scale(testdir, name, name_pattern_generator, unit):
+    result = testdir.run(
+        'py.test-benchmark',
+        '--storage',
+        STORAGE,
+        'compare',
+        '0001',
+        '0002',
+        '0003',
+        '--sort',
+        'min',
+        '--columns',
+        'min,max',
+        '--name',
+        name,
+        '--histogram',
+        'foobar',
+        '--csv',
+        'foobar',
+        '--time-unit',
+        unit
+    )
+    result.stderr.fnmatch_lines(['Generated csv: *foobar.csv'])
+    LineMatcher(testdir.tmpdir.join('foobar.csv').readlines(cr=0)).fnmatch_lines(
+        [
+            'name,min,max',
+            'tests/test_normal.py::test_xfast_parametrized[[]0[]],2.15628567*e-07,1.03186158*e-05',
+            'tests/test_normal.py::test_xfast_parametrized[[]0[]],2.16902756*e-07,7.73929968*e-06',
+            'tests/test_normal.py::test_xfast_parametrized[[]0[]],2.17314542*e-07,1.14473891*e-05',
+            '',
+        ]
+    )
+    result.stdout.fnmatch_lines(
+        [
+            '---*--- benchmark: 3 tests ---*---',
+            f'Name (time in {unit}) * Min * Max          ',
         ]
     )
     assert result.ret == 0
