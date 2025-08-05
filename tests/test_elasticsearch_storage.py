@@ -117,10 +117,7 @@ class MockSession(BenchmarkSession):
         )
 
 
-try:
-    text_type = unicode
-except NameError:
-    text_type = str
+text_type = str
 
 
 def force_text(text):

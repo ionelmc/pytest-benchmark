@@ -292,10 +292,10 @@ def test_compare(testdir, name, name_pattern_generator):
 @pytest.mark.parametrize(
     ('name', 'name_pattern_generator', 'unit'),
     [
-        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, "s"),
-        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, "ms"),
-        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, "us"),
-        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, "ns"),
+        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, 's'),
+        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, 'ms'),
+        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, 'us'),
+        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, 'ns'),
     ],
 )
 def test_compare_with_unit_scale(testdir, name, name_pattern_generator, unit):
@@ -318,7 +318,7 @@ def test_compare_with_unit_scale(testdir, name, name_pattern_generator, unit):
         '--csv',
         'foobar',
         '--time-unit',
-        unit
+        unit,
     )
     result.stderr.fnmatch_lines(['Generated csv: *foobar.csv'])
     LineMatcher(testdir.tmpdir.join('foobar.csv').readlines(cr=0)).fnmatch_lines(

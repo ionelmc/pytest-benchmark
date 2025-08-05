@@ -151,7 +151,7 @@ def main():
             logger=logger,
             scale_unit=partial(
                 hook.pytest_benchmark_scale_unit,
-                config=Config.fromdictargs({"benchmark_time_unit": args.time_unit}, []),
+                config=Config.fromdictargs({'benchmark_time_unit': args.time_unit}, []),
             ),
         )
         groups = hook.pytest_benchmark_group_stats(
