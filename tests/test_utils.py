@@ -1,4 +1,5 @@
 import argparse
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -83,7 +84,7 @@ def test_missing_scm_bins(scm, crazytestdir, monkeypatch):
         fh.write('asdf')
     subprocess.check_call([scm, 'add', 'test_get_commit_info.py'])
     subprocess.check_call([scm, 'commit', '-m', 'asdf'])
-    monkeypatch.setenv('PATH', Path.cwd())
+    monkeypatch.setenv('PATH', os.getcwd())  # noqa: PTH109
     out = get_commit_info()
     assert (
         'No such file or directory' in out['error']

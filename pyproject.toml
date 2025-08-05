@@ -75,6 +75,9 @@ pytest-benchmark = "pytest_benchmark.cli:main"
 "Changelog" = "https://pytest-benchmark.readthedocs.io/en/latest/changelog.html"
 "Issue Tracker" = "https://github.com/ionelmc/pytest-benchmark/issues"
 
+[tool.mypy]
+exclude = ['build']
+
 [[tool.mypy.overrides]]
 module = [
     "aspectlib", # ignore_missing_imports = true
