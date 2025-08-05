@@ -1,7 +1,15 @@
 [build-system]
-requires = [
-    "setuptools>=30.3.0",
+requires = ["setuptools>=30.3.0"]
+
+
+[[tool.mypy.overrides]]
+module = [
+    "aspectlib", # ignore_missing_imports = true
+    "cpuinfo",
+    "pygal.*",
+    "pygaljs",
 ]
+ignore_missing_imports = true
 
 [tool.ruff]
 extend-exclude = ["static", "ci/templates"]
@@ -37,7 +45,7 @@ select = [
     "PLC", # pylint convention
     "PLE", # pylint errors
     "PT", # flake8-pytest-style
-#    "PTH", # flake8-use-pathlib
+    #    "PTH", # flake8-use-pathlib
     "RSE", # flake8-raise
     "RUF", # ruff-specific rules
     "S", # flake8-bandit

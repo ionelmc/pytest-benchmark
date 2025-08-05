@@ -6,7 +6,6 @@ import sys
 from io import BytesIO
 from io import StringIO
 
-import py
 import pytest
 from freezegun import freeze_time
 
@@ -125,10 +124,7 @@ class MockSession(BenchmarkSession):
             break
 
 
-try:
-    text_type = unicode
-except NameError:
-    text_type = str
+text_type = str
 
 
 def force_text(text):
@@ -300,7 +296,7 @@ def test_regression_checks_inf(sess, name_format):
                 (
                     'tests/test_normal.py::test_xfast_parametrized[0] '
                     '(0002_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190348_uncommitted-changes)',
-                    "Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > " '0.000001000',
+                    "Field 'max' has failed DifferenceRegressionCheck: 0.000005551 > 0.000001000",
                 ),
             ],
             'trial': [
@@ -351,7 +347,7 @@ def test_compare_1(sess, LineMatcher):
     LineMatcher(output.getvalue().splitlines()).fnmatch_lines(
         [
             'Benchmark machine_info is different. Current: {"foo": "bar"} VS saved: {"machine": "x86_64", "node": "minibox", "processor": "x86_64", "python_compiler": "GCC 4.6.3", "python_implementation": "CPython", "python_version": "2.7.3", "release": "3.13.0-55-generic", "system": "Linux"} (location: tests/test_storage).',
-            'Comparing against benchmarks from: 0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted' '-changes.json',
+            'Comparing against benchmarks from: 0001_b87b9aae14ff14a7887a6bbaa9731b9a8760555d_20150814_190343_uncommitted-changes.json',
             '',
             '*------------------------------------------------------------------------ benchmark: 2 tests -----------------------------------------------------------------------*',
             'Name (time in ns) * Min                 * Max                Mean              StdDev              Median                IQR            Outliers  Rounds  Iterations  OPS (Mops/s) *',
