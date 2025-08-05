@@ -1,6 +1,79 @@
 [build-system]
-requires = ["setuptools>=30.3.0"]
+requires = [
+    "setuptools>=69",
+]
+build-backend = "setuptools.build_meta"
 
+[project]
+dynamic = [
+    "readme",
+]
+name = "pytest-benchmark"
+version = "5.1.0"
+license = "BSD-2-Clause"
+license-files = ["LICENSE"]
+description = "A ``pytest`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer."
+authors = [
+    { name = "Ionel Cristian Mărieș", email = "contact@ionelmc.ro" },
+]
+classifiers = [
+    # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Operating System :: Unix",
+    "Operating System :: POSIX",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    # uncomment if you test on these interpreters:
+    # "Programming Language :: Python :: Implementation :: IronPython",
+    # "Programming Language :: Python :: Implementation :: Jython",
+    # "Programming Language :: Python :: Implementation :: Stackless",
+    "Topic :: Utilities",
+]
+keywords = [
+    "pytest",
+    "benchmark",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "pytest>=8.1",
+    "py-cpuinfo",
+]
+
+[project.optional-dependencies]
+aspect = [
+    "aspectlib",
+]
+histogram = [
+    "pygal",
+    "pygaljs",
+    "setuptools",
+]
+elasticsearch = [
+    "elasticsearch",
+]
+
+[project.entry-points.pytest11]
+benchmark = "pytest_benchmark.plugin"
+
+[project.scripts]
+py.test-benchmark = "pytest_benchmark.cli:main"
+pytest-benchmark = "pytest_benchmark.cli:main"
+
+[project.urls]
+"Sources" = "https://github.com/ionelmc/pytest-benchmark"
+"Documentation" = "https://pytest-benchmark.readthedocs.io/"
+"Changelog" = "https://pytest-benchmark.readthedocs.io/en/latest/changelog.html"
+"Issue Tracker" = "https://github.com/ionelmc/pytest-benchmark/issues"
 
 [[tool.mypy.overrides]]
 module = [
@@ -23,34 +96,31 @@ target-version = "py39"
 [tool.ruff.lint]
 ignore = [
     "RUF001", # ruff-specific rules ambiguous-unicode-character-string
-    "S101", # flake8-bandit assert
-    "S308", # flake8-bandit suspicious-mark-safe-usage
-    "E501", # pycodestyle line-too-long
-    "PT004",
-    "PT011",
-    "PT013",
-    "S603",
-    "S607",
+    "S101",   # flake8-bandit assert
+    "S308",   # flake8-bandit suspicious-mark-safe-usage
+    "S603",   # flake8-bandit subprocess-without-shell-equals-true
+    "S607",   # flake8-bandit start-process-with-partial-path
+    "E501",   # pycodestyle line-too-long
 ]
 select = [
-    "B", # flake8-bugbear
-    "C4", # flake8-comprehensions
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
     "DTZ", # flake8-datetimez
-    "E", # pycodestyle errors
+    "E",   # pycodestyle errors
     "EXE", # flake8-executable
-    "F", # pyflakes
-    "I", # isort
+    "F",   # pyflakes
+    "I",   # isort
     "INT", # flake8-gettext
     "PIE", # flake8-pie
     "PLC", # pylint convention
     "PLE", # pylint errors
-    "PT", # flake8-pytest-style
-    #    "PTH", # flake8-use-pathlib
+    "PT",  # flake8-pytest-style
+    "PTH", # flake8-use-pathlib
     "RSE", # flake8-raise
     "RUF", # ruff-specific rules
-    "S", # flake8-bandit
-    "UP", # pyupgrade
-    "W", # pycodestyle warnings
+    "S",   # flake8-bandit
+    "UP",  # pyupgrade
+    "W",   # pycodestyle warnings
 ]
 
 [tool.ruff.lint.flake8-pytest-style]

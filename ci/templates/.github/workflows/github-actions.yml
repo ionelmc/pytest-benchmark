@@ -10,25 +10,22 @@ jobs:
       matrix:
         include:
           - name: 'check'
-            python: '3.11'
-            toxpython: 'python3.11'
+            python: '3.13'
             tox_env: 'check'
             os: 'ubuntu-latest'
           - name: 'docs'
-            python: '3.11'
-            toxpython: 'python3.11'
+            python: '3.13'
             tox_env: 'docs'
             os: 'ubuntu-latest'
 {% for env in tox_environments %}
 {% set prefix = env.split('-')[0] -%}
+{% set freethreaded = prefix.endswith('t') %}
 {% if prefix.startswith('pypy') %}
 {% set python %}pypy-{{ prefix[4] }}.{{ prefix[5:] }}{% endset %}
 {% set cpython %}pp{{ prefix[4:5] }}{% endset %}
-{% set toxpython %}pypy{{ prefix[4] }}.{{ prefix[5:] }}{% endset %}
 {% else %}
-{% set python %}{{ prefix[2] }}.{{ prefix[3:] }}{% endset %}
+{% set python %}{{ prefix[2] }}.{{ prefix[3:].rstrip('t') }}{% endset %}
 {% set cpython %}cp{{ prefix[2:] }}{% endset %}
-{% set toxpython %}python{{ prefix[2] }}.{{ prefix[3:] }}{% endset %}
 {% endif %}
 {% for os, python_arch in [
     ['ubuntu', 'x64'],
@@ -37,7 +34,6 @@ jobs:
 ] %}
           - name: '{{ env }} ({{ os }})'
             python: '{{ python }}'
-            toxpython: '{{ toxpython }}'
             python_arch: '{{ python_arch }}'
             tox_env: '{{ env }}'
             os: '{{ os }}-latest'
@@ -59,8 +55,6 @@ jobs:
         tox --version
         pip list --format=freeze
     - name: test
-      env:
-        TOXPYTHON: '{{ '${{ matrix.toxpython }}' }}'
       run: >
         tox -e {{ '${{ matrix.tox_env }}' }} -v
   finish:
@@ -71,6 +65,7 @@ jobs:
     - uses: coverallsapp/github-action@v2
       with:
         parallel-finished: true
-    - uses: codecov/codecov-action@v3
+    - uses: codecov/codecov-action@v5
       with:
         CODECOV_TOKEN: {% raw %}${{ secrets.CODECOV_TOKEN }}{% endraw %}
+{{ '' }}
