@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 from io import BytesIO
 from io import StringIO
 from pathlib import Path
@@ -198,7 +197,7 @@ def test_parse_with_creds_in_second_host_of_url():
 
 
 def test_parse_with_creds_in_netrc(tmpdir):
-    netrc_file = os.path.join(tmpdir.strpath, 'netrc')
+    netrc_file = Path(tmpdir.strpath) / 'netrc'
     with open(netrc_file, 'w') as f:
         f.write('machine example.org login user1 password pass1\n')
         f.write('machine another.org login user2 password pass2\n')
@@ -210,7 +209,7 @@ def test_parse_with_creds_in_netrc(tmpdir):
 
 
 def test_parse_url_creds_supersedes_netrc_creds(tmpdir):
-    netrc_file = os.path.join(tmpdir.strpath, 'netrc')
+    netrc_file = Path(tmpdir.strpath) / 'netrc'
     with open(netrc_file, 'w') as f:
         f.write('machine example.org login user1 password pass1\n')
         f.write('machine another.org login user2 password pass2\n')

@@ -1,10 +1,9 @@
 import argparse
-import os
 import shutil
 import subprocess
+from pathlib import Path
 
 import pytest
-from pytest import mark
 
 from pytest_benchmark.utils import clonefunc
 from pytest_benchmark.utils import get_commit_info
@@ -22,7 +21,7 @@ def f2(a):
     return a
 
 
-@mark.parametrize('f', [f1, f2])
+@pytest.mark.parametrize('f', [f1, f2])
 def test_clonefunc(f):
     assert clonefunc(f)(1) == f(1)
     assert clonefunc(f)(1) == f(1)
@@ -84,7 +83,7 @@ def test_missing_scm_bins(scm, crazytestdir, monkeypatch):
         fh.write('asdf')
     subprocess.check_call([scm, 'add', 'test_get_commit_info.py'])
     subprocess.check_call([scm, 'commit', '-m', 'asdf'])
-    monkeypatch.setenv('PATH', os.getcwd())
+    monkeypatch.setenv('PATH', Path.cwd())
     out = get_commit_info()
     assert (
         'No such file or directory' in out['error']
@@ -147,14 +146,14 @@ def test_parse_columns():
         parse_columns('min,max,x')
 
 
-@mark.parametrize('scm', [None, 'git', 'hg'])
-@mark.parametrize(
+@pytest.mark.parametrize('scm', [None, 'git', 'hg'])
+@pytest.mark.parametrize(
     'set_remote',
     [
         False,
         'https://example.com/pytest_benchmark_repo',
         'https://example.com/pytest_benchmark_repo.git',
-        'c:\\foo\\bar\\pytest_benchmark_repo.git' 'foo@example.com:pytest_benchmark_repo.git',
+        'c:\\foo\\bar\\pytest_benchmark_repo.gitfoo@example.com:pytest_benchmark_repo.git',
     ],
 )
 def test_get_project_name(scm, set_remote, testdir):
@@ -182,7 +181,7 @@ default = {set_remote}
         assert get_project_name().startswith('test_get_project_name')
 
 
-@mark.parametrize('scm', ['git', 'hg'])
+@pytest.mark.parametrize('scm', ['git', 'hg'])
 def test_get_project_name_broken(scm, testdir):
     testdir.tmpdir.join('.' + scm).ensure(dir=1)
     assert get_project_name() in ['test_get_project_name_broken0', 'test_get_project_name_broken1']
@@ -203,7 +202,7 @@ def test_get_project_name_fallback_broken_hgrc(testdir, capfd):
 
 
 def test_parse_elasticsearch_storage():
-    benchdir = os.path.basename(os.getcwd())
+    benchdir = Path.cwd().name
 
     assert parse_elasticsearch_storage('http://localhost:9200') == (['http://localhost:9200'], 'benchmark', 'benchmark', benchdir)
     assert parse_elasticsearch_storage('http://localhost:9200/benchmark2') == (

@@ -1,4 +1,4 @@
-from pytest import mark
+import pytest
 
 from pytest_benchmark.stats import Stats
 
@@ -48,7 +48,7 @@ def test_single_item():
     assert stats.ops == 1
 
 
-@mark.parametrize('length', range(1, 10))
+@pytest.mark.parametrize('length', range(1, 10))
 def test_length(length):
     stats = Stats()
     for _ in range(length):

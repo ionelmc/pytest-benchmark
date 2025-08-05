@@ -11,11 +11,8 @@ from datetime import datetime
 from datetime import timezone
 from decimal import Decimal
 from functools import partial
-from os.path import basename
-from os.path import dirname
-from os.path import exists
-from os.path import join
 from os.path import split
+from pathlib import Path
 from subprocess import CalledProcessError
 from subprocess import check_output
 from urllib.parse import parse_qs
@@ -94,7 +91,7 @@ class Fallback:
 
 @partial(Fallback, exceptions=(IndexError, CalledProcessError, OSError))
 def get_project_name():
-    return basename(os.getcwd())
+    return Path.cwd().name
 
 
 @get_project_name.register
@@ -120,11 +117,11 @@ def get_project_name_hg():
 def in_any_parent(name, path=None):
     prev = None
     if not path:
-        path = os.getcwd()
-    while path and prev != path and not exists(join(path, name)):
+        path = Path.cwd()
+    while path and prev != path and not path.joinpath(name).exists():
         prev = path
-        path = dirname(path)
-    return exists(join(path, name))
+        path = path.parent
+    return path.joinpath(name).exists()
 
 
 def subprocess_output(cmd):
@@ -211,7 +208,7 @@ def load_timer(string):
         raise argparse.ArgumentTypeError("Value for --benchmark-timer must be in dotted form. Eg: 'module.attr'.")
     mod, attr = string.rsplit('.', 1)
     if mod == 'pep418':
-        import time
+        import time  # noqa: PLC0415
 
         return NameWrapper(getattr(time, attr))
     else:
@@ -389,9 +386,9 @@ def parse_save(string):
 
 def _parse_hosts(storage_url, netrc_file):
     # load creds from netrc file
-    path = os.path.expanduser(netrc_file)
+    path = Path(netrc_file).expanduser()
     creds = None
-    if netrc_file and os.path.isfile(path):
+    if netrc_file and path.is_file():
         creds = netrc.netrc(path)
 
     # add creds to urls
@@ -432,17 +429,17 @@ def load_storage(storage, **kwargs):
         storage = 'file://' + storage
     netrc_file = kwargs.pop('netrc')  # only used by elasticsearch storage
     if storage.startswith('file://'):
-        from .storage.file import FileStorage
+        from .storage.file import FileStorage  # noqa: PLC0415
 
         return FileStorage(storage[len('file://') :], **kwargs)
     elif storage.startswith('elasticsearch+'):
-        from .storage.elasticsearch import ElasticsearchStorage
+        from .storage.elasticsearch import ElasticsearchStorage  # noqa: PLC0415
 
         # TODO update benchmark_autosave
         args = parse_elasticsearch_storage(storage[len('elasticsearch+') :], netrc_file=netrc_file)
         return ElasticsearchStorage(*args, **kwargs)
     else:
-        raise argparse.ArgumentTypeError('Storage must be in form of file://path or ' 'elasticsearch+http[s]://host1,host2/index/doctype')
+        raise argparse.ArgumentTypeError('Storage must be in form of file://path or elasticsearch+http[s]://host1,host2/index/doctype')
 
 
 def time_unit(value):
@@ -582,7 +579,7 @@ def get_cprofile_functions(stats):
     """
     result = []
     # this assumes that you run py.test from project root dir
-    project_dir_parent = dirname(os.getcwd())
+    project_dir_parent = str(Path.cwd().parent)
 
     for function_info, run_info in stats.stats.items():
         file_path = function_info[0]

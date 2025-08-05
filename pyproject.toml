@@ -66,7 +66,7 @@ elasticsearch = [
 benchmark = "pytest_benchmark.plugin"
 
 [project.scripts]
-py.test-benchmark = "pytest_benchmark.cli:main"
+"py.test-benchmark" = "pytest_benchmark.cli:main"
 pytest-benchmark = "pytest_benchmark.cli:main"
 
 [project.urls]
@@ -101,6 +101,7 @@ ignore = [
     "S603",   # flake8-bandit subprocess-without-shell-equals-true
     "S607",   # flake8-bandit start-process-with-partial-path
     "E501",   # pycodestyle line-too-long
+    "PTH123",
 ]
 select = [
     "B",   # flake8-bugbear

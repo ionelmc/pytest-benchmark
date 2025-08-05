@@ -132,7 +132,7 @@ def test_help_compare(testdir, args):
             '',
             "    pytest-benchmark compare 'Linux-CPython-3.5-64bit/*'",
             '',
-            "        Loads all benchmarks ran with that interpreter. Note the special quoting that disables your shell's " 'glob',
+            "        Loads all benchmarks ran with that interpreter. Note the special quoting that disables your shell's glob",
             '        expansion.',
             '',
             '    pytest-benchmark compare 0001',
@@ -236,10 +236,10 @@ def test_list(testdir):
 @pytest.mark.parametrize(
     ('name', 'name_pattern_generator'),
     [
-        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n),
-        ('long', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n),
-        ('normal', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n),
-        ('trial', lambda n: '%.4d*' % n),
+        ('short', lambda n: f'*xfast_parametrized[[]0[]] ({n:04}*)'),
+        ('long', lambda n: f'*xfast_parametrized[[]0[]] ({n:04}*)'),
+        ('normal', lambda n: f'*xfast_parametrized[[]0[]] ({n:04}*)'),
+        ('trial', lambda n: f'{n:04}*'),
     ],
 )
 def test_compare(testdir, name, name_pattern_generator):
@@ -292,10 +292,10 @@ def test_compare(testdir, name, name_pattern_generator):
 @pytest.mark.parametrize(
     ('name', 'name_pattern_generator', 'unit'),
     [
-        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, 's'),
-        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, 'ms'),
-        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, 'us'),
-        ('short', lambda n: '*xfast_parametrized[[]0[]] ' '(%.4d*)' % n, 'ns'),
+        ('short', lambda n: f'*xfast_parametrized[[]0[]] ({n:04}*)', 's'),
+        ('short', lambda n: f'*xfast_parametrized[[]0[]] ({n:04}*)', 'ms'),
+        ('short', lambda n: f'*xfast_parametrized[[]0[]] ({n:04}*)', 'us'),
+        ('short', lambda n: f'*xfast_parametrized[[]0[]] ({n:04}*)', 'ns'),
     ],
 )
 def test_compare_with_unit_scale(testdir, name, name_pattern_generator, unit):

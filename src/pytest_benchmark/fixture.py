@@ -189,7 +189,7 @@ class BenchmarkFixture:
             duration, iterations, loops_range = self._calibrate_timer(runner)
 
             # Choose how many times we must repeat the test
-            rounds = int(ceil(self._max_time / duration))
+            rounds = ceil(self._max_time / duration)
             rounds = max(rounds, self._min_rounds)
             rounds = min(rounds, sys.maxsize)
 
@@ -298,7 +298,7 @@ class BenchmarkFixture:
 
     def weave(self, target, **kwargs):
         try:
-            import aspectlib
+            import aspectlib  # noqa: PLC0415
         except ImportError as exc:
             raise ImportError(exc.args, 'Please install aspectlib or pytest-benchmark[aspect]') from exc
 
@@ -351,7 +351,7 @@ class BenchmarkFixture:
 
             if duration >= min_time_estimate:
                 # coarse estimation of the number of loops
-                loops = int(ceil(min_time * loops / duration))
+                loops = ceil(min_time * loops / duration)
                 self._logger.debug(f'    Estimating {loops} iterations.', green=True)
                 if loops == 1:
                     # If we got a single loop then bail early - nothing to calibrate if the the

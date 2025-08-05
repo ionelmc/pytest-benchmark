@@ -315,7 +315,7 @@ def test_group_by_param_all(testdir):
             '------------------*',
             '',
             'Legend:',
-            '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd ' 'Quartile.',
+            '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
             '============* 8 passed * ============*',
         ]
     )
@@ -352,7 +352,7 @@ def test_group_by_param_select(testdir):
             '------------------*',
             '',
             'Legend:',
-            '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd ' 'Quartile.',
+            '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
             '============* 8 passed * ============*',
         ]
     )
@@ -399,7 +399,7 @@ def test_group_by_param_select_multiple(testdir):
             '------------------*',
             '',
             'Legend:',
-            '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd ' 'Quartile.',
+            '  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.',
             '============* 8 passed * ============*',
         ]
     )
@@ -678,7 +678,7 @@ def test_compare_no_files_verbose(testdir):
     result = testdir.runpytest_subprocess(
         '--benchmark-max-time=0.0000001', '--doctest-modules', test, '--benchmark-compare', '--benchmark-verbose'
     )
-    result.stderr.fnmatch_lines([" WARNING: Can't compare. No benchmark files in '*'." " Can't load the previous benchmark."])
+    result.stderr.fnmatch_lines([" WARNING: Can't compare. No benchmark files in '*'. Can't load the previous benchmark."])
 
 
 def test_compare_no_files_match(testdir):
@@ -868,7 +868,7 @@ def test_bogus_timer(testdir):
     result.stderr.fnmatch_lines(
         [
             '*usage: *',
-            '*: error: argument --benchmark-timer: Value for --benchmark-timer must be in dotted form. Eg: ' "'module.attr'.",
+            "*: error: argument --benchmark-timer: Value for --benchmark-timer must be in dotted form. Eg: 'module.attr'.",
         ]
     )
 
