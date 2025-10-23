@@ -14,7 +14,7 @@ from .utils import format_time
 from .utils import slugify
 
 statistics: typing.Any
-statistics_error: str | None = None
+statistics_error: typing.Optional[str] = None
 try:
     import statistics
 except (ImportError, SyntaxError):
