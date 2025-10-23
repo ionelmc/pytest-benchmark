@@ -38,3 +38,4 @@ Authors
 * Eugeniy - https://github.com/zcoder
 * Patrick Winter - https://github.com/winpat
 * Ben Avrahami - https://github.com/bentheiii
+* Enno Gotthold - https://github.com/SchoolGuy
