@@ -157,7 +157,7 @@ Commandline options
                         x/doctype?project_name=Project] (when --benchmark-save
                         or --benchmark-autosave are used). For backwards
                         compatibility unexpected values are converted to
-                        file://<value>. Default: 'file://./.benchmarks'.
+                        \file://<value>. Default: 'file://./.benchmarks'.
   --benchmark-netrc=[BENCHMARK_NETRC]
                         Load elasticsearch credentials from a netrc file.
                         Default: ''.
