@@ -7,6 +7,7 @@ Unreleased
 
 * Add support for a per-round ``teardown`` function to pedantic mode.
 * ``--benchmark-compare-fail`` now accepts precantages higher than 100%.
+* Fix support for Python 3.9
 
 5.1.0 (2024-10-30)
 ------------------
