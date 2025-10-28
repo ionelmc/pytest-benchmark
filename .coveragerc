@@ -6,7 +6,7 @@ branch = true
 source =
     src
     tests
-parallel = true
+patch = subprocess
 
 [report]
 show_missing = true

@@ -26,7 +26,15 @@ extlinks = {
 
 html_theme = 'furo'
 html_theme_options = {
-    'githuburl': 'https://github.com/ionelmc/pytest-benchmark/',
+    'source_repository': 'https://github.com/ionelmc/pytest-benchmark/',
+    'source_branch': 'main',
+    'source_directory': 'docs/',
+    'footer_icons': [
+        {
+            'url': 'https://github.com/ionelmc/pytest-benchmark/',
+            'html': 'github.com/ionelmc/pytest-benchmark',
+        },
+    ],
 }
 
 html_use_smartypants = True

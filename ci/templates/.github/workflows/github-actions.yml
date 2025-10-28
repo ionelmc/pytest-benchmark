@@ -32,15 +32,18 @@ jobs:
     ['windows', 'x64'],
     ['macos', 'arm64'],
 ] %}
-          - name: '{{ env }} ({{ os }})'
+          - name: '{{ env }} ({{ os }}/{{ python_arch }})'
             python: '{{ python }}'
             python_arch: '{{ python_arch }}'
             tox_env: '{{ env }}'
             os: '{{ os }}-latest'
+{% if 'cover' in env %}
+            cover: true
+{% endif %}
 {% endfor %}
 {% endfor %}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0
     - uses: actions/setup-python@v5
@@ -57,6 +60,18 @@ jobs:
     - name: test
       run: >
         tox -e {{ '${{ matrix.tox_env }}' }} -v
+    - uses: coverallsapp/github-action@v2
+      if: matrix.cover
+      continue-on-error: true
+      with:
+        flag-name: {{ '${{ matrix.name }}' }}
+        parallel: true
+    - uses: codecov/codecov-action@v5
+      if: matrix.cover
+      with:
+        flags: {{ '${{ matrix.name }}' }}
+        token: {{ '${{ secrets.CODECOV_TOKEN }}' }}
+        verbose: true
   finish:
     needs: test
     if: {{ '${{ always() }}' }}
@@ -65,7 +80,4 @@ jobs:
     - uses: coverallsapp/github-action@v2
       with:
         parallel-finished: true
-    - uses: codecov/codecov-action@v5
-      with:
-        CODECOV_TOKEN: {% raw %}${{ secrets.CODECOV_TOKEN }}{% endraw %}
-{{ '' }}
+{{- '' }}

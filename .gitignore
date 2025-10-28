@@ -6,6 +6,7 @@ __pycache__
 *~
 *.bak
 .DS_Store
+Thumbs.db
 
 # C extensions
 *.so
