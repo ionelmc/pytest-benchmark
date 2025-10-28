@@ -37,5 +37,7 @@ Authors
 * Tony Kuo - https://github.com/tony92151
 * Eugeniy - https://github.com/zcoder
 * Patrick Winter - https://github.com/winpat
+* Ali-Akber Saifee - https://github.com/alisaifee
 * Ben Avrahami - https://github.com/bentheiii
+* Sorin Sbarnea - https://github.com/ssbarnea
 * Enno Gotthold - https://github.com/SchoolGuy

@@ -2,12 +2,21 @@
 Changelog
 =========
 
-Unreleased
-----------
+5.2.0 (2025-10-29)
+------------------
 
-* Add support for a per-round ``teardown`` function to pedantic mode.
-* ``--benchmark-compare-fail`` now accepts precantages higher than 100%.
-* Fix support for Python 3.9
+* Added support for a per-round ``teardown`` function to pedantic mode.
+  Contributed Patrick Winter by `#264 <https://github.com/ionelmc/pytest-benchmark/pull/264>`_.
+* Added ``--benchmark-time-unit`` option.
+  Contributed by Tony Kuo in `#281 <https://github.com/ionelmc/pytest-benchmark/pull/281>`_.
+* Fixed deprecated hook examples in docstrings.
+  Contributed by Ali-Akber Saifee in `#284 <https://github.com/ionelmc/pytest-benchmark/pull/284>`_.
+* Changed ``--benchmark-compare-fail`` to accept percentages higher than 100%.
+  Contributed by Ben Avrahami in `#290 <https://github.com/ionelmc/pytest-benchmark/pull/280>`_.
+* Added minimal typing support.
+  Contributed by Sorin Sbarnea in `#290 <https://github.com/ionelmc/pytest-benchmark/pull/290>`_.
+* Fixed support for Python 3.9.
+  Contributed by Enno Gotthold in `#291 <https://github.com/ionelmc/pytest-benchmark/pull/291>`_.
 
 5.1.0 (2024-10-30)
 ------------------
