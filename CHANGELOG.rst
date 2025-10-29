@@ -17,6 +17,7 @@ Changelog
   Contributed by Sorin Sbarnea in `#290 <https://github.com/ionelmc/pytest-benchmark/pull/290>`_.
 * Fixed support for Python 3.9.
   Contributed by Enno Gotthold in `#291 <https://github.com/ionelmc/pytest-benchmark/pull/291>`_.
+* Replaced the complicated and broken code of ``pytest_benchmark.utils.clonefunc`` with a simple return of the input.
 
 5.1.0 (2024-10-30)
 ------------------

@@ -6,7 +6,6 @@ import platform
 import re
 import subprocess
 import sys
-import types
 from datetime import datetime
 from datetime import timezone
 from decimal import Decimal
@@ -17,8 +16,6 @@ from subprocess import CalledProcessError
 from subprocess import check_output
 from urllib.parse import parse_qs
 from urllib.parse import urlparse
-
-from .compat import PY311
 
 TIME_UNITS = {'': 'Seconds', 'm': 'Milliseconds (ms)', 'u': 'Microseconds (us)', 'n': 'Nanoseconds (ns)'}
 ALLOWED_COLUMNS = ['min', 'max', 'mean', 'stddev', 'median', 'iqr', 'ops', 'outliers', 'rounds', 'iterations']
@@ -488,49 +485,16 @@ def funcname(f):
         return str(f)
 
 
-# from: https://bitbucket.org/antocuni/pypytools/src/tip/pypytools/util.py?at=default
 def clonefunc(f):
-    """Deep clone the given function to create a new one.
-
-    By default, the PyPy JIT specializes the assembler based on f.__code__:
-    clonefunc makes sure that you will get a new function with a **different**
-    __code__, so that PyPy will produce independent assembler. This is useful
-    e.g. for benchmarks and microbenchmarks, so you can make sure to compare
-    apples to apples.
-
-    Use it with caution: if abused, this might easily produce an explosion of
-    produced assembler.
     """
-    # first of all, we clone the code object
-    if not hasattr(f, '__code__'):
-        return f
-    co = f.__code__
-    args = [
-        co.co_argcount,
-        co.co_posonlyargcount,
-        co.co_kwonlyargcount,
-        co.co_nlocals,
-        co.co_stacksize,
-        co.co_flags,
-        co.co_code,
-        co.co_consts,
-        co.co_names,
-        co.co_varnames,
-        co.co_filename,
-        co.co_name,
-        co.co_firstlineno,
-        co.co_lnotab,
-        co.co_freevars,
-        co.co_cellvars,
-    ]
-    if PY311:
-        args.insert(12, co.co_qualname)
-        args.insert(15, co.co_exceptiontable)
-    co2 = types.CodeType(*args)
-    #
-    # then, we clone the function itself, using the new co2
-    f2 = types.FunctionType(co2, f.__globals__, f.__name__, f.__defaults__, f.__closure__)
-    return f2
+    This used to be a slightly improved version of clonefunc from https://github.com/antocuni/pypytools/blob/master/pypytools/util.py
+
+    It was supposed to make a copy of the function with a new code object so PyPy creates fresh JIT compilation for the given function,
+    however, it has proven difficult to maintain and to even prove that it does what it supposed to do without breaking something.
+
+    Now it simply does nothing - it returns the input function.
+    """
+    return f
 
 
 class SafeJSONEncoder(json.JSONEncoder):
