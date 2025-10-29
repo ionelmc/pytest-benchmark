@@ -210,15 +210,18 @@ class BenchmarkFixture:
         else:
             cprofile_loops = range(self.cprofile_loops)
         if self.enabled and self.cprofile:
-            tracer = sys.gettrace()
+            prev_tracer = sys.gettrace()
+            prev_profiler = sys.getprofile()
             sys.settrace(None)
+            sys.setprofile(None)
             try:
                 profile = cProfile.Profile()
                 for _ in cprofile_loops:
                     function_result = profile.runcall(function_to_benchmark, *args, **kwargs)
                 self._save_cprofile(profile)
             finally:
-                sys.settrace(tracer)
+                sys.settrace(prev_tracer)
+                sys.setprofile(prev_profiler)
         else:
             function_result = function_to_benchmark(*args, **kwargs)
         return function_result
