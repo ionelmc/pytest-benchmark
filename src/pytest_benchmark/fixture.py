@@ -102,7 +102,7 @@ class BenchmarkFixture:
             gc_enabled = gc.isenabled()
             if self._disable_gc:
                 gc.disable()
-            tracer = sys.gettrace()
+            prev_tracer = sys.gettrace()
             sys.settrace(None)
             try:
                 if loops_range:
@@ -117,7 +117,7 @@ class BenchmarkFixture:
                     end = timer()
                     return end - start, result
             finally:
-                sys.settrace(tracer)
+                sys.settrace(prev_tracer)
                 if gc_enabled:
                     gc.enable()
 
