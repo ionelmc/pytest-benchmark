@@ -18,6 +18,7 @@ Changelog
 * Fixed support for Python 3.9.
   Contributed by Enno Gotthold in `#291 <https://github.com/ionelmc/pytest-benchmark/pull/291>`_.
 * Replaced the complicated and broken code of ``pytest_benchmark.utils.clonefunc`` with a simple return of the input.
+* Changed cprofile mode to disable any tracers, just like the regular benchmark loop.
 
 5.1.0 (2024-10-30)
 ------------------
