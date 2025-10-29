@@ -103,7 +103,8 @@ class BenchmarkFixture:
             if self._disable_gc:
                 gc.disable()
             prev_tracer = sys.gettrace()
-            sys.settrace(None)
+            if prev_tracer:
+                sys.settrace(None)
             try:
                 if loops_range:
                     start = timer()
@@ -117,7 +118,8 @@ class BenchmarkFixture:
                     end = timer()
                     return end - start, result
             finally:
-                sys.settrace(prev_tracer)
+                if prev_tracer:
+                    sys.settrace(prev_tracer)
                 if gc_enabled:
                     gc.enable()
 
@@ -212,16 +214,20 @@ class BenchmarkFixture:
         if self.enabled and self.cprofile:
             prev_tracer = sys.gettrace()
             prev_profiler = sys.getprofile()
-            sys.settrace(None)
-            sys.setprofile(None)
+            if prev_tracer:
+                sys.settrace(None)
+            if prev_profiler:
+                sys.setprofile(None)
             try:
                 profile = cProfile.Profile()
                 for _ in cprofile_loops:
                     function_result = profile.runcall(function_to_benchmark, *args, **kwargs)
                 self._save_cprofile(profile)
             finally:
-                sys.settrace(prev_tracer)
-                sys.setprofile(prev_profiler)
+                if prev_tracer:
+                    sys.settrace(prev_tracer)
+                if prev_profiler:
+                    sys.setprofile(prev_profiler)
         else:
             function_result = function_to_benchmark(*args, **kwargs)
         return function_result
