@@ -54,7 +54,7 @@ class PauseInstrumentation:
 
 
 class BenchmarkFixture:
-    _precisions: typing.ClassVar = {}
+    _precisions: typing.ClassVar[dict[str, float]] = {}
 
     def __init__(
         self,
