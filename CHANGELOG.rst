@@ -18,7 +18,11 @@ Changelog
 * Fixed support for Python 3.9.
   Contributed by Enno Gotthold in `#291 <https://github.com/ionelmc/pytest-benchmark/pull/291>`_.
 * Replaced the complicated and broken code of ``pytest_benchmark.utils.clonefunc`` with a simple return of the input.
-* Changed cprofile mode to disable any tracers, just like the regular benchmark loop.
+  That function was supposed to allow benchmarking with the cost of PyPy JIT included but it's a hassle to maintain.
+* Moved the instrumentation pause outside the round loops (in addition to tracing, profiling is paused too).
+  Pedantic mode will keep doing this per round (as the user manually controls the round count).
+  This is necessary because in some scenarios setting and unsetting the tracer too much will overflow an internal counter
+  (found to cause "OverflowError: events set too many times" at least on Python 3.13).
 
 5.1.0 (2024-10-30)
 ------------------
