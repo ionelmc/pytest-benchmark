@@ -29,6 +29,30 @@ class FixtureAlreadyUsed(Exception):
     pass
 
 
+class PauseInstrumentation:
+    def __init__(self, tracer=True, profiler=True):
+        self.disable_profiler = profiler
+        self.disable_tracer = tracer
+        self.prev_tracer = None
+        self.prev_profiler = None
+
+    def __enter__(self):
+        if self.disable_tracer:
+            self.prev_tracer = sys.gettrace()
+            if self.prev_tracer:
+                sys.settrace(None)
+        if self.disable_profiler:
+            self.prev_profiler = sys.getprofile()
+            if self.prev_profiler:
+                sys.setprofile(None)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.prev_tracer:
+            sys.settrace(self.prev_tracer)
+        if self.prev_profiler:
+            sys.setprofile(self.prev_profiler)
+
+
 class BenchmarkFixture:
     _precisions: typing.ClassVar = {}
 
@@ -102,9 +126,6 @@ class BenchmarkFixture:
             gc_enabled = gc.isenabled()
             if self._disable_gc:
                 gc.disable()
-            prev_tracer = sys.gettrace()
-            if prev_tracer:
-                sys.settrace(None)
             try:
                 if loops_range:
                     start = timer()
@@ -118,8 +139,6 @@ class BenchmarkFixture:
                     end = timer()
                     return end - start, result
             finally:
-                if prev_tracer:
-                    sys.settrace(prev_tracer)
                 if gc_enabled:
                     gc.enable()
 
@@ -188,7 +207,8 @@ class BenchmarkFixture:
         if self.enabled:
             runner = self._make_runner(function_to_benchmark, args, kwargs)
 
-            duration, iterations, loops_range = self._calibrate_timer(runner)
+            with PauseInstrumentation():
+                duration, iterations, loops_range = self._calibrate_timer(runner)
 
             # Choose how many times we must repeat the test
             rounds = ceil(self._max_time / duration)
@@ -202,32 +222,23 @@ class BenchmarkFixture:
             if self._warmup:
                 warmup_rounds = min(rounds, max(1, int(self._warmup / iterations)))
                 self._logger.debug(f'  Warmup {warmup_rounds} rounds x {iterations} iterations ...')
-                for _ in range(warmup_rounds):
-                    runner(loops_range)
-            for _ in range(rounds):
-                stats.update(runner(loops_range))
+                with PauseInstrumentation():
+                    for _ in range(warmup_rounds):
+                        runner(loops_range)
+            with PauseInstrumentation():
+                for _ in range(rounds):
+                    stats.update(runner(loops_range))
             self._logger.debug(f'  Ran for {format_time(time.time() - run_start)}s.', yellow=True, bold=True)
         if self.cprofile_loops is None:
             cprofile_loops = loops_range or range(1)
         else:
             cprofile_loops = range(self.cprofile_loops)
         if self.enabled and self.cprofile:
-            prev_tracer = sys.gettrace()
-            prev_profiler = sys.getprofile()
-            if prev_tracer:
-                sys.settrace(None)
-            if prev_profiler:
-                sys.setprofile(None)
-            try:
+            with PauseInstrumentation():
                 profile = cProfile.Profile()
                 for _ in cprofile_loops:
                     function_result = profile.runcall(function_to_benchmark, *args, **kwargs)
                 self._save_cprofile(profile)
-            finally:
-                if prev_tracer:
-                    sys.settrace(prev_tracer)
-                if prev_profiler:
-                    sys.setprofile(prev_profiler)
         else:
             function_result = function_to_benchmark(*args, **kwargs)
         return function_result
@@ -269,7 +280,8 @@ class BenchmarkFixture:
             args, kwargs = make_arguments()
 
             runner = self._make_runner(target, args, kwargs)
-            runner(loops_range)
+            with PauseInstrumentation():
+                runner(loops_range)
 
             if teardown is not None:
                 teardown(*args, **kwargs)
@@ -278,10 +290,11 @@ class BenchmarkFixture:
             args, kwargs = make_arguments()
 
             runner = self._make_runner(target, args, kwargs)
-            if loops_range:
-                duration = runner(loops_range)
-            else:
-                duration, result = runner(loops_range)
+            with PauseInstrumentation():
+                if loops_range:
+                    duration = runner(loops_range)
+                else:
+                    duration, result = runner(loops_range)
             stats.update(duration)
 
             if teardown is not None:
@@ -303,7 +316,8 @@ class BenchmarkFixture:
             profile = cProfile.Profile()
             args, kwargs = make_arguments()
             for _ in cprofile_loops:
-                profile.runcall(target, *args, **kwargs)
+                with PauseInstrumentation():
+                    profile.runcall(target, *args, **kwargs)
                 if teardown is not None:
                     teardown(*args, **kwargs)
             self._save_cprofile(profile)
