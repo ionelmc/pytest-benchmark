@@ -2,6 +2,12 @@
 Changelog
 =========
 
+5.2.1 (2025-11-04)
+------------------
+
+* Add markers so pytest doesn't try to assert-rewrite the plugin internals
+  (fixes those ``pytest.PytestAssertRewriteWarning: Module already imported so cannot be rewritten; pytest_benchmark`` warnings).
+
 5.2.0 (2025-10-30)
 ------------------
 
