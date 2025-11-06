@@ -4,6 +4,7 @@
 """
 
 from functools import partial
+import os
 
 import pytest
 
@@ -68,7 +69,9 @@ class BenchmarkSession:
         self.skip = config.getoption('benchmark_skip')
         self.disabled = config.getoption('benchmark_disable') and not config.getoption('benchmark_enable')
 
-        if config.getoption('dist', 'no') != 'no' and not self.skip and not self.disabled:
+        # Only the main process has the 'dist' field in the config.
+        xdist_active = config.getoption('dist', 'no') != 'no' or os.environ.get('PYTEST_XDIST_WORKER', None)
+        if xdist_active and not self.skip and not self.disabled:
             self.logger.warning(
                 'Benchmarks are automatically disabled because xdist plugin is active.'
                 'Benchmarks cannot be performed reliably in a parallelized environment.',
