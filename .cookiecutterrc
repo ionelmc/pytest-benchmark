@@ -40,7 +40,7 @@ default_context:
     sphinx_theme: furo
     test_matrix_separate_coverage: 'yes'
     tests_inside_package: 'no'
-    version: 5.2.1
+    version: 5.2.2
     version_manager: bump2version
     website: http://blog.ionelmc.ro
     year_from: '2014'
