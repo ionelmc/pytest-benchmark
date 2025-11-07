@@ -3,8 +3,8 @@
   PYTEST_DONT_REWRITE
 """
 
-from functools import partial
 import os
+from functools import partial
 
 import pytest
 
