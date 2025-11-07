@@ -2,6 +2,12 @@
 Changelog
 =========
 
+v5.2.2 (2025-11-07)
+--------------------
+
+* Fixed auto-disable to work with newer xdist (pytest-benchmark auto disables benchmarks if xdist is enabled by design).
+  Contributed by Thomas B. Brunner in `#294 <https://github.com/ionelmc/pytest-benchmark/pull/294>`_.
+
 5.2.1 (2025-11-04)
 ------------------
 
