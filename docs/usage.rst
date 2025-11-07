@@ -71,33 +71,33 @@ Commandline options
 ===================
 
 ``py.test`` command-line options:
-
-  --benchmark-min-time=SECONDS
+  --benchmark-min-time SECONDS
                         Minimum time per round in seconds. Default: '0.000005'
-  --benchmark-max-time=SECONDS
+  --benchmark-max-time SECONDS
                         Maximum run time per test - it will be repeated until
                         this total time is reached. It may be exceeded if test
                         function is very slow or --benchmark-min-rounds is large
                         (it takes precedence). Default: '1.0'
-  --benchmark-min-rounds=NUM
+  --benchmark-min-rounds NUM
                         Minimum rounds, even if total time would exceed `--max-
                         time`. Default: 5
-  --benchmark-timer=FUNC
+  --benchmark-timer FUNC
                         Timer to use when measuring time. Default:
                         'time.perf_counter'
-  --benchmark-calibration-precision=NUM
+  --benchmark-calibration-precision NUM
                         Precision to use when calibrating number of iterations.
                         Precision of 10 will make the timer look 10 times more
                         accurate, at a cost of less precise measure of
                         deviations. Default: 10
-  --benchmark-warmup=[KIND]
+  --benchmark-warmup
+                        Argument: ``[KIND]`` (optional)
                         Activates warmup. Will run the test function up to
                         number of times in the calibration phase. See
                         `--benchmark-warmup-iterations`. Note: Even the warmup
                         phase obeys --benchmark-max-time. Available KIND:
                         'auto', 'off', 'on'. Default: 'auto' (automatically
                         activate on PyPy).
-  --benchmark-warmup-iterations=NUM
+  --benchmark-warmup-iterations NUM
                         Max number of iterations to run in the warmup phase.
                         Default: 100000
   --benchmark-disable-gc
@@ -110,78 +110,86 @@ Commandline options
                         --benchmark-disable (in case you have it in pytest
                         configuration).
   --benchmark-only      Only run benchmarks. This overrides --benchmark-skip.
-  --benchmark-save=NAME
-                        Save the current run into 'STORAGE-PATH/counter-
-                        NAME.json'. Default: '<commitid>_<date>_<time>_<isdirty>', example:
-                        'e689af57e7439b9005749d806248897ad550eab5_20150811_041632_uncommitted-changes'.
-  --benchmark-autosave  Autosave the current run into 'STORAGE-PATH/<counter>_<commitid>_<date>_<time>_<isdirty>',
-                        example:
-                        'STORAGE-PATH/0123_525685bcd6a51d1ade0be75e2892e713e02dfd19_20151028_221708_uncommitted-changes.json'
+  --benchmark-save NAME
+                        Save the current run into 'STORAGE-
+                        PATH/counter_NAME.json'.
+  --benchmark-autosave  Autosave the current run into 'STORAGE-PATH/counter_8d53
+                        0304d13d1c16fa23a1cf5adc15d8297502e2_20251107_124338_unc
+                        ommited-changes.json
   --benchmark-save-data
                         Use this to make --benchmark-save and --benchmark-
                         autosave include all the timing data, not just the
                         stats.
-  --benchmark-json=PATH
+  --benchmark-json PATH
                         Dump a JSON report into PATH. Note that this will
                         include the complete data (all the timings, not just the
                         stats).
-  --benchmark-compare=[NUM|_ID]
+  --benchmark-compare
+                        Argument: ``NUM | ID``
+
                         Compare the current run against run NUM (or prefix of
                         _id in elasticsearch) or the latest saved run if
                         unspecified.
-  --benchmark-compare-fail=EXPR [EXPR ...]
+  --benchmark-compare-fail EXPR
                         Fail test if performance regresses according to given
                         EXPR (eg: min:5% or mean:0.001 for number of seconds).
                         Can be used multiple times.
-  --benchmark-cprofile=COLUMN
+  --benchmark-cprofile COLUMN
                         If specified cProfile will be enabled. Top functions
                         will be stored for the given column. Available columns:
                         'ncalls_recursion', 'ncalls', 'tottime', 'tottime_per',
                         'cumtime', 'cumtime_per', 'function_name'.
-  --benchmark-cprofile-loops=LOOPS
+  --benchmark-cprofile-loops LOOPS
                         How many times to run the function in cprofile.
                         Available options: 'auto', or an integer.
-  --benchmark-cprofile-top=COUNT
+  --benchmark-cprofile-top COUNT
                         How many rows to display.
-  --benchmark-cprofile-dump=[FILENAME-PREFIX]
+  --benchmark-cprofile-dump
+                        Argument: ``[FILENAME-PREFIX]`` (optional)
+
                         Save cprofile dumps as FILENAME-PREFIX-test_name.prof.
                         If FILENAME-PREFIX contains slashes ('/') then
                         directories will be created. Default:
-                        'benchmark_20241028_160327'
-  --benchmark-time-unit=COLUMN
-                        Unit to scale the results to. Available units: 'ns',
-                        'us', 'ms', 's'. Default: 'auto'.
-  --benchmark-storage=URI
+                        'benchmark_20251107_124338'
+  --benchmark-storage URI
                         Specify a path to store the runs as uri in form
                         file://path or elasticsearch+http[s]://host1,host2/[inde
                         x/doctype?project_name=Project] (when --benchmark-save
                         or --benchmark-autosave are used). For backwards
                         compatibility unexpected values are converted to
-                        \file://<value>. Default: 'file://./.benchmarks'.
-  --benchmark-netrc=[BENCHMARK_NETRC]
+                        file://<value>. Default: 'file://./.benchmarks'.
+  --benchmark-netrc
+                        Argument: ``[BENCHMARK_NETRC]`` (optional)
+
                         Load elasticsearch credentials from a netrc file.
                         Default: ''.
   --benchmark-verbose   Dump diagnostic and progress information.
   --benchmark-quiet     Disable reporting. Verbose mode takes precedence.
-  --benchmark-sort=COL  Column to sort on. Can be one of: 'min', 'max', 'mean',
+  --benchmark-sort COL  Column to sort on. Can be one of: 'min', 'max', 'mean',
                         'stddev', 'name', 'fullname'. Default: 'min'
-  --benchmark-group-by=LABEL
+  --benchmark-group-by LABEL
                         How to group tests. Can be one of: 'group', 'name',
                         'fullname', 'func', 'fullfunc', 'param' or 'param:NAME',
                         where NAME is the name passed to @pytest.parametrize.
                         Default: 'group'
-  --benchmark-columns=LABELS
+  --benchmark-columns LABELS
                         Comma-separated list of columns to show in the result
                         table. Default: 'min, max, mean, stddev, median, iqr,
                         outliers, ops, rounds, iterations'
-  --benchmark-name=FORMAT
+  --benchmark-name FORMAT
                         How to format names in results. Can be one of 'short',
                         'normal', 'long', or 'trial'. Default: 'normal'
-  --benchmark-histogram=[FILENAME-PREFIX]
-                        Plot graphs of min/max/avg/stddev over time in
-                        FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX
-                        contains slashes ('/') then directories will be
-                        created. Default: 'benchmark_<date>_<time>'
+  --benchmark-time-unit COLUMN
+                        Unit to scale the results to. Available units: 'ns',
+                        'us', 'ms', 's'. Default: 'auto'.
+  --benchmark-histogram
+                        Argument: ``[FILENAME-PREFIX]`` (optional)
+
+                        Plot graphs of min/max/avg/stddev over time in FILENAME-
+                        PREFIX-test_name.svg. If FILENAME-PREFIX contains
+                        slashes ('/') then directories will be created. Default:
+                        'benchmark_20251107_124338'
+
 
 .. _comparison-cli:
 
@@ -230,16 +238,16 @@ The compare ``command`` takes almost all the ``--benchmark`` options, minus the 
 
     examples:
 
-        pytest-benchmark compare 'Linux-CPython-3.5-64bit/*'
+        ``pytest-benchmark compare 'Linux-CPython-3.5-64bit/*'``
 
             Loads all benchmarks ran with that interpreter. Note the special quoting that disables your shell's glob
             expansion.
 
-        pytest-benchmark compare 0001
+        ``pytest-benchmark compare 0001``
 
             Loads first run from all the interpreters.
 
-        pytest-benchmark compare /foo/bar/0001_abc.json /lorem/ipsum/0001_sir_dolor.json
+        ``pytest-benchmark compare /foo/bar/0001_abc.json /lorem/ipsum/0001_sir_dolor.json``
 
             Loads runs from exactly those files.
 
