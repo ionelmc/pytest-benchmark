@@ -8,14 +8,14 @@ v5.2.2 (2025-11-07)
 * Fixed auto-disable to work with newer xdist (pytest-benchmark auto disables benchmarks if xdist is enabled by design).
   Contributed by Thomas B. Brunner in `#294 <https://github.com/ionelmc/pytest-benchmark/pull/294>`_.
 
-5.2.1 (2025-11-04)
-------------------
+v5.2.1 (2025-11-04)
+--------------------
 
 * Add markers so pytest doesn't try to assert-rewrite the plugin internals
   (fixes those ``pytest.PytestAssertRewriteWarning: Module already imported so cannot be rewritten; pytest_benchmark`` warnings).
 
-5.2.0 (2025-10-30)
-------------------
+v5.2.0 (2025-10-30)
+-------------------
 
 * Added support for a per-round ``teardown`` function to pedantic mode.
   Contributed Patrick Winter by `#264 <https://github.com/ionelmc/pytest-benchmark/pull/264>`_.
@@ -36,19 +36,19 @@ v5.2.2 (2025-11-07)
   This is necessary because in some scenarios setting and unsetting the tracer too much will overflow an internal counter
   (found to cause "OverflowError: events set too many times" at least on Python 3.13).
 
-5.1.0 (2024-10-30)
-------------------
+v5.1.0 (2024-10-30)
+-------------------
 
 * Fixed broken hooks handling on pytest 8.1 or later (the ``TypeError: import_path() missing 1 required keyword-only argument: 'consider_namespace_packages'`` issue).
   Unfortunately this sets the minimum supported pytest version to 8.1.
 
-5.0.1 (2024-10-30)
-------------------
+v5.0.1 (2024-10-30)
+-------------------
 
 * Fixed bad fixture check that broke down then `nbmake <https://pypi.org/project/nbmake/>`_ was enabled.
 
-5.0.0 (2024-10-29)
-------------------
+v5.0.0 (2024-10-29)
+-------------------
 
 * Dropped support for now EOL Python 3.8. Also moved tests suite to only test the latest pytest versions (8.3.x).
 * Fix generate parametrize tests benchmark csv report errors (issue `#268 <https://github.com/ionelmc/pytest-benchmark/issues/268>`_).
@@ -64,8 +64,8 @@ v5.2.2 (2025-11-07)
   - ``--benchmark-cprofile-dump=[FILENAME-PREFIX]`` - allows saving to a file (that you can load in `snakeviz <https://pypi.org/project/snakeviz/>`_, `RunSnakeRun <https://pypi.org/project/RunSnakeRun/>`_ or other tools).
 * Removed hidden dependency on `py.path <https://pypi.org/project/py/>`_ (replaced with pathlib).
 
-4.0.0 (2022-10-26)
-------------------
+v4.0.0 (2022-10-26)
+-------------------
 
 * Dropped support for legacy Pythons (2.7, 3.6 or older).
 * Switched CI to GitHub Actions.
@@ -78,8 +78,8 @@ v5.2.2 (2025-11-07)
   Fixes `#205 <https://github.com/ionelmc/pytest-benchmark/issues/205>`_.
   Contributed by Friedrich Delgado in `#207 <https://github.com/ionelmc/pytest-benchmark/pull/207>`_.
 
-3.4.1 (2021-04-17)
-------------------
+v3.4.1 (2021-04-17)
+-------------------
 
 * Republished with updated changelog.
 
@@ -87,8 +87,8 @@ v5.2.2 (2025-11-07)
   apparently... thus ``3.4.0`` was set in by accident.
 
 
-3.4.0 (2021-04-17)
-------------------
+v3.4.0 (2021-04-17)
+-------------------
 
 * Disable progress indication unless ``--benchmark-verbose`` is used.
   Contributed by Dimitris Rozakis in `#149 <https://github.com/ionelmc/pytest-benchmark/pull/149>`_.
@@ -107,8 +107,8 @@ v5.2.2 (2025-11-07)
   Fixes `#199 <https://github.com/ionelmc/pytest-benchmark/issues/199>`_.
 * ``PerformanceRegression`` exception no longer inherits ``pytest.UsageError`` (apparently a *final* class).
 
-3.2.3 (2020-01-10)
-------------------
+v3.2.3 (2020-01-10)
+-------------------
 
 * Fixed "already-imported" pytest warning. Contributed by Jonathan Simon Prates in
   `#151 <https://github.com/ionelmc/pytest-benchmark/pull/151>`_.
@@ -116,13 +116,13 @@ v5.2.2 (2025-11-07)
 * Dropped Python 3.4 from the test suite and updated test deps.
 * Fixed ``pytest_benchmark.utils.clonefunc`` to work on Python 3.8.
 
-3.2.2 (2017-01-12)
-------------------
+v3.2.2 (2017-01-12)
+-------------------
 
 * Added support for pytest items without funcargs. Fixes interoperability with other pytest plugins like pytest-flake8.
 
-3.2.1 (2017-01-10)
-------------------
+v3.2.1 (2017-01-10)
+-------------------
 
 * Updated changelog entries for 3.2.0. I made the release for pytest-cov on the same day and thought I updated the
   changelogs for both plugins. Alas, I only updated pytest-cov.
@@ -130,8 +130,8 @@ v5.2.2 (2025-11-07)
 * Fixed couple CI/test issues.
 * Fixed broken ``pytest_benchmark.__version__``.
 
-3.2.0 (2017-01-07)
-------------------
+v3.2.0 (2017-01-07)
+-------------------
 
 * Added support for simple ``trial`` x-axis histogram label. Contributed by Ken Crowell in
   `#95 <https://github.com/ionelmc/pytest-benchmark/pull/95>`_).
@@ -166,16 +166,16 @@ v5.2.2 (2025-11-07)
   `#136 <https://github.com/ionelmc/pytest-benchmark/pull/136>`_ and
   `#138 <https://github.com/ionelmc/pytest-benchmark/pull/138>`_.
 
-3.1.1 (2017-07-26)
-------------------
+v3.1.1 (2017-07-26)
+-------------------
 
 * Fixed loading data from old json files (missing ``ops`` field, see
   `#81 <https://github.com/ionelmc/pytest-benchmark/issues/81>`_).
 * Fixed regression on broken SCM (see
   `#82 <https://github.com/ionelmc/pytest-benchmark/issues/82>`_).
 
-3.1.0 (2017-07-21)
-------------------
+v3.1.0 (2017-07-21)
+-------------------
 
 * Added "operations per second" (``ops`` field in ``Stats``) metric --
   shows the call rate of code being tested. Contributed by Alexey Popravka in
@@ -193,7 +193,7 @@ v5.2.2 (2025-11-07)
 * Remove ``git`` and ``hg`` as system dependencies when guessing the project name.
 
 3.1.0a2 (2017-03-27)
---------------------
+---------------------
 
 * ``machine_info`` now contains more detailed information about the CPU, in
   particular the exact model. Contributed by Antonio Cuni in `#61 <https://github.com/ionelmc/pytest-benchmark/pull/61>`_.
@@ -212,7 +212,7 @@ v5.2.2 (2025-11-07)
 * Remove the project name from the autosave name. This will get the old brief naming from 3.0 back.
 
 3.1.0a1 (2016-10-29)
---------------------
+---------------------
 
 * Added ``--benchmark-columns`` command line option. It selects what columns are displayed in the result table. Contributed by
   Antonio Cuni in `#34 <https://github.com/ionelmc/pytest-benchmark/pull/34>`_.
@@ -239,8 +239,8 @@ v5.2.2 (2025-11-07)
 * Changed ``--benchmark-storage`` so it now allows elasticsearch storage. It allows to store data to elasticsearch instead to
   json files. Contributed by Petr Šebek in `#58 <https://github.com/ionelmc/pytest-benchmark/pull/58>`_.
 
-3.0.0 (2015-11-08)
-------------------
+v3.0.0 (2015-11-08)
+-------------------
 
 * Improved ``--help`` text for ``--benchmark-histogram``, ``--benchmark-save`` and ``--benchmark-autosave``.
 * Benchmarks that raised exceptions during test now have special highlighting in result table (red background).
@@ -254,7 +254,7 @@ v5.2.2 (2025-11-07)
 * Not using the benchmark fixture (but requiring it) will issue a warning (``WBENCHMARK-U1``).
 
 3.0.0rc1 (2015-10-25)
----------------------
+----------------------
 
 * Changed ``--benchmark-warmup`` to take optional value and automatically activate on PyPy (default value is ``auto``).
   **MAY BE BACKWARDS INCOMPATIBLE**
@@ -262,7 +262,7 @@ v5.2.2 (2025-11-07)
   the file).
 
 3.0.0b3 (2015-10-22)
----------------------
+----------------------
 
 * Changed how comparison is displayed in the result table. Now previous runs are shown as normal runs and names get a
   special suffix indicating the origin. Eg: "test_foobar (NOW)" or "test_foobar (0123)".
@@ -271,7 +271,7 @@ v5.2.2 (2025-11-07)
 * Moved the display of default options in the header section.
 
 3.0.0b2 (2015-10-17)
----------------------
+----------------------
 
 * Add a ``--benchmark-disable`` option. It's automatically activated when xdist is on
 * When xdist is on or ``statistics`` can't be imported then ``--benchmark-disable`` is automatically activated (instead
@@ -280,30 +280,30 @@ v5.2.2 (2025-11-07)
 * Improved description for ``--benchmark-max-time``.
 
 3.0.0b1 (2015-10-13)
---------------------
+---------------------
 
 * Tests are sorted alphabetically in the results table.
 * Failing to import ``statistics`` doesn't create hard failures anymore. Benchmarks are automatically skipped if import
   failure occurs. This would happen on Python 3.2 (or earlier Python 3).
 
 3.0.0a4 (2015-10-08)
---------------------
+---------------------
 
 * Changed how failures to get commit info are handled: now they are soft failures. Previously it made the whole
   test suite fail, just because you didn't have ``git/hg`` installed.
 
 3.0.0a3 (2015-10-02)
---------------------
+---------------------
 
 * Added progress indication when computing stats.
 
 3.0.0a2 (2015-09-30)
---------------------
+---------------------
 
 * Fixed accidental output capturing caused by capturemanager misuse.
 
 3.0.0a1 (2015-09-13)
---------------------
+---------------------
 
 * Added JSON report saving (the ``--benchmark-json`` command line arguments). Based on initial work from Dave Collins in
   `#8 <https://github.com/ionelmc/pytest-benchmark/pull/8>`_.
@@ -338,8 +338,8 @@ v5.2.2 (2025-11-07)
 * Added ``pedantic mode`` via ``benchmark.pedantic()``. This mode disables calibration and allows a setup function.
 
 
-2.5.0 (2015-06-20)
-------------------
+v2.5.0 (2015-06-20)
+-------------------
 
 * Improved test suite a bit (not using ``cram`` anymore).
 * Improved help text on the ``--benchmark-warmup`` option.
@@ -349,50 +349,50 @@ v5.2.2 (2025-11-07)
 * Fixed a bug where calibration would run forever.
 * Disabled red/green coloring (it was kinda random) when there's a single test in the results table.
 
-2.4.1 (2015-03-16)
-------------------
+v2.4.1 (2015-03-16)
+-------------------
 
 * Fix regression, plugin was raising ``ValueError: no option named 'dist'`` when xdist wasn't installed.
 
-2.4.0 (2015-03-12)
-------------------
+v2.4.0 (2015-03-12)
+-------------------
 
 * Add a ``benchmark_weave`` experimental fixture.
 * Fix internal failures when ``xdist`` plugin is active.
 * Automatically disable benchmarks if ``xdist`` is active.
 
-2.3.0 (2014-12-27)
-------------------
+v2.3.0 (2014-12-27)
+-------------------
 
 * Moved the warmup in the calibration phase. Solves issues with benchmarking on PyPy.
 
   Added a ``--benchmark-warmup-iterations`` option to fine-tune that.
 
-2.2.0 (2014-12-26)
-------------------
+v2.2.0 (2014-12-26)
+-------------------
 
 * Make the default rounds smaller (so that variance is more accurate).
 * Show the defaults in the ``--help`` section.
 
-2.1.0 (2014-12-20)
-------------------
+v2.1.0 (2014-12-20)
+-------------------
 
 * Simplify the calibration code so that the round is smaller.
 * Add diagnostic output for calibration code (``--benchmark-verbose``).
 
-2.0.0 (2014-12-19)
-------------------
+v2.0.0 (2014-12-19)
+-------------------
 
 * Replace the context-manager based API with a simple callback interface. **BACKWARDS INCOMPATIBLE**
 * Implement timer calibration for precise measurements.
 
-1.0.0 (2014-12-15)
-------------------
+v1.0.0 (2014-12-15)
+-------------------
 
 * Use a precise default timer for PyPy.
 
-? (?)
------
+v0.0.1 - v0.12.1 (2014-10-09 - 2014-12-15)
+------------------------------------------
 
 * README and styling fixes. Contributed by Marc Abramowitz in `#4 <https://github.com/ionelmc/pytest-benchmark/pull/4>`_.
-* Lots of wild changes.
+* Lots of wild changes and too many irrelevant releases to include.
