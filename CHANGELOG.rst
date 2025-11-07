@@ -24,7 +24,7 @@ v5.2.2 (2025-11-07)
 * Fixed deprecated hook examples in docstrings.
   Contributed by Ali-Akber Saifee in `#284 <https://github.com/ionelmc/pytest-benchmark/pull/284>`_.
 * Changed ``--benchmark-compare-fail`` to accept percentages higher than 100%.
-  Contributed by Ben Avrahami in `#290 <https://github.com/ionelmc/pytest-benchmark/pull/280>`_.
+  Contributed by Ben Avrahami in `#280 <https://github.com/ionelmc/pytest-benchmark/pull/280>`_.
 * Added minimal typing support.
   Contributed by Sorin Sbarnea in `#290 <https://github.com/ionelmc/pytest-benchmark/pull/290>`_.
 * Fixed support for Python 3.9.
