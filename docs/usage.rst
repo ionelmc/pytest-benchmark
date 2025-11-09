@@ -153,11 +153,11 @@ Commandline options
                         'benchmark_20251107_124338'
   --benchmark-storage URI
                         Specify a path to store the runs as uri in form
-                        file://path or elasticsearch+http[s]://host1,host2/[inde
+                        file\://path or elasticsearch+http[s]://host1,host2/[inde
                         x/doctype?project_name=Project] (when --benchmark-save
                         or --benchmark-autosave are used). For backwards
                         compatibility unexpected values are converted to
-                        file://<value>. Default: 'file://./.benchmarks'.
+                        file\://<value>. Default: 'file\://./.benchmarks'.
   --benchmark-netrc
                         Argument: ``[BENCHMARK_NETRC]`` (optional)
 
