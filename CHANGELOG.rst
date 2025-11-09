@@ -6,6 +6,7 @@ v5.2.3 (2025-11-09)
 --------------------
 
 * Add support for pytest 9.0.
+* Moved the README.rst/CHANGELOG.rst concatenation from setup.py to pyproject.toml.
 
 v5.2.2 (2025-11-07)
 --------------------
