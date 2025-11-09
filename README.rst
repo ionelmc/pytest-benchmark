@@ -2,8 +2,6 @@
 Overview
 ========
 
-.. start-badges
-
 .. list-table::
     :stub-columns: 1
 
@@ -43,8 +41,6 @@ Overview
 .. |commits-since| image:: https://img.shields.io/github/commits-since/ionelmc/pytest-benchmark/v5.2.2.svg
     :alt: Commits since latest release
     :target: https://github.com/ionelmc/pytest-benchmark/compare/v5.2.2...master
-
-.. end-badges
 
 A ``pytest`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen
 timer.

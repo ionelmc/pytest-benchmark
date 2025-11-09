@@ -4,6 +4,9 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.dynamic]
+readme = { file = ["README.rst", "CHANGELOG.rst"] }
+
 [project]
 dynamic = [
     "readme",
