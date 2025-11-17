@@ -72,6 +72,7 @@ class BenchmarkSession:
         # Only the main process has the 'dist' field in the config.
         xdist_active = config.getoption('dist', 'no') != 'no' or os.environ.get('PYTEST_XDIST_WORKER')
         if xdist_active and not self.skip and not self.disabled:
+            # Only log the warning in the main process.
             if not os.environ.get('PYTEST_XDIST_WORKER'):
                 self.logger.warning(
                     'Benchmarks are automatically disabled because xdist plugin is active. '
