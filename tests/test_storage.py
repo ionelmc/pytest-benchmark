@@ -36,7 +36,7 @@ JSON_DATA['commit_info'] = {'foo': 'bar'}
 list(normalize_stats(bench['stats']) for bench in JSON_DATA['benchmarks'])
 
 
-class Namespace(object):
+class Namespace:
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 

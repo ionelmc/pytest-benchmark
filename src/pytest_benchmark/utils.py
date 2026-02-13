@@ -127,7 +127,7 @@ def in_any_parent(name, path=None):
 
 
 def subprocess_output(cmd):
-    return check_output(cmd.split(), stderr=subprocess.STDOUT, universal_newlines=True).strip()
+    return check_output(cmd.split(), stderr=subprocess.STDOUT, text=True).strip()
 
 
 def get_commit_info(project_name=None):
