@@ -73,7 +73,7 @@ class BenchmarkSession:
         xdist_active = config.getoption('dist', 'no') != 'no' or os.environ.get('PYTEST_XDIST_WORKER', None)
         if xdist_active and not self.skip and not self.disabled:
             self.logger.warning(
-                'Benchmarks are automatically disabled because xdist plugin is active.'
+                'Benchmarks are automatically disabled because xdist plugin is active. '
                 'Benchmarks cannot be performed reliably in a parallelized environment.',
             )
             self.disabled = True
