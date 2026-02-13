@@ -42,3 +42,4 @@ Authors
 * Sorin Sbarnea - https://github.com/ssbarnea
 * Enno Gotthold - https://github.com/SchoolGuy
 * Thomas B. Brunner - https://github.com/thomasbbrunner
+* Hugo van Kemenade - https://github.com/hugovk
