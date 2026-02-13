@@ -4,14 +4,13 @@
 """
 
 import operator
-import sys
 from math import isinf
 
 from .utils import report_online_progress
 from .utils import report_progress
 
-NUMBER_FMT = '{0:,.4f}' if sys.version_info[:2] > (2, 6) else '{0:.4f}'
-ALIGNED_NUMBER_FMT = '{0:>{1},.4f}{2:<{3}}' if sys.version_info[:2] > (2, 6) else '{0:>{1}.4f}{2:<{3}}'
+NUMBER_FMT = '{0:,.4f}'
+ALIGNED_NUMBER_FMT = '{0:>{1},.4f}{2:<{3}}'
 
 
 class TableResults:

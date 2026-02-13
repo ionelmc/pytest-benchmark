@@ -254,7 +254,6 @@ def test_regression_checks(sess, name_format):
     )
 
 
-@pytest.mark.skipif(sys.version_info[:2] < (2, 7), reason='Something weird going on, see: https://bugs.python.org/issue4482')
 def test_regression_checks_inf(sess, name_format):
     output = make_logger(sess)
     sess.compare = '0002'
