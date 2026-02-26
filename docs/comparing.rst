@@ -38,6 +38,33 @@ Example::
 
     pytest-benchmark compare 0001 0002
 
+Comparing between source files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When comparing benchmarks from multiple files (e.g. a ``main`` branch run vs. a feature branch run),
+the default output shows all benchmarks in a single flat table.
+The ``--between`` flag pivots the table so that each row is a unique benchmark,
+with columns showing the metric value from each source file and the relative change.
+It takes a comma-separated list of metrics to compare::
+
+    pytest-benchmark compare --between=min 0001 0002
+
+Example output::
+
+    ----------------------------- benchmark: 9 tests, 2 sources ------------------------------
+    Name (time in ns)                      0001_f41c0c7 Min  0002_8e68892 Min             ΔMin
+    ------------------------------------------------------------------------------------------
+    test_getattr_thread_critical                   790.9257          245.7993           -68.9%
+    test_setattr_thread_critical                   899.9952          254.1521           -71.8%
+    ...
+
+The first source is the reference (shown in cyan on the terminal).
+Each subsequent source is followed by a ``Δ`` column showing the percentage change.
+
+You can compare multiple metrics and control the sort order with ``--sort``::
+
+    pytest-benchmark compare --between=min,mean --sort=mean 0001 0002
+
 Plotting
 --------
 

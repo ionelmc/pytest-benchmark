@@ -12,6 +12,7 @@ from .fixture import statistics
 from .fixture import statistics_error
 from .logger import Logger
 from .table import TableResults
+from .utils import DEFAULT_COLUMNS
 from .utils import NAME_FORMATTERS
 from .utils import SecondsDecimal
 from .utils import first_or_value
@@ -89,7 +90,7 @@ class BenchmarkSession:
 
         self.only = config.getoption('benchmark_only')
         self.sort = config.getoption('benchmark_sort')
-        self.columns = config.getoption('benchmark_columns')
+        self.columns = config.getoption('benchmark_columns') or DEFAULT_COLUMNS
         if self.skip and self.only:
             self.skip = False
         if self.disabled and self.only:

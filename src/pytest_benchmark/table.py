@@ -12,6 +12,7 @@ from .utils import report_progress
 NUMBER_FMT = '{0:,.4f}'
 ALIGNED_NUMBER_FMT = '{0:>{1},.4f}{2:<{3}}'
 STAT_PROPS = ('min', 'max', 'mean', 'median', 'iqr', 'stddev', 'ops')
+DELTA = '\N{GREEK CAPITAL LETTER DELTA}'
 
 
 def compute_best_worst(benchmarks, progress_reporter, tr, line):
@@ -141,6 +142,123 @@ class TableResults:
         tr.write_line('Legend:')
         tr.write_line('  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.')
         tr.write_line('  OPS: Operations Per Second, computed as 1 / Mean')
+
+
+class CompareBetweenResults(TableResults):
+    def display(self, tr, groups, progress_reporter=report_progress):
+        tr.write_line('')
+
+        for line, (group, benchmarks) in progress_reporter(groups, tr, 'Computing stats ... group {pos}/{total}'):
+            self._display_single_between(line, group, benchmarks, tr=tr, progress_reporter=progress_reporter)
+
+        tr.write_line('Legend:')
+        tr.write_line('  Cyan: reference source for comparison. Green: improvement, Red: regression.')
+        tr.write_line(f'  {DELTA}: percentage change from reference source.')
+
+    def _display_single_between(self, line, group, benchmarks, *, tr, progress_reporter):
+        # Collect sources in order of first appearance and build fullname -> {source: bench} mapping
+        sources = list(dict.fromkeys(bench.get('source', '') for bench in benchmarks))
+        bench_map = {}
+        for bench in benchmarks:
+            bench_map.setdefault(bench['fullname'], {})[bench.get('source', '')] = bench
+
+        if len(sources) < 2:
+            tr.write_line(f'ERROR: --between requires at least 2 source files, got {len(sources)}.', red=True)
+            return
+
+        metrics = [c for c in self.columns if c in STAT_PROPS]
+
+        all_benches = list(benchmarks)
+        best, worst = compute_best_worst(all_benches, progress_reporter, tr, line)
+        _unit, adjustment, ops_adjustment, labels = self.compute_scale(all_benches, best, worst)
+        adjustments = {m: (ops_adjustment if m == 'ops' else adjustment) for m in metrics}
+
+        # Sort benchmarks by the sort metric from the first source
+        first_source = sources[0]
+        sorted_names = sorted(
+            bench_map,
+            key=lambda name: bench_map[name].get(first_source, {}).get(self.sort, float('inf')),
+        )
+
+        # Format benchmark display names without source suffix
+        display_names = {}
+        for fullname in sorted_names:
+            any_bench = next(iter(bench_map[fullname].values()))
+            display_names[fullname] = self.name_format({**any_bench, 'source': ''})
+
+        name_width = 3 + max(len(labels['name']), *(len(n) for n in display_names.values()))
+
+        columns = []  # Each entry: (source_idx, metric, label, width, is_change)
+
+        def _val_col_width(metric, src, label):
+            """
+            Helper to compute value column width for a given metric and source
+            """
+            adj = adjustments[metric]
+            w = len(label)
+            for fn in sorted_names:
+                bench = bench_map[fn].get(src)
+                if bench is not None:
+                    w = max(w, len(NUMBER_FMT.format(bench[metric] * adj)))
+            return w + 2
+
+        # Format source labels using name_format
+        source_labels = [self.name_format({'name': '', 'fullname': '', 'source': src}).strip(' ()') for src in sources]
+
+        # Per-metric grouping: ref value, then for each other source: value + delta
+        for metric in metrics:
+            mlabel = labels[metric]
+            # Reference column
+            ref_label = f'{source_labels[0]} {mlabel}'
+            columns.append((0, metric, ref_label, _val_col_width(metric, sources[0], ref_label), False))
+            # Other sources with deltas
+            for si in range(1, len(sources)):
+                val_label = f'{source_labels[si]} {mlabel}'
+                columns.append((si, metric, val_label, _val_col_width(metric, sources[si], val_label), False))
+                diff_label = f'{DELTA}{mlabel}'
+                columns.append((si, metric, diff_label, max(len(diff_label) + 2, 10), True))
+
+        header = ''.join(
+            [
+                labels['name'].ljust(name_width),
+                *(label.rjust(width) for _si, _metric, label, width, _is_change in columns),
+            ]
+        )
+
+        group_name = '' if group is None else f' {group!r}'
+        tr.write_line(
+            f' benchmark{group_name}: {len(sorted_names)} tests, {len(sources)} sources '.center(len(header), '-'),
+            yellow=True,
+        )
+        tr.write_line(header)
+        tr.write_line('-' * len(header), yellow=True)
+
+        for fullname in sorted_names:
+            tr.write(display_names[fullname].ljust(name_width))
+            row_values = {}
+            for si, metric, _label, width, is_change in columns:
+                if not is_change:
+                    bench = bench_map[fullname].get(sources[si])
+                    if bench is None:
+                        tr.write('N/A'.rjust(width))
+                    else:
+                        row_values[(si, metric)] = bench[metric]
+                        tr.write(NUMBER_FMT.format(bench[metric] * adjustments[metric]).rjust(width), cyan=(si == 0))
+                else:
+                    base_val = row_values.get((0, metric))
+                    cmp_val = row_values.get((si, metric))
+                    if base_val is None or cmp_val is None or base_val == 0:
+                        tr.write('N/A'.rjust(width))
+                    else:
+                        pct = (cmp_val - base_val) / abs(base_val) * 100
+                        # For ops, higher is better; for time metrics, lower is better
+                        is_improvement = (pct > 0) if metric == 'ops' else (pct < 0)
+                        is_regression = (pct < 0) if metric == 'ops' else (pct > 0)
+                        tr.write(f'{pct:+.1f}%'.rjust(width), green=is_improvement, red=is_regression, bold=True)
+            tr.write('\n')
+
+        tr.write_line('-' * len(header), yellow=True)
+        tr.write_line('')
 
 
 def compute_baseline_scale(baseline, value, width):
