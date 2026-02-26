@@ -43,3 +43,4 @@ Authors
 * Enno Gotthold - https://github.com/SchoolGuy
 * Thomas B. Brunner - https://github.com/thomasbbrunner
 * Hugo van Kemenade - https://github.com/hugovk
+* Aarni Koskela - https://github.com/akx
