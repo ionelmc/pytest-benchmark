@@ -19,6 +19,7 @@ from .plugin import add_csv_options
 from .plugin import add_display_options
 from .plugin import add_global_options
 from .plugin import add_histogram_options
+from .table import CompareBetweenResults
 from .table import TableResults
 from .utils import NAME_FORMATTERS
 from .utils import first_or_value
@@ -108,6 +109,11 @@ def make_parser():
     )
     add_display_options(compare_command.add_argument, prefix='')
     add_histogram_options(compare_command.add_argument, prefix='')
+    compare_command.add_argument(
+        '--compare-between',
+        action='store_true',
+        help='Compare same-named benchmarks across different source files.',
+    )
     add_glob_or_file(compare_command.add_argument)
     add_csv_options(compare_command.add_argument, prefix='')
 
@@ -148,10 +154,18 @@ def main():
         for file in storage.query():
             print(file)
     elif args.command == 'compare':
-        results_table = TableResults(
+        histogram = first_or_value(args.histogram, False)
+        if args.compare_between:
+            if histogram:
+                parser.error('--compare-between is not compatible with --histogram')
+            results_table_cls = CompareBetweenResults
+        else:
+            results_table_cls = TableResults
+
+        results_table = results_table_cls(
             columns=args.columns,
             sort=args.sort,
-            histogram=first_or_value(args.histogram, False),
+            histogram=histogram,
             name_format=NAME_FORMATTERS[args.name],
             logger=logger,
             scale_unit=partial(
