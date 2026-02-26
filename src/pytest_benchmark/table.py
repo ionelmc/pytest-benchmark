@@ -11,6 +11,20 @@ from .utils import report_progress
 
 NUMBER_FMT = '{0:,.4f}'
 ALIGNED_NUMBER_FMT = '{0:>{1},.4f}{2:<{3}}'
+STAT_PROPS = ('min', 'max', 'mean', 'median', 'iqr', 'stddev', 'ops')
+
+
+def compute_best_worst(benchmarks, progress_reporter, tr, line):
+    worst = {}
+    best = {}
+    for line1, prop in progress_reporter(STAT_PROPS, tr, '{line}: {value}', line=line):
+        # For 'ops', higher is better; for time-based metrics, lower is better
+        best_fn, worst_fn = (max, min) if prop == 'ops' else (min, max)
+        values = progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line1)
+        best[prop] = best_fn(bench[prop] for _, bench in values)
+        values = progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line1)
+        worst[prop] = worst_fn(bench[prop] for _, bench in values)
+    return best, worst
 
 
 class TableResults:
@@ -22,6 +36,24 @@ class TableResults:
         self.logger = logger
         self.scale_unit = scale_unit
 
+    def compute_scale(self, benchmarks, best, worst):
+        unit, adjustment = self.scale_unit(unit='seconds', benchmarks=benchmarks, best=best, worst=worst, sort=self.sort)
+        ops_unit, ops_adjustment = self.scale_unit(unit='operations', benchmarks=benchmarks, best=best, worst=worst, sort=self.sort)
+        labels = {
+            'name': f'Name (time in {unit}s)',
+            'min': 'Min',
+            'max': 'Max',
+            'mean': 'Mean',
+            'stddev': 'StdDev',
+            'rounds': 'Rounds',
+            'iterations': 'Iterations',
+            'iqr': 'IQR',
+            'median': 'Median',
+            'outliers': 'Outliers',
+            'ops': f'OPS ({ops_unit}ops/s)' if ops_unit else 'OPS',
+        }
+        return unit, adjustment, ops_adjustment, labels
+
     def display(self, tr, groups, progress_reporter=report_progress):
         tr.write_line('')
         report_online_progress(progress_reporter, tr, 'Computing stats ...')
@@ -30,38 +62,14 @@ class TableResults:
             for bench in benchmarks:
                 bench['name'] = self.name_format(bench)
 
-            worst = {}
-            best = {}
             solo = len(benchmarks) == 1
-            for line1, prop in progress_reporter(
-                ('min', 'max', 'mean', 'median', 'iqr', 'stddev', 'ops'), tr, '{line}: {value}', line=line
-            ):
-                if prop == 'ops':
-                    worst[prop] = min(bench[prop] for _, bench in progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line1))
-                    best[prop] = max(bench[prop] for _, bench in progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line1))
-                else:
-                    worst[prop] = max(bench[prop] for _, bench in progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line1))
-                    best[prop] = min(bench[prop] for _, bench in progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line1))
+            best, worst = compute_best_worst(benchmarks, progress_reporter, tr, line)
             for line1, prop in progress_reporter(('outliers', 'rounds', 'iterations'), tr, '{line}: {value}', line=line):
                 worst[prop] = max(
                     benchmark[prop] for _, benchmark in progress_reporter(benchmarks, tr, '{line} ({pos}/{total})', line=line1)
                 )
 
-            unit, adjustment = self.scale_unit(unit='seconds', benchmarks=benchmarks, best=best, worst=worst, sort=self.sort)
-            ops_unit, ops_adjustment = self.scale_unit(unit='operations', benchmarks=benchmarks, best=best, worst=worst, sort=self.sort)
-            labels = {
-                'name': f'Name (time in {unit}s)',
-                'min': 'Min',
-                'max': 'Max',
-                'mean': 'Mean',
-                'stddev': 'StdDev',
-                'rounds': 'Rounds',
-                'iterations': 'Iterations',
-                'iqr': 'IQR',
-                'median': 'Median',
-                'outliers': 'Outliers',
-                'ops': f'OPS ({ops_unit}ops/s)' if ops_unit else 'OPS',
-            }
+            unit, adjustment, ops_adjustment, labels = self.compute_scale(benchmarks, best, worst)
             widths = {
                 'name': 3 + max(len(labels['name']), max(len(benchmark['name']) for benchmark in benchmarks)),
                 'rounds': 2 + max(len(labels['rounds']), len(str(worst['rounds']))),
@@ -69,8 +77,9 @@ class TableResults:
                 'outliers': 2 + max(len(labels['outliers']), len(str(worst['outliers']))),
                 'ops': 2 + max(len(labels['ops']), len(NUMBER_FMT.format(best['ops'] * ops_adjustment))),
             }
-            for prop in 'min', 'max', 'mean', 'stddev', 'median', 'iqr':
-                widths[prop] = 2 + max(len(labels[prop]), max(len(NUMBER_FMT.format(bench[prop] * adjustment)) for bench in benchmarks))
+            for prop in STAT_PROPS:
+                if prop not in widths:
+                    widths[prop] = 2 + max(len(labels[prop]), max(len(NUMBER_FMT.format(bench[prop] * adjustment)) for bench in benchmarks))
 
             rpadding = 0 if solo else 10
             labels_line = labels['name'].ljust(widths['name']) + ''.join(
