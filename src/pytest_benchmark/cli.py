@@ -19,10 +19,13 @@ from .plugin import add_csv_options
 from .plugin import add_display_options
 from .plugin import add_global_options
 from .plugin import add_histogram_options
+from .table import CompareBetweenResults
 from .table import TableResults
+from .utils import DEFAULT_COLUMNS
 from .utils import NAME_FORMATTERS
 from .utils import first_or_value
 from .utils import load_storage
+from .utils import parse_columns
 from .utils import report_noprogress
 
 COMPARE_HELP = """examples:
@@ -108,6 +111,14 @@ def make_parser():
     )
     add_display_options(compare_command.add_argument, prefix='')
     add_histogram_options(compare_command.add_argument, prefix='')
+    compare_command.add_argument(
+        '--between',
+        metavar='COLUMNS',
+        type=parse_columns,
+        default=None,
+        help='Compare same-named benchmarks across different source files. '
+        'Takes a comma-separated list of metric columns to compare (e.g. min,mean,ops).',
+    )
     add_glob_or_file(compare_command.add_argument)
     add_csv_options(compare_command.add_argument, prefix='')
 
@@ -148,10 +159,23 @@ def main():
         for file in storage.query():
             print(file)
     elif args.command == 'compare':
-        results_table = TableResults(
+        histogram = first_or_value(args.histogram, False)
+        if args.between:
+            if args.columns:
+                parser.error('--between is not compatible with --columns (--between already specifies the columns)')
+            if histogram:
+                parser.error('--between is not compatible with --histogram')
+            results_table_cls = CompareBetweenResults
+            args.columns = args.between
+        else:
+            results_table_cls = TableResults
+            if not args.columns:
+                args.columns = DEFAULT_COLUMNS
+
+        results_table = results_table_cls(
             columns=args.columns,
             sort=args.sort,
-            histogram=first_or_value(args.histogram, False),
+            histogram=histogram,
             name_format=NAME_FORMATTERS[args.name],
             logger=logger,
             scale_unit=partial(

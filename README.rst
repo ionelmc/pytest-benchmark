@@ -168,6 +168,11 @@ Histogram (``--benchmark-histogram``):
 
     Also, it has `nice tooltips <https://cdn.rawgit.com/ionelmc/pytest-benchmark/master/docs/sample.svg>`_.
 
+Compare between mode (``pytest-benchmark compare --between``):
+
+.. image:: https://github.com/ionelmc/pytest-benchmark/raw/master/docs/screenshot-compare-between.png
+    :alt: Screenshot of pytest summary in compare between mode
+
 Development
 ===========
 

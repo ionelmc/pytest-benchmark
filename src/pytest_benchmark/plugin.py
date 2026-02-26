@@ -19,6 +19,7 @@ from .fixture import BenchmarkFixture
 from .session import BenchmarkSession
 from .session import PerformanceRegression
 from .timers import default_timer
+from .utils import DEFAULT_COLUMNS
 from .utils import NameWrapper
 from .utils import consistent_dumps
 from .utils import get_commit_info
@@ -79,9 +80,8 @@ def add_display_options(addoption, prefix='benchmark-'):
         f'--{prefix}columns',
         metavar='LABELS',
         type=parse_columns,
-        default=['min', 'max', 'mean', 'stddev', 'median', 'iqr', 'outliers', 'ops', 'rounds', 'iterations'],
-        help='Comma-separated list of columns to show in the result table. Default: '
-        "'min, max, mean, stddev, median, iqr, outliers, ops, rounds, iterations'",
+        default=None,  # Deferred; resolved in cli.py and session.py
+        help=f"Comma-separated list of columns to show in the result table. Default: '{', '.join(DEFAULT_COLUMNS)}'",
     )
     addoption(
         f'--{prefix}name',
