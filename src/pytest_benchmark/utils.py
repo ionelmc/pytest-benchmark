@@ -55,7 +55,7 @@ def get_tag(project_name=None):
     info = get_commit_info(project_name)
     parts = [info['id'], get_current_time()]
     if info['dirty']:
-        parts.append('uncommited-changes')
+        parts.append('uncommitted-changes')
     return '_'.join(parts)
 
 
@@ -414,10 +414,10 @@ def parse_elasticsearch_storage(string, default_index='benchmark', default_docty
     index = default_index
     doctype = default_doctype
     if storage_url.path and storage_url.path != '/':
-        splitted = storage_url.path.strip('/').split('/')
-        index = splitted[0]
-        if len(splitted) >= 2:
-            doctype = splitted[1]
+        split_path = storage_url.path.strip('/').split('/')
+        index = split_path[0]
+        if len(split_path) >= 2:
+            doctype = split_path[1]
     query = parse_qs(storage_url.query)
     try:
         project_name = query['project_name'][0]

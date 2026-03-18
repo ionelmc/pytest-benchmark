@@ -9,7 +9,7 @@ Notable features and goals:
 * Sensible defaults and automatic calibration for microbenchmarks
 * Good integration with pytest
 * Comparison and regression tracking
-* Exhausive statistics
+* Exhaustive statistics
 * JSON export
 
 Examples:
