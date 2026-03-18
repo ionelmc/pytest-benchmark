@@ -233,6 +233,9 @@ The compare ``command`` takes almost all the ``--benchmark`` options, minus the 
       --csv=FILENAME        Save a csv report. If FILENAME contains slashes ('/')
                             then directories will be created. Default:
                             'benchmark_<date>_<time>'
+      -k EXPR               Only show benchmarks matching the given expression.
+                            Uses the same syntax as pytest's ``-k`` option
+                            (e.g. ``'foo and not bar'``).
 
     examples:
 
