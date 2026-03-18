@@ -110,6 +110,13 @@ def make_parser():
     add_histogram_options(compare_command.add_argument, prefix='')
     add_glob_or_file(compare_command.add_argument)
     add_csv_options(compare_command.add_argument, prefix='')
+    compare_command.add_argument(
+        '-k',
+        metavar='EXPR',
+        dest='filter_expr',
+        default=None,
+        help="Only show benchmarks matching the given expression. Uses the same syntax as pytest's -k option (e.g. 'foo and not bar').",
+    )
 
     return parser
 
@@ -159,8 +166,19 @@ def main():
                 config=Config.fromdictargs({'benchmark_time_unit': args.time_unit}, []),
             ),
         )
+        benchmarks = storage.load_benchmarks(*args.glob_or_file)
+        if args.filter_expr:
+            from _pytest.mark.expression import Expression  # noqa: PLC0415
+
+            expr = Expression.compile(args.filter_expr)
+
+            def _evaluate_expr(benchmark):
+                name = benchmark.get('fullname') or benchmark.get('name', '')
+                return expr.evaluate(lambda key: key in name)
+
+            benchmarks = filter(_evaluate_expr, benchmarks)
         groups = hook.pytest_benchmark_group_stats(
-            benchmarks=storage.load_benchmarks(*args.glob_or_file),
+            benchmarks=benchmarks,
             group_by=args.group_by,
             config=None,
         )

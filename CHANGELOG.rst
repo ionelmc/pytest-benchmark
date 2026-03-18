@@ -2,6 +2,11 @@
 Changelog
 =========
 
+v5.2.4 (unreleased)
+--------------------
+
+* Added ``-k`` filter option to the ``compare`` CLI command, using the same expression syntax as pytest's ``-k`` option.
+
 v5.2.3 (2025-11-09)
 --------------------
 
