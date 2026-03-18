@@ -79,7 +79,7 @@ class CommandArgumentParser(argparse.ArgumentParser):
 
 
 def add_glob_or_file(addoption):
-    addoption('glob_or_file', nargs='*', help='Glob or exact path for json files. If not specified all runs are loaded.')
+    addoption('glob_or_file', nargs='*', help='Glob or exact path for JSON files. If not specified all runs are loaded.')
 
 
 def make_parser():

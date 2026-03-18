@@ -6,7 +6,7 @@ to it.
 
 Notable features and goals:
 
-* Sensible defaults and automatic calibration for microbenchmarks
+* Sensible defaults and automatic calibration for micro-benchmarks
 * Good integration with pytest
 * Comparison and regression tracking
 * Exhaustive statistics

@@ -387,7 +387,7 @@ class BenchmarkFixture:
                 loops = ceil(min_time * loops / duration)
                 self._logger.debug(f'    Estimating {loops} iterations.', green=True)
                 if loops == 1:
-                    # If we got a single loop then bail early - nothing to calibrate if the the
+                    # If we got a single loop then bail early - nothing to calibrate if the
                     # test function is 100 times slower than the timer resolution.
                     loops_range = range(loops)
                     break
