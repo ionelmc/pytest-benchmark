@@ -95,7 +95,7 @@ class BenchmarkSession:
         if self.disabled and self.only:
             raise pytest.UsageError(
                 "Can't have both --benchmark-only and --benchmark-disable options. Note that --benchmark-disable is "
-                "automatically activated if xdist is on or you're missing the statistics dependency."
+                'automatically activated if xdist is on, or if `statistics` is not available.'
             )
         self.group_by = config.getoption('benchmark_group_by')
         self.save = config.getoption('benchmark_save')
