@@ -1,0 +1,8 @@
+[files]
+extend-exclude = []
+
+[default.extend-identifiers]
+serie = "serie"
+
+[default.extend-words]
+serie = "serie"

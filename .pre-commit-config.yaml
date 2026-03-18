@@ -40,3 +40,7 @@ repos:
           - pygaljs
           - aspectlib
           - statistics
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.44.0
+    hooks:
+      - id: typos
