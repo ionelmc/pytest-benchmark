@@ -93,7 +93,7 @@ def test_help_compare(testdir, args):
             '                                 [--columns LABELS] [--name FORMAT]',
             '                                 [--time-unit COLUMN]',
             '                                 [--histogram [FILENAME-PREFIX]]',
-            '                                 [--csv [FILENAME]]',
+            '                                 [--compare-between] [--csv [FILENAME]]',
             '                                 [[]glob_or_file *[]]',
             '',
             'Compare saved runs.',
@@ -122,6 +122,8 @@ def test_help_compare(testdir, args):
             '                        FILENAME-PREFIX-test_name.svg. If FILENAME-PREFIX',
             "                        contains slashes ('/') then directories will be",
             "                        created. Default: 'benchmark_*'",
+            '  --compare-between     Compare same-named benchmarks across different source',
+            '                        files.',
             "  --csv [FILENAME]      Save a csv report. If FILENAME contains slashes ('/')",
             '                        then directories will be created. Default:',
             "                        'benchmark_*'",
@@ -285,6 +287,63 @@ def test_compare(testdir, name, name_pattern_generator):
         ]
     )
     assert result.ret == 0
+
+
+def test_compare_between(testdir):
+    common_args = [
+        'py.test-benchmark',
+        '--storage',
+        STORAGE,
+        'compare',
+        '--compare-between',
+        '--sort=min',
+        '--columns=min,max',
+        '--name=short',
+    ]
+    # 2-source case: reference (*), interleaved value+delta columns
+    result = testdir.run(*common_args, '0001', '0002')
+    result.stdout.fnmatch_lines(
+        [
+            '---*--- benchmark: 1 tests, 2 sources ---*---',
+            'Name (time in ns) *0001_b87b9aa(*) Min*0001_b87b9aa(*) Max*0002_b87b9aa Min*\u0394Min*0002_b87b9aa Max*\u0394Max',
+            '---*---',
+            'xfast_parametrized[[]0[]] *217.3145*11*447.3891*216.9028*-0.2%*7*739.2997*-32.4%',
+            '---*---',
+            '',
+            'Legend:',
+            '  (*): reference source for comparison.*',
+        ]
+    )
+    assert result.ret == 0
+
+    # 3-source case: each non-reference source followed by its deltas
+    result = testdir.run(*common_args, '0001', '0002', '0003')
+    result.stdout.fnmatch_lines(
+        [
+            '---*--- benchmark: 1 tests, 3 sources ---*---',
+            'Name (time in ns) *0001_b87b9aa(*) Min*0001_b87b9aa(*) Max*0002_b87b9aa Min*\u0394Min*0002_b87b9aa Max*\u0394Max*0003_5b78858 Min*\u0394Min*0003_5b78858 Max*\u0394Max',
+            '---*---',
+            'xfast_parametrized[[]0[]] *217.3145*11*447.3891*216.9028*-0.2%*7*739.2997*-32.4%*215.6286*-0.8%*10*318.6159*-9.9%',
+            '---*---',
+        ]
+    )
+    assert result.ret == 0
+
+
+def test_compare_between_histogram_error(testdir):
+    result = testdir.run(
+        'py.test-benchmark',
+        '--storage',
+        STORAGE,
+        'compare',
+        '--compare-between',
+        '--histogram',
+        'foobar',
+        '0001',
+        '0002',
+    )
+    result.stderr.fnmatch_lines(['*error: --compare-between is not compatible with --histogram*'])
+    assert result.ret != 0
 
 
 @pytest.mark.parametrize(
