@@ -93,7 +93,7 @@ def test_help_compare(testdir, args):
             '                                 [--columns LABELS] [--name FORMAT]',
             '                                 [--time-unit COLUMN]',
             '                                 [--histogram [FILENAME-PREFIX]]',
-            '                                 [--csv [FILENAME]]',
+            '                                 [--csv [FILENAME]] [-k EXPR]',
             '                                 [[]glob_or_file *[]]',
             '',
             'Compare saved runs.',
@@ -125,6 +125,9 @@ def test_help_compare(testdir, args):
             "  --csv [FILENAME]      Save a csv report. If FILENAME contains slashes ('/')",
             '                        then directories will be created. Default:',
             "                        'benchmark_*'",
+            '  -k EXPR               Only show benchmarks matching the given expression.',
+            "                        Uses the same syntax as pytest's -k option (e.g. 'foo",
+            "                        and not bar').",
             '',
             'examples:',
             '',
@@ -358,3 +361,35 @@ def test_compare_csv(testdir):
     )
     result = testdir.run('py.test-benchmark', 'compare', '--csv')
     result.stderr.fnmatch_lines(['Generated csv: *.csv'])
+
+
+def test_compare_filter(testdir):
+    test = testdir.makepyfile("""
+    import pytest
+    @pytest.mark.parametrize("arg", ["foo", "bar"])
+    def test_alpha(benchmark, arg):
+        benchmark(lambda: None)
+    def test_beta(benchmark):
+        benchmark(lambda: None)
+    """)
+    result = testdir.runpytest_subprocess('--benchmark-autosave', test)
+    result.stderr.fnmatch_lines(['Saved benchmark data in: *'])
+
+    # Filter to only test_alpha benchmarks
+    result = testdir.run('py.test-benchmark', 'compare', '-k', 'alpha', '--columns', 'min,max')
+    result.stdout.fnmatch_lines(['*benchmark: 2 tests*'])
+    assert 'test_beta' not in result.stdout.str()
+
+    # Filter with "not" expression
+    result = testdir.run('py.test-benchmark', 'compare', '-k', 'not alpha', '--columns', 'min,max')
+    result.stdout.fnmatch_lines(['*benchmark: 1 tests*'])
+    assert 'test_alpha' not in result.stdout.str()
+
+    # Filter with "and" expression
+    result = testdir.run('py.test-benchmark', 'compare', '-k', 'alpha and foo', '--columns', 'min,max')
+    result.stdout.fnmatch_lines(['*benchmark: 1 tests*'])
+    assert 'bar' not in result.stdout.str()
+
+    # No filter shows all
+    result = testdir.run('py.test-benchmark', 'compare', '--columns', 'min,max')
+    result.stdout.fnmatch_lines(['*benchmark: 3 tests*'])
