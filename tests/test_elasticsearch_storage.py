@@ -1,3 +1,7 @@
+import pytest
+
+pytest.importorskip('elasticsearch')
+
 import json
 import logging
 from io import BytesIO
@@ -5,7 +9,6 @@ from io import StringIO
 from pathlib import Path
 
 import elasticsearch
-import pytest
 from freezegun import freeze_time
 
 from pytest_benchmark import plugin
