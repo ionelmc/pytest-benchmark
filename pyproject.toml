@@ -78,6 +78,12 @@ pytest-benchmark = "pytest_benchmark.cli:main"
 "Changelog" = "https://pytest-benchmark.readthedocs.io/en/latest/changelog.html"
 "Issue Tracker" = "https://github.com/ionelmc/pytest-benchmark/issues"
 
+[dependency-groups]
+dev = [
+    "freezegun>=1.5.5",
+    "nbmake>=1.5.5",
+]
+
 [tool.mypy]
 exclude = ['build']
 
