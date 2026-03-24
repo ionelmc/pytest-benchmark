@@ -478,12 +478,7 @@ def test_fixtures_also_skipped(testdir):
 def test_conflict_between_only_and_disable(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-only', '--benchmark-disable', test)
-    result.stderr.fnmatch_lines(
-        [
-            "ERROR: Can't have both --benchmark-only and --benchmark-disable options. Note that --benchmark-disable is "
-            "automatically activated if xdist is on or you're missing the statistics dependency."
-        ]
-    )
+    result.stderr.fnmatch_lines(["ERROR: Can't have both --benchmark-only and --benchmark-disable options"])
 
 
 def test_max_time_min_rounds(testdir):
