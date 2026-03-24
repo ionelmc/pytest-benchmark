@@ -99,7 +99,7 @@ def test_help_compare(testdir, args):
             'Compare saved runs.',
             '',
             'positional arguments:',
-            '  glob_or_file          Glob or exact path for json files. If not specified',
+            '  glob_or_file          Glob or exact path for JSON files. If not specified',
             '                        all runs are loaded.',
             '',
             'option*:',
