@@ -478,7 +478,7 @@ def test_fixtures_also_skipped(testdir):
 def test_conflict_between_only_and_disable(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-only', '--benchmark-disable', test)
-    result.stderr.fnmatch_lines(["ERROR: Can't have both --benchmark-only and --benchmark-disable options"])
+    result.stderr.fnmatch_lines(["ERROR: Can't have both --benchmark-only and --benchmark-disable options*"])
 
 
 def test_max_time_min_rounds(testdir):
@@ -904,7 +904,7 @@ def test_xdist(testdir):
     result = testdir.runpytest_subprocess('--doctest-modules', '-n', '1', '-rw', test)
     result.stderr.fnmatch_lines(
         [
-            '* Benchmarks are automatically disabled because xdist plugin is active.Benchmarks cannot be '
+            '* Benchmarks are automatically disabled because xdist plugin is active. Benchmarks cannot be '
             'performed reliably in a parallelized environment.',
         ]
     )
@@ -917,7 +917,7 @@ def test_xdist_verbose(testdir):
     result.stderr.fnmatch_lines(
         [
             '------*',
-            ' WARNING: Benchmarks are automatically disabled because xdist plugin is active.Benchmarks cannot be performed '
+            ' WARNING: Benchmarks are automatically disabled because xdist plugin is active. Benchmarks cannot be performed '
             'reliably in a parallelized environment.',
             '------*',
         ]
