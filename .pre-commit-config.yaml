@@ -32,7 +32,7 @@ repos:
         additional_dependencies:
           - pytest
           - freezegun
-          - py-cpuinfo
+          - py-cpuinfo2
           - jinja2
           - types-setuptools
           - elasticsearch
