@@ -1,14 +1,14 @@
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, Never, overload
+from typing import TYPE_CHECKING, Any, overload
 
 if TYPE_CHECKING:
     import cProfile
 
 
 # Compound Types
-type Args = tuple[Any, ...] | tuple[Never]
+type Args = tuple[Any, ...] | tuple[()]
 type Kwargs = dict[str, Any]
-type SetupFunc = Callable[[], tuple[tuple[Any, ...], dict[str, Any]]]
+type SetupFunc = Callable[[], tuple[Args, Kwargs]]
 type TeardownFunc = Callable[[], Any]
 
 
@@ -42,7 +42,7 @@ class BenchmarkFixture:
     # Provided `args` and/or `kwargs` (prevent `setup`)
     @overload
     def pedantic[**P, R](self, target: Callable[P, R], 
-                         args: Args, kwargs: Kwargs | None,
+                         args: Args=..., kwargs: Kwargs | None=...,
                          *, 
                          teardown: TeardownFunc| None=..., rounds: int=..., warmup_rounds: int=..., iterations: int=...) -> R: ...
     # Provided `setup` (prevent `args`/`kwargs`)
