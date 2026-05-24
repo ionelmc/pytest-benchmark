@@ -20,7 +20,7 @@ class BenchmarkFixture:
         self.disabled: bool
         self.param: str | None
         self.params: tuple[str, ...] | None
-        self.group: str
+        self.group: str | None
         self.has_error: bool
         self.extra_info: dict[str, Any]
         self.skipped: bool
