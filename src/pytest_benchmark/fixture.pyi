@@ -41,28 +41,42 @@ class BenchmarkFixture:
 
     # Provided `args` and/or `kwargs` (prevent `setup`)
     @overload
-    def pedantic[**P, R](self, target: Callable[P, R], 
-                         args: Args=..., kwargs: Kwargs | None=...,
-                         *, 
-                         teardown: TeardownFunc| None=..., rounds: int=..., warmup_rounds: int=..., iterations: int=...) -> R: ...
+    def pedantic[**P, R](
+        self, 
+        target: Callable[P, R], 
+        args: Args = ..., 
+        kwargs: Kwargs | None = ...,
+        *, 
+        teardown: TeardownFunc | None = ..., 
+        rounds: int = ..., 
+        warmup_rounds: int = ..., 
+        iterations: int = ...,
+    ) -> R: ...
     # Provided `setup` (prevent `args`/`kwargs`)
     @overload
-    def pedantic[**P, R](self, target: Callable[P, R], 
-                         *,
-                         setup: SetupFunc, 
-                         teardown: Callable[[], Any] | None=..., rounds: int=..., warmup_rounds: int=..., iterations: int=...) -> R: ...
     def pedantic[**P, R](
-            self, 
-            target: Callable[P, R], 
-            args: Args = (), 
-            kwargs: Kwargs | None = None, 
-            setup: SetupFunc | None = None, 
-            teardown: TeardownFunc | None = None, 
-            rounds: int = 1, 
-            warmup_rounds: int = 0, 
-            iterations: int = 1
-        ) -> R: ...
+        self, 
+        target: Callable[P, R], 
+        *,
+        setup: SetupFunc | None = ..., 
+        teardown: TeardownFunc | None = ..., 
+        rounds: int = ..., 
+        warmup_rounds: int = ..., 
+        iterations: int = ...,
+    ) -> R: ...
+    def pedantic[**P, R](
+        self, 
+        target: Callable[P, R], 
+        args: Args = (), 
+        kwargs: Kwargs | None = None, 
+        setup: SetupFunc | None = None, 
+        teardown: TeardownFunc | None = None, 
+        rounds: int = 1, 
+        warmup_rounds: int = 0, 
+        iterations: int = 1
+    ) -> R: ...
     
     def weave[**P, R](self, target: Callable[P, R], **kwargs: Any) -> None: ...
 
     patch = weave
+    

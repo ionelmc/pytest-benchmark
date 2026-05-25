@@ -51,3 +51,4 @@ def test_benchmarkfixture_hints(benchmark: BenchmarkFixture):
 
     # Pass `args`/`kwargs` and `setup` (Should show Type Error)
     benchmark.pedantic(len, args=tuple([]), setup=lambda: (tuple(), dict()))
+    
