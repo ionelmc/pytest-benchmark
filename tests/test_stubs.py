@@ -10,6 +10,8 @@ if TYPE_CHECKING:
 
     from pytest_benchmark.fixture import BenchmarkFixture
     from pytest_benchmark.stats import Metadata
+    from pytest_benchmark.stats import _FlatMetadataDict  # type: ignore
+    from pytest_benchmark.stats import _MetadataDict  # type: ignore
 
     @type_check_only
     def test_benchmarkfixture_hints(benchmark: BenchmarkFixture):
@@ -28,6 +30,9 @@ if TYPE_CHECKING:
         assert_type(benchmark.cprofile_dump, str | None)
         assert_type(benchmark.cprofile_stats, pstats.Stats | None)
         assert_type(benchmark.stats, Metadata | None)
+
+        if benchmark.stats:
+            assert_type(benchmark.stats.as_dict(), _MetadataDict | _FlatMetadataDict)
 
         # Properties
         assert_type(benchmark.enabled, bool)
