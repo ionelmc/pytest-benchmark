@@ -13,15 +13,15 @@ from .stats import Metadata
 statistics: Any
 statistics_error: str | None
 
+_Args: TypeAlias = tuple[Any, ...] | tuple[()]
+_Kwargs: TypeAlias = dict[str, Any]
+_SetupFunc: TypeAlias = Callable[..., tuple[_Args, _Kwargs]]
+_TeardownFunc: TypeAlias = Callable[..., Any]
+
+_P = ParamSpec('_P')
+_R = TypeVar('_R')
+
 class BenchmarkFixture:
-    Args: TypeAlias = tuple[Any, ...] | tuple[()]
-    Kwargs: TypeAlias = dict[str, Any]
-    SetupFunc: TypeAlias = Callable[..., tuple[Args, Kwargs]]
-    TeardownFunc: TypeAlias = Callable[..., Any]
-
-    _P = ParamSpec('_P')
-    _R = TypeVar('_R')
-
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.name: str
         self.fullname: str
@@ -52,10 +52,10 @@ class BenchmarkFixture:
     def pedantic(  # Provided `args` and/or `kwargs` (prevent `setup`)
         self,
         target: Callable[_P, _R],
-        args: Args = ...,
-        kwargs: Kwargs | None = ...,
+        args: _Args = ...,
+        kwargs: _Kwargs | None = ...,
         *,
-        teardown: TeardownFunc | None = ...,
+        teardown: _TeardownFunc | None = ...,
         rounds: int = ...,
         warmup_rounds: int = ...,
         iterations: int = ...,
@@ -65,8 +65,8 @@ class BenchmarkFixture:
         self,
         target: Callable[_P, _R],
         *,
-        setup: SetupFunc | None = ...,
-        teardown: TeardownFunc | None = ...,
+        setup: _SetupFunc | None = ...,
+        teardown: _TeardownFunc | None = ...,
         rounds: int = ...,
         warmup_rounds: int = ...,
         iterations: int = ...,
