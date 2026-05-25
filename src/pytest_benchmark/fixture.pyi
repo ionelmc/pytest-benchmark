@@ -1,48 +1,57 @@
+import cProfile
+import pstats
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from collections.abc import Hashable
 from typing import Any
+from typing import ParamSpec
+from typing import TypeAlias
+from typing import TypeVar
 from typing import overload
 
-if TYPE_CHECKING:
-    import cProfile
+from .stats import Metadata
 
-# Compound Types
-type Args = tuple[Any, ...] | tuple[()]
-type Kwargs = dict[str, Any]
-type SetupFunc = Callable[[], tuple[Args, Kwargs]]
-type TeardownFunc = Callable[[], Any]
+statistics: Any
+statistics_error: str | None
 
 class BenchmarkFixture:
+    Args: TypeAlias = tuple[Any, ...] | tuple[()]
+    Kwargs: TypeAlias = dict[str, Any]
+    SetupFunc: TypeAlias = Callable[..., tuple[Args, Kwargs]]
+    TeardownFunc: TypeAlias = Callable[..., Any]
+
+    _P = ParamSpec('_P')
+    _R = TypeVar('_R')
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.name: str
         self.fullname: str
         self.disabled: bool
         self.param: str | None
-        self.params: tuple[str, ...] | None
+        self.params: dict[str, Any] | None
         self.group: str | None
         self.has_error: bool
-        self.extra_info: dict[str, Any]
+        self.extra_info: dict[Hashable, Any]
         self.skipped: bool
 
         self.cprofile: cProfile.Profile
         self.cprofile_loops: int | None
         self.cprofile_dump: str | None
 
-        # Narrow types for stats?
-        self.cprofile_stats: dict[Any, Any] | None
-        self.stats: dict[Any, Any] | None
+        self.cprofile_stats: pstats.Stats | None
+        self.stats: Metadata | None
 
     @property
     def enabled(self) -> bool: ...
-
-    # Expose `function_to_benchmark` *args/**kwargs to `__call__`
-    def __call__[**P, R](self, function_to_benchmark: Callable[P, R], *args: P.args, **kwargs: P.kwargs) -> R: ...
-
-    # Provided `args` and/or `kwargs` (prevent `setup`)
-    @overload
-    def pedantic[**P, R](
+    def __call__(  # Expose `function_to_benchmark` *args/**kwargs to `__call__`
         self,
-        target: Callable[P, R],
+        function_to_benchmark: Callable[_P, _R],
+        *args: _P.args,
+        **kwargs: _P.kwargs,
+    ) -> _R: ...
+    @overload
+    def pedantic(  # Provided `args` and/or `kwargs` (prevent `setup`)
+        self,
+        target: Callable[_P, _R],
         args: Args = ...,
         kwargs: Kwargs | None = ...,
         *,
@@ -50,30 +59,22 @@ class BenchmarkFixture:
         rounds: int = ...,
         warmup_rounds: int = ...,
         iterations: int = ...,
-    ) -> R: ...
-    # Provided `setup` (prevent `args`/`kwargs`)
+    ) -> _R: ...
     @overload
-    def pedantic[**P, R](
+    def pedantic(  # Provided `setup` (prevent `args`/`kwargs`)
         self,
-        target: Callable[P, R],
+        target: Callable[_P, _R],
         *,
         setup: SetupFunc | None = ...,
         teardown: TeardownFunc | None = ...,
         rounds: int = ...,
         warmup_rounds: int = ...,
         iterations: int = ...,
-    ) -> R: ...
-    def pedantic[**P, R](
+    ) -> _R: ...
+    def weave(
         self,
-        target: Callable[P, R],
-        args: Args = (),
-        kwargs: Kwargs | None = None,
-        setup: SetupFunc | None = None,
-        teardown: TeardownFunc | None = None,
-        rounds: int = 1,
-        warmup_rounds: int = 0,
-        iterations: int = 1,
-    ) -> R: ...
-    def weave[**P, R](self, target: Callable[P, R], **kwargs: Any) -> None: ...
+        target: Callable[_P, _R],
+        **kwargs: Any,
+    ) -> None: ...
 
     patch = weave
