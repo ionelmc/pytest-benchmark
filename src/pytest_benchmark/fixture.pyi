@@ -1,9 +1,10 @@
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING
+from typing import Any
+from typing import overload
 
 if TYPE_CHECKING:
     import cProfile
-
 
 # Compound Types
 type Args = tuple[Any, ...] | tuple[()]
@@ -11,9 +12,7 @@ type Kwargs = dict[str, Any]
 type SetupFunc = Callable[[], tuple[Args, Kwargs]]
 type TeardownFunc = Callable[[], Any]
 
-
 class BenchmarkFixture:
-
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.name: str
         self.fullname: str
@@ -28,10 +27,10 @@ class BenchmarkFixture:
         self.cprofile: cProfile.Profile
         self.cprofile_loops: int | None
         self.cprofile_dump: str | None
-        
+
         # Narrow types for stats?
         self.cprofile_stats: dict[Any, Any] | None
-        self.stats: dict[Any, Any] | None 
+        self.stats: dict[Any, Any] | None
 
     @property
     def enabled(self) -> bool: ...
@@ -42,41 +41,39 @@ class BenchmarkFixture:
     # Provided `args` and/or `kwargs` (prevent `setup`)
     @overload
     def pedantic[**P, R](
-        self, 
-        target: Callable[P, R], 
-        args: Args = ..., 
+        self,
+        target: Callable[P, R],
+        args: Args = ...,
         kwargs: Kwargs | None = ...,
-        *, 
-        teardown: TeardownFunc | None = ..., 
-        rounds: int = ..., 
-        warmup_rounds: int = ..., 
+        *,
+        teardown: TeardownFunc | None = ...,
+        rounds: int = ...,
+        warmup_rounds: int = ...,
         iterations: int = ...,
     ) -> R: ...
     # Provided `setup` (prevent `args`/`kwargs`)
     @overload
     def pedantic[**P, R](
-        self, 
-        target: Callable[P, R], 
+        self,
+        target: Callable[P, R],
         *,
-        setup: SetupFunc | None = ..., 
-        teardown: TeardownFunc | None = ..., 
-        rounds: int = ..., 
-        warmup_rounds: int = ..., 
+        setup: SetupFunc | None = ...,
+        teardown: TeardownFunc | None = ...,
+        rounds: int = ...,
+        warmup_rounds: int = ...,
         iterations: int = ...,
     ) -> R: ...
     def pedantic[**P, R](
-        self, 
-        target: Callable[P, R], 
-        args: Args = (), 
-        kwargs: Kwargs | None = None, 
-        setup: SetupFunc | None = None, 
-        teardown: TeardownFunc | None = None, 
-        rounds: int = 1, 
-        warmup_rounds: int = 0, 
-        iterations: int = 1
+        self,
+        target: Callable[P, R],
+        args: Args = (),
+        kwargs: Kwargs | None = None,
+        setup: SetupFunc | None = None,
+        teardown: TeardownFunc | None = None,
+        rounds: int = 1,
+        warmup_rounds: int = 0,
+        iterations: int = 1,
     ) -> R: ...
-    
     def weave[**P, R](self, target: Callable[P, R], **kwargs: Any) -> None: ...
 
     patch = weave
-    
