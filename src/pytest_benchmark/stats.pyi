@@ -39,7 +39,6 @@ class _cprofile_stats(TypedDict):
     cumime_per: float
     function_name: str
 
-
 # Each flag for Metadata.as_dict() can change the included keys
 
 class _MetadataDict(TypedDict):
@@ -63,9 +62,9 @@ class _MetadataDict_stats_data_flat(_MetadataDict, _MetadataDict_stats_data): ..
 
 class _MetadataDict_stats_nonflat(_MetadataDict):
     stats: _MetadataDict_stats
+
 class _MetadataDict_stats_data_nonflat(_MetadataDict):
     stats: _MetadataDict_stats_data
-
 
 cProfileStats = Literal[
     'cumtime',
@@ -160,12 +159,12 @@ class Metadata:
 
     def __bool__(self) -> bool: ...
     def __nonzero__(self) -> bool: ...
-    def get(self, key: str, default: _D = None) -> Any | _D: ...
+    def get(self, key: str, default: _D = ...) -> Any | _D: ...
     def __getitem__(self, key: str) -> Any: ...
     @property
     def has_error(self) -> bool: ...
     @overload
-    def as_dict( # no stats
+    def as_dict(  # no stats
         self,
         include_data: bool = ...,
         flat: bool = ...,
@@ -173,7 +172,7 @@ class Metadata:
         cprofile: tuple[cProfileStats | None, int] | None = ...,
     ) -> _MetadataDict: ...
     @overload
-    def as_dict( # stats
+    def as_dict(  # stats
         self,
         include_data: Literal[False] = False,
         flat: Literal[False] = False,
@@ -181,7 +180,7 @@ class Metadata:
         cprofile: tuple[cProfileStats | None, int] | None = ...,
     ) -> _MetadataDict_stats_nonflat: ...
     @overload
-    def as_dict( # flat stats
+    def as_dict(  # flat stats
         self,
         include_data: Literal[False] = False,
         flat: Literal[True] = True,
@@ -189,7 +188,7 @@ class Metadata:
         cprofile: tuple[cProfileStats | None, int] | None = ...,
     ) -> _MetadataDict_stats_flat: ...
     @overload
-    def as_dict( # stats with data
+    def as_dict(  # stats with data
         self,
         include_data: Literal[True] = True,
         flat: Literal[False] = False,
@@ -197,7 +196,7 @@ class Metadata:
         cprofile: tuple[cProfileStats | None, int] | None = ...,
     ) -> _MetadataDict_stats_data_nonflat: ...
     @overload
-    def as_dict( # flat stats with data
+    def as_dict(  # flat stats with data
         self,
         include_data: Literal[True] = True,
         flat: Literal[True] = True,
