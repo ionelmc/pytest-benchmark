@@ -24,7 +24,7 @@ class _StatsDict(TypedDict):
     iqr: float
     q1: float
     q3: float
-    iqr_outliers: int | str
+    iqr_outliers: int
     stddev_outliers: int
     outliers: int | str
     ld15iqr: float
@@ -89,7 +89,6 @@ Field = Literal[
     'total',
 ]
 
-
 cProfileFilter: TypeAlias = tuple[cProfileStats | None, int]
 
 class Stats:
@@ -137,9 +136,7 @@ class Stats:
     @cached_property
     def ops(self) -> float: ...
 
-
 class Metadata:
-
     def __init__(self, fixture: BenchmarkFixture, iterations: int, options: dict[str, Any]) -> None:
         self.name: str
         self.fullname: str
@@ -165,7 +162,7 @@ class Metadata:
         include_data: bool = True,
         flat: bool = False,
         stats: bool = True,
-        cprofile: cProfileFilter | None = ...,
+        cprofile: cProfileFilter | None = None,
     ) -> _MetadataDict | _FlatMetadataDict: ...
     def update(self, duration: float) -> None: ...
 
