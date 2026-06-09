@@ -58,6 +58,8 @@ class BenchmarkSession:
             'min_time': SecondsDecimal(config.getoption('benchmark_min_time')),
             'min_rounds': config.getoption('benchmark_min_rounds'),
             'max_time': SecondsDecimal(config.getoption('benchmark_max_time')),
+            'precision': config.getoption('benchmark_precision'),
+            'confidence': config.getoption('benchmark_confidence'),
             'timer': load_timer(config.getoption('benchmark_timer')),
             'calibration_precision': config.getoption('benchmark_calibration_precision'),
             'disable_gc': config.getoption('benchmark_disable_gc'),

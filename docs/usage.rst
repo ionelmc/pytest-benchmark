@@ -81,6 +81,15 @@ Commandline options
   --benchmark-min-rounds NUM
                         Minimum rounds, even if total time would exceed `--max-
                         time`. Default: 5
+  --benchmark-precision FRACTION
+                        Run rounds until the relative margin of error of the
+                        mean (at --benchmark-confidence) is below this fraction,
+                        e.g. 0.02 for ±2%. Bounded by --benchmark-min-rounds and
+                        --benchmark-max-time. Default: disabled (fixed number of
+                        rounds).
+  --benchmark-confidence FRACTION
+                        Confidence level for --benchmark-precision, e.g. 0.99
+                        for a 99% confidence interval. Default: 0.99
   --benchmark-timer FUNC
                         Timer to use when measuring time. Default:
                         'time.perf_counter'
@@ -264,6 +273,7 @@ You can set per-test options with the ``benchmark`` marker:
         min_time=0.1,
         max_time=0.5,
         min_rounds=5,
+        precision=0.02,
         timer=time.time,
         disable_gc=True,
         warmup=False

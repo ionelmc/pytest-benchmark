@@ -371,6 +371,17 @@ def parse_rounds(string):
         return value
 
 
+def parse_fraction(string):
+    try:
+        value = float(string)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(exc) from None
+    else:
+        if not 0 < value < 1:
+            raise argparse.ArgumentTypeError('Value must be a fraction strictly between 0 and 1.')
+        return value
+
+
 def parse_seconds(string):
     try:
         return SecondsDecimal(string).as_string
