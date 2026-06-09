@@ -29,6 +29,7 @@ from .utils import operations_unit
 from .utils import parse_columns
 from .utils import parse_compare_fail
 from .utils import parse_cprofile_loops
+from .utils import parse_fraction
 from .utils import parse_name_format
 from .utils import parse_rounds
 from .utils import parse_save
@@ -192,6 +193,22 @@ def pytest_addoption(parser):
         type=parse_rounds,
         default=5,
         help='Minimum rounds, even if total time would exceed `--max-time`. Default: %(default)r',
+    )
+    group.addoption(
+        '--benchmark-precision',
+        metavar='FRACTION',
+        type=parse_fraction,
+        default=None,
+        help='Run rounds until the relative margin of error of the mean (at --benchmark-confidence) '
+        'is below this fraction, e.g. 0.02 for ±2%%. Bounded by --benchmark-min-rounds and '
+        '--benchmark-max-time. Default: disabled (fixed number of rounds).',
+    )
+    group.addoption(
+        '--benchmark-confidence',
+        metavar='FRACTION',
+        type=parse_fraction,
+        default=0.99,
+        help='Confidence level for --benchmark-precision, e.g. 0.99 for a 99%% confidence interval. Default: %(default)r',
     )
     group.addoption(
         '--benchmark-timer',
@@ -500,6 +517,8 @@ def pytest_runtest_setup(item):
                 'max_time',
                 'min_rounds',
                 'min_time',
+                'precision',
+                'confidence',
                 'timer',
                 'group',
                 'disable_gc',

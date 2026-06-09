@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Added ``--benchmark-precision`` and ``--benchmark-confidence``:
+  instead of a fixed number of rounds, stop once the mean's relative margin of error falls below the given fraction.
+
 v5.2.3 (2025-11-09)
 --------------------
 
