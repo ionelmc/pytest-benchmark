@@ -137,7 +137,7 @@ class BenchmarkSession:
                 yield flat_bench
 
     def save_json(self, output_json):
-        with self.json as fh:
+        with open(self.json, mode='wb') as fh:
             fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())
         self.logger.info(f'Wrote benchmark data in: {self.json}', purple=True)
 

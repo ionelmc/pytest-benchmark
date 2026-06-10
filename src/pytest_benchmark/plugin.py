@@ -3,7 +3,6 @@
   PYTEST_DONT_REWRITE
 """
 
-import argparse
 import operator
 import platform
 import sys
@@ -11,6 +10,7 @@ import traceback
 from collections import defaultdict
 from datetime import datetime
 from datetime import timezone
+from pathlib import Path
 
 import pytest
 
@@ -257,7 +257,7 @@ def pytest_addoption(parser):
     group.addoption(
         '--benchmark-json',
         metavar='PATH',
-        type=argparse.FileType('wb'),
+        type=Path,
         help='Dump a JSON report into PATH. Note that this will include the complete data (all the timings, not just the stats).',
     )
     group.addoption(
