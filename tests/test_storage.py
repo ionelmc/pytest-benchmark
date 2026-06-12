@@ -50,13 +50,6 @@ class Namespace:
             return default
 
 
-class LooseFileLike(BytesIO):
-    def close(self):
-        value = self.getvalue()
-        super().close()
-        self.getvalue = lambda: value
-
-
 class MockSession(BenchmarkSession):
     def __init__(self, name_format):
         self.histogram = True
@@ -396,14 +389,15 @@ def test_compare_2(sess, LineMatcher):
 
 @freeze_time('2015-08-15T00:04:18.687119')
 def test_save_json(sess, tmpdir, monkeypatch):
+    json_path = Path(str(tmpdir)) / 'output.json'
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = False
     sess.autosave = False
-    sess.json = LooseFileLike()
+    sess.json = json_path
     sess.save_data = False
     sess.handle_saving()
-    assert tmpdir.listdir() == []
-    assert json.loads(sess.json.getvalue().decode()) == JSON_DATA
+    assert json_path.exists()
+    assert json.loads(json_path.read_text(encoding='utf8')) == JSON_DATA
 
 
 @freeze_time('2015-08-15T00:04:18.687119')
