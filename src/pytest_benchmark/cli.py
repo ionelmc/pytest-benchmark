@@ -151,67 +151,90 @@ class HookDispatch:
         return getattr(self.conftest, item, default)
 
 
+def _get_logger_level(args):
+    if args.verbose:
+        return Logger.VERBOSE
+    if args.quiet:
+        return Logger.QUIET
+    return Logger.NORMAL
+
+
+def _handle_list_command(storage):
+    for file in storage.query():
+        print(file)
+
+
+def _handle_compare_command(args, parser, storage, logger, hook):
+    histogram = first_or_value(args.histogram, False)
+    if args.between:
+        if args.columns:
+            parser.error('--between is not compatible with --columns (--between already specifies the columns)')
+        if histogram:
+            parser.error('--between is not compatible with --histogram')
+        results_table_cls = CompareBetweenResults
+        args.columns = args.between
+    else:
+        results_table_cls = TableResults
+        if not args.columns:
+            args.columns = DEFAULT_COLUMNS
+
+    results_table = results_table_cls(
+        columns=args.columns,
+        sort=args.sort,
+        histogram=histogram,
+        name_format=NAME_FORMATTERS[args.name],
+        logger=logger,
+        scale_unit=partial(
+            hook.pytest_benchmark_scale_unit,
+            config=Config.fromdictargs({'benchmark_time_unit': args.time_unit}, []),
+        ),
+    )
+
+    benchmarks = list(storage.load_benchmarks(*args.glob_or_file))
+
+    if not benchmarks:
+        parser.error(
+            'No benchmark results found. Run pytest with --benchmark-save '
+            'or --benchmark-autosave before using compare.'
+    )
+
+    if args.filter_expr:
+        from _pytest.mark.expression import Expression  # noqa: PLC0415
+
+        expr = Expression.compile(args.filter_expr)
+
+        def _evaluate_expr(benchmark):
+            name = benchmark.get('fullname') or benchmark.get('name', '')
+            return expr.evaluate(lambda key: key in name)
+
+        benchmarks = filter(_evaluate_expr, benchmarks)
+
+    groups = hook.pytest_benchmark_group_stats(
+        benchmarks=benchmarks,
+        group_by=args.group_by,
+        config=None,
+    )
+
+    results_table.display(TerminalReporter(), groups, progress_reporter=report_noprogress)
+
+    if args.csv:
+        results_csv = CSVResults(args.columns, args.sort, logger)
+        (output_file,) = args.csv
+        results_csv.render(output_file, groups)
+
+
 def main():
     parser = make_parser()
     args = parser.parse_args()
-    level = Logger.QUIET if args.quiet else Logger.NORMAL
-    if args.verbose:
-        level = Logger.VERBOSE
-    logger = Logger(level)
-    storage = load_storage(args.storage, logger=logger, netrc=args.netrc)
 
+    logger = Logger(_get_logger_level(args))
+    storage = load_storage(args.storage, logger=logger, netrc=args.netrc)
     hook = HookDispatch(mode=args.importmode, root=pathlib.Path('.'))
 
     if args.command == 'list':
-        for file in storage.query():
-            print(file)
+        _handle_list_command(storage)
     elif args.command == 'compare':
-        histogram = first_or_value(args.histogram, False)
-        if args.between:
-            if args.columns:
-                parser.error('--between is not compatible with --columns (--between already specifies the columns)')
-            if histogram:
-                parser.error('--between is not compatible with --histogram')
-            results_table_cls = CompareBetweenResults
-            args.columns = args.between
-        else:
-            results_table_cls = TableResults
-            if not args.columns:
-                args.columns = DEFAULT_COLUMNS
-
-        results_table = results_table_cls(
-            columns=args.columns,
-            sort=args.sort,
-            histogram=histogram,
-            name_format=NAME_FORMATTERS[args.name],
-            logger=logger,
-            scale_unit=partial(
-                hook.pytest_benchmark_scale_unit,
-                config=Config.fromdictargs({'benchmark_time_unit': args.time_unit}, []),
-            ),
-        )
-        benchmarks = storage.load_benchmarks(*args.glob_or_file)
-        if args.filter_expr:
-            from _pytest.mark.expression import Expression  # noqa: PLC0415
-
-            expr = Expression.compile(args.filter_expr)
-
-            def _evaluate_expr(benchmark):
-                name = benchmark.get('fullname') or benchmark.get('name', '')
-                return expr.evaluate(lambda key: key in name)
-
-            benchmarks = filter(_evaluate_expr, benchmarks)
-        groups = hook.pytest_benchmark_group_stats(
-            benchmarks=benchmarks,
-            group_by=args.group_by,
-            config=None,
-        )
-        results_table.display(TerminalReporter(), groups, progress_reporter=report_noprogress)
-        if args.csv:
-            results_csv = CSVResults(args.columns, args.sort, logger)
-            (output_file,) = args.csv
-
-            results_csv.render(output_file, groups)
+        _handle_compare_command(args, parser, storage, logger, hook)
     elif args.command is None:
         parser.error('missing command (available commands: {})'.format(', '.join(map(repr, parser.commands.choices))))
     else:

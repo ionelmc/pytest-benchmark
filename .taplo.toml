@@ -1,3 +1,6 @@
 [formatting]
 array_auto_collapse = false
 indent_string = "    "
+
+[schema]
+enabled = false

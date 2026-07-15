@@ -361,6 +361,24 @@ def test_compare_between_columns_error(testdir):
     result.stderr.fnmatch_lines(['*error: --between is not compatible with --columns*'])
     assert result.ret != 0
 
+def test_compare_without_saved_benchmarks_shows_helpful_message(testdir):
+    empty_storage = testdir.tmpdir.mkdir('empty_benchmarks')
+
+    result = testdir.run(
+        'py.test-benchmark',
+        '--storage',
+        str(empty_storage),
+        'compare',
+    )
+
+    result.stderr.fnmatch_lines(
+        [
+            '*error: No benchmark results found. Run pytest with --benchmark-save '
+            'or --benchmark-autosave before using compare.*',
+        ]
+    )
+    assert result.ret != 0
+
 
 @pytest.mark.parametrize(
     ('name', 'name_pattern_generator', 'unit'),
@@ -371,6 +389,8 @@ def test_compare_between_columns_error(testdir):
         ('short', lambda n: f'*xfast_parametrized[[]0[]] ({n:04}*)', 'ns'),
     ],
 )
+
+
 def test_compare_with_unit_scale(testdir, name, name_pattern_generator, unit):
     result = testdir.run(
         'py.test-benchmark',

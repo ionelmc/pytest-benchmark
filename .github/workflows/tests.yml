@@ -1,0 +1,50 @@
+name: Tests and Coverage
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Upgrade pip
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Install project
+        run: |
+          python -m pip install -e ".[aspect]"
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install pytest pytest-cov nbmake freezegun virtualenv pygal pygaljs
+
+      - name: Run tests
+        run: |
+          pytest --cov=pytest_benchmark \
+                 --cov-report=xml \
+                 --cov-report=term-missing \
+                 -o addopts=""
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
