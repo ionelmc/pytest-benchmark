@@ -99,9 +99,10 @@ def get_project_name():
 
 @get_project_name.register
 def get_project_name_git():
-    is_git = check_output(['git', 'rev-parse', '--git-dir'], stderr=subprocess.STDOUT)
+    is_git = check_output(['git', 'rev-parse', '--git-dir'], stderr=subprocess.DEVNULL)
     if is_git:
-        project_address = check_output(['git', 'config', '--local', 'remote.origin.url'])
+        project_address = check_output(['git', 'config', '--local', 'remote.origin.url'],
+                                        stderr=subprocess.DEVNULL)
         if isinstance(project_address, bytes):
             project_address = project_address.decode()
         project_name = [i for i in re.split(r'[/:\s\\]|\.git', project_address) if i][-1]
