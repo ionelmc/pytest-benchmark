@@ -40,8 +40,20 @@ class Logger:
             if suspend and self.resume_capture:
                 self.resume_capture()
         if warner is None:
-            warner = warnings.warn
-        warner(PytestBenchmarkWarning(text))
+            # These are informational messages about the plugin's own behavior (e.g. benchmarks
+            # being auto-disabled), not warnings about the user's code, so they shouldn't be
+            # promotable to errors by the user's `filterwarnings` setting. Doing so would abort
+            # the whole session with an INTERNALERROR very early (during pytest_configure).
+            # We can't use `warnings.catch_warnings()` here as it would also reset pytest's own
+            # warnings-capturing state (breaking `-W`/`--benchmark-verbose` and the warnings
+            # summary), so we push/pop a single filter entry instead.
+            warnings.filterwarnings('always', category=PytestBenchmarkWarning)
+            try:
+                warnings.warn(PytestBenchmarkWarning(text), stacklevel=2)
+            finally:
+                warnings.filters.pop(0)
+        else:
+            warner(PytestBenchmarkWarning(text))
 
     def error(self, text):
         self.term.line('')

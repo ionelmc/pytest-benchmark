@@ -924,6 +924,23 @@ def test_xdist_verbose(testdir):
     )
 
 
+def test_xdist_filterwarnings_error(testdir):
+    # Regression test for https://github.com/ionelmc/pytest-benchmark/issues/286
+    # With `filterwarnings = error`, the plugin's own xdist-disabled notice must not be
+    # promoted to an exception (which used to blow up pytest_configure with an INTERNALERROR).
+    pytest.importorskip('xdist')
+    testdir.makeini(
+        """
+        [pytest]
+        filterwarnings = error
+        """
+    )
+    test = testdir.makepyfile(SIMPLE_TEST)
+    result = testdir.runpytest_subprocess('-n', '1', test)
+    assert 'INTERNALERROR' not in result.stderr.str()
+    result.stdout.fnmatch_lines(['*2 passed*'])
+
+
 def test_cprofile(testdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-cprofile=cumtime', test)
