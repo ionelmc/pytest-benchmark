@@ -17,6 +17,7 @@ from typing import Any
 from typing import Callable
 from typing import ClassVar
 from typing import Self
+from typing import cast
 
 from .logger import Logger
 from .stats import Metadata
@@ -104,7 +105,7 @@ class BenchmarkFixture:
         self.skipped: bool = False
 
         self._disable_gc = disable_gc
-        self._timer = timer.target
+        self._timer = cast(Timer, timer.target)
         self._min_rounds = min_rounds
         self._max_time = float(max_time)
         self._min_time = float(min_time)

@@ -59,11 +59,11 @@ class Stats:
         return sum(self.data)
 
     @cached_property
-    def min(self) -> Any:
+    def min(self) -> float:
         return min(self.data)
 
     @cached_property
-    def max(self) -> Any:
+    def max(self) -> float:
         return max(self.data)
 
     @cached_property
@@ -71,7 +71,7 @@ class Stats:
         return statistics.mean(self.data)
 
     @cached_property
-    def stddev(self):
+    def stddev(self) -> float:
         if len(self.data) > 1:
             return statistics.stdev(self.data)
 
@@ -92,11 +92,11 @@ class Stats:
         return count
 
     @cached_property
-    def rounds(self):
+    def rounds(self) -> int:
         return len(self.data)
 
     @cached_property
-    def median(self):
+    def median(self) -> float:
         return statistics.median(self.data)
 
     @cached_property
@@ -124,7 +124,7 @@ class Stats:
         return self.sorted_data[pos]
 
     @cached_property
-    def q1(self):
+    def q1(self) -> float:
         rounds = self.rounds
         data = self.sorted_data
 
@@ -142,7 +142,7 @@ class Stats:
         return statistics.median(data[: rounds // 2])
 
     @cached_property
-    def q3(self):
+    def q3(self) -> float:
         rounds = self.rounds
         data = self.sorted_data
 
@@ -160,7 +160,7 @@ class Stats:
         return statistics.median(data[rounds // 2 :])
 
     @cached_property
-    def iqr(self):
+    def iqr(self) -> float:
         return self.q3 - self.q1
 
     @property
@@ -177,20 +177,20 @@ class Stats:
         return count
 
     @cached_property
-    def outliers(self):
+    def outliers(self) -> str:
         return f'{self.stddev_outliers};{self.iqr_outliers}'
 
     @cached_property
-    def ops(self):
+    def ops(self) -> float:
         if self.total:
             return self.rounds / self.total
         return 0
 
 
 class Metadata:
-    cprofile_stats: pstats.Stats
+    cprofile_stats: pstats.Stats | None
 
-    def __init__(self, fixture, iterations, options):
+    def __init__(self, fixture: Any, iterations: int, options: dict[str, Any]) -> None:
         self.name = fixture.name
         self.fullname = fixture.fullname
         self.group = fixture.group
@@ -210,23 +210,29 @@ class Metadata:
     def __nonzero__(self) -> bool:
         return bool(self.stats)
 
-    def get(self, key, default=None):
+    def get(self, key: str, default: Any = None) -> Any:
         try:
             return getattr(self.stats, key)
         except AttributeError:
             return getattr(self, key, default)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         try:
             return getattr(self.stats, key)
         except AttributeError:
             return getattr(self, key)
 
     @property
-    def has_error(self):
+    def has_error(self) -> bool:
         return self.fixture.has_error
 
-    def as_dict(self, include_data=True, flat=False, stats=True, cprofile=None):
+    def as_dict(
+        self,
+        include_data: bool = True,
+        flat: bool = False,
+        stats: bool = True,
+        cprofile: tuple[str | None, int] | None = None,
+    ) -> dict[str, Any]:
         result = {
             'group': self.group,
             'name': self.name,
@@ -254,14 +260,14 @@ class Metadata:
                 if cprofile_sort_by is None or len(cprofile_functions) == len(cprofile_list):
                     break
         if stats:
-            stats = self.stats.as_dict()
+            stats_data = self.stats.as_dict()
             if include_data:
-                stats['data'] = self.stats.data
-            stats['iterations'] = self.iterations
+                stats_data['data'] = self.stats.data
+            stats_data['iterations'] = self.iterations
             if flat:
-                result.update(stats)
+                result.update(stats_data)
             else:
-                result['stats'] = stats
+                result['stats'] = stats_data
         return result
 
     def update(self, duration: int) -> None:

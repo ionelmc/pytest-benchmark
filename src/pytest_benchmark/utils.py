@@ -8,10 +8,12 @@ import json
 import netrc
 import os
 import platform
+import pstats
 import re
 import subprocess
 import sys
 from collections.abc import Generator
+from collections.abc import Iterator
 from datetime import datetime
 from datetime import timezone
 from decimal import Decimal
@@ -27,6 +29,7 @@ from typing import Literal
 from typing import Self
 from typing import TypeVar
 from typing import overload
+from urllib.parse import ParseResult
 from urllib.parse import parse_qs
 from urllib.parse import urlparse
 
@@ -49,7 +52,7 @@ class SecondsDecimal(Decimal):
 
 
 class NameWrapper:
-    def __init__(self, target) -> None:
+    def __init__(self, target: object) -> None:
         self.target = target
 
     def __str__(self) -> str:
@@ -57,11 +60,11 @@ class NameWrapper:
         name += self.target.__name__ if hasattr(self.target, '__name__') else repr(self.target)
         return name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'NameWrapper({self.target!r})'
 
 
-def get_tag(project_name=None):
+def get_tag(project_name: str | None = None) -> str:
     info = get_commit_info(project_name)
     parts = [info['id'], get_current_time()]
     if info['dirty']:
@@ -119,7 +122,7 @@ def get_project_name_git() -> str | None:
 
 
 @get_project_name.register
-def get_project_name_hg():
+def get_project_name_hg() -> str:
     with open(os.devnull, 'w') as devnull:
         project_address = check_output(['hg', 'path', 'default'], stderr=devnull, text=True)
     project_name = project_address.split('/')[-1]
@@ -241,11 +244,11 @@ def load_timer(string: str) -> NameWrapper:
 
 
 class RegressionCheck:
-    def __init__(self, field, threshold) -> None:
+    def __init__(self, field: str, threshold: float) -> None:
         self.field = field
         self.threshold = threshold
 
-    def fails(self, current, compared) -> str | None:
+    def fails(self, current: dict[str, float], compared: dict[str, float]) -> str | None:
         val = self.compute(current, compared)
 
         if val > self.threshold:
@@ -257,7 +260,7 @@ class RegressionCheck:
 
 
 class PercentageRegressionCheck(RegressionCheck):
-    def compute(self, current, compared) -> float:
+    def compute(self, current: dict[str, float], compared: dict[str, float]) -> float:
         val = compared[self.field]
 
         if not val:
@@ -267,16 +270,16 @@ class PercentageRegressionCheck(RegressionCheck):
 
 
 class DifferenceRegressionCheck(RegressionCheck):
-    def compute(self, current, compared):
+    def compute(self, current: dict[str, float], compared: dict[str, float]) -> float:
         return current[self.field] - compared[self.field]
 
 
 def parse_compare_fail(
-    string,
-    rex=re.compile(
+    string: str,
+    rex: re.Pattern[str] = re.compile(
         r'^(?P<field>min|max|mean|median|stddev|iqr):' r'((?P<percentage>[0-9]+)%|(?P<difference>[0-9]*\.?[0-9]+([eE][-+]?[' r'0-9]+)?))$'
     ),
-):
+) -> RegressionCheck:
     m = rex.match(string)
     if m:
         g = m.groupdict()
@@ -288,7 +291,7 @@ def parse_compare_fail(
     raise argparse.ArgumentTypeError(f'Could not parse value: {string!r}.')
 
 
-def parse_cprofile_loops(string):
+def parse_cprofile_loops(string: str) -> int | None:
     if string == 'auto':
         return None
     else:
@@ -433,7 +436,7 @@ def parse_save(string: str) -> str:
     return string
 
 
-def _parse_hosts(storage_url, netrc_file: str) -> list[str]:
+def _parse_hosts(storage_url: ParseResult, netrc_file: str | Path) -> list[str]:
     # load creds from netrc file
     path = Path(netrc_file).expanduser()
     creds = None
@@ -588,14 +591,14 @@ def consistent_dumps(value: Any) -> str:
     return json.dumps(value, sort_keys=True)
 
 
-def safe_dumps(obj: object, **kwargs: Any):
+def safe_dumps(obj: object, **kwargs: Any) -> str:
     return json.dumps(obj, cls=SafeJSONEncoder, **kwargs)
 
 
 def report_progress(iterable: list[T], terminal_reporter: Any, format_string: str, **kwargs: Any) -> Generator[tuple[str, T], None, None]:
     total = len(iterable)
 
-    def progress_reporting_wrapper():
+    def progress_reporting_wrapper() -> Generator[tuple[str, T], None, None]:
         for pos, item in enumerate(iterable):
             string = format_string.format(pos=pos + 1, total=total, value=item, **kwargs)
             terminal_reporter.rewrite(string, black=True, bold=True)
@@ -609,17 +612,17 @@ def report_noprogress(iterable: list[Any], *args: Any, **kwargs: Any) -> Generat
         yield '', item
 
 
-def report_online_progress(progress_reporter, tr, line):
+def report_online_progress(progress_reporter: Callable[..., Iterator[tuple[str, Any]]], tr: Any, line: str) -> None:
     next(progress_reporter([line], tr, '{value}'))
 
 
-def slugify(name):
+def slugify(name: str) -> str:
     for c in r'\/:*?<>| ':
         name = name.replace(c, '_').replace('__', '_')
     return name
 
 
-def get_cprofile_functions(stats):
+def get_cprofile_functions(stats: pstats.Stats) -> list[dict[str, str | int | float]]:
     """
     Convert pstats structure to list of sorted dicts about each function.
     """
@@ -627,7 +630,7 @@ def get_cprofile_functions(stats):
     # this assumes that you run py.test from project root dir
     project_dir_parent = str(Path.cwd().parent)
 
-    for function_info, run_info in stats.stats.items():
+    for function_info, run_info in stats.stats.items():  # type: ignore[attr-defined]
         file_path = function_info[0]
         if file_path.startswith(project_dir_parent):
             file_path = file_path[len(project_dir_parent) :].lstrip('/')
