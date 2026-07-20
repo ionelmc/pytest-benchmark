@@ -1,32 +1,32 @@
 import re
 import uuid
+from collections.abc import Generator
 from datetime import date
 from datetime import datetime
 from decimal import Decimal
 from functools import partial
+from typing import Any
 
+import elasticsearch
+from elastic_transport import ObjectApiResponse
+from elasticsearch.serializer import JSONSerializer
+
+from ..logger import Logger
 from ..stats import normalize_stats
-
-try:
-    import elasticsearch
-    from elasticsearch.serializer import JSONSerializer
-except ImportError as exc:
-    raise ImportError('Please install elasticsearch or pytest-benchmark[elasticsearch]') from exc
 
 
 class BenchmarkJSONSerializer(JSONSerializer):
-    def default(self, data):
+    def default(self, data: date | datetime | Decimal | uuid.UUID) -> str | float:
         if isinstance(data, (date, datetime)):
             return data.isoformat()
+
         elif isinstance(data, Decimal):
             return float(data)
-        elif isinstance(data, uuid.UUID):
-            return str(data)
-        else:
-            return f'UNSERIALIZABLE[{data!r}]'
+
+        return str(data)
 
 
-def _mask_hosts(hosts):
+def _mask_hosts(hosts: list[str]) -> list[str]:
     m = re.compile('^([^:]+)://[^@]+@')
     sub_fun = partial(m.sub, '\\1://***:***@')
     masked_hosts = list(map(sub_fun, hosts))
@@ -34,7 +34,15 @@ def _mask_hosts(hosts):
 
 
 class ElasticsearchStorage:
-    def __init__(self, hosts, index, doctype, project_name, logger, default_machine_id=None):
+    def __init__(
+        self,
+        hosts: list[str],
+        index: str,
+        doctype: str,
+        project_name: str,
+        logger: Logger,
+        default_machine_id: str | None = None,
+    ) -> None:
         self._es_hosts = hosts
         self._es_index = index
         self._es_doctype = doctype
@@ -42,25 +50,36 @@ class ElasticsearchStorage:
         self._project_name = project_name
         self.default_machine_id = default_machine_id
         self.logger = logger
-        self._cache = {}
+        self._cache: dict[str, Any] = {}
         self._create_index()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self._es_hosts)
 
     @property
-    def location(self):
+    def location(self) -> str:
         return str(self._es_hosts)
 
-    def query(self):
+    def query(self) -> list[Any]:
         """
         Returns sorted records names (ids) that corresponds with project.
         """
-        body = {'size': 0, 'aggs': {'benchmark_ids': {'terms': {'field': 'benchmark_id'}}}}
-        result = self._es.search(index=self._es_index, doc_type=self._es_doctype, body=body)
+        body: dict[str, Any] = {
+            'size': 0,
+            'aggs': {
+                'benchmark_ids': {
+                    'terms': {
+                        'field': 'benchmark_id',
+                    },
+                },
+            },
+        }
+
+        result: ObjectApiResponse[Any] = self._es.search(index=self._es_index, doc_type=self._es_doctype, body=body)  # type: ignore[call-arg]
+
         return sorted([record['key'] for record in result['aggregations']['benchmark_ids']['buckets']])
 
-    def load(self, id_prefix=None):
+    def load(self, id_prefix: str | None = None):
         """
         Yield key and content of records that corresponds with project name.
         """
@@ -68,85 +87,107 @@ class ElasticsearchStorage:
         grouped_data = self._group_by_commit_and_time(r['hits']['hits'])
         result = list(grouped_data.items())
         result.sort(key=lambda x: datetime.strptime(x[1]['datetime'], '%Y-%m-%dT%H:%M:%S.%f'))  # noqa: DTZ007
+
         for key, data in result:
             for bench in data['benchmarks']:
                 normalize_stats(bench['stats'])
+
             yield key, data
 
-    def _search(self, project, id_prefix=None):
-        body = {
+    def _search(self, project: str, id_prefix: str | None = None) -> ObjectApiResponse[Any]:
+        body: dict[str, Any] = {
             'size': 1000,
             'sort': [{'datetime': {'order': 'desc'}}],
             'query': {'bool': {'filter': {'term': {'commit_info.project': project}}}},
         }
+
         if id_prefix:
             body['query']['bool']['must'] = {'prefix': {'_id': id_prefix}}
 
-        return self._es.search(index=self._es_index, doc_type=self._es_doctype, body=body)
+        # TODO: Remove ignore parameters because doesn't existe in function create
+        return self._es.search(  # type: ignore[call-arg]
+            index=self._es_index,
+            doc_type=self._es_doctype,
+            body=body,
+        )
 
     @staticmethod
-    def _benchmark_from_es_record(source_es_record):
-        result = {}
+    def _benchmark_from_es_record(source_es_record: dict[str, Any]):
+        result: dict[str, Any] = {}
+
         for benchmark_key in ('group', 'stats', 'options', 'param', 'name', 'params', 'fullname', 'benchmark_id'):
             result[benchmark_key] = source_es_record[benchmark_key]
+
         return result
 
     @staticmethod
-    def _run_info_from_es_record(source_es_record):
-        result = {}
+    def _run_info_from_es_record(source_es_record: dict[str, Any]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+
         for run_key in ('machine_info', 'commit_info', 'datetime', 'version'):
             result[run_key] = source_es_record[run_key]
+
         return result
 
-    def _group_by_commit_and_time(self, hits):
-        result = {}
+    def _group_by_commit_and_time(self, hits: list[dict[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+
         for hit in hits:
             source_hit = hit['_source']
             key = '{}_{}'.format(source_hit['commit_info']['id'], source_hit['datetime'])
             benchmark = self._benchmark_from_es_record(source_hit)
+
             if key in result:
                 result[key]['benchmarks'].append(benchmark)
+
             else:
                 run_info = self._run_info_from_es_record(source_hit)
                 run_info['benchmarks'] = [benchmark]
                 result[key] = run_info
+
         return result
 
-    def load_benchmarks(self, *args):
+    def load_benchmarks(self, *args: str) -> Generator[dict[str, Any], Any, None]:
         """
         Yield benchmarks that corresponds with project. Put path and
         source (uncommon part of path) to benchmark dict.
         """
         id_prefix = args[0] if args else None
         r = self._search(self._project_name, id_prefix)
+
         for hit in r['hits']['hits']:
             bench = self._benchmark_from_es_record(hit['_source'])
             bench.update(bench.pop('stats'))
             bench['source'] = bench['benchmark_id']
             yield bench
 
-    def save(self, output_json, save):
+    def save(self, output_json: dict[str, Any], save: str):
         output_benchmarks = output_json.pop('benchmarks')
         for bench in output_benchmarks:
             # add top level info from output_json dict to each record
             bench.update(output_json)
             benchmark_id = save
+
             if self.default_machine_id:
                 benchmark_id = self.default_machine_id + '_' + benchmark_id
+
             doc_id = benchmark_id + '_' + bench['fullname']
             bench['benchmark_id'] = benchmark_id
-            self._es.index(
+
+            # TODO: Remove or replace doc_type parameters because doesn't existe in function index
+            self._es.index(  # type: ignore[call-arg]
                 index=self._es_index,
                 doc_type=self._es_doctype,
                 body=bench,
                 id=doc_id,
             )
+
         # hide user's credentials before logging
         masked_hosts = _mask_hosts(self._es_hosts)
         self.logger.info(f'Saved benchmark data to {masked_hosts} to index {self._es_index} as doctype {self._es_doctype}')
 
-    def _create_index(self):
-        mapping = {
+    def _create_index(self) -> None:
+        mapping: dict[str, Any] = {
             'mappings': {
                 'benchmark': {
                     'properties': {
@@ -213,4 +254,5 @@ class ElasticsearchStorage:
                 }
             }
         }
-        self._es.indices.create(index=self._es_index, ignore=400, body=mapping)
+        # TODO: Remove ignore parameters because doesn't existe in function create
+        self._es.indices.create(index=self._es_index, ignore=400, body=mapping)  # type: ignore[call-arg]

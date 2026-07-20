@@ -8,6 +8,7 @@ import pstats
 import statistics
 from bisect import bisect_left
 from bisect import bisect_right
+from typing import Any
 
 from .utils import cached_property
 from .utils import funcname
@@ -34,50 +35,51 @@ class Stats:
         'total',
     )
 
-    def __init__(self):
-        self.data = []
+    def __init__(self) -> None:
+        self.data: list[float] = []
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.data)
 
-    def __nonzero__(self):
+    def __nonzero__(self) -> bool:
         return bool(self.data)
 
-    def as_dict(self):
+    def as_dict(self) -> dict[str, Any]:
         return {field: getattr(self, field) for field in self.fields}
 
-    def update(self, duration):
+    def update(self, duration: float) -> None:
         self.data.append(duration)
 
     @cached_property
-    def sorted_data(self):
+    def sorted_data(self) -> list[float]:
         return sorted(self.data)
 
     @cached_property
-    def total(self):
+    def total(self) -> float:
         return sum(self.data)
 
     @cached_property
-    def min(self):
+    def min(self) -> Any:
         return min(self.data)
 
     @cached_property
-    def max(self):
+    def max(self) -> Any:
         return max(self.data)
 
     @cached_property
-    def mean(self):
+    def mean(self) -> float:
         return statistics.mean(self.data)
 
     @cached_property
     def stddev(self):
         if len(self.data) > 1:
             return statistics.stdev(self.data)
+
         else:
             return 0
 
     @property
-    def stddev_outliers(self):
+    def stddev_outliers(self) -> int:
         """
         Count of StdDev outliers: what's beyond (Mean - StdDev, Mean - StdDev)
         """
@@ -98,28 +100,28 @@ class Stats:
         return statistics.median(self.data)
 
     @cached_property
-    def ld15iqr(self):
+    def ld15iqr(self) -> float:
         """
         Tukey-style Lowest Datum within 1.5 IQR under Q1.
         """
         if len(self.data) == 1:
             return self.data[0]
-        else:
-            return self.sorted_data[bisect_left(self.sorted_data, self.q1 - 1.5 * self.iqr)]
+
+        return self.sorted_data[bisect_left(self.sorted_data, self.q1 - 1.5 * self.iqr)]
 
     @cached_property
-    def hd15iqr(self):
+    def hd15iqr(self) -> float:
         """
         Tukey-style Highest Datum within 1.5 IQR over Q3.
         """
         if len(self.data) == 1:
             return self.data[0]
-        else:
-            pos = bisect_right(self.sorted_data, self.q3 + 1.5 * self.iqr)
-            if pos == len(self.data):
-                return self.sorted_data[-1]
-            else:
-                return self.sorted_data[pos]
+
+        pos = bisect_right(self.sorted_data, self.q3 + 1.5 * self.iqr)
+        if pos == len(self.data):
+            return self.sorted_data[-1]
+
+        return self.sorted_data[pos]
 
     @cached_property
     def q1(self):
@@ -129,14 +131,15 @@ class Stats:
         # See: https://en.wikipedia.org/wiki/Quartile#Computing_methods
         if rounds == 1:
             return data[0]
+
         elif rounds % 2:  # Method 3
             n, q = rounds // 4, rounds % 4
             if q == 1:
                 return 0.25 * data[n - 1] + 0.75 * data[n]
-            else:
-                return 0.75 * data[n] + 0.25 * data[n + 1]
-        else:  # Method 2
-            return statistics.median(data[: rounds // 2])
+
+            return 0.75 * data[n] + 0.25 * data[n + 1]
+
+        return statistics.median(data[: rounds // 2])
 
     @cached_property
     def q3(self):
@@ -146,21 +149,22 @@ class Stats:
         # See: https://en.wikipedia.org/wiki/Quartile#Computing_methods
         if rounds == 1:
             return data[0]
+
         elif rounds % 2:  # Method 3
             n, q = rounds // 4, rounds % 4
             if q == 1:
                 return 0.75 * data[3 * n] + 0.25 * data[3 * n + 1]
-            else:
-                return 0.25 * data[3 * n + 1] + 0.75 * data[3 * n + 2]
-        else:  # Method 2
-            return statistics.median(data[rounds // 2 :])
+
+            return 0.25 * data[3 * n + 1] + 0.75 * data[3 * n + 2]
+
+        return statistics.median(data[rounds // 2 :])
 
     @cached_property
     def iqr(self):
         return self.q3 - self.q1
 
     @property
-    def iqr_outliers(self):
+    def iqr_outliers(self) -> int:
         """
         Count of Tukey outliers: what's beyond (Q1 - 1.5IQR, Q3 + 1.5IQR)
         """
@@ -200,10 +204,10 @@ class Metadata:
         self.options = options
         self.fixture = fixture
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.stats)
 
-    def __nonzero__(self):
+    def __nonzero__(self) -> bool:
         return bool(self.stats)
 
     def get(self, key, default=None):
@@ -260,11 +264,11 @@ class Metadata:
                 result['stats'] = stats
         return result
 
-    def update(self, duration):
+    def update(self, duration: int) -> None:
         self.stats.update(duration / self.iterations)
 
 
-def normalize_stats(stats):
+def normalize_stats(stats: dict[str, Any]) -> dict[str, Any]:
     if 'ops' not in stats:
         # fill field added in 3.1.0
         stats['ops'] = 1 / stats['mean']

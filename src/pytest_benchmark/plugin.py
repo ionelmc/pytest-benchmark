@@ -11,7 +11,9 @@ from collections import defaultdict
 from datetime import datetime
 from datetime import timezone
 from pathlib import Path
+from typing import Any
 
+import cpuinfo
 import pytest
 
 from . import __version__
@@ -39,8 +41,8 @@ from .utils import parse_warmup
 from .utils import time_unit
 
 
-def pytest_report_header(config):
-    bs = config._benchmarksession
+def pytest_report_header(config: pytest.Config):
+    bs: BenchmarkSession = getattr(config, '_benchmarksession')  # noqa: B009
 
     return (
         'benchmark: {version} (defaults:'
@@ -60,7 +62,7 @@ def pytest_report_header(config):
     )
 
 
-def add_display_options(addoption, prefix='benchmark-'):
+def add_display_options(addoption, prefix: str = 'benchmark-') -> None:
     addoption(
         f'--{prefix}sort',
         metavar='COL',
@@ -99,7 +101,7 @@ def add_display_options(addoption, prefix='benchmark-'):
     )
 
 
-def add_histogram_options(addoption, prefix='benchmark-'):
+def add_histogram_options(addoption, prefix: str = 'benchmark-') -> None:
     filename_prefix = f'benchmark_{get_current_time()}'
     addoption(
         f'--{prefix}histogram',
@@ -113,7 +115,7 @@ def add_histogram_options(addoption, prefix='benchmark-'):
     )
 
 
-def add_csv_options(addoption, prefix='benchmark-'):
+def add_csv_options(addoption, prefix: str = 'benchmark-') -> None:
     filename_prefix = f'benchmark_{get_current_time()}'
     addoption(
         f'--{prefix}csv',
@@ -126,7 +128,7 @@ def add_csv_options(addoption, prefix='benchmark-'):
     )
 
 
-def add_global_options(addoption, prefix='benchmark-'):
+def add_global_options(addoption, prefix: str = 'benchmark-') -> None:
     addoption(
         f'--{prefix}storage',
         *[] if prefix else ['-s'],
@@ -314,12 +316,14 @@ def pytest_addoption(parser):
     add_histogram_options(group.addoption)
 
 
-def pytest_addhooks(pluginmanager):
+def pytest_addhooks(pluginmanager) -> None:
     from . import hookspec  # noqa: PLC0415
 
     method = getattr(pluginmanager, 'add_hookspecs', None)
+
     if method is None:
         method = pluginmanager.addhooks
+
     method(hookspec)
 
 
@@ -333,10 +337,11 @@ def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info
         )
 
 
-def pytest_collection_modifyitems(config, items):
+def pytest_collection_modifyitems(config, items: list[Any]):
     bs = config._benchmarksession
     skip_bench = pytest.mark.skip(reason='Skipping benchmark (--benchmark-skip active).')
     skip_other = pytest.mark.skip(reason='Skipping non-benchmark (--benchmark-only active).')
+
     for item in items:
         has_benchmark = hasattr(item, 'fixturenames') and 'benchmark' in item.fixturenames
         if has_benchmark:
@@ -350,7 +355,7 @@ def pytest_collection_modifyitems(config, items):
 def pytest_benchmark_group_stats(config, benchmarks, group_by):
     groups = defaultdict(list)
     for bench in benchmarks:
-        key = ()
+        key: tuple[Any, ...] = ()
         for grouping in group_by.split(','):
             if grouping == 'group':
                 key += (bench['group'],)
@@ -369,10 +374,12 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
                 key += ('{}={}'.format(param_name, bench['params'][param_name]),)
             else:
                 raise NotImplementedError(f'Unsupported grouping {group_by!r}.')
-        groups[' '.join(str(p) for p in key if p) or None].append(bench)
+        group_name = ' '.join(str(part) for part in key if part) or None
+        groups[group_name].append(bench)
 
     for grouped_benchmarks in groups.values():
         grouped_benchmarks.sort(key=operator.itemgetter('fullname' if 'full' in group_by else 'name'))
+
     return sorted(groups.items(), key=lambda pair: pair[0] or '')
 
 
@@ -382,24 +389,25 @@ def pytest_sessionfinish(session, exitstatus):
     yield
 
 
-def pytest_terminal_summary(terminalreporter):
+def pytest_terminal_summary(terminalreporter: Any):
     try:
         terminalreporter.config._benchmarksession.display(terminalreporter)
+
     except PerformanceRegression:
         raise
+
     except Exception:
         terminalreporter.config._benchmarksession.logger.error(f'\n{traceback.format_exc()}')
         raise
 
 
-def get_cpu_info():
-    import cpuinfo  # noqa: PLC0415
-
+def get_cpu_info() -> dict[str, Any]:
     return cpuinfo.get_cpu_info() or {}
 
 
 def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
     config_time_unit = config.getoption('benchmark_time_unit', None) if config else None
+
     if config_time_unit == 'ns':
         return 'n', 1e9
     elif config_time_unit == 'us':
@@ -408,25 +416,34 @@ def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
         return 'm', 1e3
     elif config_time_unit == 's':
         return '', 1.0
+
     assert config_time_unit in ('auto', None)
+
     if unit == 'seconds':
         time_unit_key = sort
+
         if sort in ('name', 'fullname'):
             time_unit_key = 'min'
+
         return time_unit(best.get(sort, benchmarks[0][time_unit_key]))
+
     elif unit == 'operations':
         return operations_unit(worst.get('ops', benchmarks[0]['ops']))
-    else:
-        raise RuntimeError(f'Unexpected measurement unit {unit!r}')
+
+    raise RuntimeError(f'Unexpected measurement unit {unit!r}')
 
 
-def pytest_benchmark_generate_machine_info():
+def pytest_benchmark_generate_machine_info() -> dict[str, Any]:
     python_implementation = platform.python_implementation()
     python_implementation_version = platform.python_version()
+
     if python_implementation == 'PyPy':
-        python_implementation_version = '%d.%d.%d' % sys.pypy_version_info[:3]  # noqa:UP031
-        if sys.pypy_version_info.releaselevel != 'final':
-            python_implementation_version += '-%s%d' % sys.pypy_version_info[3:]  # noqa:UP031
+        pypy_version_info = getattr(sys, 'pypy_version_info')  # noqa: B009
+        python_implementation_version = '%d.%d.%d' % pypy_version_info[:3]  # noqa:UP031
+
+        if pypy_version_info.releaselevel != 'final':
+            python_implementation_version += '-%s%d' % pypy_version_info[3:]  # noqa:UP031
+
     return {
         'node': platform.node(),
         'processor': platform.processor(),
@@ -442,37 +459,48 @@ def pytest_benchmark_generate_machine_info():
     }
 
 
-def pytest_benchmark_generate_commit_info(config):
+def pytest_benchmark_generate_commit_info(config: pytest.Config) -> dict[str, Any]:
     return get_commit_info(config.getoption('benchmark_project_name', None))
 
 
-def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_info, commit_info):
-    benchmarks_json = []
-    output_json = {
+def pytest_benchmark_generate_json(
+    config: pytest.Config,
+    benchmarks: list[Any],
+    include_data,
+    machine_info,
+    commit_info,
+):
+    benchmarks_json: list[Any] = []
+
+    output_json: dict[str, Any] = {
         'machine_info': machine_info,
         'commit_info': commit_info,
         'benchmarks': benchmarks_json,
         'datetime': datetime.now(timezone.utc).isoformat(),
         'version': __version__,
     }
+
     for bench in benchmarks:
         if not bench.has_error:
             benchmarks_json.append(bench.as_dict(include_data=include_data))
+
     return output_json
 
 
 @pytest.fixture
 def benchmark(request):
-    bs: BenchmarkSession = request.config._benchmarksession
+    bs = request.config._benchmarksession
 
     if bs.skip:
         pytest.skip('Benchmarks are skipped (--benchmark-skip was used).')
+
     else:
         node = request.node
         marker = node.get_closest_marker('benchmark')
         options: dict[str, object] = dict(marker.kwargs) if marker else {}
         if 'timer' in options:
             options['timer'] = NameWrapper(options['timer'])
+
         fixture = BenchmarkFixture(
             node,
             add_stats=bs.benchmarks.append,
@@ -481,6 +509,7 @@ def benchmark(request):
             disabled=bs.disabled,
             **dict(bs.options, **options),
         )
+
         yield fixture
         fixture._cleanup()
 
@@ -527,8 +556,9 @@ def pytest_runtest_makereport(item, call):
 
 
 @pytest.hookimpl(trylast=True)  # force the other plugins to initialise, fixes issue with capture not being properly initialised
-def pytest_configure(config):
+def pytest_configure(config: pytest.Config):
     config.addinivalue_line('markers', 'benchmark: mark a test with custom benchmark settings.')
-    bs = config._benchmarksession = BenchmarkSession(config)
+    bs = BenchmarkSession(config)
+    setattr(config, '_benchmarksession', bs)  # noqa: B010
     bs.handle_loading()
     config.pluginmanager.register(bs, 'pytest-benchmark')

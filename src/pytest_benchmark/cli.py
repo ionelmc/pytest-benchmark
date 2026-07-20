@@ -3,13 +3,23 @@
   PYTEST_DONT_REWRITE
 """
 
-import argparse
+from argparse import Action
+from argparse import ArgumentParser
+from argparse import Namespace
+from argparse import RawDescriptionHelpFormatter
+from collections.abc import Sequence
 from functools import partial
+from pathlib import Path
+from types import ModuleType
+from typing import Any
+from typing import NoReturn
+from typing import Self
 
-from _pytest import pathlib
+import pytest
+from _pytest import pathlib as _pathlib  # TODO: Change name of import
 from _pytest._io import TerminalWriter
-from _pytest.config import Config
 from _pytest.config.findpaths import locate_config
+from _pytest.mark.expression import Expression
 
 from pytest_benchmark.csv import CSVResults
 
@@ -44,39 +54,52 @@ COMPARE_HELP = """examples:
         Loads runs from exactly those files."""
 
 
-class HelpAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
+class HelpAction(Action):
+    def __call__(
+        self,
+        parser: ArgumentParser,
+        namespace: Namespace,
+        values: str | Sequence[Any] | None,
+        option_string: str | None = None,
+    ) -> NoReturn:
         if values:
-            make_parser().parse_args([values, '--help'])
+            command = values if isinstance(values, str) else str(values[0])
+            make_parser().parse_args([command, '--help'])
+
         else:
             parser.print_help()
+
         parser.exit()
 
 
-class CommandArgumentParser(argparse.ArgumentParser):
+class CommandArgumentParser(ArgumentParser):
     commands = None
-    commands_dispatch = None
+    commands_dispatch: dict[str, Any] | None = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs['add_help'] = False
 
-        super().__init__(*args, formatter_class=argparse.RawDescriptionHelpFormatter, **kwargs)
+        kwargs.setdefault('formatter_class', RawDescriptionHelpFormatter)
+        super().__init__(*args, **kwargs)
+
         self.add_argument('-h', '--help', metavar='COMMAND', nargs='?', action=HelpAction, help='Display help and exit.')
+
         help_command = self.add_command('help', description='Display help and exit.')
         help_command.add_argument('command', nargs='?', action=HelpAction)
 
-    def add_command(self, name, **opts):
+    def add_command(self, name: str, **opts: Any) -> ArgumentParser:
         if self.commands is None:
             self.commands = self.add_subparsers(
                 title='commands',
                 dest='command',
-                parser_class=argparse.ArgumentParser,
+                parser_class=ArgumentParser,
             )
             self.commands_dispatch = {}
+
         if 'description' in opts and 'help' not in opts:
             opts['help'] = opts['description']
 
-        command = self.commands.add_parser(name, formatter_class=argparse.RawDescriptionHelpFormatter, **opts)
+        command = self.commands.add_parser(name, formatter_class=RawDescriptionHelpFormatter, **opts)
         self.commands_dispatch[name] = command
         return command
 
@@ -85,7 +108,7 @@ def add_glob_or_file(addoption):
     addoption('glob_or_file', nargs='*', help='Glob or exact path for JSON files. If not specified all runs are loaded.')
 
 
-def make_parser():
+def make_parser() -> CommandArgumentParser:
     parser = CommandArgumentParser('py.test-benchmark', description="pytest_benchmark's management commands.")
     add_global_options(parser.add_argument, prefix='')
 
@@ -133,11 +156,13 @@ def make_parser():
 
 
 class HookDispatch:
-    def __init__(self, *, root, **kwargs):
+    conftest: ModuleType | None
+
+    def __init__(self, *, root: Path, **kwargs: str) -> None:
         _, _, config, *_ = locate_config(invocation_dir=root, args=())
-        conftest_file = pathlib.Path('conftest.py')
+        conftest_file = Path('conftest.py')
         if conftest_file.exists():
-            self.conftest = pathlib.import_path(
+            self.conftest = _pathlib.import_path(
                 conftest_file,
                 **kwargs,
                 root=root,
@@ -146,36 +171,44 @@ class HookDispatch:
         else:
             self.conftest = None
 
-    def __getattr__(self, item):
+    def __getattr__(self, item: str) -> Any:
+        # TODO: inspect a way to get clean or explain what do the function
         default = getattr(plugin, item)
         return getattr(self.conftest, item, default)
 
 
-def main():
+def main() -> None:
     parser = make_parser()
     args = parser.parse_args()
     level = Logger.QUIET if args.quiet else Logger.NORMAL
+
     if args.verbose:
         level = Logger.VERBOSE
+
     logger = Logger(level)
     storage = load_storage(args.storage, logger=logger, netrc=args.netrc)
 
-    hook = HookDispatch(mode=args.importmode, root=pathlib.Path('.'))
+    hook = HookDispatch(mode=args.importmode, root=Path())
 
     if args.command == 'list':
         for file in storage.query():
             print(file)
+
     elif args.command == 'compare':
         histogram = first_or_value(args.histogram, False)
+
         if args.between:
             if args.columns:
                 parser.error('--between is not compatible with --columns (--between already specifies the columns)')
+
             if histogram:
                 parser.error('--between is not compatible with --histogram')
-            results_table_cls = CompareBetweenResults
+            results_table_cls: Any = CompareBetweenResults
             args.columns = args.between
+
         else:
             results_table_cls = TableResults
+
             if not args.columns:
                 args.columns = DEFAULT_COLUMNS
 
@@ -187,33 +220,44 @@ def main():
             logger=logger,
             scale_unit=partial(
                 hook.pytest_benchmark_scale_unit,
-                config=Config.fromdictargs({'benchmark_time_unit': args.time_unit}, []),
+                config=pytest.Config.fromdictargs(
+                    {'benchmark_time_unit': args.time_unit},
+                    [],
+                ),
             ),
         )
         benchmarks = storage.load_benchmarks(*args.glob_or_file)
-        if args.filter_expr:
-            from _pytest.mark.expression import Expression  # noqa: PLC0415
 
+        if args.filter_expr:
             expr = Expression.compile(args.filter_expr)
 
-            def _evaluate_expr(benchmark):
+            def _evaluate_expr(benchmark: Any) -> bool:
                 name = benchmark.get('fullname') or benchmark.get('name', '')
-                return expr.evaluate(lambda key: key in name)
+
+                def matcher(key: str, **kwargs: str | int | bool | None) -> bool:
+                    return key in name
+
+                return expr.evaluate(matcher)  # type: ignore[arg-type]
 
             benchmarks = filter(_evaluate_expr, benchmarks)
+
         groups = hook.pytest_benchmark_group_stats(
             benchmarks=benchmarks,
             group_by=args.group_by,
             config=None,
         )
         results_table.display(TerminalReporter(), groups, progress_reporter=report_noprogress)
+
         if args.csv:
             results_csv = CSVResults(args.columns, args.sort, logger)
             (output_file,) = args.csv
 
             results_csv.render(output_file, groups)
+
     elif args.command is None:
+        assert parser.commands is not None
         parser.error('missing command (available commands: {})'.format(', '.join(map(repr, parser.commands.choices))))
+
     else:
         parser.error(f'unexpected command {args.command!r}')
 
@@ -222,26 +266,27 @@ class TerminalReporter:
     def __init__(self):
         self._tw = TerminalWriter()
 
-    def ensure_newline(self):
+    def ensure_newline(self: Self):
         pass
 
-    def write(self, content, **markup):
+    def write(self: Self, content: str, **markup: bool):
         self._tw.write(content, **markup)
 
-    def write_line(self, line, **markup):
-        if not isinstance(line, str):
+    def write_line(self: Self, line: str, **markup: bool):
+        if not isinstance(line, str):  # TODO: Unnecessary isinstance call; "str" is always an instance of "str"
             line = line.decode(errors='replace')
+
         self._tw.line(line, **markup)
 
-    def rewrite(self, line, **markup):
+    def rewrite(self: Self, line: str, **markup: bool):
         line = str(line)
         self._tw.write('\r' + line, **markup)
 
-    def write_sep(self, sep, title=None, **markup):
+    def write_sep(self: Self, sep: str, title: str | None = None, **markup: bool):
         self._tw.sep(sep, title, **markup)
 
-    def section(self, title, sep='=', **kw):
+    def section(self: Self, title: str, sep: str = '=', **kw: Any):
         self._tw.sep(sep, title, **kw)
 
-    def line(self, msg, **kw):
+    def line(self: Self, msg: str, **kw: Any):
         self._tw.line(msg, **kw)

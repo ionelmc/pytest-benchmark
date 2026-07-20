@@ -5,6 +5,7 @@
 
 import os
 from functools import partial
+from typing import Any
 
 import pytest
 
@@ -33,16 +34,18 @@ class BenchmarkSession:
     compared_mapping = None
     groups = None
 
-    def __init__(self, config):
+    def __init__(self, config: pytest.Config) -> None:
         self.verbose = config.getoption('benchmark_verbose')
-        self.quiet = False if self.verbose else config.getoption('benchmark_quiet')
-        level = Logger.QUIET if self.quiet else Logger.NORMAL
+        self.quiet: bool = False if self.verbose else config.getoption('benchmark_quiet')
+        level: int = Logger.QUIET if self.quiet else Logger.NORMAL
+
         if self.verbose:
             level = Logger.VERBOSE
+
         self.logger = Logger(level, config=config)
         self.config = config
-        self.performance_regressions = []
-        self.benchmarks = []
+        self.performance_regressions: list[tuple[Any, ...]] = []
+        self.benchmarks: list[Any] = []
         self.machine_id = get_machine_id()
         self.storage = load_storage(
             config.getoption('benchmark_storage'),
@@ -114,6 +117,7 @@ class BenchmarkSession:
         return obj
 
     def prepare_benchmarks(self):
+        assert self.compared_mapping is not None
         for bench in self.benchmarks:
             if bench:
                 compared = False
@@ -250,6 +254,7 @@ class BenchmarkSession:
 
     def display_cprofile(self, tr):
         section_displayed = False
+        assert self.groups is not None
         for group in self.groups:
             _group_name, benchmarks = group
             for benchmark in benchmarks:

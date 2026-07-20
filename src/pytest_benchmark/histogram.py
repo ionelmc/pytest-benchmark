@@ -5,22 +5,20 @@
 
 from collections.abc import Iterable
 from pathlib import Path
+from typing import Any
+
+from pygal.graph.box import Box
+from pygal.style import DefaultStyle
 
 from .utils import TIME_UNITS
 from .utils import slugify
 
-try:
-    from pygal.graph.box import Box
-    from pygal.style import DefaultStyle
-except ImportError as exc:
-    raise ImportError(exc.args, 'Please install pygal and pygaljs or pytest-benchmark[histogram]') from exc
-
 
 class CustomBox(Box):
-    def _box_points(self, serie, _):
+    def _box_points(self, serie, _) -> tuple[Any, list[Any]]:
         return serie, [serie[0], serie[6]]
 
-    def _value_format(self, x):
+    def _value_format(self, x: Any) -> str:  # TODO: Change type hinting of x
         return (
             f'Min: {x[:7][0]:.4f}\n'
             f'Q1-1.5IQR: {x[:7][1]:.4f}\n'
@@ -31,12 +29,17 @@ class CustomBox(Box):
 
     def _format(self, x, *args):
         sup = super()._format
+
         if args:
             val = x.values
+
         else:
             val = x
+
         if isinstance(val, Iterable):
-            return self._value_format(val), val[7]
+            values = list(val)
+            return self._value_format(values), values[7]
+
         else:
             return sup(x, *args)
 
@@ -45,7 +48,7 @@ class CustomBox(Box):
         self.svg.node(node, 'desc', class_='x_label').text = value[1]
 
 
-def make_plot(benchmarks, title, adjustment):
+def make_plot(benchmarks, title: str, adjustment: int):
     class Style(DefaultStyle):
         colors = tuple('#000000' if row['path'] else DefaultStyle.colors[1] for row in benchmarks)
         font_family = 'Consolas, "Deja Vu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace'
@@ -54,7 +57,7 @@ def make_plot(benchmarks, title, adjustment):
     maximum = int(max(min(row['max'], row['hd15iqr']) * adjustment for row in benchmarks) + 1)
 
     try:
-        import pygaljs  # noqa: PLC0415
+        import pygaljs  # type: ignore # noqa: PLC0415
     except ImportError:
         opts = {}
     else:
@@ -93,13 +96,15 @@ def make_plot(benchmarks, title, adjustment):
         serie = [row[field] * adjustment for field in ['min', 'ld15iqr', 'q1', 'median', 'q3', 'hd15iqr', 'max']]
         serie.append(row['path'])
         plot.add(f'{row["fullname"]} - {row["rounds"]} rounds', serie)
+
     return plot
 
 
-def make_histogram(output_prefix, name, benchmarks, unit, adjustment):
+def make_histogram(output_prefix: str, name: str, benchmarks: Any, unit: str, adjustment: int) -> Path:
     if name:
         path = f'{output_prefix}-{slugify(name)}.svg'
         title = f'Speed in {TIME_UNITS[unit]} of {name}'
+
     else:
         path = f'{output_prefix}.svg'
         title = f'Speed in {TIME_UNITS[unit]}'

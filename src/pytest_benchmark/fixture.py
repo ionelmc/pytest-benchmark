@@ -6,28 +6,27 @@
 import cProfile
 import gc
 import pstats
+import statistics  # noqa: F401 - compatibility export consumed by session.py
 import sys
 import time
-import traceback
-import typing
+from cProfile import Profile
 from math import ceil
 from pathlib import Path
+from types import TracebackType
+from typing import Any
+from typing import Callable
+from typing import ClassVar
+from typing import Self
 
+from .logger import Logger
+from .stats import Metadata
+from .timers import Timer
 from .timers import compute_timer_precision
 from .utils import NameWrapper
 from .utils import format_time
 from .utils import slugify
 
-statistics: typing.Any
 statistics_error: str | None = None
-try:
-    import statistics
-except (ImportError, SyntaxError):
-    statistics_error = traceback.format_exc()
-    statistics = None
-else:
-    statistics_error = None
-    from .stats import Metadata
 
 
 class FixtureAlreadyUsed(Exception):
@@ -35,51 +34,60 @@ class FixtureAlreadyUsed(Exception):
 
 
 class PauseInstrumentation:
-    def __init__(self, tracer=True, profiler=True):
+    def __init__(self: Self, tracer: bool = True, profiler: bool = True):
         self.disable_profiler = profiler
         self.disable_tracer = tracer
-        self.prev_tracer = None
-        self.prev_profiler = None
+        self.prev_tracer: Any = None
+        self.prev_profiler: Any = None
 
     def __enter__(self):
         if self.disable_tracer:
             self.prev_tracer = sys.gettrace()
+
             if self.prev_tracer:
                 sys.settrace(None)
+
         if self.disable_profiler:
             self.prev_profiler = sys.getprofile()
+
             if self.prev_profiler:
                 sys.setprofile(None)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         if self.prev_tracer:
             sys.settrace(self.prev_tracer)
+
         if self.prev_profiler:
             sys.setprofile(self.prev_profiler)
 
 
 class BenchmarkFixture:
-    _precisions: typing.ClassVar[dict[str, float]] = {}
+    _precisions: ClassVar[dict[str, float]] = {}
 
     def __init__(
         self,
         node,
-        disable_gc,
-        timer,
-        min_rounds,
-        min_time,
-        max_time,
+        disable_gc: bool,
+        timer: NameWrapper,
+        min_rounds: int,
+        min_time: float | int,
+        max_time: float | int,
         warmup,
-        warmup_iterations,
+        warmup_iterations: int,
         calibration_precision,
         add_stats,
-        logger,
+        logger: Logger,
         warner,
-        disabled,
-        cprofile,
+        disabled: bool,
+        cprofile: str,
         cprofile_loops,
         cprofile_dump,
-        group=None,
+        group: dict[str, Any] | None = None,
     ):
         self.name = node.name
         self.fullname = node._nodeid
@@ -91,9 +99,9 @@ class BenchmarkFixture:
             self.param = None
             self.params = None
         self.group = group
-        self.has_error = False
-        self.extra_info = {}
-        self.skipped = False
+        self.has_error: bool = False
+        self.extra_info: dict[str, Any] = {}
+        self.skipped: bool = False
 
         self._disable_gc = disable_gc
         self._timer = timer.target
@@ -105,23 +113,26 @@ class BenchmarkFixture:
         self._warmup = warmup and warmup_iterations
         self._logger = logger
         self._warner = warner
-        self._cleanup_callbacks = []
-        self._mode = None
+        self._cleanup_callbacks: list[Callable[[], None]] = []
+        self._mode: str | None = None
         self.cprofile = cprofile
         self.cprofile_loops = cprofile_loops
         self.cprofile_dump = cprofile_dump
         self.cprofile_stats = None
-        self.stats = None
+        self.stats: Metadata | None = None
 
     @property
     def enabled(self):
         return not self.disabled
 
-    def _get_precision(self, timer):
-        if timer in self._precisions:
-            timer_precision = self._precisions[timer]
+    def _get_precision(self, timer: Timer) -> float:
+        timer_name = str(NameWrapper(timer))
+        if timer_name in self._precisions:
+            timer_precision = self._precisions[timer_name]
+
         else:
-            timer_precision = self._precisions[timer] = compute_timer_precision(timer)
+            timer_precision = compute_timer_precision(timer) or 0.0
+            self._precisions[timer_name] = timer_precision
             self._logger.debug('')
             self._logger.debug(f'Computing precision for {NameWrapper(timer)} ... {format_time(timer_precision)}s.', blue=True, bold=True)
         return timer_precision
@@ -134,22 +145,26 @@ class BenchmarkFixture:
             try:
                 if loops_range:
                     start = timer()
+
                     for _ in loops_range:
                         function_to_benchmark(*args, **kwargs)
+
                     end = timer()
                     return end - start
+
                 else:
                     start = timer()
                     result = function_to_benchmark(*args, **kwargs)
                     end = timer()
                     return end - start, result
+
             finally:
                 if gc_enabled:
                     gc.enable()
 
         return runner
 
-    def _make_stats(self, iterations):
+    def _make_stats(self, iterations) -> Metadata:
         bench_stats = Metadata(
             self,
             iterations=iterations,
@@ -166,9 +181,11 @@ class BenchmarkFixture:
         self.stats = bench_stats
         return bench_stats
 
-    def _save_cprofile(self, profile: cProfile.Profile):
+    def _save_cprofile(self, profile: Profile):
         stats = pstats.Stats(profile)
+        assert self.stats is not None
         self.stats.cprofile_stats = stats
+
         if self.cprofile_dump:
             output_file = Path(f'{self.cprofile_dump}-{slugify(self.name)}.prof')
             output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -179,9 +196,11 @@ class BenchmarkFixture:
         if self._mode:
             self.has_error = True
             raise FixtureAlreadyUsed(f'Fixture can only be used once. Previously it was used in {self._mode} mode.')
+
         try:
             self._mode = 'benchmark(...)'
             return self._raw(function_to_benchmark, *args, **kwargs)
+
         except Exception:
             self.has_error = True
             raise
@@ -190,6 +209,7 @@ class BenchmarkFixture:
         if self._mode:
             self.has_error = True
             raise FixtureAlreadyUsed(f'Fixture can only be used once. Previously it was used in {self._mode} mode.')
+
         try:
             self._mode = 'benchmark.pedantic(...)'
             return self._raw_pedantic(

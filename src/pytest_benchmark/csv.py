@@ -6,20 +6,28 @@
 import csv
 import operator
 from pathlib import Path
+from typing import Any
+
+from .logger import Logger
 
 
 class CSVResults:
-    def __init__(self, columns, sort, logger):
+    def __init__(self, columns: list[Any], sort: Any, logger: Logger) -> None:
         self.columns = columns
         self.sort = sort
         self.logger = logger
 
-    def render(self, output_file, groups):
+    def render(
+        self,
+        output_file: str | Path,
+        groups: list[tuple[str, list[dict[str, Any]]]],
+    ) -> None:
         output_file = Path(output_file)
         output_file.parent.mkdir(exist_ok=True, parents=True)
 
         if not output_file.suffix:
             output_file = output_file.with_suffix('.csv')
+
         with output_file.open('w') as stream:
             writer = csv.writer(stream)
             params = sorted(
@@ -43,4 +51,5 @@ class CSVResults:
                     row.extend(bench_params.get(param, '') for param in params)
                     row.extend(bench[prop] for prop in self.columns)
                     writer.writerow(row)
+
         self.logger.info(f'Generated csv: {output_file}', bold=True)

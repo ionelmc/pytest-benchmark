@@ -5,6 +5,8 @@
 
 import operator
 from math import isinf
+from typing import Any
+from typing import LiteralString
 
 from .utils import report_online_progress
 from .utils import report_progress
@@ -145,7 +147,7 @@ class TableResults:
 
 
 class CompareBetweenResults(TableResults):
-    def display(self, tr, groups, progress_reporter=report_progress):
+    def display(self, tr: Any, groups, progress_reporter=report_progress):
         tr.write_line('')
 
         for line, (group, benchmarks) in progress_reporter(groups, tr, 'Computing stats ... group {pos}/{total}'):
@@ -158,7 +160,7 @@ class CompareBetweenResults(TableResults):
     def _display_single_between(self, line, group, benchmarks, *, tr, progress_reporter):
         # Collect sources in order of first appearance and build fullname -> {source: bench} mapping
         sources = list(dict.fromkeys(bench.get('source', '') for bench in benchmarks))
-        bench_map = {}
+        bench_map: dict[str, dict[str, Any]] = {}
         for bench in benchmarks:
             bench_map.setdefault(bench['fullname'], {})[bench.get('source', '')] = bench
 
@@ -261,17 +263,25 @@ class CompareBetweenResults(TableResults):
         tr.write_line('')
 
 
-def compute_baseline_scale(baseline, value, width):
+def compute_baseline_scale(
+    baseline: int | float,
+    value: int | float,
+    width: int,
+) -> LiteralString | str:
     if not width:
         return ''
+
     if value == baseline:
         return ' (1.0)'.ljust(width)
 
     scale = abs(value / baseline) if baseline else float('inf')
+
     if scale > 1000:
         if isinf(scale):
             return ' (inf)'.ljust(width)
-        else:
+
+        else:  # TODO: Remove unnecessary else
             return ' (>1000.0)'.ljust(width)
-    else:
+
+    else:  # TODO: Remove unnecessary else
         return f' ({scale:.2f})'.ljust(width)
