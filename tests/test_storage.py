@@ -21,10 +21,20 @@ from pytest_benchmark.storage.file import FileStorage
 from pytest_benchmark.utils import NAME_FORMATTERS
 from pytest_benchmark.utils import DifferenceRegressionCheck
 from pathlib import Path
+from typing import Protocol
+from _pytest.pytester import LineMatcher
 from pytest_benchmark.utils import PercentageRegressionCheck
 from pytest_benchmark.utils import get_machine_id
 
 pytest_plugins = 'pytester'
+
+
+class LegacyPath(Protocol):
+    def join(self, *parts: str) -> LegacyPath: ...
+
+    def read(self, mode: str = 'r') -> str: ...
+
+    def write(self, data: str | bytes, mode: str = 'w') -> None: ...
 
 
 THIS = Path(__file__)
@@ -120,14 +130,14 @@ class MockSession(BenchmarkSession):
 text_type = str
 
 
-def force_text(text):
+def force_text(text: str | bytes) -> str:
     if isinstance(text, text_type):
         return text
     else:
         return text.decode('utf-8')
 
 
-def force_bytes(text):
+def force_bytes(text: str | bytes) -> bytes:
     if isinstance(text, text_type):
         return text.encode('utf-8')
     else:
@@ -135,7 +145,8 @@ def force_bytes(text):
 
 
 @pytest.fixture(params=['short', 'normal', 'long', 'trial'])
-def name_format(request):
+def name_format(request: pytest.FixtureRequest) -> str:
+    assert isinstance(request.param, str)
     return request.param
 
 
@@ -144,7 +155,7 @@ def sess(request, name_format):
     return MockSession(name_format)
 
 
-def make_logger(sess):
+def make_logger(sess: MockSession):
     output = StringIO()
     sess.logger = sess.storage.logger = Namespace(
         warning=lambda text, **opts: output.write(force_text(text) + '\n'),
@@ -154,7 +165,7 @@ def make_logger(sess):
     return output
 
 
-def test_rendering(sess):
+def test_rendering(sess: MockSession):
     output = make_logger(sess)
     sess.histogram = os.path.join('docs', 'sample')
     sess.compare = '*/*'
@@ -171,7 +182,7 @@ def test_rendering(sess):
     )
 
 
-def test_regression_checks(sess, name_format):
+def test_regression_checks(sess: MockSession, name_format: str):
     output = make_logger(sess)
     sess.handle_loading()
     sess.performance_regressions = []
@@ -247,7 +258,7 @@ def test_regression_checks(sess, name_format):
     )
 
 
-def test_regression_checks_inf(sess, name_format):
+def test_regression_checks_inf(sess: MockSession, name_format: str):
     output = make_logger(sess)
     sess.compare = '0002'
     sess.handle_loading()
@@ -323,7 +334,7 @@ def test_regression_checks_inf(sess, name_format):
     )
 
 
-def test_compare_1(sess, LineMatcher):
+def test_compare_1(sess: MockSession, LineMatcher: type[LineMatcher]):
     output = make_logger(sess)
     sess.handle_loading()
     sess.finish()
@@ -354,7 +365,7 @@ def test_compare_1(sess, LineMatcher):
     )
 
 
-def test_compare_2(sess, LineMatcher):
+def test_compare_2(sess: MockSession, LineMatcher: type[LineMatcher]):
     output = make_logger(sess)
     sess.compare = '0002'
     sess.handle_loading()
@@ -388,7 +399,7 @@ def test_compare_2(sess, LineMatcher):
 
 
 @freeze_time('2015-08-15T00:04:18.687119')
-def test_save_json(sess, tmpdir, monkeypatch):
+def test_save_json(sess: MockSession, tmpdir: LegacyPath, monkeypatch: pytest.MonkeyPatch):
     json_path = Path(str(tmpdir)) / 'output.json'
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = False
@@ -401,7 +412,7 @@ def test_save_json(sess, tmpdir, monkeypatch):
 
 
 @freeze_time('2015-08-15T00:04:18.687119')
-def test_save_with_name(sess, tmpdir, monkeypatch):
+def test_save_with_name(sess: MockSession, tmpdir: LegacyPath, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = 'foobar'
     sess.autosave = True
@@ -416,7 +427,7 @@ def test_save_with_name(sess, tmpdir, monkeypatch):
 
 
 @freeze_time('2015-08-15T00:04:18.687119')
-def test_save_no_name(sess, tmpdir, monkeypatch):
+def test_save_no_name(sess: MockSession, tmpdir: LegacyPath, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = True
     sess.autosave = True
@@ -430,7 +441,7 @@ def test_save_no_name(sess, tmpdir, monkeypatch):
 
 
 @freeze_time('2015-08-15T00:04:18.687119')
-def test_save_with_error(sess, tmpdir, monkeypatch):
+def test_save_with_error(sess: MockSession, tmpdir: LegacyPath, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = True
     sess.autosave = True
@@ -452,7 +463,7 @@ def test_save_with_error(sess, tmpdir, monkeypatch):
 
 
 @freeze_time('2015-08-15T00:04:18.687119')
-def test_autosave(sess, tmpdir, monkeypatch):
+def test_autosave(sess: MockSession, tmpdir: LegacyPath, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = False
     sess.autosave = True

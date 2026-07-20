@@ -1,7 +1,10 @@
 import time
+from collections.abc import Generator
 from functools import partial
 
 import pytest
+
+from pytest_benchmark.fixture import BenchmarkFixture
 
 
 def slow_warmup():
@@ -11,26 +14,26 @@ def slow_warmup():
 
 
 @pytest.mark.benchmark(warmup=True, warmup_iterations=10**8, max_time=10)
-def test_calibrate(benchmark):
+def test_calibrate(benchmark: BenchmarkFixture) -> None:
     benchmark(slow_warmup)
 
 
 @pytest.mark.benchmark(warmup=True, warmup_iterations=10**8, max_time=10)
-def test_calibrate_fast(benchmark):
+def test_calibrate_fast(benchmark: BenchmarkFixture) -> None:
     benchmark(lambda: [int] * 100)
 
 
 @pytest.mark.benchmark(warmup=True, warmup_iterations=10**8, max_time=10)
-def test_calibrate_xfast(benchmark):
+def test_calibrate_xfast(benchmark: BenchmarkFixture) -> None:
     benchmark(lambda: None)
 
 
 @pytest.mark.benchmark(warmup=True, warmup_iterations=10**8, max_time=10)
-def test_calibrate_slow(benchmark):
+def test_calibrate_slow(benchmark: BenchmarkFixture) -> None:
     benchmark(partial(time.sleep, 0.00001))
 
 
-def timer(ratio, step, additive):
+def timer(ratio: float, step: float, additive: bool) -> Generator[float, bool, None]:
     t = 0
     slowmode = False
     while 1:
@@ -48,7 +51,7 @@ def timer(ratio, step, additive):
 @pytest.mark.parametrize('skew_ratio', [0, 1, -1])
 @pytest.mark.parametrize('additive', [True, False])
 @pytest.mark.benchmark(max_time=0, min_rounds=1, calibration_precision=100)
-def test_calibrate_stuck(benchmark, minimum, additive, skew_ratio):
+def test_calibrate_stuck(benchmark: BenchmarkFixture, minimum: float, additive: bool, skew_ratio: int) -> None:
     # if skew_ratio:
     #     ratio += skew_ratio * SKEW
     if skew_ratio > 0:

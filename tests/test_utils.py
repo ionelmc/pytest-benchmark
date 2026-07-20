@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 import argparse
 import os
 import shutil
 import subprocess
 from pathlib import Path
+from typing import Literal
+from typing import Protocol
+from typing import cast
 
 import pytest
+from _pytest.legacypath import Testdir
 
 from pytest_benchmark.utils import clonefunc
 from pytest_benchmark.utils import get_commit_info
@@ -14,6 +20,24 @@ from pytest_benchmark.utils import parse_elasticsearch_storage
 from pytest_benchmark.utils import parse_warmup
 
 pytest_plugins = ('pytester',)
+
+
+class LegacyPath(Protocol):
+    def join(self, *parts: str) -> LegacyPath: ...
+
+    def ensure(self, *parts: str, dir: int = 0, file: bool = False) -> LegacyPath: ...
+
+    def chdir(self) -> None: ...
+
+    def write(self, data: str) -> None: ...
+
+
+class TypedTestdir(Protocol):
+    @property
+    def tmpdir(self) -> LegacyPath: ...
+
+    def mkdir(self, name: str) -> LegacyPath: ...
+
 
 f1 = lambda a: a  # noqa
 
@@ -33,15 +57,16 @@ def test_clonefunc_not_function():
 
 
 @pytest.fixture(params=(True, False))
-def crazytestdir(request, testdir):
+def crazytestdir(request: pytest.FixtureRequest, testdir: Testdir) -> TypedTestdir:
+    typed_testdir = cast(TypedTestdir, cast(object, testdir))
     if request.param:
-        testdir.tmpdir.join('foo', 'bar').ensure(dir=1).chdir()
+        typed_testdir.tmpdir.join('foo', 'bar').ensure(dir=1).chdir()
 
-    return testdir
+    return typed_testdir
 
 
 @pytest.fixture(params=('git', 'hg'))
-def scm(request, testdir):
+def scm(request: pytest.FixtureRequest, testdir: TypedTestdir) -> str:
     scm = request.param
     if not shutil.which(scm):
         pytest.skip(f'{scm!r} not available on $PATH')
@@ -59,7 +84,7 @@ username = you <you@example.com>
     return scm
 
 
-def test_get_commit_info(scm, crazytestdir):
+def test_get_commit_info(scm: str, crazytestdir: TypedTestdir):
     with open('test_get_commit_info.py', 'w') as fh:
         fh.write('asdf')
     subprocess.check_call([scm, 'add', 'test_get_commit_info.py'])
@@ -79,7 +104,7 @@ def test_get_commit_info(scm, crazytestdir):
     assert 'id' in out
 
 
-def test_missing_scm_bins(scm, crazytestdir, monkeypatch):
+def test_missing_scm_bins(scm: str, crazytestdir: TypedTestdir, monkeypatch: pytest.MonkeyPatch):
     with open('test_get_commit_info.py', 'w') as fh:
         fh.write('asdf')
     subprocess.check_call([scm, 'add', 'test_get_commit_info.py'])
@@ -93,7 +118,7 @@ def test_missing_scm_bins(scm, crazytestdir, monkeypatch):
     )
 
 
-def test_get_branch_info(scm, testdir):
+def test_get_branch_info(scm: str, testdir: TypedTestdir):
     # make an initial commit
     testdir.tmpdir.join('foo.txt').ensure(file=True)
     subprocess.check_call([scm, 'add', 'foo.txt'])
@@ -118,11 +143,11 @@ def test_get_branch_info(scm, testdir):
         assert get_commit_info()['branch'] == '(detached head)'
 
 
-def test_no_branch_info(testdir):
+def test_no_branch_info(testdir: TypedTestdir):
     assert get_commit_info()['branch'] == '(unknown)'
 
 
-def test_commit_info_error(testdir):
+def test_commit_info_error(testdir: TypedTestdir):
     testdir.mkdir('.git')
     info = get_commit_info()
     assert info['branch'].lower() == '(unknown)'.lower()
@@ -157,7 +182,7 @@ def test_parse_columns():
         'c:\\foo\\bar\\pytest_benchmark_repo.gitfoo@example.com:pytest_benchmark_repo.git',
     ],
 )
-def test_get_project_name(scm, set_remote, testdir):
+def test_get_project_name(scm: str | None, set_remote: Literal[False] | str, testdir: TypedTestdir) -> None:
     if scm is None:
         assert get_project_name().startswith('test_get_project_name')
         return
@@ -183,19 +208,19 @@ default = {set_remote}
 
 
 @pytest.mark.parametrize('scm', ['git', 'hg'])
-def test_get_project_name_broken(scm, testdir):
+def test_get_project_name_broken(scm: str, testdir: TypedTestdir):
     testdir.tmpdir.join('.' + scm).ensure(dir=1)
     assert get_project_name() in ['test_get_project_name_broken0', 'test_get_project_name_broken1']
 
 
-def test_get_project_name_fallback(testdir, capfd):
+def test_get_project_name_fallback(testdir: TypedTestdir, capfd: pytest.CaptureFixture[str]):
     testdir.tmpdir.ensure('.hg', dir=1)
     project_name = get_project_name()
     assert project_name.startswith('test_get_project_name_fallback')
     assert capfd.readouterr() == ('', '')
 
 
-def test_get_project_name_fallback_broken_hgrc(testdir, capfd):
+def test_get_project_name_fallback_broken_hgrc(testdir: TypedTestdir, capfd: pytest.CaptureFixture[str]):
     testdir.tmpdir.ensure('.hg', 'hgrc').write('[paths]\ndefault = /')
     project_name = get_project_name()
     assert project_name.startswith('test_get_project_name_fallback')

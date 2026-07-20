@@ -85,16 +85,30 @@ dev = [
 ]
 
 [tool.mypy]
-exclude = ['build']
+exclude = ['build', 'tests', 'typings']
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_untyped_defs = true
+disallow_untyped_calls = true
+no_implicit_optional = true
+warn_return_any = true
+
+[tool.basedpyright]
+include = ['src', 'ci', 'tests', 'docs']
+venvPath = '.'
+venv = '.venv'
 
 [[tool.mypy.overrides]]
 module = [
     "aspectlib", # ignore_missing_imports = true
+    "__pypy__.*",
     "cpuinfo",
+    "jinja2.*",
     "pygal.*",
     "pygaljs",
 ]
 ignore_missing_imports = true
+
 
 [tool.ruff]
 extend-exclude = ["static", "ci/templates"]

@@ -4,14 +4,20 @@
 """
 
 import os
+from collections.abc import Iterator
 from functools import partial
+from pathlib import Path
+from typing import Any
+from typing import cast
 
 import pytest
 
 from .fixture import statistics
 from .fixture import statistics_error
 from .logger import Logger
+from .stats import Metadata
 from .table import TableResults
+from .table import TerminalReporter
 from .utils import DEFAULT_COLUMNS
 from .utils import NAME_FORMATTERS
 from .utils import SecondsDecimal
@@ -30,19 +36,21 @@ class PerformanceRegression(Exception):
 
 
 class BenchmarkSession:
-    compared_mapping = None
-    groups = None
+    compared_mapping: dict[Path, dict[str, dict[str, Any]]] | None = None
+    groups: list[tuple[str | None, list[dict[str, Any]]]] | None = None
 
-    def __init__(self, config):
+    def __init__(self, config: pytest.Config) -> None:
         self.verbose = config.getoption('benchmark_verbose')
-        self.quiet = False if self.verbose else config.getoption('benchmark_quiet')
-        level = Logger.QUIET if self.quiet else Logger.NORMAL
+        self.quiet: bool = False if self.verbose else config.getoption('benchmark_quiet')
+        level: int = Logger.QUIET if self.quiet else Logger.NORMAL
+
         if self.verbose:
             level = Logger.VERBOSE
+
         self.logger = Logger(level, config=config)
         self.config = config
-        self.performance_regressions = []
-        self.benchmarks = []
+        self.performance_regressions: list[tuple[str, str]] = []
+        self.benchmarks: list[Metadata] = []
         self.machine_id = get_machine_id()
         self.storage = load_storage(
             config.getoption('benchmark_storage'),
@@ -102,27 +110,29 @@ class BenchmarkSession:
         self.save = config.getoption('benchmark_save')
         self.autosave = config.getoption('benchmark_autosave')
         self.save_data = config.getoption('benchmark_save_data')
-        self.json = config.getoption('benchmark_json')
+        self.json: str | None = config.getoption('benchmark_json')
         self.compare = config.getoption('benchmark_compare')
         self.compare_fail = config.getoption('benchmark_compare_fail')
         self.name_format = NAME_FORMATTERS[config.getoption('benchmark_name')]
         self.histogram = first_or_value(config.getoption('benchmark_histogram'), False)
 
-    def get_machine_info(self):
+    def get_machine_info(self) -> dict[str, Any]:
         obj = self.config.hook.pytest_benchmark_generate_machine_info(config=self.config)
         self.config.hook.pytest_benchmark_update_machine_info(config=self.config, machine_info=obj)
-        return obj
+        return cast(dict[str, Any], obj)
 
-    def prepare_benchmarks(self):
+    def prepare_benchmarks(self) -> Iterator[dict[str, Any]]:
+        assert self.compared_mapping is not None
         for bench in self.benchmarks:
             if bench:
                 compared = False
                 for path, compared_mapping in self.compared_mapping.items():
                     if bench.fullname in compared_mapping:
-                        compared = compared_mapping[bench.fullname]
+                        compared_benchmark = compared_mapping[bench.fullname]
+                        compared = True
                         source = short_filename(path, self.machine_id)
                         flat_bench = bench.as_dict(include_data=False, stats=False, cprofile=(self.cprofile_sort_by, self.cprofile_top))
-                        flat_bench.update(compared['stats'])
+                        flat_bench.update(compared_benchmark['stats'])
                         flat_bench['path'] = str(path)
                         flat_bench['source'] = source
                         if self.compare_fail:
@@ -136,21 +146,28 @@ class BenchmarkSession:
                 flat_bench['source'] = compared and 'NOW'
                 yield flat_bench
 
-    def save_json(self, output_json):
+    def save_json(self, output_json: dict[str, Any]) -> None:
+        if self.json is None:
+            raise RuntimeError('JSON output path is not configured.')
         with open(self.json, mode='wb') as fh:
             fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())
         self.logger.info(f'Wrote benchmark data in: {self.json}', purple=True)
 
-    def handle_saving(self):
+    def handle_saving(self) -> None:
         save = self.save or self.autosave
-        if save or self.json:
-            if not self.benchmarks:
-                if not self.disabled:
-                    self.logger.warning('Not saving anything, no benchmarks have been run!')
-                return
-            machine_info = self.get_machine_info()
-            commit_info = self.config.hook.pytest_benchmark_generate_commit_info(config=self.config)
-            self.config.hook.pytest_benchmark_update_commit_info(config=self.config, commit_info=commit_info)
+        if not save and not self.json:
+            return
+
+        if not self.benchmarks:
+            if not self.disabled:
+                self.logger.warning('Not saving anything, no benchmarks have been run!')
+            return
+
+        machine_info = self.get_machine_info()
+        commit_info = self.config.hook.pytest_benchmark_generate_commit_info(config=self.config)
+        if commit_info is None:
+            raise RuntimeError('pytest_benchmark_generate_commit_info did not return commit information.')
+        self.config.hook.pytest_benchmark_update_commit_info(config=self.config, commit_info=commit_info)
 
         if self.json:
             output_json = self.config.hook.pytest_benchmark_generate_json(
@@ -160,6 +177,8 @@ class BenchmarkSession:
                 machine_info=machine_info,
                 commit_info=commit_info,
             )
+            if output_json is None:
+                raise RuntimeError('pytest_benchmark_generate_json did not return benchmark data.')
             self.config.hook.pytest_benchmark_update_json(
                 config=self.config,
                 benchmarks=self.benchmarks,
@@ -175,6 +194,8 @@ class BenchmarkSession:
                 machine_info=machine_info,
                 commit_info=commit_info,
             )
+            if output_json is None:
+                raise RuntimeError('pytest_benchmark_generate_json did not return benchmark data.')
             self.config.hook.pytest_benchmark_update_json(
                 config=self.config,
                 benchmarks=self.benchmarks,
@@ -182,7 +203,7 @@ class BenchmarkSession:
             )
             self.storage.save(output_json, save)
 
-    def handle_loading(self):
+    def handle_loading(self) -> None:
         compared_mapping = {}
         if self.compare:
             if self.compare is True:
@@ -210,7 +231,7 @@ class BenchmarkSession:
                 self.logger.info(f'Comparing against benchmarks from: {path}', newline=False)
         self.compared_mapping = compared_mapping
 
-    def finish(self):
+    def finish(self) -> None:
         self.handle_saving()
         prepared_benchmarks = list(self.prepare_benchmarks())
         if prepared_benchmarks:
@@ -218,7 +239,7 @@ class BenchmarkSession:
                 config=self.config, benchmarks=prepared_benchmarks, group_by=self.group_by
             )
 
-    def display(self, tr):
+    def display(self, tr: TerminalReporter) -> None:
         if not self.groups:
             return
 
@@ -238,7 +259,7 @@ class BenchmarkSession:
         if not self.quiet:
             self.display_cprofile(tr)
 
-    def check_regressions(self):
+    def check_regressions(self) -> None:
         if self.compare_fail and not self.compared_mapping:
             raise pytest.UsageError('--benchmark-compare-fail requires valid --benchmark-compare.')
 
@@ -248,8 +269,9 @@ class BenchmarkSession:
             )
             raise PerformanceRegression('Performance has regressed.')
 
-    def display_cprofile(self, tr):
+    def display_cprofile(self, tr: TerminalReporter) -> None:
         section_displayed = False
+        assert self.groups is not None
         for group in self.groups:
             _group_name, benchmarks = group
             for benchmark in benchmarks:

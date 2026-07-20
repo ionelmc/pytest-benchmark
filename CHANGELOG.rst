@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Improved type annotations across the package, CI helpers, and test suite, and strengthened static type checking.
+  Contributed by Eli-ezer Reuven Ramirez Ruiz.
+
 v5.2.3 (2025-11-09)
 --------------------
 

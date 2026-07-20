@@ -3,11 +3,23 @@
   PYTEST_DONT_REWRITE
 """
 
+from typing import Any
+
 import pytest
+
+from .fixture import BenchmarkFixture
+from .session import BenchmarkSession
 
 
 @pytest.hookspec(firstresult=True)
-def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
+def pytest_benchmark_scale_unit(
+    config: pytest.Config,
+    unit: str,
+    benchmarks: list[dict[str, Any]],
+    best: dict[str, float],
+    worst: dict[str, float],
+    sort: str,
+) -> tuple[str, float] | None:
     """
     To have custom time scaling do something like this:
 
@@ -28,7 +40,9 @@ def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
 
 
 @pytest.hookspec(firstresult=True)
-def pytest_benchmark_generate_machine_info(config):
+def pytest_benchmark_generate_machine_info(
+    config: pytest.Config,
+) -> dict[str, Any] | None:
     """
     To completely replace the generated machine_info do something like this:
 
@@ -39,7 +53,10 @@ def pytest_benchmark_generate_machine_info(config):
     """
 
 
-def pytest_benchmark_update_machine_info(config, machine_info):
+def pytest_benchmark_update_machine_info(
+    config: pytest.Config,
+    machine_info: dict[str, Any],
+) -> None:
     """
     If benchmarks are compared and machine_info is different, warnings will be shown.
 
@@ -53,7 +70,9 @@ def pytest_benchmark_update_machine_info(config, machine_info):
 
 
 @pytest.hookspec(firstresult=True)
-def pytest_benchmark_generate_commit_info(config):
+def pytest_benchmark_generate_commit_info(
+    config: pytest.Config,
+) -> dict[str, Any] | None:
     """
     To completely replace the generated commit_info do something like this:
 
@@ -64,7 +83,10 @@ def pytest_benchmark_generate_commit_info(config):
     """
 
 
-def pytest_benchmark_update_commit_info(config, commit_info):
+def pytest_benchmark_update_commit_info(
+    config: pytest.Config,
+    commit_info: dict[str, Any],
+) -> None:
     """
     To add something into the commit_info, like the commit message do something like this:
 
@@ -76,7 +98,11 @@ def pytest_benchmark_update_commit_info(config, commit_info):
 
 
 @pytest.hookspec(firstresult=True)
-def pytest_benchmark_group_stats(config, benchmarks, group_by):
+def pytest_benchmark_group_stats(
+    config: pytest.Config,
+    benchmarks: list[dict[str, Any]],
+    group_by: str,
+) -> list[tuple[str | None, list[dict[str, Any]]]] | None:
     """
     You may perform grouping customization here, in case the builtin grouping doesn't suit you.
 
@@ -97,7 +123,13 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
 
 
 @pytest.hookspec(firstresult=True)
-def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_info, commit_info):
+def pytest_benchmark_generate_json(
+    config: pytest.Config,
+    benchmarks: list[BenchmarkFixture],
+    include_data: bool,
+    machine_info: dict[str, Any],
+    commit_info: dict[str, Any],
+) -> dict[str, Any] | None:
     """
     You should read pytest-benchmark's code if you really need to wholly customize the JSON.
 
@@ -118,7 +150,11 @@ def pytest_benchmark_generate_json(config, benchmarks, include_data, machine_inf
     """
 
 
-def pytest_benchmark_update_json(config, benchmarks, output_json):
+def pytest_benchmark_update_json(
+    config: pytest.Config,
+    benchmarks: list[BenchmarkFixture],
+    output_json: dict[str, Any],
+) -> None:
     """
     Use this to add custom fields in the output JSON.
 
@@ -131,7 +167,12 @@ def pytest_benchmark_update_json(config, benchmarks, output_json):
     """
 
 
-def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark):
+def pytest_benchmark_compare_machine_info(
+    config: pytest.Config,
+    benchmarksession: BenchmarkSession,
+    machine_info: dict[str, Any],
+    compared_benchmark: dict[str, Any],
+) -> None:
     """
     You may want to use this hook to implement custom checks or abort execution.
     ``pytest-benchmark`` builtin hook does this:

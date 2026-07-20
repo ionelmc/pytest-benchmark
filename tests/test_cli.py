@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 import sys
-from collections import namedtuple
+from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Protocol
+from typing import cast
 
 import pytest
 from _pytest.legacypath import Testdir
 from _pytest.pytester import LineMatcher
+from _pytest.pytester import RunResult
 
 pytest_plugins = ('pytester',)
 
@@ -12,17 +18,32 @@ THIS = Path(__file__)
 STORAGE = THIS.with_name('test_storage')
 
 
+class LegacyPath(Protocol):
+    def join(self, *parts: str) -> LegacyPath: ...
+
+    def readlines(self, cr: int = 1) -> list[str]: ...
+
+
+@dataclass
+class CliTestdir:
+    makepyfile: Callable[..., LegacyPath]
+    runpytest_subprocess: Callable[..., RunResult]
+    tmpdir: LegacyPath
+    run: Callable[..., RunResult]
+
+
 @pytest.fixture
-def testdir(testdir, monkeypatch):
-    return namedtuple('testdir', ['makepyfile', 'runpytest_subprocess', 'tmpdir', 'run'])(
-        testdir.makepyfile,
-        testdir.runpytest_subprocess,
-        testdir.tmpdir,
-        lambda bin, *args: testdir.run(bin + '.exe' if sys.platform == 'win32' else bin, *args),
+def testdir(testdir: Testdir, monkeypatch: pytest.MonkeyPatch) -> CliTestdir:
+    typed_testdir = cast(CliTestdir, cast(object, testdir))
+    return CliTestdir(
+        typed_testdir.makepyfile,
+        typed_testdir.runpytest_subprocess,
+        typed_testdir.tmpdir,
+        lambda bin, *args: typed_testdir.run(bin + '.exe' if sys.platform == 'win32' else bin, *args),
     )
 
 
-def test_help(testdir):
+def test_help(testdir: CliTestdir):
     result = testdir.run('py.test-benchmark', '--help')
     result.stdout.fnmatch_lines(
         [
@@ -51,7 +72,7 @@ def test_help(testdir):
     assert result.ret == 0
 
 
-def test_help_command(testdir):
+def test_help_command(testdir: CliTestdir):
     result = testdir.run('py.test-benchmark', 'help')
     result.stdout.fnmatch_lines(
         [
@@ -69,7 +90,7 @@ def test_help_command(testdir):
 
 
 @pytest.mark.parametrize('args', ['list --help', 'help list'])
-def test_help_list(testdir, args):
+def test_help_list(testdir: CliTestdir, args: str) -> None:
     result = testdir.run('py.test-benchmark', *args.split())
     result.stdout.fnmatch_lines(
         [
@@ -85,7 +106,7 @@ def test_help_list(testdir, args):
 
 
 @pytest.mark.parametrize('args', ['compare --help', 'help compare'])
-def test_help_compare(testdir, args):
+def test_help_compare(testdir: CliTestdir, args: str) -> None:
     result = testdir.run('py.test-benchmark', *args.split())
     result.stdout.fnmatch_lines(
         [
@@ -152,7 +173,7 @@ def test_help_compare(testdir, args):
     assert result.ret == 0
 
 
-def test_hooks(testdir: Testdir):
+def test_hooks(testdir: CliTestdir) -> None:
     testdir.makepyfile(
         conftest="""
 def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
@@ -198,7 +219,7 @@ def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
     assert result.ret == 0
 
 
-def test_list(testdir):
+def test_list(testdir: CliTestdir):
     result = testdir.run('py.test-benchmark', '--storage', STORAGE, 'list')
     assert result.stderr.lines == []
     result.stdout.fnmatch_lines(
@@ -247,7 +268,7 @@ def test_list(testdir):
         ('trial', lambda n: f'{n:04}*'),
     ],
 )
-def test_compare(testdir, name, name_pattern_generator):
+def test_compare(testdir: CliTestdir, name, name_pattern_generator):
     result = testdir.run(
         'py.test-benchmark',
         '--storage',
@@ -294,7 +315,7 @@ def test_compare(testdir, name, name_pattern_generator):
     assert result.ret == 0
 
 
-def test_compare_between(testdir):
+def test_compare_between(testdir: CliTestdir):
     common_args = [
         'py.test-benchmark',
         '--storage',
@@ -331,7 +352,7 @@ def test_compare_between(testdir):
     assert result.ret == 0
 
 
-def test_compare_between_histogram_error(testdir):
+def test_compare_between_histogram_error(testdir: CliTestdir):
     result = testdir.run(
         'py.test-benchmark',
         '--storage',
@@ -347,7 +368,7 @@ def test_compare_between_histogram_error(testdir):
     assert result.ret != 0
 
 
-def test_compare_between_columns_error(testdir):
+def test_compare_between_columns_error(testdir: CliTestdir):
     result = testdir.run(
         'py.test-benchmark',
         '--storage',
@@ -371,7 +392,7 @@ def test_compare_between_columns_error(testdir):
         ('short', lambda n: f'*xfast_parametrized[[]0[]] ({n:04}*)', 'ns'),
     ],
 )
-def test_compare_with_unit_scale(testdir, name, name_pattern_generator, unit):
+def test_compare_with_unit_scale(testdir: CliTestdir, name, name_pattern_generator, unit):
     result = testdir.run(
         'py.test-benchmark',
         '--storage',
@@ -412,7 +433,7 @@ def test_compare_with_unit_scale(testdir, name, name_pattern_generator, unit):
     assert result.ret == 0
 
 
-def test_compare_csv(testdir):
+def test_compare_csv(testdir: CliTestdir):
     test = testdir.makepyfile("""
     import pytest
     @pytest.mark.parametrize("arg", ["foo", "bar"])
@@ -435,7 +456,7 @@ def test_compare_csv(testdir):
     result.stderr.fnmatch_lines(['Generated csv: *.csv'])
 
 
-def test_compare_filter(testdir):
+def test_compare_filter(testdir: CliTestdir):
     test = testdir.makepyfile("""
     import pytest
     @pytest.mark.parametrize("arg", ["foo", "bar"])

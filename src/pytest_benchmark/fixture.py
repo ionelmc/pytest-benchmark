@@ -6,97 +6,132 @@
 import cProfile
 import gc
 import pstats
+import statistics  # noqa: F401 - compatibility export consumed by session.py
 import sys
 import time
-import traceback
-import typing
+from cProfile import Profile
 from math import ceil
 from pathlib import Path
+from types import TracebackType
+from typing import Any
+from typing import Callable
+from typing import ClassVar
+from typing import ParamSpec
+from typing import Protocol
+from typing import Self
+from typing import TypeVar
+from typing import cast
 
+import pytest
+
+from .logger import Logger
+from .stats import Metadata
+from .timers import Timer
 from .timers import compute_timer_precision
 from .utils import NameWrapper
 from .utils import format_time
 from .utils import slugify
 
-statistics: typing.Any
 statistics_error: str | None = None
-try:
-    import statistics
-except (ImportError, SyntaxError):
-    statistics_error = traceback.format_exc()
-    statistics = None
-else:
-    statistics_error = None
-    from .stats import Metadata
+P = ParamSpec('P')
+R = TypeVar('R')
+Arguments = tuple[tuple[Any, ...], dict[str, Any]]
+Runner = Callable[[range | None], float | tuple[float, Any]]
+
+
+class CallSpec(Protocol):
+    id: str
+    params: dict[str, object]
+
+
+class Rollback(Protocol):
+    def rollback(self) -> None: ...
 
 
 class FixtureAlreadyUsed(Exception):
     pass
 
 
+class _NotSet:
+    pass
+
+
 class PauseInstrumentation:
-    def __init__(self, tracer=True, profiler=True):
+    def __init__(self: Self, tracer: bool = True, profiler: bool = True) -> None:
         self.disable_profiler = profiler
         self.disable_tracer = tracer
-        self.prev_tracer = None
-        self.prev_profiler = None
+        self.prev_tracer: Any = None
+        self.prev_profiler: Any = None
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         if self.disable_tracer:
             self.prev_tracer = sys.gettrace()
+
             if self.prev_tracer:
                 sys.settrace(None)
+
         if self.disable_profiler:
             self.prev_profiler = sys.getprofile()
+
             if self.prev_profiler:
                 sys.setprofile(None)
+        return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         if self.prev_tracer:
             sys.settrace(self.prev_tracer)
+
         if self.prev_profiler:
             sys.setprofile(self.prev_profiler)
 
 
 class BenchmarkFixture:
-    _precisions: typing.ClassVar[dict[str, float]] = {}
+    _precisions: ClassVar[dict[str, float]] = {}
 
     def __init__(
         self,
-        node,
-        disable_gc,
-        timer,
-        min_rounds,
-        min_time,
-        max_time,
-        warmup,
-        warmup_iterations,
-        calibration_precision,
-        add_stats,
-        logger,
-        warner,
-        disabled,
-        cprofile,
-        cprofile_loops,
-        cprofile_dump,
-        group=None,
-    ):
+        node: pytest.Item,
+        disable_gc: bool,
+        timer: NameWrapper,
+        min_rounds: int,
+        min_time: float | int,
+        max_time: float | int,
+        warmup: bool,
+        warmup_iterations: int,
+        calibration_precision: int,
+        add_stats: Callable[[Metadata], None],
+        logger: Logger,
+        warner: Callable[[Warning], None],
+        disabled: bool,
+        cprofile: str,
+        cprofile_loops: int | None,
+        cprofile_dump: str | None,
+        group: str | None = None,
+    ) -> None:
         self.name = node.name
         self.fullname = node._nodeid
         self.disabled = disabled
+        self.param: str | None
+        self.params: dict[str, object] | None
         if hasattr(node, 'callspec'):
-            self.param = node.callspec.id
-            self.params = node.callspec.params
+            callspec = cast(CallSpec, node.callspec)
+            self.param = callspec.id
+            self.params = callspec.params
         else:
             self.param = None
             self.params = None
         self.group = group
-        self.has_error = False
-        self.extra_info = {}
-        self.skipped = False
+        self.has_error: bool = False
+        self.extra_info: dict[str, Any] = {}
+        self.skipped: bool = False
 
         self._disable_gc = disable_gc
-        self._timer = timer.target
+        self._timer = cast(Timer, timer.target)
         self._min_rounds = min_rounds
         self._max_time = float(max_time)
         self._min_time = float(min_time)
@@ -105,51 +140,58 @@ class BenchmarkFixture:
         self._warmup = warmup and warmup_iterations
         self._logger = logger
         self._warner = warner
-        self._cleanup_callbacks = []
-        self._mode = None
+        self._cleanup_callbacks: list[Callable[[], None]] = []
+        self._mode: str | None = None
         self.cprofile = cprofile
         self.cprofile_loops = cprofile_loops
         self.cprofile_dump = cprofile_dump
         self.cprofile_stats = None
-        self.stats = None
+        self.stats: Metadata | None = None
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         return not self.disabled
 
-    def _get_precision(self, timer):
-        if timer in self._precisions:
-            timer_precision = self._precisions[timer]
+    def _get_precision(self, timer: Timer) -> float:
+        timer_name = str(NameWrapper(timer))
+        if timer_name in self._precisions:
+            timer_precision = self._precisions[timer_name]
+
         else:
-            timer_precision = self._precisions[timer] = compute_timer_precision(timer)
+            timer_precision = compute_timer_precision(timer) or 0.0
+            self._precisions[timer_name] = timer_precision
             self._logger.debug('')
             self._logger.debug(f'Computing precision for {NameWrapper(timer)} ... {format_time(timer_precision)}s.', blue=True, bold=True)
         return timer_precision
 
-    def _make_runner(self, function_to_benchmark, args, kwargs):
-        def runner(loops_range, timer=self._timer):
+    def _make_runner(self, function_to_benchmark: Callable[..., R], args: tuple[Any, ...], kwargs: dict[str, Any]) -> Runner:
+        def runner(loops_range: range | None, timer: Timer = self._timer) -> float | tuple[float, R]:
             gc_enabled = gc.isenabled()
             if self._disable_gc:
                 gc.disable()
             try:
                 if loops_range:
                     start = timer()
+
                     for _ in loops_range:
                         function_to_benchmark(*args, **kwargs)
+
                     end = timer()
                     return end - start
+
                 else:
                     start = timer()
                     result = function_to_benchmark(*args, **kwargs)
                     end = timer()
                     return end - start, result
+
             finally:
                 if gc_enabled:
                     gc.enable()
 
         return runner
 
-    def _make_stats(self, iterations):
+    def _make_stats(self, iterations: int) -> Metadata:
         bench_stats = Metadata(
             self,
             iterations=iterations,
@@ -166,30 +208,45 @@ class BenchmarkFixture:
         self.stats = bench_stats
         return bench_stats
 
-    def _save_cprofile(self, profile: cProfile.Profile):
+    def _save_cprofile(self, profile: Profile) -> None:
         stats = pstats.Stats(profile)
+        assert self.stats is not None
         self.stats.cprofile_stats = stats
+
         if self.cprofile_dump:
             output_file = Path(f'{self.cprofile_dump}-{slugify(self.name)}.prof')
             output_file.parent.mkdir(parents=True, exist_ok=True)
             stats.dump_stats(output_file)
             self._logger.info(f'Saved profile: {output_file}', bold=True)
 
-    def __call__(self, function_to_benchmark, *args, **kwargs):
+    def __call__(self, function_to_benchmark: Callable[P, R], *args: P.args, **kwargs: P.kwargs) -> R:
         if self._mode:
             self.has_error = True
             raise FixtureAlreadyUsed(f'Fixture can only be used once. Previously it was used in {self._mode} mode.')
+
         try:
             self._mode = 'benchmark(...)'
             return self._raw(function_to_benchmark, *args, **kwargs)
+
         except Exception:
             self.has_error = True
             raise
 
-    def pedantic(self, target, args=(), kwargs=None, setup=None, teardown=None, rounds=1, warmup_rounds=0, iterations=1):
+    def pedantic(
+        self,
+        target: Callable[..., R],
+        args: tuple[Any, ...] = (),
+        kwargs: dict[str, Any] | None = None,
+        setup: Callable[[], Arguments | None] | None = None,
+        teardown: Callable[..., None] | None = None,
+        rounds: int = 1,
+        warmup_rounds: int = 0,
+        iterations: int = 1,
+    ) -> R:
         if self._mode:
             self.has_error = True
             raise FixtureAlreadyUsed(f'Fixture can only be used once. Previously it was used in {self._mode} mode.')
+
         try:
             self._mode = 'benchmark.pedantic(...)'
             return self._raw_pedantic(
@@ -206,7 +263,7 @@ class BenchmarkFixture:
             self.has_error = True
             raise
 
-    def _raw(self, function_to_benchmark, *args, **kwargs):
+    def _raw(self, function_to_benchmark: Callable[P, R], *args: P.args, **kwargs: P.kwargs) -> R:
         loops_range = None
 
         if self.enabled:
@@ -232,7 +289,7 @@ class BenchmarkFixture:
                         runner(loops_range)
             with PauseInstrumentation():
                 for _ in range(rounds):
-                    stats.update(runner(loops_range))
+                    stats.update(cast(float, runner(loops_range)))
             self._logger.debug(f'  Ran for {format_time(time.time() - run_start)}s.', yellow=True, bold=True)
         if self.cprofile_loops is None:
             cprofile_loops = loops_range or range(1)
@@ -241,18 +298,32 @@ class BenchmarkFixture:
         if self.enabled and self.cprofile:
             with PauseInstrumentation():
                 profile = cProfile.Profile()
-                for _ in cprofile_loops:
+                cprofile_iterator = iter(cprofile_loops)
+                next(cprofile_iterator)
+                function_result = profile.runcall(function_to_benchmark, *args, **kwargs)
+                for _ in cprofile_iterator:
                     function_result = profile.runcall(function_to_benchmark, *args, **kwargs)
                 self._save_cprofile(profile)
         else:
             function_result = function_to_benchmark(*args, **kwargs)
         return function_result
 
-    def _raw_pedantic(self, target, args=(), kwargs=None, setup=None, teardown=None, rounds=1, warmup_rounds=0, iterations=1):
+    def _raw_pedantic(
+        self,
+        target: Callable[..., R],
+        args: tuple[Any, ...] = (),
+        kwargs: dict[str, Any] | None = None,
+        setup: Callable[[], Arguments | None] | None = None,
+        teardown: Callable[..., None] | None = None,
+        rounds: int = 1,
+        warmup_rounds: int = 0,
+        iterations: int = 1,
+    ) -> R:
         if kwargs is None:
             kwargs = {}
+        benchmark_kwargs = kwargs
 
-        has_args = bool(args or kwargs)
+        has_args = bool(args or benchmark_kwargs)
 
         if not isinstance(iterations, int) or iterations < 1:
             raise ValueError('Must have positive int for `iterations`.')
@@ -266,7 +337,7 @@ class BenchmarkFixture:
         if iterations > 1 and setup:
             raise ValueError("Can't use more than 1 `iterations` with a `setup` function.")
 
-        def make_arguments(args=args, kwargs=kwargs):
+        def make_arguments(args: tuple[Any, ...] = args, kwargs: dict[str, Any] = benchmark_kwargs) -> Arguments:
             if setup:
                 maybe_args = setup()
                 if maybe_args:
@@ -281,6 +352,7 @@ class BenchmarkFixture:
 
         stats = self._make_stats(iterations)
         loops_range = range(iterations) if iterations > 1 else None
+        result: R | _NotSet = _NotSet()
         for _ in range(warmup_rounds):
             args, kwargs = make_arguments()
 
@@ -297,9 +369,9 @@ class BenchmarkFixture:
             runner = self._make_runner(target, args, kwargs)
             with PauseInstrumentation():
                 if loops_range:
-                    duration = runner(loops_range)
+                    duration = cast(float, runner(loops_range))
                 else:
-                    duration, result = runner(loops_range)
+                    duration, result = cast(tuple[float, R], runner(loops_range))
             stats.update(duration)
 
             if teardown is not None:
@@ -311,6 +383,9 @@ class BenchmarkFixture:
             result = target(*args, **kwargs)
             if teardown is not None:
                 teardown(*args, **kwargs)
+
+        if isinstance(result, _NotSet):
+            raise RuntimeError('Benchmark target did not produce a result.')
 
         if self.cprofile:
             if self.cprofile_loops is None:
@@ -329,30 +404,31 @@ class BenchmarkFixture:
 
         return result
 
-    def weave(self, target, **kwargs):
+    def weave(self, target: Callable[P, R], **kwargs: Any) -> None:
         try:
             import aspectlib  # noqa: PLC0415
         except ImportError as exc:
             raise ImportError(exc.args, 'Please install aspectlib or pytest-benchmark[aspect]') from exc
 
-        def aspect(function):
-            def wrapper(*args, **kwargs):
+        def aspect(function: Callable[P, R]) -> Callable[P, R]:
+            def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
                 return self(function, *args, **kwargs)
 
             return wrapper
 
-        self._cleanup_callbacks.append(aspectlib.weave(target, aspect, **kwargs).rollback)
+        weave = cast(Callable[..., Rollback], aspectlib.weave)
+        self._cleanup_callbacks.append(weave(target, aspect, **kwargs).rollback)
 
     patch = weave
 
-    def _cleanup(self):
+    def _cleanup(self) -> None:
         while self._cleanup_callbacks:
             callback = self._cleanup_callbacks.pop()
             callback()
         if not self._mode and not self.skipped:
             self._logger.warning('Benchmark fixture was not used at all in this test!', warner=self._warner, suspend=True)
 
-    def _calibrate_timer(self, runner):
+    def _calibrate_timer(self, runner: Runner) -> tuple[float, int, range]:
         timer_precision = self._get_precision(self._timer)
         min_time = max(self._min_time, timer_precision * self._calibration_precision)
         min_time_estimate = min_time * 5 / self._calibration_precision
@@ -367,13 +443,13 @@ class BenchmarkFixture:
         loops = 1
         while True:
             loops_range = range(loops)
-            duration = runner(loops_range)
+            duration = cast(float, runner(loops_range))
             if self._warmup:
                 warmup_start = time.time()
                 warmup_iterations = 0
                 warmup_rounds = 0
                 while time.time() - warmup_start < self._max_time and warmup_iterations < self._warmup:
-                    duration = min(duration, runner(loops_range))
+                    duration = min(duration, cast(float, runner(loops_range)))
                     warmup_rounds += 1
                     warmup_iterations += loops
                 self._logger.debug(f'    Warmup: {format_time(time.time() - warmup_start)}s ({warmup_rounds} x {loops} iterations).')

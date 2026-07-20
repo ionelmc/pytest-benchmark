@@ -5,22 +5,31 @@
 
 from collections.abc import Iterable
 from pathlib import Path
+from typing import Any
+from typing import Callable
+from typing import Protocol
+from typing import cast
+
+from pygal.graph.box import Box
+from pygal.style import DefaultStyle
 
 from .utils import TIME_UNITS
 from .utils import slugify
 
-try:
-    from pygal.graph.box import Box
-    from pygal.style import DefaultStyle
-except ImportError as exc:
-    raise ImportError(exc.args, 'Please install pygal and pygaljs or pytest-benchmark[histogram]') from exc
+
+class SVGNode(Protocol):
+    text: str
+
+
+class SVG(Protocol):
+    def node(self, parent: object, tag: str, **attributes: str) -> SVGNode: ...
 
 
 class CustomBox(Box):
-    def _box_points(self, serie, _):
+    def _box_points(self, serie: list[Any], _: Any) -> tuple[list[Any], list[Any]]:
         return serie, [serie[0], serie[6]]
 
-    def _value_format(self, x):
+    def _value_format(self, x: Any) -> str:  # TODO: Change type hinting of x
         return (
             f'Min: {x[:7][0]:.4f}\n'
             f'Q1-1.5IQR: {x[:7][1]:.4f}\n'
@@ -29,23 +38,38 @@ class CustomBox(Box):
             f'Max: {x[:7][6]:.4f}'
         )
 
-    def _format(self, x, *args):
-        sup = super()._format
+    def _format(self, x: Any, *args: Any) -> Any:
+        sup = cast(Callable[..., Any], super()._format)
+
         if args:
             val = x.values
+
         else:
             val = x
+
         if isinstance(val, Iterable):
-            return self._value_format(val), val[7]
+            values = list(val)
+            return self._value_format(values), values[7]
+
         else:
-            return sup(x, *args)
+            return cast(Any, sup(x, *args))
 
-    def _tooltip_data(self, node, value, x, y, classes=None, xlabel=None):
-        super()._tooltip_data(node, value[0], x, y, classes=classes, xlabel=None)
-        self.svg.node(node, 'desc', class_='x_label').text = value[1]
+    def _tooltip_data(
+        self,
+        node: Any,
+        value: tuple[Any, str],
+        x: float,
+        y: float,
+        classes: str | None = None,
+        xlabel: str | None = None,
+    ) -> None:
+        tooltip_data = cast(Callable[..., None], super()._tooltip_data)
+        tooltip_data(node, value[0], x, y, classes=classes, xlabel=None)
+        svg = cast(SVG, self.svg)
+        svg.node(node, 'desc', class_='x_label').text = value[1]
 
 
-def make_plot(benchmarks, title, adjustment):
+def make_plot(benchmarks: list[dict[str, Any]], title: str, adjustment: float) -> CustomBox:
     class Style(DefaultStyle):
         colors = tuple('#000000' if row['path'] else DefaultStyle.colors[1] for row in benchmarks)
         font_family = 'Consolas, "Deja Vu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace'
@@ -54,11 +78,12 @@ def make_plot(benchmarks, title, adjustment):
     maximum = int(max(min(row['max'], row['hd15iqr']) * adjustment for row in benchmarks) + 1)
 
     try:
-        import pygaljs  # noqa: PLC0415
+        import pygaljs  # type: ignore # noqa: PLC0415
     except ImportError:
         opts = {}
     else:
-        opts = {'js': [pygaljs.uri('2.0.x', 'pygal-tooltips.js')]}
+        uri = cast(Callable[..., str], pygaljs.uri)
+        opts = {'js': [uri('2.0.x', 'pygal-tooltips.js')]}
 
     plot = CustomBox(
         box_mode='tukey',
@@ -92,14 +117,17 @@ def make_plot(benchmarks, title, adjustment):
     for row in benchmarks:
         serie = [row[field] * adjustment for field in ['min', 'ld15iqr', 'q1', 'median', 'q3', 'hd15iqr', 'max']]
         serie.append(row['path'])
-        plot.add(f'{row["fullname"]} - {row["rounds"]} rounds', serie)
+        add = cast(Callable[..., CustomBox], plot.add)
+        add(f'{row["fullname"]} - {row["rounds"]} rounds', serie)
+
     return plot
 
 
-def make_histogram(output_prefix, name, benchmarks, unit, adjustment):
+def make_histogram(output_prefix: str, name: str | None, benchmarks: Any, unit: str, adjustment: float) -> Path:
     if name:
         path = f'{output_prefix}-{slugify(name)}.svg'
         title = f'Speed in {TIME_UNITS[unit]} of {name}'
+
     else:
         path = f'{output_prefix}.svg'
         title = f'Speed in {TIME_UNITS[unit]}'
@@ -112,5 +140,6 @@ def make_histogram(output_prefix, name, benchmarks, unit, adjustment):
         title=title,
         adjustment=adjustment,
     )
-    plot.render_to_file(str(output_file))
+    render_to_file = cast(Callable[[str], None], plot.render_to_file)
+    render_to_file(str(output_file))
     return output_file

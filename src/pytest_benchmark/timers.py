@@ -3,14 +3,25 @@
   PYTEST_DONT_REWRITE
 """
 
+from collections.abc import Callable
 from time import time as timeout_timer
+from typing import cast
+
+Timer = Callable[[], float]
 
 try:
-    from __pypy__.time import CLOCK_MONOTONIC  # type: ignore
-    from __pypy__.time import clock_gettime  # type: ignore
+    from __pypy__.time import (
+        CLOCK_MONOTONIC as _CLOCK_MONOTONIC,  # type: ignore[import-not-found]  # pyright: ignore[reportMissingImports, reportUnknownVariableType]
+    )
+    from __pypy__.time import (
+        clock_gettime as _clock_gettime,  # type: ignore[import-not-found]  # pyright: ignore[reportMissingImports, reportUnknownVariableType]
+    )
 
-    def monotonic():
-        return clock_gettime(CLOCK_MONOTONIC)
+    CLOCK_MONOTONIC = cast(int, _CLOCK_MONOTONIC)
+    clock_gettime = cast(Callable[[int], float], _clock_gettime)
+
+    def monotonic() -> float:
+        return cast(float, clock_gettime(CLOCK_MONOTONIC))
 
 except ImportError:
     from timeit import default_timer
@@ -18,27 +29,35 @@ else:
     default_timer = monotonic
 
 
-def compute_timer_precision(timer):
+def compute_timer_precision(timer: Timer) -> float | None:
     precision = None
     points = 0
     timeout = timeout_timer() + 1.0
     previous = timer()
+
     # Stop as soon as we have enough data points or the timeout expires.
     while timeout_timer() < timeout and points < 100:
+        t2 = previous
         for _ in range(10):
             t1 = timer()
             t2 = timer()
             dt = t2 - t1
+
             if 0 < dt:
                 break
+
         else:
             dt = t2 - previous
             if dt <= 0.0:
                 continue
+
         if precision is not None:
             precision = min(precision, dt)
+
         else:
             precision = dt
+
         points += 1
         previous = timer()
+
     return precision

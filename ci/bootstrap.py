@@ -3,17 +3,29 @@ import os
 import pathlib
 import subprocess
 import sys
+from collections.abc import Sequence
+from typing import Callable
+from typing import Protocol
+from typing import cast
 
 base_path: pathlib.Path = pathlib.Path(__file__).resolve().parent.parent
 templates_path = base_path / 'ci' / 'templates'
 
 
-def check_call(args):
+class Template(Protocol):
+    def render(self, **context: object) -> str: ...
+
+
+class Environment(Protocol):
+    def get_template(self, name: str) -> Template: ...
+
+
+def check_call(args: Sequence[str | os.PathLike[str]]) -> None:
     print('+', *args)
     subprocess.check_call(args)
 
 
-def exec_in_env():
+def exec_in_env() -> None:
     env_path = base_path / '.tox' / 'bootstrap'
     if sys.platform == 'win32':
         bin_path = env_path / 'Scripts'
@@ -36,16 +48,19 @@ def exec_in_env():
 
     print(f'Re-executing with: {python_executable}')
     print('+ exec', python_executable, __file__, '--no-env')
-    os.execv(python_executable, [python_executable, __file__, '--no-env'])
+    executable_args: list[str | os.PathLike[str]] = [python_executable, __file__, '--no-env']
+    os.execv(python_executable, executable_args)
 
 
-def main():
+def main() -> None:
     import jinja2  # noqa: PLC0415
 
     print(f'Project path: {base_path}')
 
-    jinja = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(str(templates_path)),
+    environment_factory = cast(Callable[..., Environment], jinja2.Environment)
+    loader_factory = cast(Callable[[str], object], jinja2.FileSystemLoader)
+    jinja = environment_factory(
+        loader=loader_factory(str(templates_path)),
         trim_blocks=True,
         lstrip_blocks=True,
         keep_trailing_newline=True,

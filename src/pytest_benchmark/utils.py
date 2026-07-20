@@ -8,9 +8,12 @@ import json
 import netrc
 import os
 import platform
+import pstats
 import re
 import subprocess
 import sys
+from collections.abc import Generator
+from collections.abc import Iterator
 from datetime import datetime
 from datetime import timezone
 from decimal import Decimal
@@ -19,40 +22,52 @@ from os.path import split
 from pathlib import Path
 from subprocess import CalledProcessError
 from subprocess import check_output
+from typing import Any
+from typing import Callable
+from typing import Generic
+from typing import Literal
+from typing import Self
+from typing import TypeVar
+from typing import cast
+from typing import overload
+from urllib.parse import ParseResult
 from urllib.parse import parse_qs
 from urllib.parse import urlparse
 
 TIME_UNITS = {'': 'Seconds', 'm': 'Milliseconds (ms)', 'u': 'Microseconds (us)', 'n': 'Nanoseconds (ns)'}
 ALLOWED_COLUMNS = ['min', 'max', 'mean', 'stddev', 'median', 'iqr', 'ops', 'outliers', 'rounds', 'iterations']
 DEFAULT_COLUMNS = ['min', 'max', 'mean', 'stddev', 'median', 'iqr', 'outliers', 'ops', 'rounds', 'iterations']
+T = TypeVar('T')
 
 
 class SecondsDecimal(Decimal):
-    def __float__(self):
+    def __float__(self) -> float:
         return float(super().__str__())
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{format_time(float(super().__str__()))}s'
 
     @property
-    def as_string(self):
+    def as_string(self) -> str:
         return super().__str__()
 
 
 class NameWrapper:
-    def __init__(self, target):
+    def __init__(self, target: object) -> None:
         self.target = target
 
-    def __str__(self):
-        name = self.target.__module__ + '.' if hasattr(self.target, '__module__') else ''
-        name += self.target.__name__ if hasattr(self.target, '__name__') else repr(self.target)
+    def __str__(self) -> str:
+        module_name = getattr(self.target, '__module__', '')
+        target_name = getattr(self.target, '__name__', None)
+        name = f'{module_name}.' if module_name else ''
+        name += target_name if isinstance(target_name, str) else repr(self.target)
         return name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'NameWrapper({self.target!r})'
 
 
-def get_tag(project_name=None):
+def get_tag(project_name: str | None = None) -> str:
     info = get_commit_info(project_name)
     parts = [info['id'], get_current_time()]
     if info['dirty']:
@@ -60,7 +75,7 @@ def get_tag(project_name=None):
     return '_'.join(parts)
 
 
-def get_machine_id():
+def get_machine_id() -> str:
     return '{}-{}-{}-{}'.format(
         platform.system(),
         platform.python_implementation(),
@@ -70,12 +85,12 @@ def get_machine_id():
 
 
 class Fallback:
-    def __init__(self, fallback, exceptions):
+    def __init__(self, fallback: Callable[..., Any], exceptions: tuple[type[Exception], ...]) -> None:
         self.fallback = fallback
-        self.functions = []
+        self.functions: list[Callable[..., Any]] = []
         self.exceptions = exceptions
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         for func in self.functions:
             try:
                 value = func(*args, **kwargs)
@@ -87,51 +102,55 @@ class Fallback:
         else:
             return self.fallback(*args, **kwargs)
 
-    def register(self, other):
+    def register(self, other: Callable[..., Any]) -> Self:
         self.functions.append(other)
         return self
 
 
 @partial(Fallback, exceptions=(IndexError, CalledProcessError, OSError))
-def get_project_name():
+def get_project_name() -> str:
     return Path.cwd().name
 
 
 @get_project_name.register
-def get_project_name_git():
+def get_project_name_git() -> str | None:
     is_git = check_output(['git', 'rev-parse', '--git-dir'], stderr=subprocess.STDOUT)
     if is_git:
-        project_address = check_output(['git', 'config', '--local', 'remote.origin.url'])
-        if isinstance(project_address, bytes):
-            project_address = project_address.decode()
+        project_address = check_output(['git', 'config', '--local', 'remote.origin.url'], text=True)
+
         project_name = [i for i in re.split(r'[/:\s\\]|\.git', project_address) if i][-1]
+
         return project_name.strip()
+    return None
 
 
 @get_project_name.register
-def get_project_name_hg():
+def get_project_name_hg() -> str:
     with open(os.devnull, 'w') as devnull:
-        project_address = check_output(['hg', 'path', 'default'], stderr=devnull)
-    project_address = project_address.decode()
+        project_address = check_output(['hg', 'path', 'default'], stderr=devnull, text=True)
     project_name = project_address.split('/')[-1]
+
     return project_name.strip()
 
 
-def in_any_parent(name, path=None):
+def in_any_parent(name: str, path: Path | None = None) -> bool:
     prev = None
+
     if not path:
         path = Path.cwd()
+
     while path and prev != path and not path.joinpath(name).exists():
         prev = path
         path = path.parent
+
     return path.joinpath(name).exists()
 
 
-def subprocess_output(cmd):
+def subprocess_output(cmd: str) -> str:
     return check_output(cmd.split(), stderr=subprocess.STDOUT, text=True).strip()
 
 
-def get_commit_info(project_name=None):
+def get_commit_info(project_name: str | None = None) -> dict[str, Any]:
     dirty = False
     commit = 'unversioned'
     commit_time = None
@@ -140,12 +159,11 @@ def get_commit_info(project_name=None):
     branch = '(unknown)'
     try:
         if in_any_parent('.git'):
-            desc = subprocess_output('git describe --dirty --always --long --abbrev=40')
-            desc = desc.split('-')
-            if desc[-1].strip() == 'dirty':
+            desc_parts = subprocess_output('git describe --dirty --always --long --abbrev=40').split('-')
+            if desc_parts[-1].strip() == 'dirty':
                 dirty = True
-                desc.pop()
-            commit = desc[-1].strip('g')
+                desc_parts.pop()
+            commit = desc_parts[-1].strip('g')
             commit_time = subprocess_output('git show -s --pretty=format:"%cI"').strip('"')
             author_time = subprocess_output('git show -s --pretty=format:"%aI"').strip('"')
             branch = subprocess_output('git rev-parse --abbrev-ref HEAD')
@@ -178,78 +196,93 @@ def get_commit_info(project_name=None):
         }
 
 
-def get_current_time():
+def get_current_time() -> str:
     return datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
 
 
-def first_or_value(obj, value):
+def first_or_value(obj: Any, value: Any) -> Any:
     if obj:
         (value,) = obj
 
     return value
 
 
-def short_filename(path, machine_id=None):
-    parts = []
+def short_filename(path: Path, machine_id: str | None = None) -> str:
+    parts: list[str] = []
+
     try:
         last = len(path.parts) - 1
+
     except AttributeError:
         return str(path)
+
     for pos, part in enumerate(path.parts):
         if not pos and part == machine_id:
             continue
+
         if pos == last:
             part = part.rsplit('.', 1)[0]
             # if len(part) > 16:
             #     part = "%.13s..." % part
         parts.append(part)
+
     return '/'.join(parts)
 
 
-def load_timer(string):
+def load_timer(string: str) -> NameWrapper:
     if '.' not in string:
         raise argparse.ArgumentTypeError("Value for --benchmark-timer must be in dotted form. Eg: 'module.attr'.")
-    mod, attr = string.rsplit('.', 1)
-    if mod == 'pep418':
+
+    module_name, attr = string.rsplit('.', 1)
+
+    if module_name == 'pep418':
         import time  # noqa: PLC0415
 
         return NameWrapper(getattr(time, attr))
+
     else:
-        __import__(mod)
-        mod = sys.modules[mod]
-        return NameWrapper(getattr(mod, attr))
+        __import__(module_name)
+        module = sys.modules[module_name]
+        return NameWrapper(getattr(module, attr))
 
 
 class RegressionCheck:
-    def __init__(self, field, threshold):
+    def __init__(self, field: str, threshold: float) -> None:
         self.field = field
         self.threshold = threshold
 
-    def fails(self, current, compared):
+    def fails(self, current: dict[str, float], compared: dict[str, float]) -> str | None:
         val = self.compute(current, compared)
+
         if val > self.threshold:
             return f'Field {self.field!r} has failed {self.__class__.__name__}: {val:.9f} > {self.threshold:.9f}'
+        return None
+
+    def compute(self, current: Any, compared: Any) -> float:
+        raise NotImplementedError
 
 
 class PercentageRegressionCheck(RegressionCheck):
-    def compute(self, current, compared):
+    def compute(self, current: dict[str, float], compared: dict[str, float]) -> float:
         val = compared[self.field]
+
         if not val:
             return float('inf')
+
         return current[self.field] / val * 100 - 100
 
 
 class DifferenceRegressionCheck(RegressionCheck):
-    def compute(self, current, compared):
+    def compute(self, current: dict[str, float], compared: dict[str, float]) -> float:
         return current[self.field] - compared[self.field]
 
 
 def parse_compare_fail(
-    string,
-    rex=re.compile(
+    string: str,
+    rex: re.Pattern[str] = re.compile(
         r'^(?P<field>min|max|mean|median|stddev|iqr):' r'((?P<percentage>[0-9]+)%|(?P<difference>[0-9]*\.?[0-9]+([eE][-+]?[' r'0-9]+)?))$'
     ),
-):
+) -> RegressionCheck:
     m = rex.match(string)
     if m:
         g = m.groupdict()
@@ -261,7 +294,7 @@ def parse_compare_fail(
     raise argparse.ArgumentTypeError(f'Could not parse value: {string!r}.')
 
 
-def parse_cprofile_loops(string):
+def parse_cprofile_loops(string: str) -> int | None:
     if string == 'auto':
         return None
     else:
@@ -274,44 +307,54 @@ def parse_cprofile_loops(string):
         return value
 
 
-def parse_warmup(string):
+def parse_warmup(string: str) -> bool:
     string = string.lower().strip()
+
     if string == 'auto':
         return platform.python_implementation() == 'PyPy'
+
     elif string in ['off', 'false', 'no']:
         return False
+
     elif string in ['on', 'true', 'yes', '']:
         return True
+
     else:
         raise argparse.ArgumentTypeError(f'Could not parse value: {string!r}.')
 
 
-def name_formatter_short(bench):
+def name_formatter_short(bench: dict[str, str]) -> str:
     name = bench['name']
+
     if bench['source']:
         name = '{} ({:.4})'.format(name, split(bench['source'])[-1])
+
     if name.startswith('test_'):
         name = name[5:]
+
     return name
 
 
-def name_formatter_normal(bench):
+def name_formatter_normal(bench: dict[str, str]) -> str:
     name = bench['name']
+
     if bench['source']:
         parts = bench['source'].split('/')
         parts[-1] = parts[-1][:12]
         name = '{} ({})'.format(name, '/'.join(parts))
+
     return name
 
 
-def name_formatter_long(bench):
+def name_formatter_long(bench: dict[str, str]) -> str:
     if bench['source']:
         return '{fullname} ({source})'.format(**bench)
+
     else:
         return bench['fullname']
 
 
-def name_formatter_trial(bench):
+def name_formatter_trial(bench: dict[str, str]) -> str:
     if bench['source']:
         return '{:.4}'.format(split(bench['source'])[-1])
     else:
@@ -326,41 +369,47 @@ NAME_FORMATTERS = {
 }
 
 
-def parse_name_format(string):
+def parse_name_format(string: str) -> str:
     string = string.lower().strip()
+
     if string in NAME_FORMATTERS:
         return string
+
     else:
         raise argparse.ArgumentTypeError(f'Could not parse value: {string!r}.')
 
 
-def parse_timer(string):
+def parse_timer(string: str) -> str:
     return str(load_timer(string))
 
 
-def parse_sort(string):
+def parse_sort(string: str) -> str:
     string = string.lower().strip()
+
     if string not in ('min', 'max', 'mean', 'stddev', 'name', 'fullname'):
         raise argparse.ArgumentTypeError(
             f'Unacceptable value: {string!r}. '
             "Value for --benchmark-sort must be one of: 'min', 'max', 'mean', "
             "'stddev', 'name', 'fullname'."
         )
+
     return string
 
 
-def parse_columns(string):
+def parse_columns(string: str) -> list[str]:
     columns = [str.strip(s) for s in string.lower().split(',')]
     invalid = set(columns) - set(ALLOWED_COLUMNS)
+
     if invalid:
         # there are extra items in columns!
         msg = 'Invalid column name(s): {}. '.format(', '.join(invalid))
         msg += 'The only valid column names are: {}'.format(', '.join(ALLOWED_COLUMNS))
         raise argparse.ArgumentTypeError(msg)
+
     return columns
 
 
-def parse_rounds(string):
+def parse_rounds(string: str) -> int:
     try:
         value = int(string)
     except ValueError as exc:
@@ -371,31 +420,35 @@ def parse_rounds(string):
         return value
 
 
-def parse_seconds(string):
+def parse_seconds(string: str) -> str:
     try:
         return SecondsDecimal(string).as_string
+
     except Exception as exc:
         raise argparse.ArgumentTypeError(f'Invalid decimal value {string!r}: {exc!r}') from None
 
 
-def parse_save(string):
+def parse_save(string: str) -> str:
     if not string:
         raise argparse.ArgumentTypeError("Can't be empty.")
+
     illegal = ''.join(c for c in r'\/:*?<>|' if c in string)
     if illegal:
         raise argparse.ArgumentTypeError(f'Must not contain any of these characters: /:*?<>|\\ (it has {illegal!r})')
+
     return string
 
 
-def _parse_hosts(storage_url, netrc_file):
+def _parse_hosts(storage_url: ParseResult, netrc_file: str | Path) -> list[str]:
     # load creds from netrc file
     path = Path(netrc_file).expanduser()
     creds = None
+
     if netrc_file and path.is_file():
         creds = netrc.netrc(path)
 
     # add creds to urls
-    urls = []
+    urls: list[str] = []
     for netloc in storage_url.netloc.split(','):
         auth = ''
         if creds and '@' not in netloc:
@@ -406,92 +459,121 @@ def _parse_hosts(storage_url, netrc_file):
                 auth = f'{user}:{secret}@'
         url = f'{storage_url.scheme}://{auth}{netloc}'
         urls.append(url)
+
     return urls
 
 
-def parse_elasticsearch_storage(string, default_index='benchmark', default_doctype='benchmark', netrc_file=''):
+def parse_elasticsearch_storage(
+    string: str,
+    default_index: str = 'benchmark',
+    default_doctype: str = 'benchmark',
+    netrc_file: str = '',
+) -> tuple[list[str], str, str, str]:
     storage_url = urlparse(string)
     hosts = _parse_hosts(storage_url, netrc_file)
     index = default_index
     doctype = default_doctype
+
     if storage_url.path and storage_url.path != '/':
         split_path = storage_url.path.strip('/').split('/')
         index = split_path[0]
+
         if len(split_path) >= 2:
             doctype = split_path[1]
+
     query = parse_qs(storage_url.query)
+
     try:
         project_name = query['project_name'][0]
+
     except KeyError:
         project_name = get_project_name()
+
     return hosts, index, doctype, project_name
 
 
-def load_storage(storage, **kwargs):
+def load_storage(storage: str, **kwargs: Any) -> Any:
     if '://' not in storage:
         storage = 'file://' + storage
+
     netrc_file = kwargs.pop('netrc')  # only used by elasticsearch storage
+
     if storage.startswith('file://'):
         from .storage.file import FileStorage  # noqa: PLC0415
 
         return FileStorage(storage[len('file://') :], **kwargs)
+
     elif storage.startswith('elasticsearch+'):
         from .storage.elasticsearch import ElasticsearchStorage  # noqa: PLC0415
 
         # TODO update benchmark_autosave
         args = parse_elasticsearch_storage(storage[len('elasticsearch+') :], netrc_file=netrc_file)
         return ElasticsearchStorage(*args, **kwargs)
+
     else:
         raise argparse.ArgumentTypeError('Storage must be in form of file://path or elasticsearch+http[s]://host1,host2/index/doctype')
 
 
-def time_unit(value):
+def time_unit(value: float) -> tuple[str, float]:
     if value < 1e-6:
         return 'n', 1e9
+
     elif value < 1e-3:
         return 'u', 1e6
+
     elif value < 1:
         return 'm', 1e3
+
     else:
         return '', 1.0
 
 
-def operations_unit(value):
+def operations_unit(value: float) -> tuple[str, float]:
     if value > 1e6:
         return 'M', 1e-6
+
     if value > 1e3:
         return 'K', 1e-3
+
     return '', 1.0
 
 
-def format_time(value):
+def format_time(value: float) -> str:
     unit, adjustment = time_unit(value)
     return f'{value * adjustment:.2f}{unit:s}'
 
 
-class cached_property:
-    def __init__(self, func):
+class cached_property(Generic[T]):
+    def __init__(self, func: Callable[[Any], T]) -> None:
         self.__doc__ = func.__doc__
         self.func = func
 
-    def __get__(self, obj, cls):
+    @overload
+    def __get__(self, obj: None, cls: type[Any]) -> Self: ...
+
+    @overload
+    def __get__(self, obj: object, cls: type[Any] | None = None) -> T: ...
+
+    def __get__(self, obj: object | None, cls: type[Any] | None = None) -> Self | T:
         if obj is None:
             return self
+
         value = obj.__dict__[self.func.__name__] = self.func(obj)
         return value
 
 
-def funcname(f):
+def funcname(f: Callable[..., Any]) -> str:
     try:
         if isinstance(f, partial):
             return f.func.__name__
         else:
             return f.__name__
+
     except AttributeError:
         return str(f)
 
 
-def clonefunc(f):
+def clonefunc(f: Callable[..., T]) -> Callable[..., T]:
     """
     This used to be a slightly improved version of clonefunc from https://github.com/antocuni/pypytools/blob/master/pypytools/util.py
 
@@ -504,22 +586,22 @@ def clonefunc(f):
 
 
 class SafeJSONEncoder(json.JSONEncoder):
-    def default(self, o):
+    def default(self, o: object) -> str:
         return f'UNSERIALIZABLE[{o!r}]'
 
 
-def consistent_dumps(value):
+def consistent_dumps(value: Any) -> str:
     return json.dumps(value, sort_keys=True)
 
 
-def safe_dumps(obj, **kwargs):
+def safe_dumps(obj: object, **kwargs: Any) -> str:
     return json.dumps(obj, cls=SafeJSONEncoder, **kwargs)
 
 
-def report_progress(iterable, terminal_reporter, format_string, **kwargs):
+def report_progress(iterable: list[T], terminal_reporter: Any, format_string: str, **kwargs: Any) -> Generator[tuple[str, T], None, None]:
     total = len(iterable)
 
-    def progress_reporting_wrapper():
+    def progress_reporting_wrapper() -> Generator[tuple[str, T], None, None]:
         for pos, item in enumerate(iterable):
             string = format_string.format(pos=pos + 1, total=total, value=item, **kwargs)
             terminal_reporter.rewrite(string, black=True, bold=True)
@@ -528,30 +610,34 @@ def report_progress(iterable, terminal_reporter, format_string, **kwargs):
     return progress_reporting_wrapper()
 
 
-def report_noprogress(iterable, *args, **kwargs):
+def report_noprogress(iterable: list[Any], *args: Any, **kwargs: Any) -> Generator[tuple[Literal[''], Any], Any, None]:
     for item in iterable:
         yield '', item
 
 
-def report_online_progress(progress_reporter, tr, line):
+def report_online_progress(progress_reporter: Callable[..., Iterator[tuple[str, Any]]], tr: Any, line: str) -> None:
     next(progress_reporter([line], tr, '{value}'))
 
 
-def slugify(name):
+def slugify(name: str) -> str:
     for c in r'\/:*?<>| ':
         name = name.replace(c, '_').replace('__', '_')
     return name
 
 
-def get_cprofile_functions(stats):
+def get_cprofile_functions(stats: pstats.Stats) -> list[dict[str, str | int | float]]:
     """
     Convert pstats structure to list of sorted dicts about each function.
     """
-    result = []
+    result: list[dict[str, str | int | float]] = []
     # this assumes that you run py.test from project root dir
     project_dir_parent = str(Path.cwd().parent)
 
-    for function_info, run_info in stats.stats.items():
+    raw_stats = cast(
+        dict[tuple[str, int, str], tuple[int, int, float, float, object]],
+        stats.stats,  # type: ignore[attr-defined]
+    )
+    for function_info, run_info in raw_stats.items():
         file_path = function_info[0]
         if file_path.startswith(project_dir_parent):
             file_path = file_path[len(project_dir_parent) :].lstrip('/')
