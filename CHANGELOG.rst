@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Defer the xdist auto-disable warning until a benchmark fixture is collected.
+  Contributed by xlyyddy for `#65 <https://github.com/ionelmc/pytest-benchmark/issues/65>`_.
+
 v5.2.3 (2025-11-09)
 --------------------
 

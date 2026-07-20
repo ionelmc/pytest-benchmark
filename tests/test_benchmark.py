@@ -898,30 +898,61 @@ def test_bogus_sort(testdir):
     )
 
 
+XDIST_WARNING = (
+    'Benchmarks are automatically disabled because xdist plugin is active. '
+    'Benchmarks cannot be performed reliably in a parallelized environment.'
+)
+
+
 def test_xdist(testdir):
     pytest.importorskip('xdist')
     test = testdir.makepyfile(SIMPLE_TEST)
-    result = testdir.runpytest_subprocess('--doctest-modules', '-n', '1', '-rw', test)
-    result.stderr.fnmatch_lines(
-        [
-            '* Benchmarks are automatically disabled because xdist plugin is active. Benchmarks cannot be '
-            'performed reliably in a parallelized environment.',
-        ]
-    )
+    result = testdir.runpytest_subprocess('--doctest-modules', '-n', '2', '-rw', test)
+    result.stderr.fnmatch_lines([f'* {XDIST_WARNING}'])
+    assert result.stderr.str().count(f'PytestBenchmarkWarning: {XDIST_WARNING}') == 1
 
 
 def test_xdist_verbose(testdir):
     pytest.importorskip('xdist')
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '-n', '1', '--benchmark-verbose', test)
-    result.stderr.fnmatch_lines(
-        [
-            '------*',
-            ' WARNING: Benchmarks are automatically disabled because xdist plugin is active. Benchmarks cannot be performed '
-            'reliably in a parallelized environment.',
-            '------*',
-        ]
+    result.stderr.fnmatch_lines(['------*', f' WARNING: {XDIST_WARNING}', '------*'])
+    assert result.stderr.str().count(f' WARNING: {XDIST_WARNING}') == 1
+
+
+def test_xdist_without_benchmark(testdir):
+    pytest.importorskip('xdist')
+    test = testdir.makepyfile(
+        """
+def test_regular():
+    pass
+"""
     )
+    result = testdir.runpytest_subprocess('-n', '1', test)
+    result.assert_outcomes(passed=1)
+    assert XDIST_WARNING not in result.stderr.str()
+    assert XDIST_WARNING not in result.stdout.str()
+
+
+@pytest.mark.parametrize(
+    ('option', 'outcomes'),
+    [
+        ('--benchmark-disable', {'passed': 1}),
+        ('--benchmark-skip', {'skipped': 1}),
+    ],
+)
+def test_xdist_explicit_benchmark_option_does_not_warn(testdir, option, outcomes):
+    pytest.importorskip('xdist')
+    test = testdir.makepyfile(
+        """
+def test_bench(benchmark):
+    benchmark(lambda: None)
+"""
+    )
+    result = testdir.runpytest_subprocess('-n', '1', option, test)
+    result.assert_outcomes(**outcomes)
+    assert XDIST_WARNING not in result.stderr.str()
+    assert XDIST_WARNING not in result.stdout.str()
 
 
 def test_cprofile(testdir):

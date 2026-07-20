@@ -71,14 +71,11 @@ class BenchmarkSession:
         self.disabled = config.getoption('benchmark_disable') and not config.getoption('benchmark_enable')
 
         # Only the main process has the 'dist' field in the config.
-        xdist_worker = os.environ.get('PYTEST_XDIST_WORKER')
-        xdist_active = config.getoption('dist', 'no') != 'no' or xdist_worker
-        if xdist_active and not self.skip and not self.disabled:
-            if not xdist_worker:
-                self.logger.warning(
-                    'Benchmarks are automatically disabled because xdist plugin is active. '
-                    'Benchmarks cannot be performed reliably in a parallelized environment.',
-                )
+        self.xdist_worker = os.environ.get('PYTEST_XDIST_WORKER')
+        xdist_active = config.getoption('dist', 'no') != 'no' or self.xdist_worker
+        self.xdist_warning = bool(xdist_active and not self.skip and not self.disabled)
+        self.xdist_benchmark_found = False
+        if self.xdist_warning:
             self.disabled = True
         if hasattr(config, 'slaveinput'):
             self.disabled = True
@@ -107,6 +104,18 @@ class BenchmarkSession:
         self.compare_fail = config.getoption('benchmark_compare_fail')
         self.name_format = NAME_FORMATTERS[config.getoption('benchmark_name')]
         self.histogram = first_or_value(config.getoption('benchmark_histogram'), False)
+
+    def note_xdist_benchmark(self):
+        if self.xdist_warning and self.xdist_worker in (None, 'gw0'):
+            self.xdist_benchmark_found = True
+
+    def pytest_unconfigure(self):
+        # Worker collection captures warnings into pytest's summary, so defer to preserve Logger's stderr output.
+        if self.xdist_benchmark_found:
+            self.logger.warning(
+                'Benchmarks are automatically disabled because xdist plugin is active. '
+                'Benchmarks cannot be performed reliably in a parallelized environment.',
+            )
 
     def get_machine_info(self):
         obj = self.config.hook.pytest_benchmark_generate_machine_info(config=self.config)
