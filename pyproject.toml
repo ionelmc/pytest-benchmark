@@ -85,7 +85,8 @@ dev = [
 ]
 
 [tool.mypy]
-exclude = ['build']
+exclude = ['build', 'ci', 'tests', 'typings']
+check_untyped_defs = true
 
 [[tool.mypy.overrides]]
 module = [
@@ -95,6 +96,7 @@ module = [
     "pygaljs",
 ]
 ignore_missing_imports = true
+
 
 [tool.ruff]
 extend-exclude = ["static", "ci/templates"]
