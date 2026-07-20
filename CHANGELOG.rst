@@ -7,6 +7,8 @@ Unreleased
 
 * Added ``--benchmark-precision`` and ``--benchmark-confidence``:
   instead of a fixed number of rounds, stop once the mean's relative margin of error falls below the given fraction.
+* Defer the xdist auto-disable warning until a benchmark fixture is collected.
+  Contributed by xlyyddy for `#65 <https://github.com/ionelmc/pytest-benchmark/issues/65>`_.
 
 v5.2.3 (2025-11-09)
 --------------------

@@ -357,6 +357,7 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         has_benchmark = hasattr(item, 'fixturenames') and 'benchmark' in item.fixturenames
         if has_benchmark:
+            bs.note_xdist_benchmark()
             if bs.skip:
                 item.add_marker(skip_bench)
         else:

@@ -44,3 +44,4 @@ Authors
 * Thomas B. Brunner - https://github.com/thomasbbrunner
 * Hugo van Kemenade - https://github.com/hugovk
 * Aarni Koskela - https://github.com/akx
+* xlyyddy - https://github.com/xlyyddy
