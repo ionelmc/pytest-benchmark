@@ -14,12 +14,12 @@ from .session import BenchmarkSession
 @pytest.hookspec(firstresult=True)
 def pytest_benchmark_scale_unit(
     config: pytest.Config,
-    unit,
-    benchmarks: BenchmarkFixture,
-    best,
-    worst,
-    sort,
-) -> None:
+    unit: str,
+    benchmarks: list[dict[str, Any]],
+    best: dict[str, float],
+    worst: dict[str, float],
+    sort: str,
+) -> tuple[str, float] | None:
     """
     To have custom time scaling do something like this:
 
@@ -42,7 +42,7 @@ def pytest_benchmark_scale_unit(
 @pytest.hookspec(firstresult=True)
 def pytest_benchmark_generate_machine_info(
     config: pytest.Config,
-) -> None:
+) -> dict[str, Any] | None:
     """
     To completely replace the generated machine_info do something like this:
 
@@ -72,7 +72,7 @@ def pytest_benchmark_update_machine_info(
 @pytest.hookspec(firstresult=True)
 def pytest_benchmark_generate_commit_info(
     config: pytest.Config,
-) -> None:
+) -> dict[str, Any] | None:
     """
     To completely replace the generated commit_info do something like this:
 
@@ -100,9 +100,9 @@ def pytest_benchmark_update_commit_info(
 @pytest.hookspec(firstresult=True)
 def pytest_benchmark_group_stats(
     config: pytest.Config,
-    benchmarks: BenchmarkFixture,
+    benchmarks: list[dict[str, Any]],
     group_by: str,
-) -> None:
+) -> list[tuple[str | None, list[dict[str, Any]]]] | None:
     """
     You may perform grouping customization here, in case the builtin grouping doesn't suit you.
 
@@ -126,10 +126,10 @@ def pytest_benchmark_group_stats(
 def pytest_benchmark_generate_json(
     config: pytest.Config,
     benchmarks: list[BenchmarkFixture],
-    include_data,
+    include_data: bool,
     machine_info: dict[str, Any],
     commit_info: dict[str, Any],
-) -> None:
+) -> dict[str, Any] | None:
     """
     You should read pytest-benchmark's code if you really need to wholly customize the JSON.
 
@@ -153,7 +153,7 @@ def pytest_benchmark_generate_json(
 def pytest_benchmark_update_json(
     config: pytest.Config,
     benchmarks: list[BenchmarkFixture],
-    output_json: Any,
+    output_json: dict[str, Any],
 ) -> None:
     """
     Use this to add custom fields in the output JSON.
@@ -170,8 +170,8 @@ def pytest_benchmark_update_json(
 def pytest_benchmark_compare_machine_info(
     config: pytest.Config,
     benchmarksession: BenchmarkSession,
-    machine_info: str,
-    compared_benchmark: BenchmarkFixture,
+    machine_info: dict[str, Any],
+    compared_benchmark: dict[str, Any],
 ) -> None:
     """
     You may want to use this hook to implement custom checks or abort execution.

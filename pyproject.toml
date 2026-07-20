@@ -87,6 +87,7 @@ dev = [
 [tool.mypy]
 exclude = ['build', 'ci', 'tests', 'typings']
 check_untyped_defs = true
+disallow_untyped_defs = true
 
 [[tool.mypy.overrides]]
 module = [

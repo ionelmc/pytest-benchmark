@@ -16,8 +16,12 @@ from types import TracebackType
 from typing import Any
 from typing import Callable
 from typing import ClassVar
+from typing import ParamSpec
 from typing import Self
+from typing import TypeVar
 from typing import cast
+
+import pytest
 
 from .logger import Logger
 from .stats import Metadata
@@ -28,6 +32,10 @@ from .utils import format_time
 from .utils import slugify
 
 statistics_error: str | None = None
+P = ParamSpec('P')
+R = TypeVar('R')
+Arguments = tuple[tuple[Any, ...], dict[str, Any]]
+Runner = Callable[[range | None], float | tuple[float, Any]]
 
 
 class FixtureAlreadyUsed(Exception):
@@ -35,13 +43,13 @@ class FixtureAlreadyUsed(Exception):
 
 
 class PauseInstrumentation:
-    def __init__(self: Self, tracer: bool = True, profiler: bool = True):
+    def __init__(self: Self, tracer: bool = True, profiler: bool = True) -> None:
         self.disable_profiler = profiler
         self.disable_tracer = tracer
         self.prev_tracer: Any = None
         self.prev_profiler: Any = None
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         if self.disable_tracer:
             self.prev_tracer = sys.gettrace()
 
@@ -53,6 +61,7 @@ class PauseInstrumentation:
 
             if self.prev_profiler:
                 sys.setprofile(None)
+        return self
 
     def __exit__(
         self,
@@ -72,24 +81,24 @@ class BenchmarkFixture:
 
     def __init__(
         self,
-        node,
+        node: pytest.Item,
         disable_gc: bool,
         timer: NameWrapper,
         min_rounds: int,
         min_time: float | int,
         max_time: float | int,
-        warmup,
+        warmup: bool,
         warmup_iterations: int,
-        calibration_precision,
-        add_stats,
+        calibration_precision: int,
+        add_stats: Callable[[Metadata], None],
         logger: Logger,
-        warner,
+        warner: Callable[[Warning], None],
         disabled: bool,
         cprofile: str,
-        cprofile_loops,
-        cprofile_dump,
-        group: dict[str, Any] | None = None,
-    ):
+        cprofile_loops: int | None,
+        cprofile_dump: str | None,
+        group: str | None = None,
+    ) -> None:
         self.name = node.name
         self.fullname = node._nodeid
         self.disabled = disabled
@@ -123,7 +132,7 @@ class BenchmarkFixture:
         self.stats: Metadata | None = None
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         return not self.disabled
 
     def _get_precision(self, timer: Timer) -> float:
@@ -138,8 +147,8 @@ class BenchmarkFixture:
             self._logger.debug(f'Computing precision for {NameWrapper(timer)} ... {format_time(timer_precision)}s.', blue=True, bold=True)
         return timer_precision
 
-    def _make_runner(self, function_to_benchmark, args, kwargs):
-        def runner(loops_range, timer=self._timer):
+    def _make_runner(self, function_to_benchmark: Callable[..., R], args: tuple[Any, ...], kwargs: dict[str, Any]) -> Runner:
+        def runner(loops_range: range | None, timer: Timer = self._timer) -> float | tuple[float, R]:
             gc_enabled = gc.isenabled()
             if self._disable_gc:
                 gc.disable()
@@ -165,7 +174,7 @@ class BenchmarkFixture:
 
         return runner
 
-    def _make_stats(self, iterations) -> Metadata:
+    def _make_stats(self, iterations: int) -> Metadata:
         bench_stats = Metadata(
             self,
             iterations=iterations,
@@ -182,7 +191,7 @@ class BenchmarkFixture:
         self.stats = bench_stats
         return bench_stats
 
-    def _save_cprofile(self, profile: Profile):
+    def _save_cprofile(self, profile: Profile) -> None:
         stats = pstats.Stats(profile)
         assert self.stats is not None
         self.stats.cprofile_stats = stats
@@ -193,7 +202,7 @@ class BenchmarkFixture:
             stats.dump_stats(output_file)
             self._logger.info(f'Saved profile: {output_file}', bold=True)
 
-    def __call__(self, function_to_benchmark, *args, **kwargs):
+    def __call__(self, function_to_benchmark: Callable[P, R], *args: P.args, **kwargs: P.kwargs) -> R:
         if self._mode:
             self.has_error = True
             raise FixtureAlreadyUsed(f'Fixture can only be used once. Previously it was used in {self._mode} mode.')
@@ -206,7 +215,17 @@ class BenchmarkFixture:
             self.has_error = True
             raise
 
-    def pedantic(self, target, args=(), kwargs=None, setup=None, teardown=None, rounds=1, warmup_rounds=0, iterations=1):
+    def pedantic(
+        self,
+        target: Callable[..., R],
+        args: tuple[Any, ...] = (),
+        kwargs: dict[str, Any] | None = None,
+        setup: Callable[[], Arguments | None] | None = None,
+        teardown: Callable[..., None] | None = None,
+        rounds: int = 1,
+        warmup_rounds: int = 0,
+        iterations: int = 1,
+    ) -> R:
         if self._mode:
             self.has_error = True
             raise FixtureAlreadyUsed(f'Fixture can only be used once. Previously it was used in {self._mode} mode.')
@@ -227,7 +246,7 @@ class BenchmarkFixture:
             self.has_error = True
             raise
 
-    def _raw(self, function_to_benchmark, *args, **kwargs):
+    def _raw(self, function_to_benchmark: Callable[P, R], *args: P.args, **kwargs: P.kwargs) -> R:
         loops_range = None
 
         if self.enabled:
@@ -253,7 +272,7 @@ class BenchmarkFixture:
                         runner(loops_range)
             with PauseInstrumentation():
                 for _ in range(rounds):
-                    stats.update(runner(loops_range))
+                    stats.update(cast(float, runner(loops_range)))
             self._logger.debug(f'  Ran for {format_time(time.time() - run_start)}s.', yellow=True, bold=True)
         if self.cprofile_loops is None:
             cprofile_loops = loops_range or range(1)
@@ -269,11 +288,22 @@ class BenchmarkFixture:
             function_result = function_to_benchmark(*args, **kwargs)
         return function_result
 
-    def _raw_pedantic(self, target, args=(), kwargs=None, setup=None, teardown=None, rounds=1, warmup_rounds=0, iterations=1):
+    def _raw_pedantic(
+        self,
+        target: Callable[..., R],
+        args: tuple[Any, ...] = (),
+        kwargs: dict[str, Any] | None = None,
+        setup: Callable[[], Arguments | None] | None = None,
+        teardown: Callable[..., None] | None = None,
+        rounds: int = 1,
+        warmup_rounds: int = 0,
+        iterations: int = 1,
+    ) -> R:
         if kwargs is None:
             kwargs = {}
+        benchmark_kwargs = kwargs
 
-        has_args = bool(args or kwargs)
+        has_args = bool(args or benchmark_kwargs)
 
         if not isinstance(iterations, int) or iterations < 1:
             raise ValueError('Must have positive int for `iterations`.')
@@ -287,7 +317,7 @@ class BenchmarkFixture:
         if iterations > 1 and setup:
             raise ValueError("Can't use more than 1 `iterations` with a `setup` function.")
 
-        def make_arguments(args=args, kwargs=kwargs):
+        def make_arguments(args: tuple[Any, ...] = args, kwargs: dict[str, Any] = benchmark_kwargs) -> Arguments:
             if setup:
                 maybe_args = setup()
                 if maybe_args:
@@ -318,9 +348,9 @@ class BenchmarkFixture:
             runner = self._make_runner(target, args, kwargs)
             with PauseInstrumentation():
                 if loops_range:
-                    duration = runner(loops_range)
+                    duration = cast(float, runner(loops_range))
                 else:
-                    duration, result = runner(loops_range)
+                    duration, result = cast(tuple[float, R], runner(loops_range))
             stats.update(duration)
 
             if teardown is not None:
@@ -350,14 +380,14 @@ class BenchmarkFixture:
 
         return result
 
-    def weave(self, target, **kwargs):
+    def weave(self, target: Callable[P, R], **kwargs: Any) -> None:
         try:
             import aspectlib  # noqa: PLC0415
         except ImportError as exc:
             raise ImportError(exc.args, 'Please install aspectlib or pytest-benchmark[aspect]') from exc
 
-        def aspect(function):
-            def wrapper(*args, **kwargs):
+        def aspect(function: Callable[P, R]) -> Callable[P, R]:
+            def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
                 return self(function, *args, **kwargs)
 
             return wrapper
@@ -366,14 +396,14 @@ class BenchmarkFixture:
 
     patch = weave
 
-    def _cleanup(self):
+    def _cleanup(self) -> None:
         while self._cleanup_callbacks:
             callback = self._cleanup_callbacks.pop()
             callback()
         if not self._mode and not self.skipped:
             self._logger.warning('Benchmark fixture was not used at all in this test!', warner=self._warner, suspend=True)
 
-    def _calibrate_timer(self, runner):
+    def _calibrate_timer(self, runner: Runner) -> tuple[float, int, range]:
         timer_precision = self._get_precision(self._timer)
         min_time = max(self._min_time, timer_precision * self._calibration_precision)
         min_time_estimate = min_time * 5 / self._calibration_precision
@@ -388,13 +418,13 @@ class BenchmarkFixture:
         loops = 1
         while True:
             loops_range = range(loops)
-            duration = runner(loops_range)
+            duration = cast(float, runner(loops_range))
             if self._warmup:
                 warmup_start = time.time()
                 warmup_iterations = 0
                 warmup_rounds = 0
                 while time.time() - warmup_start < self._max_time and warmup_iterations < self._warmup:
-                    duration = min(duration, runner(loops_range))
+                    duration = min(duration, cast(float, runner(loops_range)))
                     warmup_rounds += 1
                     warmup_iterations += loops
                 self._logger.debug(f'    Warmup: {format_time(time.time() - warmup_start)}s ({warmup_rounds} x {loops} iterations).')

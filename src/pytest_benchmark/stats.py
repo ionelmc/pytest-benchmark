@@ -270,7 +270,7 @@ class Metadata:
                 result['stats'] = stats_data
         return result
 
-    def update(self, duration: int) -> None:
+    def update(self, duration: float) -> None:
         self.stats.update(duration / self.iterations)
 
 

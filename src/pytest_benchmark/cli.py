@@ -7,6 +7,7 @@ from argparse import Action
 from argparse import ArgumentParser
 from argparse import Namespace
 from argparse import RawDescriptionHelpFormatter
+from collections.abc import Callable
 from collections.abc import Sequence
 from functools import partial
 from pathlib import Path
@@ -104,7 +105,7 @@ class CommandArgumentParser(ArgumentParser):
         return command
 
 
-def add_glob_or_file(addoption):
+def add_glob_or_file(addoption: Callable[..., Any]) -> None:
     addoption('glob_or_file', nargs='*', help='Glob or exact path for JSON files. If not specified all runs are loaded.')
 
 
@@ -263,30 +264,30 @@ def main() -> None:
 
 
 class TerminalReporter:
-    def __init__(self):
+    def __init__(self) -> None:
         self._tw = TerminalWriter()
 
-    def ensure_newline(self: Self):
+    def ensure_newline(self: Self) -> None:
         pass
 
-    def write(self: Self, content: str, **markup: bool):
+    def write(self: Self, content: str, **markup: bool) -> None:
         self._tw.write(content, **markup)
 
-    def write_line(self: Self, line: str, **markup: bool):
+    def write_line(self: Self, line: str | bytes = '', **markup: bool) -> None:
         if not isinstance(line, str):  # TODO: Unnecessary isinstance call; "str" is always an instance of "str"
             line = line.decode(errors='replace')
 
         self._tw.line(line, **markup)
 
-    def rewrite(self: Self, line: str, **markup: bool):
+    def rewrite(self: Self, line: str, **markup: bool) -> None:
         line = str(line)
         self._tw.write('\r' + line, **markup)
 
-    def write_sep(self: Self, sep: str, title: str | None = None, **markup: bool):
+    def write_sep(self: Self, sep: str, title: str | None = None, **markup: bool) -> None:
         self._tw.sep(sep, title, **markup)
 
-    def section(self: Self, title: str, sep: str = '=', **kw: Any):
+    def section(self: Self, title: str, sep: str = '=', **kw: Any) -> None:
         self._tw.sep(sep, title, **kw)
 
-    def line(self: Self, msg: str, **kw: Any):
+    def line(self: Self, msg: str, **kw: Any) -> None:
         self._tw.line(msg, **kw)

@@ -8,18 +8,22 @@ import platform
 import sys
 import traceback
 from collections import defaultdict
+from collections.abc import Generator
 from datetime import datetime
 from datetime import timezone
 from pathlib import Path
 from typing import Any
+from typing import Callable
 
 import cpuinfo
 import pytest
+from _pytest.terminal import TerminalReporter as PytestTerminalReporter
 
 from . import __version__
 from .fixture import BenchmarkFixture
 from .session import BenchmarkSession
 from .session import PerformanceRegression
+from .stats import Metadata
 from .timers import default_timer
 from .utils import DEFAULT_COLUMNS
 from .utils import NameWrapper
@@ -41,7 +45,7 @@ from .utils import parse_warmup
 from .utils import time_unit
 
 
-def pytest_report_header(config: pytest.Config):
+def pytest_report_header(config: pytest.Config) -> str:
     bs: BenchmarkSession = getattr(config, '_benchmarksession')  # noqa: B009
 
     return (
@@ -62,7 +66,7 @@ def pytest_report_header(config: pytest.Config):
     )
 
 
-def add_display_options(addoption, prefix: str = 'benchmark-') -> None:
+def add_display_options(addoption: Callable[..., Any], prefix: str = 'benchmark-') -> None:
     addoption(
         f'--{prefix}sort',
         metavar='COL',
@@ -101,7 +105,7 @@ def add_display_options(addoption, prefix: str = 'benchmark-') -> None:
     )
 
 
-def add_histogram_options(addoption, prefix: str = 'benchmark-') -> None:
+def add_histogram_options(addoption: Callable[..., Any], prefix: str = 'benchmark-') -> None:
     filename_prefix = f'benchmark_{get_current_time()}'
     addoption(
         f'--{prefix}histogram',
@@ -115,7 +119,7 @@ def add_histogram_options(addoption, prefix: str = 'benchmark-') -> None:
     )
 
 
-def add_csv_options(addoption, prefix: str = 'benchmark-') -> None:
+def add_csv_options(addoption: Callable[..., Any], prefix: str = 'benchmark-') -> None:
     filename_prefix = f'benchmark_{get_current_time()}'
     addoption(
         f'--{prefix}csv',
@@ -128,7 +132,7 @@ def add_csv_options(addoption, prefix: str = 'benchmark-') -> None:
     )
 
 
-def add_global_options(addoption, prefix: str = 'benchmark-') -> None:
+def add_global_options(addoption: Callable[..., Any], prefix: str = 'benchmark-') -> None:
     addoption(
         f'--{prefix}storage',
         *[] if prefix else ['-s'],
@@ -170,7 +174,7 @@ def add_global_options(addoption, prefix: str = 'benchmark-') -> None:
         )
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser: pytest.Parser) -> None:
     group = parser.getgroup('benchmark')
     group.addoption(
         '--benchmark-min-time',
@@ -316,29 +320,34 @@ def pytest_addoption(parser):
     add_histogram_options(group.addoption)
 
 
-def pytest_addhooks(pluginmanager) -> None:
+def pytest_addhooks(pluginmanager: pytest.PytestPluginManager) -> None:
     from . import hookspec  # noqa: PLC0415
 
     method = getattr(pluginmanager, 'add_hookspecs', None)
 
     if method is None:
-        method = pluginmanager.addhooks
+        method = getattr(pluginmanager, 'addhooks')  # noqa: B009
 
     method(hookspec)
 
 
-def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark):
-    machine_info = consistent_dumps(machine_info)
+def pytest_benchmark_compare_machine_info(
+    config: pytest.Config,
+    benchmarksession: BenchmarkSession,
+    machine_info: dict[str, Any],
+    compared_benchmark: dict[str, Any],
+) -> None:
+    machine_info_json = consistent_dumps(machine_info)
     compared_machine_info = consistent_dumps(compared_benchmark['machine_info'])
 
-    if compared_machine_info != machine_info:
+    if compared_machine_info != machine_info_json:
         benchmarksession.logger.warning(
-            f'Benchmark machine_info is different. Current: {machine_info} VS saved: {compared_machine_info} (location: {benchmarksession.storage.location}).'
+            f'Benchmark machine_info is different. Current: {machine_info_json} VS saved: {compared_machine_info} (location: {benchmarksession.storage.location}).'
         )
 
 
-def pytest_collection_modifyitems(config, items: list[Any]):
-    bs = config._benchmarksession
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    bs: BenchmarkSession = getattr(config, '_benchmarksession')  # noqa: B009
     skip_bench = pytest.mark.skip(reason='Skipping benchmark (--benchmark-skip active).')
     skip_other = pytest.mark.skip(reason='Skipping non-benchmark (--benchmark-only active).')
 
@@ -352,7 +361,9 @@ def pytest_collection_modifyitems(config, items: list[Any]):
                 item.add_marker(skip_other)
 
 
-def pytest_benchmark_group_stats(config, benchmarks, group_by):
+def pytest_benchmark_group_stats(
+    config: pytest.Config | None, benchmarks: list[dict[str, Any]], group_by: str
+) -> list[tuple[str | None, list[dict[str, Any]]]]:
     groups = defaultdict(list)
     for bench in benchmarks:
         key: tuple[Any, ...] = ()
@@ -384,20 +395,22 @@ def pytest_benchmark_group_stats(config, benchmarks, group_by):
 
 
 @pytest.hookimpl(hookwrapper=True)
-def pytest_sessionfinish(session, exitstatus):
-    session.config._benchmarksession.finish()
+def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> Generator[None, None, None]:
+    benchmark_session: BenchmarkSession = getattr(session.config, '_benchmarksession')  # noqa: B009
+    benchmark_session.finish()
     yield
 
 
-def pytest_terminal_summary(terminalreporter: Any):
+def pytest_terminal_summary(terminalreporter: PytestTerminalReporter) -> None:
     try:
-        terminalreporter.config._benchmarksession.display(terminalreporter)
+        benchmark_session: BenchmarkSession = getattr(terminalreporter.config, '_benchmarksession')  # noqa: B009
+        benchmark_session.display(terminalreporter)
 
     except PerformanceRegression:
         raise
 
     except Exception:
-        terminalreporter.config._benchmarksession.logger.error(f'\n{traceback.format_exc()}')
+        benchmark_session.logger.error(f'\n{traceback.format_exc()}')
         raise
 
 
@@ -405,7 +418,14 @@ def get_cpu_info() -> dict[str, Any]:
     return cpuinfo.get_cpu_info() or {}
 
 
-def pytest_benchmark_scale_unit(config, unit, benchmarks, best, worst, sort):
+def pytest_benchmark_scale_unit(
+    config: pytest.Config | None,
+    unit: str,
+    benchmarks: list[dict[str, Any]],
+    best: dict[str, float],
+    worst: dict[str, float],
+    sort: str,
+) -> tuple[str, float]:
     config_time_unit = config.getoption('benchmark_time_unit', None) if config else None
 
     if config_time_unit == 'ns':
@@ -465,11 +485,11 @@ def pytest_benchmark_generate_commit_info(config: pytest.Config) -> dict[str, An
 
 def pytest_benchmark_generate_json(
     config: pytest.Config,
-    benchmarks: list[Any],
-    include_data,
-    machine_info,
-    commit_info,
-):
+    benchmarks: list[Metadata],
+    include_data: bool,
+    machine_info: dict[str, Any],
+    commit_info: dict[str, Any],
+) -> dict[str, Any]:
     benchmarks_json: list[Any] = []
 
     output_json: dict[str, Any] = {
@@ -488,8 +508,8 @@ def pytest_benchmark_generate_json(
 
 
 @pytest.fixture
-def benchmark(request):
-    bs = request.config._benchmarksession
+def benchmark(request: pytest.FixtureRequest) -> Generator[BenchmarkFixture, None, None]:
+    bs: BenchmarkSession = getattr(request.config, '_benchmarksession')  # noqa: B009
 
     if bs.skip:
         pytest.skip('Benchmarks are skipped (--benchmark-skip was used).')
@@ -515,11 +535,11 @@ def benchmark(request):
 
 
 @pytest.fixture
-def benchmark_weave(benchmark):
+def benchmark_weave(benchmark: BenchmarkFixture) -> Callable[..., Any]:
     return benchmark.weave
 
 
-def pytest_runtest_setup(item):
+def pytest_runtest_setup(item: pytest.Item) -> None:
     marker = item.get_closest_marker('benchmark')
     if marker:
         if marker.args:
@@ -541,7 +561,7 @@ def pytest_runtest_setup(item):
 
 
 @pytest.hookimpl(hookwrapper=True)
-def pytest_runtest_makereport(item, call):
+def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo[Any]) -> Generator[None, pytest.TestReport, None]:
     outcome = yield
     fixture = None
     if hasattr(item, 'funcargs'):
@@ -556,7 +576,7 @@ def pytest_runtest_makereport(item, call):
 
 
 @pytest.hookimpl(trylast=True)  # force the other plugins to initialise, fixes issue with capture not being properly initialised
-def pytest_configure(config: pytest.Config):
+def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line('markers', 'benchmark: mark a test with custom benchmark settings.')
     bs = BenchmarkSession(config)
     setattr(config, '_benchmarksession', bs)  # noqa: B010

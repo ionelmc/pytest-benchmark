@@ -4,6 +4,7 @@
 """
 
 import os
+from collections.abc import Iterator
 from functools import partial
 from typing import Any
 
@@ -13,6 +14,7 @@ from .fixture import statistics
 from .fixture import statistics_error
 from .logger import Logger
 from .table import TableResults
+from .table import TerminalReporter
 from .utils import DEFAULT_COLUMNS
 from .utils import NAME_FORMATTERS
 from .utils import SecondsDecimal
@@ -111,12 +113,12 @@ class BenchmarkSession:
         self.name_format = NAME_FORMATTERS[config.getoption('benchmark_name')]
         self.histogram = first_or_value(config.getoption('benchmark_histogram'), False)
 
-    def get_machine_info(self):
+    def get_machine_info(self) -> dict[str, Any]:
         obj = self.config.hook.pytest_benchmark_generate_machine_info(config=self.config)
         self.config.hook.pytest_benchmark_update_machine_info(config=self.config, machine_info=obj)
         return obj
 
-    def prepare_benchmarks(self):
+    def prepare_benchmarks(self) -> Iterator[dict[str, Any]]:
         assert self.compared_mapping is not None
         for bench in self.benchmarks:
             if bench:
@@ -140,12 +142,12 @@ class BenchmarkSession:
                 flat_bench['source'] = compared and 'NOW'
                 yield flat_bench
 
-    def save_json(self, output_json):
+    def save_json(self, output_json: dict[str, Any]) -> None:
         with open(self.json, mode='wb') as fh:
             fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())
         self.logger.info(f'Wrote benchmark data in: {self.json}', purple=True)
 
-    def handle_saving(self):
+    def handle_saving(self) -> None:
         save = self.save or self.autosave
         if save or self.json:
             if not self.benchmarks:
@@ -186,7 +188,7 @@ class BenchmarkSession:
             )
             self.storage.save(output_json, save)
 
-    def handle_loading(self):
+    def handle_loading(self) -> None:
         compared_mapping = {}
         if self.compare:
             if self.compare is True:
@@ -214,7 +216,7 @@ class BenchmarkSession:
                 self.logger.info(f'Comparing against benchmarks from: {path}', newline=False)
         self.compared_mapping = compared_mapping
 
-    def finish(self):
+    def finish(self) -> None:
         self.handle_saving()
         prepared_benchmarks = list(self.prepare_benchmarks())
         if prepared_benchmarks:
@@ -222,7 +224,7 @@ class BenchmarkSession:
                 config=self.config, benchmarks=prepared_benchmarks, group_by=self.group_by
             )
 
-    def display(self, tr):
+    def display(self, tr: TerminalReporter) -> None:
         if not self.groups:
             return
 
@@ -242,7 +244,7 @@ class BenchmarkSession:
         if not self.quiet:
             self.display_cprofile(tr)
 
-    def check_regressions(self):
+    def check_regressions(self) -> None:
         if self.compare_fail and not self.compared_mapping:
             raise pytest.UsageError('--benchmark-compare-fail requires valid --benchmark-compare.')
 
@@ -252,7 +254,7 @@ class BenchmarkSession:
             )
             raise PerformanceRegression('Performance has regressed.')
 
-    def display_cprofile(self, tr):
+    def display_cprofile(self, tr: TerminalReporter) -> None:
         section_displayed = False
         assert self.groups is not None
         for group in self.groups:

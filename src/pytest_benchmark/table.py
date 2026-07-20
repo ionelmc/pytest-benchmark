@@ -4,10 +4,15 @@
 """
 
 import operator
+from collections.abc import Callable
+from collections.abc import Iterator
 from math import isinf
 from typing import Any
+from typing import Literal
 from typing import LiteralString
+from typing import Protocol
 
+from .logger import Logger
 from .utils import report_online_progress
 from .utils import report_progress
 
@@ -15,11 +20,26 @@ NUMBER_FMT = '{0:,.4f}'
 ALIGNED_NUMBER_FMT = '{0:>{1},.4f}{2:<{3}}'
 STAT_PROPS = ('min', 'max', 'mean', 'median', 'iqr', 'stddev', 'ops')
 DELTA = '\N{GREEK CAPITAL LETTER DELTA}'
+Benchmark = dict[str, Any]
+BenchmarkGroup = tuple[str | None, list[Benchmark]]
+ProgressReporter = Callable[..., Iterator[tuple[str, Any]]]
 
 
-def compute_best_worst(benchmarks, progress_reporter, tr, line):
-    worst = {}
-    best = {}
+class TerminalReporter(Protocol):
+    def ensure_newline(self) -> None: ...
+
+    def write(self, content: str, **markup: bool) -> None: ...
+
+    def write_line(self, line: str | bytes, **markup: bool) -> None: ...
+
+    def section(self, title: str, sep: str = '=', **markup: bool) -> None: ...
+
+
+def compute_best_worst(
+    benchmarks: list[Benchmark], progress_reporter: ProgressReporter, tr: TerminalReporter, line: str
+) -> tuple[dict[str, float], dict[str, float]]:
+    worst: dict[str, float] = {}
+    best: dict[str, float] = {}
     for line1, prop in progress_reporter(STAT_PROPS, tr, '{line}: {value}', line=line):
         # For 'ops', higher is better; for time-based metrics, lower is better
         best_fn, worst_fn = (max, min) if prop == 'ops' else (min, max)
@@ -31,7 +51,15 @@ def compute_best_worst(benchmarks, progress_reporter, tr, line):
 
 
 class TableResults:
-    def __init__(self, columns, sort, histogram, name_format, logger, scale_unit):
+    def __init__(
+        self,
+        columns: list[str],
+        sort: str,
+        histogram: str | Literal[False],
+        name_format: Callable[[Benchmark], str],
+        logger: Logger,
+        scale_unit: Callable[..., tuple[str, float]],
+    ) -> None:
         self.columns = columns
         self.sort = sort
         self.histogram = histogram
@@ -39,7 +67,9 @@ class TableResults:
         self.logger = logger
         self.scale_unit = scale_unit
 
-    def compute_scale(self, benchmarks, best, worst):
+    def compute_scale(
+        self, benchmarks: list[Benchmark], best: dict[str, float], worst: dict[str, float]
+    ) -> tuple[str, float, float, dict[str, str]]:
         unit, adjustment = self.scale_unit(unit='seconds', benchmarks=benchmarks, best=best, worst=worst, sort=self.sort)
         ops_unit, ops_adjustment = self.scale_unit(unit='operations', benchmarks=benchmarks, best=best, worst=worst, sort=self.sort)
         labels = {
@@ -57,7 +87,7 @@ class TableResults:
         }
         return unit, adjustment, ops_adjustment, labels
 
-    def display(self, tr, groups, progress_reporter=report_progress):
+    def display(self, tr: TerminalReporter, groups: list[BenchmarkGroup], progress_reporter: ProgressReporter = report_progress) -> None:
         tr.write_line('')
         report_online_progress(progress_reporter, tr, 'Computing stats ...')
         for line, (group, benchmarks) in progress_reporter(groups, tr, 'Computing stats ... group {pos}/{total}'):
@@ -147,7 +177,7 @@ class TableResults:
 
 
 class CompareBetweenResults(TableResults):
-    def display(self, tr: Any, groups, progress_reporter=report_progress):
+    def display(self, tr: TerminalReporter, groups: list[BenchmarkGroup], progress_reporter: ProgressReporter = report_progress) -> None:
         tr.write_line('')
 
         for line, (group, benchmarks) in progress_reporter(groups, tr, 'Computing stats ... group {pos}/{total}'):
@@ -157,7 +187,15 @@ class CompareBetweenResults(TableResults):
         tr.write_line('  Cyan: reference source for comparison. Green: improvement, Red: regression.')
         tr.write_line(f'  {DELTA}: percentage change from reference source.')
 
-    def _display_single_between(self, line, group, benchmarks, *, tr, progress_reporter):
+    def _display_single_between(
+        self,
+        line: str,
+        group: str | None,
+        benchmarks: list[Benchmark],
+        *,
+        tr: TerminalReporter,
+        progress_reporter: ProgressReporter,
+    ) -> None:
         # Collect sources in order of first appearance and build fullname -> {source: bench} mapping
         sources = list(dict.fromkeys(bench.get('source', '') for bench in benchmarks))
         bench_map: dict[str, dict[str, Any]] = {}
@@ -192,7 +230,7 @@ class CompareBetweenResults(TableResults):
 
         columns = []  # Each entry: (source_idx, metric, label, width, is_change)
 
-        def _val_col_width(metric, src, label):
+        def _val_col_width(metric: str, src: str, label: str) -> int:
             """
             Helper to compute value column width for a given metric and source
             """
@@ -237,15 +275,15 @@ class CompareBetweenResults(TableResults):
 
         for fullname in sorted_names:
             tr.write(display_names[fullname].ljust(name_width))
-            row_values = {}
+            row_values: dict[tuple[int, str], float] = {}
             for si, metric, _label, width, is_change in columns:
                 if not is_change:
-                    bench = bench_map[fullname].get(sources[si])
-                    if bench is None:
+                    comparison_bench = bench_map[fullname].get(sources[si])
+                    if comparison_bench is None:
                         tr.write('N/A'.rjust(width))
                     else:
-                        row_values[(si, metric)] = bench[metric]
-                        tr.write(NUMBER_FMT.format(bench[metric] * adjustments[metric]).rjust(width), cyan=(si == 0))
+                        row_values[(si, metric)] = comparison_bench[metric]
+                        tr.write(NUMBER_FMT.format(comparison_bench[metric] * adjustments[metric]).rjust(width), cyan=(si == 0))
                 else:
                     base_val = row_values.get((0, metric))
                     cmp_val = row_values.get((si, metric))
