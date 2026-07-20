@@ -6,6 +6,7 @@ from datetime import datetime
 from decimal import Decimal
 from functools import partial
 from typing import Any
+from typing import cast
 
 import elasticsearch
 from elastic_transport import ObjectApiResponse
@@ -75,7 +76,10 @@ class ElasticsearchStorage:
             },
         }
 
-        result: ObjectApiResponse[Any] = self._es.search(index=self._es_index, doc_type=self._es_doctype, body=body)  # type: ignore[call-arg]
+        result = cast(
+            ObjectApiResponse[Any],
+            self._es.search(index=self._es_index, doc_type=self._es_doctype, body=body),  # type: ignore[call-arg]
+        )
 
         return sorted([record['key'] for record in result['aggregations']['benchmark_ids']['buckets']])
 
@@ -105,10 +109,13 @@ class ElasticsearchStorage:
             body['query']['bool']['must'] = {'prefix': {'_id': id_prefix}}
 
         # TODO: Remove ignore parameters because doesn't existe in function create
-        return self._es.search(  # type: ignore[call-arg]
-            index=self._es_index,
-            doc_type=self._es_doctype,
-            body=body,
+        return cast(
+            ObjectApiResponse[Any],
+            self._es.search(  # type: ignore[call-arg]
+                index=self._es_index,
+                doc_type=self._es_doctype,
+                body=body,
+            ),
         )
 
     @staticmethod

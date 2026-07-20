@@ -221,14 +221,14 @@ class CompareBetweenResults(TableResults):
         )
 
         # Format benchmark display names without source suffix
-        display_names = {}
+        display_names: dict[str, str] = {}
         for fullname in sorted_names:
             any_bench = next(iter(bench_map[fullname].values()))
             display_names[fullname] = self.name_format({**any_bench, 'source': ''})
 
         name_width = 3 + max(len(labels['name']), *(len(n) for n in display_names.values()))
 
-        columns = []  # Each entry: (source_idx, metric, label, width, is_change)
+        columns: list[tuple[int, str, str, int, bool]] = []
 
         def _val_col_width(metric: str, src: str, label: str) -> int:
             """

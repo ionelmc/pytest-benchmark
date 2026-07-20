@@ -4,6 +4,8 @@ import pathlib
 import subprocess
 import sys
 from collections.abc import Sequence
+from typing import Any
+from typing import cast
 
 base_path: pathlib.Path = pathlib.Path(__file__).resolve().parent.parent
 templates_path = base_path / 'ci' / 'templates'
@@ -46,11 +48,14 @@ def main() -> None:
 
     print(f'Project path: {base_path}')
 
-    jinja = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(str(templates_path)),
-        trim_blocks=True,
-        lstrip_blocks=True,
-        keep_trailing_newline=True,
+    jinja = cast(
+        Any,
+        jinja2.Environment(
+            loader=jinja2.FileSystemLoader(str(templates_path)),
+            trim_blocks=True,
+            lstrip_blocks=True,
+            keep_trailing_newline=True,
+        ),
     )
     tox_environments = [
         line.strip()

@@ -14,6 +14,7 @@ from datetime import timezone
 from pathlib import Path
 from typing import Any
 from typing import Callable
+from typing import cast
 
 import cpuinfo
 import pytest
@@ -364,7 +365,7 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
 def pytest_benchmark_group_stats(
     config: pytest.Config | None, benchmarks: list[dict[str, Any]], group_by: str
 ) -> list[tuple[str | None, list[dict[str, Any]]]]:
-    groups = defaultdict(list)
+    groups: defaultdict[str | None, list[dict[str, Any]]] = defaultdict(list)
     for bench in benchmarks:
         key: tuple[Any, ...] = ()
         for grouping in group_by.split(','):
@@ -515,8 +516,8 @@ def benchmark(request: pytest.FixtureRequest) -> Generator[BenchmarkFixture, Non
         pytest.skip('Benchmarks are skipped (--benchmark-skip was used).')
 
     else:
-        node = request.node
-        marker = node.get_closest_marker('benchmark')
+        node = cast(pytest.Item, request.node)
+        marker = cast(pytest.Mark | None, node.get_closest_marker('benchmark'))
         options: dict[str, object] = dict(marker.kwargs) if marker else {}
         if 'timer' in options:
             options['timer'] = NameWrapper(options['timer'])
@@ -563,9 +564,9 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo[Any]) -> Generator[None, pytest.TestReport, None]:
     outcome = yield
-    fixture = None
+    fixture: object | None = None
     if hasattr(item, 'funcargs'):
-        fixture = item.funcargs.get('benchmark')
+        fixture = cast(object | None, item.funcargs.get('benchmark'))
     if fixture is not None and not isinstance(fixture, BenchmarkFixture):
         raise TypeError(
             f'unexpected type for `benchmark` in funcargs, {fixture!r} must be a BenchmarkFixture instance. '

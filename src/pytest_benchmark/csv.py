@@ -7,6 +7,7 @@ import csv
 import operator
 from pathlib import Path
 from typing import Any
+from typing import cast
 
 from .logger import Logger
 
@@ -46,7 +47,7 @@ class CSVResults:
 
                 for bench in benchmarks:
                     row = [bench.get('fullfunc', bench['fullname'])]
-                    bench_params = bench.get('params', {})
+                    bench_params = cast(dict[str, object] | None, bench.get('params', {}))
                     bench_params = bench_params if bench_params is not None else {}
                     row.extend(bench_params.get(param, '') for param in params)
                     row.extend(bench[prop] for prop in self.columns)

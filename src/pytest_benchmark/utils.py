@@ -28,6 +28,7 @@ from typing import Generic
 from typing import Literal
 from typing import Self
 from typing import TypeVar
+from typing import cast
 from typing import overload
 from urllib.parse import ParseResult
 from urllib.parse import parse_qs
@@ -628,11 +629,15 @@ def get_cprofile_functions(stats: pstats.Stats) -> list[dict[str, str | int | fl
     """
     Convert pstats structure to list of sorted dicts about each function.
     """
-    result = []
+    result: list[dict[str, str | int | float]] = []
     # this assumes that you run py.test from project root dir
     project_dir_parent = str(Path.cwd().parent)
 
-    for function_info, run_info in stats.stats.items():  # type: ignore[attr-defined]
+    raw_stats = cast(
+        dict[tuple[str, int, str], tuple[int, int, float, float, object]],
+        stats.stats,  # type: ignore[attr-defined]
+    )
+    for function_info, run_info in raw_stats.items():
         file_path = function_info[0]
         if file_path.startswith(project_dir_parent):
             file_path = file_path[len(project_dir_parent) :].lstrip('/')

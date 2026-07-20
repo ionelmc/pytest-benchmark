@@ -6,6 +6,8 @@
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
+from typing import Callable
+from typing import cast
 
 from pygal.graph.box import Box
 from pygal.style import DefaultStyle
@@ -28,7 +30,7 @@ class CustomBox(Box):
         )
 
     def _format(self, x: Any, *args: Any) -> Any:
-        sup = super()._format
+        sup = cast(Callable[..., Any], super()._format)
 
         if args:
             val = x.values
@@ -41,7 +43,7 @@ class CustomBox(Box):
             return self._value_format(values), values[7]
 
         else:
-            return sup(x, *args)
+            return cast(Any, sup(x, *args))
 
     def _tooltip_data(
         self,

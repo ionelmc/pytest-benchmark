@@ -10,8 +10,15 @@ from typing import cast
 Timer = Callable[[], float]
 
 try:
-    from __pypy__.time import CLOCK_MONOTONIC  # type: ignore[import-not-found]
-    from __pypy__.time import clock_gettime  # type: ignore[import-not-found]
+    from __pypy__.time import (
+        CLOCK_MONOTONIC as _CLOCK_MONOTONIC,  # type: ignore[import-not-found]  # pyright: ignore[reportMissingImports, reportUnknownVariableType]
+    )
+    from __pypy__.time import (
+        clock_gettime as _clock_gettime,  # type: ignore[import-not-found]  # pyright: ignore[reportMissingImports, reportUnknownVariableType]
+    )
+
+    CLOCK_MONOTONIC = cast(int, _CLOCK_MONOTONIC)
+    clock_gettime = cast(Callable[[int], float], _clock_gettime)
 
     def monotonic() -> float:
         return cast(float, clock_gettime(CLOCK_MONOTONIC))

@@ -6,6 +6,7 @@
 import os
 from collections.abc import Iterator
 from functools import partial
+from pathlib import Path
 from typing import Any
 from typing import cast
 
@@ -35,8 +36,8 @@ class PerformanceRegression(Exception):
 
 
 class BenchmarkSession:
-    compared_mapping = None
-    groups = None
+    compared_mapping: dict[Path, dict[str, dict[str, Any]]] | None = None
+    groups: list[tuple[str | None, list[dict[str, Any]]]] | None = None
 
     def __init__(self, config: pytest.Config) -> None:
         self.verbose = config.getoption('benchmark_verbose')
@@ -109,7 +110,7 @@ class BenchmarkSession:
         self.save = config.getoption('benchmark_save')
         self.autosave = config.getoption('benchmark_autosave')
         self.save_data = config.getoption('benchmark_save_data')
-        self.json = config.getoption('benchmark_json')
+        self.json: str | None = config.getoption('benchmark_json')
         self.compare = config.getoption('benchmark_compare')
         self.compare_fail = config.getoption('benchmark_compare_fail')
         self.name_format = NAME_FORMATTERS[config.getoption('benchmark_name')]
@@ -127,10 +128,11 @@ class BenchmarkSession:
                 compared = False
                 for path, compared_mapping in self.compared_mapping.items():
                     if bench.fullname in compared_mapping:
-                        compared = compared_mapping[bench.fullname]
+                        compared_benchmark = compared_mapping[bench.fullname]
+                        compared = True
                         source = short_filename(path, self.machine_id)
                         flat_bench = bench.as_dict(include_data=False, stats=False, cprofile=(self.cprofile_sort_by, self.cprofile_top))
-                        flat_bench.update(compared['stats'])
+                        flat_bench.update(compared_benchmark['stats'])
                         flat_bench['path'] = str(path)
                         flat_bench['source'] = source
                         if self.compare_fail:
@@ -145,6 +147,8 @@ class BenchmarkSession:
                 yield flat_bench
 
     def save_json(self, output_json: dict[str, Any]) -> None:
+        if self.json is None:
+            raise RuntimeError('JSON output path is not configured.')
         with open(self.json, mode='wb') as fh:
             fh.write(safe_dumps(output_json, ensure_ascii=True, indent=4).encode())
         self.logger.info(f'Wrote benchmark data in: {self.json}', purple=True)
