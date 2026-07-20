@@ -17,6 +17,7 @@ from typing import Any
 from typing import Callable
 from typing import ClassVar
 from typing import ParamSpec
+from typing import Protocol
 from typing import Self
 from typing import TypeVar
 from typing import cast
@@ -36,6 +37,15 @@ P = ParamSpec('P')
 R = TypeVar('R')
 Arguments = tuple[tuple[Any, ...], dict[str, Any]]
 Runner = Callable[[range | None], float | tuple[float, Any]]
+
+
+class CallSpec(Protocol):
+    id: str
+    params: dict[str, object]
+
+
+class Rollback(Protocol):
+    def rollback(self) -> None: ...
 
 
 class FixtureAlreadyUsed(Exception):
@@ -106,9 +116,12 @@ class BenchmarkFixture:
         self.name = node.name
         self.fullname = node._nodeid
         self.disabled = disabled
+        self.param: str | None
+        self.params: dict[str, object] | None
         if hasattr(node, 'callspec'):
-            self.param = node.callspec.id
-            self.params = node.callspec.params
+            callspec = cast(CallSpec, node.callspec)
+            self.param = callspec.id
+            self.params = callspec.params
         else:
             self.param = None
             self.params = None
@@ -403,7 +416,8 @@ class BenchmarkFixture:
 
             return wrapper
 
-        self._cleanup_callbacks.append(aspectlib.weave(target, aspect, **kwargs).rollback)
+        weave = cast(Callable[..., Rollback], aspectlib.weave)
+        self._cleanup_callbacks.append(weave(target, aspect, **kwargs).rollback)
 
     patch = weave
 

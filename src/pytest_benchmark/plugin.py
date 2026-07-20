@@ -353,7 +353,8 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
     skip_other = pytest.mark.skip(reason='Skipping non-benchmark (--benchmark-only active).')
 
     for item in items:
-        has_benchmark = hasattr(item, 'fixturenames') and 'benchmark' in item.fixturenames
+        fixture_names = cast(list[str], getattr(item, 'fixturenames', []))
+        has_benchmark = 'benchmark' in fixture_names
         if has_benchmark:
             if bs.skip:
                 item.add_marker(skip_bench)
@@ -526,7 +527,7 @@ def benchmark(request: pytest.FixtureRequest) -> Generator[BenchmarkFixture, Non
             node,
             add_stats=bs.benchmarks.append,
             logger=bs.logger,
-            warner=request.node.warn,
+            warner=cast(Callable[[Warning], None], node.warn),
             disabled=bs.disabled,
             **dict(bs.options, **options),
         )
@@ -566,7 +567,8 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo[Any]) -> 
     outcome = yield
     fixture: object | None = None
     if hasattr(item, 'funcargs'):
-        fixture = cast(object | None, item.funcargs.get('benchmark'))
+        fixture_arguments = cast(dict[str, object], item.funcargs)
+        fixture = fixture_arguments.get('benchmark')
     if fixture is not None and not isinstance(fixture, BenchmarkFixture):
         raise TypeError(
             f'unexpected type for `benchmark` in funcargs, {fixture!r} must be a BenchmarkFixture instance. '

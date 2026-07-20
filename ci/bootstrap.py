@@ -4,11 +4,20 @@ import pathlib
 import subprocess
 import sys
 from collections.abc import Sequence
-from typing import Any
+from typing import Callable
+from typing import Protocol
 from typing import cast
 
 base_path: pathlib.Path = pathlib.Path(__file__).resolve().parent.parent
 templates_path = base_path / 'ci' / 'templates'
+
+
+class Template(Protocol):
+    def render(self, **context: object) -> str: ...
+
+
+class Environment(Protocol):
+    def get_template(self, name: str) -> Template: ...
 
 
 def check_call(args: Sequence[str | os.PathLike[str]]) -> None:
@@ -48,14 +57,13 @@ def main() -> None:
 
     print(f'Project path: {base_path}')
 
-    jinja = cast(
-        Any,
-        jinja2.Environment(
-            loader=jinja2.FileSystemLoader(str(templates_path)),
-            trim_blocks=True,
-            lstrip_blocks=True,
-            keep_trailing_newline=True,
-        ),
+    environment_factory = cast(Callable[..., Environment], jinja2.Environment)
+    loader_factory = cast(Callable[[str], object], jinja2.FileSystemLoader)
+    jinja = environment_factory(
+        loader=loader_factory(str(templates_path)),
+        trim_blocks=True,
+        lstrip_blocks=True,
+        keep_trailing_newline=True,
     )
     tox_environments = [
         line.strip()

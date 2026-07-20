@@ -7,6 +7,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 from typing import Callable
+from typing import Protocol
 from typing import cast
 
 from pygal.graph.box import Box
@@ -14,6 +15,14 @@ from pygal.style import DefaultStyle
 
 from .utils import TIME_UNITS
 from .utils import slugify
+
+
+class SVGNode(Protocol):
+    text: str
+
+
+class SVG(Protocol):
+    def node(self, parent: object, tag: str, **attributes: str) -> SVGNode: ...
 
 
 class CustomBox(Box):
@@ -54,8 +63,10 @@ class CustomBox(Box):
         classes: str | None = None,
         xlabel: str | None = None,
     ) -> None:
-        super()._tooltip_data(node, value[0], x, y, classes=classes, xlabel=None)
-        self.svg.node(node, 'desc', class_='x_label').text = value[1]
+        tooltip_data = cast(Callable[..., None], super()._tooltip_data)
+        tooltip_data(node, value[0], x, y, classes=classes, xlabel=None)
+        svg = cast(SVG, self.svg)
+        svg.node(node, 'desc', class_='x_label').text = value[1]
 
 
 def make_plot(benchmarks: list[dict[str, Any]], title: str, adjustment: float) -> CustomBox:
@@ -71,7 +82,8 @@ def make_plot(benchmarks: list[dict[str, Any]], title: str, adjustment: float) -
     except ImportError:
         opts = {}
     else:
-        opts = {'js': [pygaljs.uri('2.0.x', 'pygal-tooltips.js')]}
+        uri = cast(Callable[..., str], pygaljs.uri)
+        opts = {'js': [uri('2.0.x', 'pygal-tooltips.js')]}
 
     plot = CustomBox(
         box_mode='tukey',
@@ -105,7 +117,8 @@ def make_plot(benchmarks: list[dict[str, Any]], title: str, adjustment: float) -
     for row in benchmarks:
         serie = [row[field] * adjustment for field in ['min', 'ld15iqr', 'q1', 'median', 'q3', 'hd15iqr', 'max']]
         serie.append(row['path'])
-        plot.add(f'{row["fullname"]} - {row["rounds"]} rounds', serie)
+        add = cast(Callable[..., CustomBox], plot.add)
+        add(f'{row["fullname"]} - {row["rounds"]} rounds', serie)
 
     return plot
 
@@ -127,5 +140,6 @@ def make_histogram(output_prefix: str, name: str | None, benchmarks: Any, unit: 
         title=title,
         adjustment=adjustment,
     )
-    plot.render_to_file(str(output_file))
+    render_to_file = cast(Callable[[str], None], plot.render_to_file)
+    render_to_file(str(output_file))
     return output_file
