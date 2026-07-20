@@ -1,23 +1,32 @@
+from collections.abc import Callable
 from functools import partial
+from typing import Generic
+from typing import TypeVar
 
 import pytest
+
+from pytest_benchmark.fixture import BenchmarkFixture
 
 empty = object()
 
 
-class cached_property:
-    def __init__(self, func):
+Owner = TypeVar('Owner')
+Value = TypeVar('Value')
+
+
+class cached_property(Generic[Owner, Value]):
+    def __init__(self, func: Callable[[Owner], Value]) -> None:
         self.func = func
 
-    def __get__(self, obj, cls):
+    def __get__(self, obj: Owner, cls: type[Owner] | None = None) -> Value:
         value = obj.__dict__[self.func.__name__] = self.func(obj)
         return value
 
 
 class SimpleProxy:
-    def __init__(self, factory):
+    def __init__(self, factory: Callable[[], object]) -> None:
         self.factory = factory
-        self.object = empty
+        self.object: object = empty
 
     def __str__(self):
         if self.object is empty:
@@ -26,11 +35,11 @@ class SimpleProxy:
 
 
 class CachedPropertyProxy:
-    def __init__(self, factory):
+    def __init__(self, factory: Callable[[], object]) -> None:
         self.factory = factory
 
     @cached_property
-    def object(self):
+    def object(self) -> object:
         return self.factory()
 
     def __str__(self):
@@ -38,9 +47,9 @@ class CachedPropertyProxy:
 
 
 class LocalsSimpleProxy:
-    def __init__(self, factory):
+    def __init__(self, factory: Callable[[], object]) -> None:
         self.factory = factory
-        self.object = empty
+        self.object: object = empty
 
     def __str__(self, func=str):
         if self.object is empty:
@@ -49,11 +58,11 @@ class LocalsSimpleProxy:
 
 
 class LocalsCachedPropertyProxy:
-    def __init__(self, factory):
+    def __init__(self, factory: Callable[[], object]) -> None:
         self.factory = factory
 
     @cached_property
-    def object(self):
+    def object(self) -> object:
         return self.factory()
 
     def __str__(self, func=str):
@@ -61,11 +70,23 @@ class LocalsCachedPropertyProxy:
 
 
 @pytest.fixture(scope='module', params=['SimpleProxy', 'CachedPropertyProxy', 'LocalsSimpleProxy', 'LocalsCachedPropertyProxy'])
-def impl(request):
-    return globals()[request.param]
+def impl(
+    request: pytest.FixtureRequest,
+) -> type[SimpleProxy] | type[CachedPropertyProxy] | type[LocalsSimpleProxy] | type[LocalsCachedPropertyProxy]:
+    implementations = {
+        'SimpleProxy': SimpleProxy,
+        'CachedPropertyProxy': CachedPropertyProxy,
+        'LocalsSimpleProxy': LocalsSimpleProxy,
+        'LocalsCachedPropertyProxy': LocalsCachedPropertyProxy,
+    }
+    assert isinstance(request.param, str)
+    return implementations[request.param]
 
 
-def test_proto(benchmark, impl):
+def test_proto(
+    benchmark: BenchmarkFixture,
+    impl: type[SimpleProxy] | type[CachedPropertyProxy] | type[LocalsSimpleProxy] | type[LocalsCachedPropertyProxy],
+) -> None:
     obj = 'foobar'
     proxied = impl(lambda: obj)
     result = benchmark(partial(str, proxied))

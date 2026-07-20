@@ -7,6 +7,7 @@ import logging
 from io import BytesIO
 from io import StringIO
 from pathlib import Path
+from typing import Protocol
 
 import elasticsearch
 from freezegun import freeze_time
@@ -33,6 +34,12 @@ SAVE_DATA = json.loads(BENCHFILE.read_text(encoding='utf8'))
 SAVE_DATA['machine_info'] = {'foo': 'bar'}
 SAVE_DATA['commit_info'] = {'foo': 'bar'}
 
+
+class LegacyPath(Protocol):
+    @property
+    def strpath(self) -> str: ...
+
+
 tmp = SAVE_DATA.copy()
 
 ES_DATA = tmp.pop('benchmarks')[0]
@@ -57,7 +64,7 @@ class LooseFileLike(BytesIO):
 
 class MockStorage(ElasticsearchStorage):
     def __init__(self):
-        self._es = mock.Mock(spec=elasticsearch.Elasticsearch)
+        self._es: mock.Mock = mock.Mock(spec=elasticsearch.Elasticsearch)
         self._es_hosts = self._es_index = self._es_doctype = 'mocked'
         self.logger = logger
         self.default_machine_id = 'FoobarOS'
@@ -122,21 +129,21 @@ class MockSession(BenchmarkSession):
 text_type = str
 
 
-def force_text(text):
+def force_text(text: str | bytes) -> str:
     if isinstance(text, text_type):
         return text
     else:
         return text.decode('utf-8')
 
 
-def force_bytes(text):
+def force_bytes(text: str | bytes) -> bytes:
     if isinstance(text, text_type):
         return text.encode('utf-8')
     else:
         return text
 
 
-def make_logger(sess):
+def make_logger(sess: MockSession) -> StringIO:
     output = StringIO()
     sess.logger = Namespace(
         info=lambda text, **opts: output.write(force_text(text) + '\n'),
@@ -150,17 +157,17 @@ def make_logger(sess):
 
 
 @pytest.fixture
-def sess():
+def sess() -> MockSession:
     return MockSession()
 
 
 @pytest.fixture
-def logger_output(sess):
+def logger_output(sess: MockSession) -> StringIO:
     return make_logger(sess)
 
 
 @freeze_time('2015-08-15T00:04:18.687119')
-def test_handle_saving(sess, logger_output, monkeypatch):
+def test_handle_saving(sess: MockSession, logger_output: StringIO, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(plugin, '__version__', '2.5.0')
     sess.save = 'commitId'
     sess.autosave = True
@@ -199,7 +206,7 @@ def test_parse_with_creds_in_second_host_of_url():
     assert 'https://user:pass@another.org' in hosts
 
 
-def test_parse_with_creds_in_netrc(tmpdir):
+def test_parse_with_creds_in_netrc(tmpdir: LegacyPath) -> None:
     netrc_file = Path(tmpdir.strpath) / 'netrc'
     with open(netrc_file, 'w') as f:
         f.write('machine example.org login user1 password pass1\n')
@@ -211,7 +218,7 @@ def test_parse_with_creds_in_netrc(tmpdir):
     assert 'https://user2:pass2@another.org' in hosts
 
 
-def test_parse_url_creds_supersedes_netrc_creds(tmpdir):
+def test_parse_url_creds_supersedes_netrc_creds(tmpdir: LegacyPath) -> None:
     netrc_file = Path(tmpdir.strpath) / 'netrc'
     with open(netrc_file, 'w') as f:
         f.write('machine example.org login user1 password pass1\n')

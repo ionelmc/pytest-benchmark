@@ -94,7 +94,7 @@ no_implicit_optional = true
 warn_return_any = true
 
 [tool.basedpyright]
-include = ['src', 'ci']
+include = ['src', 'ci', 'tests', 'docs']
 venvPath = '.'
 venv = '.venv'
 

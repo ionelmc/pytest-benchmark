@@ -1,13 +1,41 @@
+from __future__ import annotations
+
 import json
 import platform
+from typing import Protocol
 
 import pytest
+from _pytest.pytester import RunResult
 
 pytest_plugins = ('pytester',)
 platform  # noqa: B018
 
 
-def test_help(testdir):
+class LegacyPath(Protocol):
+    def join(self, *parts: str) -> LegacyPath: ...
+
+    def read(self, mode: str = 'r') -> str: ...
+
+    def readlines(self, cr: int = 1) -> list[str]: ...
+
+    def listdir(self, fil: str | None = None, sort: bool | None = None) -> list[LegacyPath]: ...
+
+    @property
+    def basename(self) -> str: ...
+
+
+class TypedTestdir(Protocol):
+    @property
+    def tmpdir(self) -> LegacyPath: ...
+
+    def makepyfile(self, *args: object, **kwargs: object) -> LegacyPath: ...
+
+    def runpytest_subprocess(self, *args: object, timeout: float | None = None) -> RunResult: ...
+
+    def mkdir(self, name: str) -> LegacyPath: ...
+
+
+def test_help(testdir: TypedTestdir) -> None:
     result = testdir.runpytest_subprocess('--help')
     result.stdout.fnmatch_lines(
         [
@@ -49,7 +77,7 @@ def test_help(testdir):
     )
 
 
-def test_groups(testdir):
+def test_groups(testdir: TypedTestdir):
     test = testdir.makepyfile(
         '''"""
     >>> print('Yay, doctests!')
@@ -163,7 +191,7 @@ def test_b(benchmark, foo, bar):
 """
 
 
-def test_group_by_name(testdir):
+def test_group_by_name(testdir: TypedTestdir):
     test_x = testdir.makepyfile(test_x=GROUPING_TEST)
     test_y = testdir.makepyfile(test_y=GROUPING_TEST)
     result = testdir.runpytest_subprocess('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'name', test_x, test_y)
@@ -205,7 +233,7 @@ def test_group_by_name(testdir):
     )
 
 
-def test_group_by_func(testdir):
+def test_group_by_func(testdir: TypedTestdir):
     test_x = testdir.makepyfile(test_x=GROUPING_TEST)
     test_y = testdir.makepyfile(test_y=GROUPING_TEST)
     result = testdir.runpytest_subprocess('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'func', test_x, test_y)
@@ -239,7 +267,7 @@ def test_group_by_func(testdir):
     )
 
 
-def test_group_by_fullfunc(testdir):
+def test_group_by_fullfunc(testdir: TypedTestdir):
     test_x = testdir.makepyfile(test_x=GROUPING_TEST)
     test_y = testdir.makepyfile(test_y=GROUPING_TEST)
     result = testdir.runpytest_subprocess('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'fullfunc', test_x, test_y)
@@ -285,7 +313,7 @@ def test_group_by_fullfunc(testdir):
     )
 
 
-def test_group_by_param_all(testdir):
+def test_group_by_param_all(testdir: TypedTestdir):
     test_x = testdir.makepyfile(test_x=GROUPING_TEST)
     test_y = testdir.makepyfile(test_y=GROUPING_TEST)
     result = testdir.runpytest_subprocess('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'param', test_x, test_y)
@@ -321,7 +349,7 @@ def test_group_by_param_all(testdir):
     )
 
 
-def test_group_by_param_select(testdir):
+def test_group_by_param_select(testdir: TypedTestdir):
     test_x = testdir.makepyfile(test_x=GROUPING_PARAMS_TEST)
     result = testdir.runpytest_subprocess(
         '--benchmark-max-time=0.0000001', '--benchmark-group-by', 'param:foo', '--benchmark-sort', 'fullname', test_x
@@ -358,7 +386,7 @@ def test_group_by_param_select(testdir):
     )
 
 
-def test_group_by_param_select_multiple(testdir):
+def test_group_by_param_select_multiple(testdir: TypedTestdir):
     test_x = testdir.makepyfile(test_x=GROUPING_PARAMS_TEST)
     result = testdir.runpytest_subprocess(
         '--benchmark-max-time=0.0000001', '--benchmark-group-by', 'param:foo,param:bar', '--benchmark-sort', 'fullname', test_x
@@ -405,7 +433,7 @@ def test_group_by_param_select_multiple(testdir):
     )
 
 
-def test_group_by_fullname(testdir):
+def test_group_by_fullname(testdir: TypedTestdir):
     test_x = testdir.makepyfile(test_x=GROUPING_TEST)
     test_y = testdir.makepyfile(test_y=GROUPING_TEST)
     result = testdir.runpytest_subprocess('--benchmark-max-time=0.0000001', '--benchmark-group-by', 'fullname', test_x, test_y)
@@ -424,7 +452,7 @@ def test_group_by_fullname(testdir):
     )
 
 
-def test_double_use(testdir):
+def test_double_use(testdir: TypedTestdir):
     test = testdir.makepyfile(
         """
 def test_a(benchmark):
@@ -445,7 +473,7 @@ def test_b(benchmark):
     )
 
 
-def test_only_override_skip(testdir):
+def test_only_override_skip(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-only', '--benchmark-skip', test)
     result.stdout.fnmatch_lines(
@@ -463,7 +491,7 @@ def test_only_override_skip(testdir):
     )
 
 
-def test_fixtures_also_skipped(testdir):
+def test_fixtures_also_skipped(testdir: TypedTestdir):
     test = testdir.makepyfile(FIXTURES_ALSO_SKIPPED_TEST)
     result = testdir.runpytest_subprocess('--benchmark-only', '-s', test)
     result.stdout.fnmatch_lines(
@@ -475,13 +503,13 @@ def test_fixtures_also_skipped(testdir):
     assert 'dep created' not in result.stdout.lines
 
 
-def test_conflict_between_only_and_disable(testdir):
+def test_conflict_between_only_and_disable(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-only', '--benchmark-disable', test)
     result.stderr.fnmatch_lines(["ERROR: Can't have both --benchmark-only and --benchmark-disable options*"])
 
 
-def test_max_time_min_rounds(testdir):
+def test_max_time_min_rounds(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-max-time=0.000001', '--benchmark-min-rounds=1', test)
     result.stdout.fnmatch_lines(
@@ -499,7 +527,7 @@ def test_max_time_min_rounds(testdir):
     )
 
 
-def test_max_time(testdir):
+def test_max_time(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-max-time=0.000001', test)
     result.stdout.fnmatch_lines(
@@ -517,7 +545,7 @@ def test_max_time(testdir):
     )
 
 
-def test_bogus_max_time(testdir):
+def test_bogus_max_time(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-max-time=bogus', test)
     result.stderr.fnmatch_lines(
@@ -529,7 +557,7 @@ def test_bogus_max_time(testdir):
 
 
 @pytest.mark.skipif("platform.python_implementation() == 'PyPy'")
-def test_pep418_timer(testdir):
+def test_pep418_timer(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess(
         '--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-timer=pep418.perf_counter', test
@@ -541,7 +569,7 @@ def test_pep418_timer(testdir):
     )
 
 
-def test_bad_save(testdir):
+def test_bad_save(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-save=asd:f?', test)
     result.stderr.fnmatch_lines(
@@ -552,7 +580,7 @@ def test_bad_save(testdir):
     )
 
 
-def test_bad_save_2(testdir):
+def test_bad_save_2(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-save=', test)
     result.stderr.fnmatch_lines(
@@ -563,7 +591,7 @@ def test_bad_save_2(testdir):
     )
 
 
-def test_bad_compare_fail(testdir):
+def test_bad_compare_fail(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-compare-fail=?', test)
     result.stderr.fnmatch_lines(
@@ -574,7 +602,7 @@ def test_bad_compare_fail(testdir):
     )
 
 
-def test_bad_rounds(testdir):
+def test_bad_rounds(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-min-rounds=asd', test)
     result.stderr.fnmatch_lines(
@@ -585,7 +613,7 @@ def test_bad_rounds(testdir):
     )
 
 
-def test_bad_rounds_2(testdir):
+def test_bad_rounds_2(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-min-rounds=0', test)
     result.stderr.fnmatch_lines(
@@ -596,7 +624,7 @@ def test_bad_rounds_2(testdir):
     )
 
 
-def test_compare(testdir):
+def test_compare(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     testdir.runpytest_subprocess('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
     result = testdir.runpytest_subprocess(
@@ -617,7 +645,7 @@ def test_compare(testdir):
     )
 
 
-def test_compare_last(testdir):
+def test_compare_last(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     testdir.runpytest_subprocess('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
     result = testdir.runpytest_subprocess(
@@ -638,7 +666,7 @@ def test_compare_last(testdir):
     )
 
 
-def test_compare_non_existing(testdir):
+def test_compare_non_existing(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     testdir.runpytest_subprocess('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
     result = testdir.runpytest_subprocess('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-compare=0002', '-rw', test)
@@ -649,7 +677,7 @@ def test_compare_non_existing(testdir):
     )
 
 
-def test_compare_non_existing_verbose(testdir):
+def test_compare_non_existing_verbose(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     testdir.runpytest_subprocess('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-autosave', test)
     result = testdir.runpytest_subprocess(
@@ -662,13 +690,13 @@ def test_compare_non_existing_verbose(testdir):
     )
 
 
-def test_compare_no_files(testdir):
+def test_compare_no_files(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-max-time=0.0000001', '--doctest-modules', '-rw', test, '--benchmark-compare')
     result.stderr.fnmatch_lines(["* PytestBenchmarkWarning: Can't compare. No benchmark files in '*'. Can't load the previous benchmark."])
 
 
-def test_compare_no_files_verbose(testdir):
+def test_compare_no_files_verbose(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess(
         '--benchmark-max-time=0.0000001', '--doctest-modules', test, '--benchmark-compare', '--benchmark-verbose'
@@ -676,13 +704,13 @@ def test_compare_no_files_verbose(testdir):
     result.stderr.fnmatch_lines([" WARNING: Can't compare. No benchmark files in '*'. Can't load the previous benchmark."])
 
 
-def test_compare_no_files_match(testdir):
+def test_compare_no_files_match(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-max-time=0.0000001', '--doctest-modules', '-rw', test, '--benchmark-compare=1')
     result.stderr.fnmatch_lines(["* PytestBenchmarkWarning: Can't compare. No benchmark files in '*' match '1'."])
 
 
-def test_compare_no_files_match_verbose(testdir):
+def test_compare_no_files_match_verbose(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess(
         '--benchmark-max-time=0.0000001', '--doctest-modules', test, '--benchmark-compare=1', '--benchmark-verbose'
@@ -690,7 +718,7 @@ def test_compare_no_files_match_verbose(testdir):
     result.stderr.fnmatch_lines([" WARNING: Can't compare. No benchmark files in '*' match '1'."])
 
 
-def test_verbose(testdir):
+def test_verbose(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-max-time=0.0000001', '--doctest-modules', '--benchmark-verbose', '-vv', test)
     result.stderr.fnmatch_lines(
@@ -703,7 +731,7 @@ def test_verbose(testdir):
     )
 
 
-def test_save(testdir):
+def test_save(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-save=foobar', '--benchmark-max-time=0.0000001', test)
     result.stderr.fnmatch_lines(
@@ -714,7 +742,7 @@ def test_save(testdir):
     json.loads(testdir.tmpdir.join('.benchmarks').listdir()[0].join('0001_foobar.json').read())
 
 
-def test_save_extra_info(testdir):
+def test_save_extra_info(testdir: TypedTestdir):
     test = testdir.makepyfile(
         """
     def test_extra(benchmark):
@@ -734,7 +762,7 @@ def test_save_extra_info(testdir):
     assert bench_info['extra_info'] == {'foo': 'bar'}
 
 
-def test_update_machine_info_hook_detection(testdir):
+def test_update_machine_info_hook_detection(testdir: TypedTestdir):
     """Tests detection and execution and update_machine_info_hooks.
 
     Verifies that machine info hooks are detected and executed in nested
@@ -786,7 +814,7 @@ def test_simple(benchmark):
     run_verify_pytest('.')
 
 
-def test_histogram(testdir):
+def test_histogram(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-histogram=foobar', '--benchmark-max-time=0.0000001', test)
     result.stderr.fnmatch_lines(
@@ -799,7 +827,7 @@ def test_histogram(testdir):
     ]
 
 
-def test_autosave(testdir):
+def test_autosave(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-autosave', '--benchmark-max-time=0.0000001', test)
     result.stderr.fnmatch_lines(
@@ -810,7 +838,7 @@ def test_autosave(testdir):
     json.loads(testdir.tmpdir.join('.benchmarks').listdir()[0].listdir('0001_*.json')[0].read())
 
 
-def test_bogus_min_time(testdir):
+def test_bogus_min_time(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-min-time=bogus', test)
     result.stderr.fnmatch_lines(
@@ -821,7 +849,7 @@ def test_bogus_min_time(testdir):
     )
 
 
-def test_disable_gc(testdir):
+def test_disable_gc(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-disable-gc', test)
     result.stdout.fnmatch_lines(
@@ -839,7 +867,7 @@ def test_disable_gc(testdir):
     )
 
 
-def test_custom_timer(testdir):
+def test_custom_timer(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-timer=time.time', test)
     result.stdout.fnmatch_lines(
@@ -857,7 +885,7 @@ def test_custom_timer(testdir):
     )
 
 
-def test_bogus_timer(testdir):
+def test_bogus_timer(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-timer=bogus', test)
     result.stderr.fnmatch_lines(
@@ -868,7 +896,7 @@ def test_bogus_timer(testdir):
     )
 
 
-def test_sort_by_mean(testdir):
+def test_sort_by_mean(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-sort=mean', test)
     result.stdout.fnmatch_lines(
@@ -886,7 +914,7 @@ def test_sort_by_mean(testdir):
     )
 
 
-def test_bogus_sort(testdir):
+def test_bogus_sort(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-sort=bogus', test)
     result.stderr.fnmatch_lines(
@@ -898,7 +926,7 @@ def test_bogus_sort(testdir):
     )
 
 
-def test_xdist(testdir):
+def test_xdist(testdir: TypedTestdir):
     pytest.importorskip('xdist')
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '-n', '1', '-rw', test)
@@ -910,7 +938,7 @@ def test_xdist(testdir):
     )
 
 
-def test_xdist_verbose(testdir):
+def test_xdist_verbose(testdir: TypedTestdir):
     pytest.importorskip('xdist')
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '-n', '1', '--benchmark-verbose', test)
@@ -924,7 +952,7 @@ def test_xdist_verbose(testdir):
     )
 
 
-def test_cprofile(testdir):
+def test_cprofile(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-cprofile=cumtime', test)
     result.stdout.fnmatch_lines(
@@ -945,7 +973,7 @@ def test_cprofile(testdir):
     )
 
 
-def test_disabled_and_cprofile(testdir):
+def test_disabled_and_cprofile(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--benchmark-disable', '--benchmark-cprofile=cumtime', test)
     result.stdout.fnmatch_lines(
@@ -955,7 +983,7 @@ def test_disabled_and_cprofile(testdir):
     )
 
 
-def test_abort_broken(testdir):
+def test_abort_broken(testdir: TypedTestdir):
     """
     Test that we don't benchmark code that raises exceptions.
     """
@@ -1093,7 +1121,7 @@ def test_fast(benchmark):
 '''
 
 
-def test_basic(testdir):
+def test_basic(testdir: TypedTestdir):
     test = testdir.makepyfile(BASIC_TEST)
     result = testdir.runpytest_subprocess('-vv', '--doctest-modules', test)
     result.stdout.fnmatch_lines(
@@ -1119,7 +1147,7 @@ def test_basic(testdir):
     )
 
 
-def test_skip(testdir):
+def test_skip(testdir: TypedTestdir):
     test = testdir.makepyfile(BASIC_TEST)
     result = testdir.runpytest_subprocess('-vv', '--doctest-modules', '--benchmark-skip', test)
     result.stdout.fnmatch_lines(
@@ -1135,7 +1163,7 @@ def test_skip(testdir):
     )
 
 
-def test_disable(testdir):
+def test_disable(testdir: TypedTestdir):
     test = testdir.makepyfile(BASIC_TEST)
     result = testdir.runpytest_subprocess('-vv', '--doctest-modules', '--benchmark-disable', test)
     result.stdout.fnmatch_lines(
@@ -1151,7 +1179,7 @@ def test_disable(testdir):
     )
 
 
-def test_mark_selection(testdir):
+def test_mark_selection(testdir: TypedTestdir):
     test = testdir.makepyfile(BASIC_TEST)
     result = testdir.runpytest_subprocess('-vv', '--doctest-modules', '-m', 'benchmark', test)
     result.stdout.fnmatch_lines(
@@ -1168,7 +1196,7 @@ def test_mark_selection(testdir):
     )
 
 
-def test_only_benchmarks(testdir):
+def test_only_benchmarks(testdir: TypedTestdir):
     test = testdir.makepyfile(BASIC_TEST)
     result = testdir.runpytest_subprocess('-vv', '--doctest-modules', '--benchmark-only', test)
     result.stdout.fnmatch_lines(
@@ -1192,7 +1220,7 @@ def test_only_benchmarks(testdir):
     )
 
 
-def test_columns(testdir):
+def test_columns(testdir: TypedTestdir):
     test = testdir.makepyfile(SIMPLE_TEST)
     result = testdir.runpytest_subprocess('--doctest-modules', '--benchmark-columns=max,iterations,min', test)
     result.stdout.fnmatch_lines(
