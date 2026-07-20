@@ -15,7 +15,7 @@ from .utils import slugify
 
 
 class CustomBox(Box):
-    def _box_points(self, serie, _) -> tuple[Any, list[Any]]:
+    def _box_points(self, serie: list[Any], _: Any) -> tuple[list[Any], list[Any]]:
         return serie, [serie[0], serie[6]]
 
     def _value_format(self, x: Any) -> str:  # TODO: Change type hinting of x
@@ -27,7 +27,7 @@ class CustomBox(Box):
             f'Max: {x[:7][6]:.4f}'
         )
 
-    def _format(self, x, *args):
+    def _format(self, x: Any, *args: Any) -> Any:
         sup = super()._format
 
         if args:
@@ -43,12 +43,20 @@ class CustomBox(Box):
         else:
             return sup(x, *args)
 
-    def _tooltip_data(self, node, value, x, y, classes=None, xlabel=None):
+    def _tooltip_data(
+        self,
+        node: Any,
+        value: tuple[Any, str],
+        x: float,
+        y: float,
+        classes: str | None = None,
+        xlabel: str | None = None,
+    ) -> None:
         super()._tooltip_data(node, value[0], x, y, classes=classes, xlabel=None)
         self.svg.node(node, 'desc', class_='x_label').text = value[1]
 
 
-def make_plot(benchmarks, title: str, adjustment: int):
+def make_plot(benchmarks: list[dict[str, Any]], title: str, adjustment: float) -> CustomBox:
     class Style(DefaultStyle):
         colors = tuple('#000000' if row['path'] else DefaultStyle.colors[1] for row in benchmarks)
         font_family = 'Consolas, "Deja Vu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace'

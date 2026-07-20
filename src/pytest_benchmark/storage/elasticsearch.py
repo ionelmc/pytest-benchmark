@@ -79,7 +79,7 @@ class ElasticsearchStorage:
 
         return sorted([record['key'] for record in result['aggregations']['benchmark_ids']['buckets']])
 
-    def load(self, id_prefix: str | None = None):
+    def load(self, id_prefix: str | None = None) -> Generator[tuple[str, dict[str, Any]], None, None]:
         """
         Yield key and content of records that corresponds with project name.
         """
@@ -112,7 +112,7 @@ class ElasticsearchStorage:
         )
 
     @staticmethod
-    def _benchmark_from_es_record(source_es_record: dict[str, Any]):
+    def _benchmark_from_es_record(source_es_record: dict[str, Any]) -> dict[str, Any]:
         result: dict[str, Any] = {}
 
         for benchmark_key in ('group', 'stats', 'options', 'param', 'name', 'params', 'fullname', 'benchmark_id'):
@@ -147,7 +147,7 @@ class ElasticsearchStorage:
 
         return result
 
-    def load_benchmarks(self, *args: str) -> Generator[dict[str, Any], Any, None]:
+    def load_benchmarks(self, *args: str) -> Generator[dict[str, Any], None, None]:
         """
         Yield benchmarks that corresponds with project. Put path and
         source (uncommon part of path) to benchmark dict.
@@ -161,7 +161,7 @@ class ElasticsearchStorage:
             bench['source'] = bench['benchmark_id']
             yield bench
 
-    def save(self, output_json: dict[str, Any], save: str):
+    def save(self, output_json: dict[str, Any], save: str) -> None:
         output_benchmarks = output_json.pop('benchmarks')
         for bench in output_benchmarks:
             # add top level info from output_json dict to each record
