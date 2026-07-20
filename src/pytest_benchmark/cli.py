@@ -101,6 +101,7 @@ class CommandArgumentParser(ArgumentParser):
             opts['help'] = opts['description']
 
         command = self.commands.add_parser(name, formatter_class=RawDescriptionHelpFormatter, **opts)
+        assert self.commands_dispatch is not None
         self.commands_dispatch[name] = command
         return command
 

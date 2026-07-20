@@ -56,8 +56,10 @@ class NameWrapper:
         self.target = target
 
     def __str__(self) -> str:
-        name = self.target.__module__ + '.' if hasattr(self.target, '__module__') else ''
-        name += self.target.__name__ if hasattr(self.target, '__name__') else repr(self.target)
+        module_name = getattr(self.target, '__module__', '')
+        target_name = getattr(self.target, '__name__', None)
+        name = f'{module_name}.' if module_name else ''
+        name += target_name if isinstance(target_name, str) else repr(self.target)
         return name
 
     def __repr__(self) -> str:

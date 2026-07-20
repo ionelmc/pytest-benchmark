@@ -42,6 +42,10 @@ class FixtureAlreadyUsed(Exception):
     pass
 
 
+class _NotSet:
+    pass
+
+
 class PauseInstrumentation:
     def __init__(self: Self, tracer: bool = True, profiler: bool = True) -> None:
         self.disable_profiler = profiler
@@ -281,7 +285,10 @@ class BenchmarkFixture:
         if self.enabled and self.cprofile:
             with PauseInstrumentation():
                 profile = cProfile.Profile()
-                for _ in cprofile_loops:
+                cprofile_iterator = iter(cprofile_loops)
+                next(cprofile_iterator)
+                function_result = profile.runcall(function_to_benchmark, *args, **kwargs)
+                for _ in cprofile_iterator:
                     function_result = profile.runcall(function_to_benchmark, *args, **kwargs)
                 self._save_cprofile(profile)
         else:
@@ -332,6 +339,7 @@ class BenchmarkFixture:
 
         stats = self._make_stats(iterations)
         loops_range = range(iterations) if iterations > 1 else None
+        result: R | _NotSet = _NotSet()
         for _ in range(warmup_rounds):
             args, kwargs = make_arguments()
 
@@ -362,6 +370,9 @@ class BenchmarkFixture:
             result = target(*args, **kwargs)
             if teardown is not None:
                 teardown(*args, **kwargs)
+
+        if isinstance(result, _NotSet):
+            raise RuntimeError('Benchmark target did not produce a result.')
 
         if self.cprofile:
             if self.cprofile_loops is None:

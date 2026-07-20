@@ -151,14 +151,19 @@ class BenchmarkSession:
 
     def handle_saving(self) -> None:
         save = self.save or self.autosave
-        if save or self.json:
-            if not self.benchmarks:
-                if not self.disabled:
-                    self.logger.warning('Not saving anything, no benchmarks have been run!')
-                return
-            machine_info = self.get_machine_info()
-            commit_info = self.config.hook.pytest_benchmark_generate_commit_info(config=self.config)
-            self.config.hook.pytest_benchmark_update_commit_info(config=self.config, commit_info=commit_info)
+        if not save and not self.json:
+            return
+
+        if not self.benchmarks:
+            if not self.disabled:
+                self.logger.warning('Not saving anything, no benchmarks have been run!')
+            return
+
+        machine_info = self.get_machine_info()
+        commit_info = self.config.hook.pytest_benchmark_generate_commit_info(config=self.config)
+        if commit_info is None:
+            raise RuntimeError('pytest_benchmark_generate_commit_info did not return commit information.')
+        self.config.hook.pytest_benchmark_update_commit_info(config=self.config, commit_info=commit_info)
 
         if self.json:
             output_json = self.config.hook.pytest_benchmark_generate_json(
@@ -168,6 +173,8 @@ class BenchmarkSession:
                 machine_info=machine_info,
                 commit_info=commit_info,
             )
+            if output_json is None:
+                raise RuntimeError('pytest_benchmark_generate_json did not return benchmark data.')
             self.config.hook.pytest_benchmark_update_json(
                 config=self.config,
                 benchmarks=self.benchmarks,
@@ -183,6 +190,8 @@ class BenchmarkSession:
                 machine_info=machine_info,
                 commit_info=commit_info,
             )
+            if output_json is None:
+                raise RuntimeError('pytest_benchmark_generate_json did not return benchmark data.')
             self.config.hook.pytest_benchmark_update_json(
                 config=self.config,
                 benchmarks=self.benchmarks,

@@ -160,7 +160,7 @@ class TableResults:
                 tr.write('\n')
             tr.write_line('-' * len(labels_line), yellow=True)
             tr.write_line('')
-            if self.histogram:
+            if isinstance(self.histogram, str):
                 from .histogram import make_histogram  # noqa: PLC0415
 
                 if len(benchmarks) > 75:

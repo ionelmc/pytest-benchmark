@@ -30,6 +30,7 @@ def compute_timer_precision(timer: Timer) -> float | None:
 
     # Stop as soon as we have enough data points or the timeout expires.
     while timeout_timer() < timeout and points < 100:
+        t2 = previous
         for _ in range(10):
             t1 = timer()
             t2 = timer()

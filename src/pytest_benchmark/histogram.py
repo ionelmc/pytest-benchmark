@@ -108,7 +108,7 @@ def make_plot(benchmarks: list[dict[str, Any]], title: str, adjustment: float) -
     return plot
 
 
-def make_histogram(output_prefix: str, name: str, benchmarks: Any, unit: str, adjustment: float) -> Path:
+def make_histogram(output_prefix: str, name: str | None, benchmarks: Any, unit: str, adjustment: float) -> Path:
     if name:
         path = f'{output_prefix}-{slugify(name)}.svg'
         title = f'Speed in {TIME_UNITS[unit]} of {name}'

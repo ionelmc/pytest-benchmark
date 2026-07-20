@@ -402,8 +402,8 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> Generator[
 
 
 def pytest_terminal_summary(terminalreporter: PytestTerminalReporter) -> None:
+    benchmark_session: BenchmarkSession = getattr(terminalreporter.config, '_benchmarksession')  # noqa: B009
     try:
-        benchmark_session: BenchmarkSession = getattr(terminalreporter.config, '_benchmarksession')  # noqa: B009
         benchmark_session.display(terminalreporter)
 
     except PerformanceRegression:
@@ -445,10 +445,10 @@ def pytest_benchmark_scale_unit(
         if sort in ('name', 'fullname'):
             time_unit_key = 'min'
 
-        return time_unit(best.get(sort, benchmarks[0][time_unit_key]))
+        return time_unit(float(best.get(sort, benchmarks[0][time_unit_key])))
 
     elif unit == 'operations':
-        return operations_unit(worst.get('ops', benchmarks[0]['ops']))
+        return operations_unit(float(worst.get('ops', benchmarks[0]['ops'])))
 
     raise RuntimeError(f'Unexpected measurement unit {unit!r}')
 
