@@ -5,6 +5,7 @@
 
 from collections.abc import Callable
 from time import time as timeout_timer
+from typing import cast
 
 Timer = Callable[[], float]
 
@@ -13,7 +14,7 @@ try:
     from __pypy__.time import clock_gettime  # type: ignore[import-not-found]
 
     def monotonic() -> float:
-        return clock_gettime(CLOCK_MONOTONIC)
+        return cast(float, clock_gettime(CLOCK_MONOTONIC))
 
 except ImportError:
     from timeit import default_timer

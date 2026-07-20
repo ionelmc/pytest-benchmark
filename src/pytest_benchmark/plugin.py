@@ -490,7 +490,7 @@ def pytest_benchmark_generate_json(
     machine_info: dict[str, Any],
     commit_info: dict[str, Any],
 ) -> dict[str, Any]:
-    benchmarks_json: list[Any] = []
+    benchmarks_json: list[dict[str, Any]] = []
 
     output_json: dict[str, Any] = {
         'machine_info': machine_info,

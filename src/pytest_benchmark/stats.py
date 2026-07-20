@@ -224,7 +224,7 @@ class Metadata:
 
     @property
     def has_error(self) -> bool:
-        return self.fixture.has_error
+        return bool(self.fixture.has_error)
 
     def as_dict(
         self,

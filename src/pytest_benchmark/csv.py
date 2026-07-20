@@ -12,7 +12,7 @@ from .logger import Logger
 
 
 class CSVResults:
-    def __init__(self, columns: list[Any], sort: Any, logger: Logger) -> None:
+    def __init__(self, columns: list[str], sort: str, logger: Logger) -> None:
         self.columns = columns
         self.sort = sort
         self.logger = logger

@@ -60,7 +60,7 @@ class ElasticsearchStorage:
     def location(self) -> str:
         return str(self._es_hosts)
 
-    def query(self) -> list[Any]:
+    def query(self) -> list[str]:
         """
         Returns sorted records names (ids) that corresponds with project.
         """

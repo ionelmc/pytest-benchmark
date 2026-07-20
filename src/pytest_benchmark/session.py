@@ -7,12 +7,14 @@ import os
 from collections.abc import Iterator
 from functools import partial
 from typing import Any
+from typing import cast
 
 import pytest
 
 from .fixture import statistics
 from .fixture import statistics_error
 from .logger import Logger
+from .stats import Metadata
 from .table import TableResults
 from .table import TerminalReporter
 from .utils import DEFAULT_COLUMNS
@@ -46,8 +48,8 @@ class BenchmarkSession:
 
         self.logger = Logger(level, config=config)
         self.config = config
-        self.performance_regressions: list[tuple[Any, ...]] = []
-        self.benchmarks: list[Any] = []
+        self.performance_regressions: list[tuple[str, str]] = []
+        self.benchmarks: list[Metadata] = []
         self.machine_id = get_machine_id()
         self.storage = load_storage(
             config.getoption('benchmark_storage'),
@@ -116,7 +118,7 @@ class BenchmarkSession:
     def get_machine_info(self) -> dict[str, Any]:
         obj = self.config.hook.pytest_benchmark_generate_machine_info(config=self.config)
         self.config.hook.pytest_benchmark_update_machine_info(config=self.config, machine_info=obj)
-        return obj
+        return cast(dict[str, Any], obj)
 
     def prepare_benchmarks(self) -> Iterator[dict[str, Any]]:
         assert self.compared_mapping is not None

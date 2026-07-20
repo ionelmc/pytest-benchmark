@@ -3,17 +3,18 @@ import os
 import pathlib
 import subprocess
 import sys
+from collections.abc import Sequence
 
 base_path: pathlib.Path = pathlib.Path(__file__).resolve().parent.parent
 templates_path = base_path / 'ci' / 'templates'
 
 
-def check_call(args):
+def check_call(args: Sequence[str | os.PathLike[str]]) -> None:
     print('+', *args)
     subprocess.check_call(args)
 
 
-def exec_in_env():
+def exec_in_env() -> None:
     env_path = base_path / '.tox' / 'bootstrap'
     if sys.platform == 'win32':
         bin_path = env_path / 'Scripts'
@@ -36,10 +37,11 @@ def exec_in_env():
 
     print(f'Re-executing with: {python_executable}')
     print('+ exec', python_executable, __file__, '--no-env')
-    os.execv(python_executable, [python_executable, __file__, '--no-env'])
+    executable_args: list[str | os.PathLike[str]] = [python_executable, __file__, '--no-env']
+    os.execv(python_executable, executable_args)
 
 
-def main():
+def main() -> None:
     import jinja2  # noqa: PLC0415
 
     print(f'Project path: {base_path}')

@@ -112,7 +112,7 @@ class FileStorage:
     def load(
         self: Self,
         *globs_or_files: str,
-    ) -> Generator[tuple[Path, Any], Any, None]:
+    ) -> Generator[tuple[Path, dict[str, Any]], None, None]:
         if not globs_or_files:
             globs_or_files = ('[0-9][0-9][0-9][0-9]_',)
 
@@ -141,7 +141,7 @@ class FileStorage:
     def load_benchmarks(
         self: Self,
         *globs_or_files: str,
-    ) -> Generator[Any, Any, None]:
+    ) -> Generator[dict[str, Any], None, None]:
         sources = [(short_filename(path), path, data) for path, data in self.load(*globs_or_files)]
         common = len(commonpath([src for src, _, _ in sources])) if sources else 0
         for source, path, data in sources:
