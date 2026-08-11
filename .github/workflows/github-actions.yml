@@ -810,10 +810,10 @@ jobs:
             tox_env: 'pypy311-pytest90-xdist-nocov'
             os: 'macos-latest'
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
-    - uses: actions/setup-python@v6
+    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: ${{ matrix.python }}
         architecture: ${{ matrix.python_arch }}
@@ -827,13 +827,13 @@ jobs:
     - name: test
       run: >
         tox -e ${{ matrix.tox_env }} -v
-    - uses: coverallsapp/github-action@v2
+    - uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2.3.8
       if: matrix.cover
       continue-on-error: true
       with:
         flag-name: ${{ matrix.name }}
         parallel: true
-    - uses: codecov/codecov-action@v5
+    - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
       if: matrix.cover
       with:
         flags: ${{ matrix.name }}
@@ -844,6 +844,6 @@ jobs:
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
-    - uses: coverallsapp/github-action@v2
+    - uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2.3.8
       with:
         parallel-finished: true
