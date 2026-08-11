@@ -114,6 +114,7 @@ ignore = [
     "S607",   # flake8-bandit start-process-with-partial-path
     "E501",   # pycodestyle line-too-long
     "PTH123",
+    "PT011",  # too broad pytest.raises
 ]
 select = [
     "B",   # flake8-bugbear
