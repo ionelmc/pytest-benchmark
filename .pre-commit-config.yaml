@@ -11,11 +11,6 @@ repos:
       - id: ruff-check
         args: [--fix, --exit-non-zero-on-fix, --show-fixes, --unsafe-fixes]
       - id: ruff-format
-  - repo: https://github.com/ComPWA/taplo-pre-commit
-    rev: ade0f95ddcf661c697d4670d2cfcbe95d0048a0a  # frozen: v0.9.3
-    hooks:
-      - id: taplo-format
-      - id: taplo-lint
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
     hooks:
