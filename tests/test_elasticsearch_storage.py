@@ -104,9 +104,11 @@ class MockSession(BenchmarkSession):
         data = json.loads(BENCHFILE.read_text(encoding='utf8'))
         self.benchmarks.extend(
             Namespace(
-                as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench: dict(_bench, **_bench['stats'])
-                if flat
-                else dict(_bench),
+                as_dict=(
+                    lambda include_data=False, stats=True, flat=False, _bench=bench: (
+                        dict(_bench, **_bench['stats']) if flat else dict(_bench)
+                    )
+                ),
                 name=bench['name'],
                 fullname=bench['fullname'],
                 group=bench['group'],

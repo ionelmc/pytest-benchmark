@@ -99,11 +99,11 @@ class MockSession(BenchmarkSession):
         for bench_file, data in reversed(list(self.storage.load('[0-9][0-9][0-9][0-9]_*'))):
             self.benchmarks.extend(
                 Namespace(
-                    as_dict=lambda include_data=False, stats=True, flat=False, _bench=bench, cprofile='cumtime': dict(
-                        _bench, **_bench['stats']
-                    )
-                    if flat
-                    else dict(_bench),
+                    as_dict=(
+                        lambda include_data=False, stats=True, flat=False, _bench=bench, cprofile='cumtime': (
+                            dict(_bench, **_bench['stats']) if flat else dict(_bench)
+                        )
+                    ),
                     name=bench['name'],
                     fullname=bench['fullname'],
                     group=bench['group'],
