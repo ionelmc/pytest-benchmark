@@ -6,25 +6,25 @@ exclude: '^(\.tox|ci/templates|\.bumpversion\.cfg)(/|$)'
 # Note the order is intentional to avoid multiple passes of the hooks
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.4
+    rev: 7c55798a78262d14b2074abf623d8a992ebb70d4  # frozen: v0.16.2
     hooks:
-      - id: ruff
+      - id: ruff-check
         args: [--fix, --exit-non-zero-on-fix, --show-fixes, --unsafe-fixes]
       - id: ruff-format
   - repo: https://github.com/ComPWA/taplo-pre-commit
-    rev: v0.9.3
+    rev: ade0f95ddcf661c697d4670d2cfcbe95d0048a0a  # frozen: v0.9.3
     hooks:
       - id: taplo-format
       - id: taplo-lint
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: mixed-line-ending
       - id: debug-statements
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.18.2
+    rev: 41e691678310dfd3833f7ab4e180ddb014310356  # frozen: v2.3.0
     hooks:
       - id: mypy
         args: ["."]
@@ -41,6 +41,6 @@ repos:
           - aspectlib
           - statistics
   - repo: https://github.com/crate-ci/typos
-    rev: v1.44.0
+    rev: 8a48f81b6c64dcfea44b3633223084c4be58ac5f  # frozen: v1.49.0
     hooks:
       - id: typos
