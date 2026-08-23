@@ -2,13 +2,18 @@
 Changelog
 =========
 
-Unreleased
-----------
+v5.3.0 (2026-08-23)
+--------------------
 
 * Added ``--benchmark-precision`` and ``--benchmark-confidence``:
   instead of a fixed number of rounds, stop once the mean's relative margin of error falls below the given fraction.
+  Contributed by Aarni Koskela in `#318 <https://github.com/ionelmc/pytest-benchmark/pull/318>`_.
+* Modernized the CI/linting a bit.
+  Contributed by Aarni Koskela in `#319 <https://github.com/ionelmc/pytest-benchmark/pull/319>`_.
 * Defer the xdist auto-disable warning until a benchmark fixture is collected.
-  Contributed by xlyyddy for `#65 <https://github.com/ionelmc/pytest-benchmark/issues/65>`_.
+  Contributed by xlyyddy in `#317 <https://github.com/ionelmc/pytest-benchmark/pull/317>`_
+  (fixes `#65 <https://github.com/ionelmc/pytest-benchmark/issues/65>`_).
+* CI now tests only with latest Pytest (now 9.1.1), Python 3.10-3.14 and PyPy 3.11.
 
 v5.2.3 (2025-11-09)
 --------------------
