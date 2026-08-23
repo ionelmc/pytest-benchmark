@@ -10,7 +10,7 @@ v5.3.0 (2026-08-23)
   Contributed by Aarni Koskela in `#318 <https://github.com/ionelmc/pytest-benchmark/pull/318>`_.
 * Added ``compare --between`` mode. Example: ``pytest-benchmark compare --between=min 0001 0002``.
   Contributed by Aarni Koskela in `#302 <https://github.com/ionelmc/pytest-benchmark/pull/302>`_.
-* Modernized the CI/linting a bit.
+* Modernized the CI/linting and added spellchecking.
   Contributed by Aarni Koskela in
   `#304 <https://github.com/ionelmc/pytest-benchmark/pull/304>`_,
   `#306 <https://github.com/ionelmc/pytest-benchmark/pull/306>`_ and
