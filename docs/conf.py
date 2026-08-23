@@ -12,7 +12,7 @@ extensions = [
 source_suffix = '.rst'
 master_doc = 'index'
 project = 'pytest-benchmark'
-year = '2014-2025'
+year = '2014-2026'
 author = 'Ionel Cristian Mărieș'
 copyright = f'{year}, {author}'
 version = release = '5.2.3'
@@ -27,7 +27,7 @@ extlinks = {
 html_theme = 'furo'
 html_theme_options = {
     'source_repository': 'https://github.com/ionelmc/pytest-benchmark/',
-    'source_branch': 'main',
+    'source_branch': 'master',
     'source_directory': 'docs/',
     'footer_icons': [
         {

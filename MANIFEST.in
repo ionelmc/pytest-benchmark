@@ -10,7 +10,7 @@ include .editorconfig
 include .github/workflows/github-actions.yml
 include .pre-commit-config.yaml
 include .readthedocs.yml
-include .taplo.toml
+include .tombi.toml
 include _typos.toml
 include pyproject.toml
 include pytest.ini

@@ -1,0 +1,4 @@
+[format]
+[format.rules]
+indent-sub-tables = false
+indent-width = 4
