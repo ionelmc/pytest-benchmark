@@ -15,7 +15,7 @@ project = 'pytest-benchmark'
 year = '2014-2026'
 author = 'Ionel Cristian Mărieș'
 copyright = f'{year}, {author}'
-version = release = '5.2.3'
+version = release = '5.3.0'
 
 pygments_style = 'trac'
 templates_path = ['.']
