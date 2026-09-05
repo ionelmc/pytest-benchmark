@@ -240,6 +240,60 @@ def test_iqr():
     assert stats.iqr == 18.1  # close enough: http://www.wessa.net/rwasp_variability.wasp
 
 
+def test_hd15iqr_excludes_high_outliers():
+    # Q1=3, Q3=8, IQR=5, so the Tukey fences are [-4.5, 15.5] and 100.0 is an
+    # outlier. hd15iqr is the highest datum *within* the fence, so 9.0.
+    stats = Stats()
+    for i in 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 100.0:
+        stats.update(i)
+    assert stats.q1 == 3.0
+    assert stats.q3 == 8.0
+    assert stats.iqr == 5.0
+    assert stats.iqr_outliers == 1
+    assert stats.hd15iqr == 9.0
+    # the statistic must never return a value it also counts as an outlier
+    assert stats.hd15iqr <= stats.q3 + 1.5 * stats.iqr
+
+
+def test_ld15iqr_excludes_low_outliers():
+    # the symmetric case, which already worked; kept so the pair stays in step
+    stats = Stats()
+    for i in 0.001, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0:
+        stats.update(i)
+    assert stats.ld15iqr == 10.0
+    assert stats.ld15iqr >= stats.q1 - 1.5 * stats.iqr
+
+
+def test_hd15iqr_ld15iqr_are_min_max_without_outliers():
+    stats = Stats()
+    for i in 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0:
+        stats.update(i)
+    assert stats.iqr_outliers == 0
+    assert stats.hd15iqr == stats.max == 10.0
+    assert stats.ld15iqr == stats.min == 1.0
+
+
+def test_hd15iqr_within_fence_for_many_shapes():
+    # the whisker must sit inside the fence whatever the sample looks like
+    import random
+
+    rng = random.Random(0)
+    for _ in range(500):
+        n = rng.randint(2, 40)
+        data = [rng.expovariate(1.0) for _ in range(n)]
+        if rng.random() < 0.5:
+            data[rng.randrange(n)] = rng.uniform(50, 5000)
+        stats = Stats()
+        for value in data:
+            stats.update(value)
+        fence_hi = stats.q3 + 1.5 * stats.iqr
+        fence_lo = stats.q1 - 1.5 * stats.iqr
+        assert stats.hd15iqr <= fence_hi
+        assert stats.ld15iqr >= fence_lo
+        assert stats.hd15iqr == max(x for x in stats.sorted_data if x <= fence_hi)
+        assert stats.ld15iqr == min(x for x in stats.sorted_data if x >= fence_lo)
+
+
 def test_ops():
     stats = Stats()
     stats.update(0)

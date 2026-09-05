@@ -7,6 +7,9 @@ Unreleased
 
 * Fixed an ``AttributeError`` with pytest's public ``nodeid`` attribute by
   avoiding the removed private ``node._nodeid`` attribute (fixes `#321 <https://github.com/ionelmc/pytest-benchmark/issues/321>`_).
+* Fixed ``Stats.hd15iqr`` returning the first datum *above* the Tukey upper fence
+  instead of the highest datum within it, so the statistic reported the outlier it
+  exists to exclude. ``ld15iqr`` was already correct.
 
 v5.3.0 (2026-08-23)
 --------------------
