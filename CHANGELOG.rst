@@ -2,6 +2,13 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Fixed ``Stats.hd15iqr`` returning the first datum *above* the Tukey upper fence
+  instead of the highest datum within it, so the statistic reported the outlier it
+  exists to exclude. ``ld15iqr`` was already correct.
+
 v5.3.0 (2026-08-23)
 --------------------
 

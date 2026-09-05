@@ -115,11 +115,18 @@ class Stats:
         if len(self.data) == 1:
             return self.data[0]
         else:
+            # bisect_right returns the insertion point *after* every element at
+            # or below the fence, so the highest datum within the fence is at
+            # pos - 1. sorted_data[pos] is the first datum *above* the fence,
+            # i.e. an outlier, which is the opposite of what this returns.
+            #
+            # pos is always >= 1: q3 is an interpolation between two elements of
+            # sorted_data so q3 >= sorted_data[0], and iqr >= 0, therefore
+            # sorted_data[0] <= q3 + 1.5 * iqr and at least one element is
+            # counted. That is why the old len(self.data) special case, which
+            # happened to be the only correct branch, can go.
             pos = bisect_right(self.sorted_data, self.q3 + 1.5 * self.iqr)
-            if pos == len(self.data):
-                return self.sorted_data[-1]
-            else:
-                return self.sorted_data[pos]
+            return self.sorted_data[pos - 1]
 
     @cached_property
     def q1(self):
