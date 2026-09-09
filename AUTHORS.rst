@@ -46,3 +46,4 @@ Authors
 * Aarni Koskela - https://github.com/akx
 * Sophia Castellarin - https://github.com/soapy1
 * xlyyddy - https://github.com/xlyyddy
+* Jan Mrowiec - https://github.com/janmrow
