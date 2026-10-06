@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Fixed an ``AttributeError`` with pytest's public ``nodeid`` attribute by
+  avoiding the removed private ``node._nodeid`` attribute (fixes `#321 <https://github.com/ionelmc/pytest-benchmark/issues/321>`_).
+
 v5.3.0 (2026-08-23)
 --------------------
 
