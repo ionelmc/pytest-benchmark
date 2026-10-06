@@ -85,7 +85,7 @@ class BenchmarkFixture:
         group=None,
     ):
         self.name = node.name
-        self.fullname = node._nodeid
+        self.fullname = node.nodeid
         self.disabled = disabled
         if hasattr(node, 'callspec'):
             self.param = node.callspec.id
