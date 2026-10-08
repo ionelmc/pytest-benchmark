@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Fix the Tox cleanup environment after the removal of ``setup.py``.
+
 v5.3.0 (2026-08-23)
 --------------------
 
