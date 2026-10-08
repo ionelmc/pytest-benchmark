@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Document how to create named benchmark groups in one test file
+  (fixes `#249 <https://github.com/ionelmc/pytest-benchmark/issues/249>`_).
+
 v5.3.0 (2026-08-23)
 --------------------
 

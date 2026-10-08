@@ -290,6 +290,42 @@ You can set per-test options with the ``benchmark`` marker:
         assert result is None
 
 
+Grouping benchmarks
+===================
+
+Set the ``group`` marker option to put related benchmarks in the same results table.
+Tests with the same group name can share a file, and their function names can differ.
+For example, save these tests in ``test_groups.py``:
+
+.. code-block:: python
+
+    import pytest
+
+
+    @pytest.mark.benchmark(group="sort")
+    def test_sort_list(benchmark):
+        assert benchmark(sorted, [3, 1, 2]) == [1, 2, 3]
+
+
+    @pytest.mark.benchmark(group="sort")
+    def test_sort_tuple(benchmark):
+        assert benchmark(sorted, (3, 1, 2)) == [1, 2, 3]
+
+
+    @pytest.mark.benchmark(group="sum")
+    def test_sum_list(benchmark):
+        assert benchmark(sum, [3, 1, 2]) == 6
+
+
+    @pytest.mark.benchmark(group="sum")
+    def test_sum_tuple(benchmark):
+        assert benchmark(sum, (3, 1, 2)) == 6
+
+Run ``pytest test_groups.py`` to see two tables: ``sort`` and ``sum``, each containing
+two benchmarks. The default ``--benchmark-group-by=group`` uses these marker values.
+Other grouping modes, such as ``--benchmark-group-by=func``, group by the selected
+category instead.
+
 Extra info
 ==========
 
