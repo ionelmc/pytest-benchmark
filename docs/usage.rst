@@ -122,7 +122,7 @@ Commandline options
   --benchmark-save NAME
                         Save the current run into 'STORAGE-
                         PATH/counter_NAME.json'.
-  --benchmark-autosave  Autosave the current run into 'STORAGE-PATH/counter_...json
+  --benchmark-autosave  Autosave the current run into ``STORAGE-PATH/counter_...json``.
   --benchmark-save-data
                         Use this to make --benchmark-save and --benchmark-
                         autosave include all the timing data, not just the

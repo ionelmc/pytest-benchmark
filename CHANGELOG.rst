@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Fix the autosave filename markup in the command line reference.
+
 v5.3.0 (2026-08-23)
 --------------------
 
