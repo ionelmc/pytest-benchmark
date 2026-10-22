@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Keep the filename in source labels when comparing a single saved benchmark run.
+
 v5.3.0 (2026-08-23)
 --------------------
 
