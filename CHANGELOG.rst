@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Preserve cached benchmark data when loading flattened benchmark results.
+
 v5.3.0 (2026-08-23)
 --------------------
 
