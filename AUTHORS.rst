@@ -2,6 +2,7 @@
 Authors
 =======
 
+* muhsin k - https://github.com/nawaaaaaAaar
 * Ionel Cristian Mărieș - https://blog.ionelmc.ro
 * Marc Abramowitz - http://marc-abramowitz.com
 * Dave Collins - https://github.com/thedavecollins

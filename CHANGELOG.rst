@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Reject non-finite and negative benchmark time limits during argument parsing.
+
 v5.3.0 (2026-08-23)
 --------------------
 
