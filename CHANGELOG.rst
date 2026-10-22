@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Continue allocating and loading saved benchmark runs after sequence number 9999.
+
 v5.3.0 (2026-08-23)
 --------------------
 
