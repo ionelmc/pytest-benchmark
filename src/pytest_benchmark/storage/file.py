@@ -36,15 +36,9 @@ class FileStorage:
 
     @property
     def _next_num(self):
-        files = self.query('[0-9][0-9][0-9][0-9]_*')
-        files.sort(reverse=True)
-        if not files:
-            return '0001'
-        for f in files:
-            try:
-                return f'{int(str(f.name).split("_")[0]) + 1:04}'
-            except ValueError:
-                raise
+        files = self.query('[0-9][0-9][0-9][0-9]*_*')
+        numbers = [int(prefix) for f in files if (prefix := f.name.split('_', 1)[0]).isdigit()]
+        return f'{max(numbers, default=0) + 1:04}'
 
     def save(self, output_json, save):
         output_file = self.get(f'{self._next_num}_{save}.json')
@@ -91,7 +85,7 @@ class FileStorage:
 
     def load(self, *globs_or_files):
         if not globs_or_files:
-            globs_or_files = ('[0-9][0-9][0-9][0-9]_',)
+            globs_or_files = ('[0-9][0-9][0-9][0-9]*_',)
 
         for file in self.query(*globs_or_files):
             if file in self._cache:
