@@ -118,6 +118,7 @@ class FileStorage:
             source = source[common:].lstrip(r'\/')
 
             for bench in data['benchmarks']:
+                bench = bench.copy()
                 bench.update(bench.pop('stats'))
                 bench['path'] = str(path)
                 bench['source'] = source
