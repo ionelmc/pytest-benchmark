@@ -113,7 +113,8 @@ class FileStorage:
 
     def load_benchmarks(self, *globs_or_files):
         sources = [(short_filename(path), path, data) for path, data in self.load(*globs_or_files)]
-        common = len(commonpath([src for src, _, _ in sources])) if sources else 0
+        common = commonpath([str(Path(src).parent) for src, _, _ in sources]) if sources else ''
+        common = len(common) if common != '.' else 0
         for source, path, data in sources:
             source = source[common:].lstrip(r'\/')
 
