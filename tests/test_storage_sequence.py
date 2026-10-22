@@ -22,3 +22,15 @@ def test_save_and_load_after_four_digit_sequence(tmp_path, machine, previous):
     assert new_file.exists()
     assert old_file.read_text(encoding='utf8') == json.dumps(data)
     assert {path.name for path, _ in storage.load()} == {old_file.name, new_file.name}
+
+
+@pytest.mark.parametrize('prefix', ['0001extra', '0001²'])
+def test_sequence_ignores_nonnumeric_prefixes(tmp_path, prefix):
+    (tmp_path / f'{prefix}_example.json').touch()
+    assert FileStorage(tmp_path, Mock())._next_num == '0001'
+
+
+def test_sequence_uses_numeric_maximum(tmp_path):
+    for prefix in ['9999', '10000', '10001']:
+        (tmp_path / f'{prefix}_example.json').touch()
+    assert FileStorage(tmp_path, Mock())._next_num == '10002'

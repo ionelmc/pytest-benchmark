@@ -37,7 +37,7 @@ class FileStorage:
     @property
     def _next_num(self):
         files = self.query('[0-9][0-9][0-9][0-9]*_*')
-        numbers = [int(prefix) for f in files if (prefix := f.name.split('_', 1)[0]).isdigit()]
+        numbers = [int(prefix) for f in files if (prefix := f.name.split('_', 1)[0]).isdecimal()]
         return f'{max(numbers, default=0) + 1:04}'
 
     def save(self, output_json, save):
