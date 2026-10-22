@@ -384,7 +384,10 @@ def parse_fraction(string):
 
 def parse_seconds(string):
     try:
-        return SecondsDecimal(string).as_string
+        value = SecondsDecimal(string)
+        if not value.is_finite() or value < 0:
+            raise ValueError('Value must be finite and non-negative.')
+        return value.as_string
     except Exception as exc:
         raise argparse.ArgumentTypeError(f'Invalid decimal value {string!r}: {exc!r}') from None
 
