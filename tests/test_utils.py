@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from pytest_benchmark.utils import clonefunc
+from pytest_benchmark.utils import format_machine_info_difference
 from pytest_benchmark.utils import get_commit_info
 from pytest_benchmark.utils import get_project_name
 from pytest_benchmark.utils import parse_columns
@@ -236,3 +237,20 @@ def test_parse_elasticsearch_storage():
         'benchmark2',
         'project_name',
     )
+
+
+def test_format_machine_info_difference_nested():
+    # Only the drifting cpu.hz_actual should be reported, flattened to a dotted key.
+    current = {'node': 'ci', 'cpu': {'brand': 'X', 'hz_actual': 3200100000}}
+    compared = {'node': 'ci', 'cpu': {'brand': 'X', 'hz_actual': 3200000000}}
+    assert format_machine_info_difference(current, compared) == 'cpu.hz_actual: 3200100000 vs 3200000000'
+
+
+def test_format_machine_info_difference_missing_keys():
+    assert format_machine_info_difference({'foo': 'bar'}, {}) == 'foo: "bar" vs <missing>'
+    assert format_machine_info_difference({}, {'foo': 'bar'}) == 'foo: <missing> vs "bar"'
+
+
+def test_format_machine_info_difference_identical():
+    info = {'node': 'ci', 'cpu': {'hz_actual': 3200000000}}
+    assert format_machine_info_difference(info, dict(info)) == ''
