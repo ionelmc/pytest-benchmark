@@ -139,11 +139,10 @@ def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info
     .. sourcecode:: python
 
         def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark):
-            if compared_benchmark["machine_info"] != machine_info:
+            if consistent_dumps(compared_benchmark["machine_info"]) != consistent_dumps(machine_info):
                 benchmarksession.logger.warning(
-                    "Benchmark machine_info is different. Current: %s VS saved: %s." % (
-                        format_dict(machine_info),
-                        format_dict(compared_benchmark["machine_info"]),
+                    "Benchmark machine_info is different. Current VS saved differ in: %s." % (
+                        format_machine_info_difference(machine_info, compared_benchmark["machine_info"]),
                     )
             )
     """
