@@ -19,6 +19,7 @@ Thumbs.db
 .cache
 .eggs
 .env
+.venv
 .installed.cfg
 .ve
 bin
