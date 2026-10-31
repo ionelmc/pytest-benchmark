@@ -1,5 +1,9 @@
+import random
+from pathlib import Path
+
 import pytest
 
+from pytest_benchmark.histogram import make_histogram
 from pytest_benchmark.stats import Stats
 
 
@@ -246,6 +250,23 @@ def test_hd15iqr_excludes_high_outliers():
     stats = Stats()
     for i in 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 100.0:
         stats.update(i)
+
+    make_histogram(
+        Path('tests', 'test_hd15iqr_excludes_high_outliers'),
+        name=None,
+        benchmarks=[
+            {
+                'name': 'foobar',
+                'path': 'foo/bar',
+                'fullname': 'FooBar',
+                'rounds': 123,
+                **stats.as_dict(),
+            },
+        ],
+        unit='',
+        adjustment=1,
+    )
+
     assert stats.q1 == 3.0
     assert stats.q3 == 8.0
     assert stats.iqr == 5.0
@@ -275,9 +296,7 @@ def test_hd15iqr_ld15iqr_are_min_max_without_outliers():
 
 def test_hd15iqr_within_fence_for_many_shapes():
     # the whisker must sit inside the fence whatever the sample looks like
-    import random
-
-    rng = random.Random(0)
+    rng = random.Random(0)  # noqa: S311
     for _ in range(500):
         n = rng.randint(2, 40)
         data = [rng.expovariate(1.0) for _ in range(n)]
