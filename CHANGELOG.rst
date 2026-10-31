@@ -2,7 +2,7 @@
 Changelog
 =========
 
-v5.3.1 (2026-10-31)
+v5.3.1 (2026-11-01)
 -------------------
 
 * Fixed an ``AttributeError`` with pytest's public ``nodeid`` attribute by
@@ -13,6 +13,7 @@ v5.3.1 (2026-10-31)
   instead of the highest datum within it, so the statistic reported the outlier it
   exists to exclude. ``ld15iqr`` was already correct.
   Contributed by WatchTree-19 in `#320 <https://github.com/ionelmc/pytest-benchmark/pull/320>`_.
+* Added workaround for pygal's broken PluginImportFixer (it's removed from ``sys.meta_path``).
 
 v5.3.0 (2026-08-23)
 --------------------
