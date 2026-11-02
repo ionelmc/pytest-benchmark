@@ -2,6 +2,14 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Changed the "machine_info is different" warning to report only the fields that
+  differ (for example ``cpu.hz_actual``) instead of dumping both ``machine_info``
+  dicts in full, so a small environment drift is obvious at a glance
+  (`#255 <https://github.com/ionelmc/pytest-benchmark/issues/255>`_).
+
 v5.3.1 (2026-11-01)
 -------------------
 

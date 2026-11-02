@@ -523,6 +523,40 @@ def consistent_dumps(value):
     return json.dumps(value, sort_keys=True)
 
 
+def _flatten_machine_info(info, prefix=''):
+    flat = {}
+    for key, value in info.items():
+        name = f'{prefix}{key}'
+        if isinstance(value, dict):
+            flat.update(_flatten_machine_info(value, f'{name}.'))
+        else:
+            flat[name] = value
+    return flat
+
+
+def format_machine_info_difference(current, compared):
+    """
+    Summarise the fields that differ between two ``machine_info`` dicts as a
+    readable ``key: current vs saved`` list. Nested dicts (such as ``cpu``) are
+    flattened to dotted keys, and a key present in only one side is shown as
+    ``<missing>``. Used to make the "machine_info is different" warning point at
+    what actually changed (for example a small ``cpu.hz_actual`` drift) instead
+    of dumping both dicts in full.
+    """
+    missing = object()
+    current_flat = _flatten_machine_info(current)
+    compared_flat = _flatten_machine_info(compared)
+    parts = []
+    for key in sorted(set(current_flat) | set(compared_flat)):
+        cur = current_flat.get(key, missing)
+        cmp = compared_flat.get(key, missing)
+        if cur != cmp:
+            cur_repr = '<missing>' if cur is missing else consistent_dumps(cur)
+            cmp_repr = '<missing>' if cmp is missing else consistent_dumps(cmp)
+            parts.append(f'{key}: {cur_repr} vs {cmp_repr}')
+    return ', '.join(parts)
+
+
 def safe_dumps(obj, **kwargs):
     return json.dumps(obj, cls=SafeJSONEncoder, **kwargs)
 

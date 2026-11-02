@@ -22,6 +22,7 @@ from .timers import default_timer
 from .utils import DEFAULT_COLUMNS
 from .utils import NameWrapper
 from .utils import consistent_dumps
+from .utils import format_machine_info_difference
 from .utils import get_commit_info
 from .utils import get_current_time
 from .utils import get_tag
@@ -341,12 +342,12 @@ def pytest_addhooks(pluginmanager):
 
 
 def pytest_benchmark_compare_machine_info(config, benchmarksession, machine_info, compared_benchmark):
-    machine_info = consistent_dumps(machine_info)
-    compared_machine_info = consistent_dumps(compared_benchmark['machine_info'])
+    compared_machine_info = compared_benchmark['machine_info']
 
-    if compared_machine_info != machine_info:
+    if consistent_dumps(compared_machine_info) != consistent_dumps(machine_info):
+        differences = format_machine_info_difference(machine_info, compared_machine_info)
         benchmarksession.logger.warning(
-            f'Benchmark machine_info is different. Current: {machine_info} VS saved: {compared_machine_info} (location: {benchmarksession.storage.location}).'
+            f'Benchmark machine_info is different. Current VS saved differ in: {differences} (location: {benchmarksession.storage.location}).'
         )
 
 
