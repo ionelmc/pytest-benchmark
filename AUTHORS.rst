@@ -47,3 +47,4 @@ Authors
 * Sophia Castellarin - https://github.com/soapy1
 * xlyyddy - https://github.com/xlyyddy
 * hfycium - https://github.com/hfycium
+* WatchTree-19 - https://github.com/WatchTree-19

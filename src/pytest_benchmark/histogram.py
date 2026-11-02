@@ -3,6 +3,7 @@
   PYTEST_DONT_REWRITE
 """
 
+import sys
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -14,6 +15,10 @@ try:
     from pygal.style import DefaultStyle
 except ImportError as exc:
     raise ImportError(exc.args, 'Please install pygal and pygaljs or pytest-benchmark[histogram]') from exc
+else:
+    from pygal import PluginImportFixer
+
+    sys.meta_path = [obj for obj in sys.meta_path if not isinstance(obj, PluginImportFixer)]
 
 
 class CustomBox(Box):

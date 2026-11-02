@@ -5,12 +5,23 @@ Changelog
 Unreleased
 ----------
 
-* Fixed an ``AttributeError`` with pytest's public ``nodeid`` attribute by
-  avoiding the removed private ``node._nodeid`` attribute (fixes `#321 <https://github.com/ionelmc/pytest-benchmark/issues/321>`_).
 * Changed the "machine_info is different" warning to report only the fields that
   differ (for example ``cpu.hz_actual``) instead of dumping both ``machine_info``
   dicts in full, so a small environment drift is obvious at a glance
   (`#255 <https://github.com/ionelmc/pytest-benchmark/issues/255>`_).
+
+v5.3.1 (2026-11-01)
+-------------------
+
+* Fixed an ``AttributeError`` with pytest's public ``nodeid`` attribute by
+  avoiding the removed private ``node._nodeid`` attribute (fixes `#321 <https://github.com/ionelmc/pytest-benchmark/issues/321>`_).
+  This adds support for Pytest 9.2.
+  Contributed by Hfycium in `#323 <https://github.com/ionelmc/pytest-benchmark/pull/323>`_.
+* Fixed ``Stats.hd15iqr`` returning the first datum *above* the Tukey upper fence
+  instead of the highest datum within it, so the statistic reported the outlier it
+  exists to exclude. ``ld15iqr`` was already correct.
+  Contributed by WatchTree-19 in `#320 <https://github.com/ionelmc/pytest-benchmark/pull/320>`_.
+* Added workaround for pygal's broken PluginImportFixer (it's removed from ``sys.meta_path``).
 
 v5.3.0 (2026-08-23)
 --------------------
