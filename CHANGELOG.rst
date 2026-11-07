@@ -2,6 +2,13 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Fixed machine-info comparison warnings crashing when benchmark storage is
+  outside the current working directory (fixes `#217 <https://github.com/ionelmc/pytest-benchmark/issues/217>`_).
+  Contributed by WhyTan00.
+
 v5.3.1 (2026-11-01)
 -------------------
 

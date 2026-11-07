@@ -24,7 +24,11 @@ class FileStorage:
 
     @property
     def location(self):
-        return str(self.path.relative_to(Path.cwd()))
+        try:
+            path = self.path.relative_to(Path.cwd())
+        except ValueError:
+            path = self.path
+        return str(path)
 
     def get(self, name):
         path = self.path.joinpath(self.default_machine_id) if self.default_machine_id else self.path
