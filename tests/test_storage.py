@@ -323,6 +323,36 @@ def test_regression_checks_inf(sess, name_format):
     )
 
 
+@pytest.mark.parametrize('path', ['.', '.benchmarks', '../benchmarks', '..'])
+def test_storage_location(tmp_path, monkeypatch, path):
+    workdir = tmp_path / 'work'
+    workdir.mkdir()
+    monkeypatch.chdir(workdir)
+    storage = FileStorage(path, logging.getLogger(__name__))
+
+    if path in ('.', '.benchmarks'):
+        expected = path
+    else:
+        expected = str((workdir / path).resolve())
+    assert storage.location == expected
+
+
+def test_compare_machine_info_outside_cwd(tmp_path, monkeypatch, caplog):
+    workdir = tmp_path / 'work'
+    workdir.mkdir()
+    monkeypatch.chdir(workdir)
+    logger = logging.getLogger(__name__)
+    storage = FileStorage(tmp_path / 'benchmarks', logger)
+    session = Namespace(storage=storage, logger=logger)
+
+    pytest_benchmark_compare_machine_info(None, session, {'machine': 'current'}, {'machine_info': {'machine': 'saved'}})
+
+    assert caplog.messages == [
+        'Benchmark machine_info is different. Current: {"machine": "current"} VS saved: {"machine": "saved"} '
+        f'(location: {storage.path}).'
+    ]
+
+
 def test_compare_1(sess, LineMatcher):
     output = make_logger(sess)
     sess.handle_loading()

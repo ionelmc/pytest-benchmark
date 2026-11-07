@@ -48,3 +48,4 @@ Authors
 * xlyyddy - https://github.com/xlyyddy
 * hfycium - https://github.com/hfycium
 * WatchTree-19 - https://github.com/WatchTree-19
+* WhyTan00 - https://github.com/WhyTan00
