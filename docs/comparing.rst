@@ -58,8 +58,9 @@ Example output::
     test_setattr_thread_critical                   899.9952          254.1521           -71.8%
     ...
 
-The first source is the reference (shown in cyan on the terminal).
+The first loaded source containing measurements is the reference (shown in cyan on the terminal) across all groups.
 Each subsequent source is followed by a ``Δ`` column showing the percentage change.
+If either source has no matching measurement, the change is shown as ``N/A``.
 
 You can compare multiple metrics and control the sort order with ``--sort``::
 

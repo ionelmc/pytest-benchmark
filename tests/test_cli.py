@@ -1,3 +1,4 @@
+import json
 import sys
 from collections import namedtuple
 from pathlib import Path
@@ -328,6 +329,55 @@ def test_compare_between(testdir):
             '---*---',
         ]
     )
+    assert result.ret == 0
+
+
+@pytest.mark.parametrize('filter_args', [(), ('-k', 'added or new_group')])
+def test_compare_between_uses_the_same_reference_across_groups(testdir, filter_args):
+    def benchmark(name, group, duration):
+        return {
+            'name': name,
+            'fullname': f'test_bench.py::{name}',
+            'group': group,
+            'stats': dict.fromkeys(('min', 'max', 'mean', 'median', 'iqr', 'stddev'), duration),
+        }
+
+    root = Path(testdir.tmpdir)
+    baseline = root / '0001_baseline.json'
+    feature = root / '0002_feature.json'
+    baseline.write_text(json.dumps({'benchmarks': [benchmark('test_shared', 'common', 1)]}), encoding='utf-8')
+    feature.write_text(
+        json.dumps(
+            {
+                'benchmarks': [
+                    benchmark('test_added', 'common', 3),
+                    benchmark('test_shared', 'common', 2),
+                    benchmark('test_new_group', 'new', 4),
+                ],
+            }
+        ),
+        encoding='utf-8',
+    )
+    result = testdir.run(
+        'py.test-benchmark',
+        'compare',
+        '--between=min',
+        '--name=short',
+        '--time-unit=s',
+        str(baseline),
+        str(feature),
+        *filter_args,
+    )
+    expected = ["---* benchmark 'common': * tests, 2 sources *---", '*0001 Min*0002 Min*ΔMin']
+    if not filter_args:
+        expected.append('shared *1.0000*2.0000*+100.0%')
+    expected += [
+        'added *N/A*3.0000*N/A',
+        "---* benchmark 'new': 1 tests, 2 sources *---",
+        '*0001 Min*0002 Min*ΔMin',
+        'new_group *N/A*4.0000*N/A',
+    ]
+    result.stdout.fnmatch_lines(expected)
     assert result.ret == 0
 
 
