@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Keep the same reference source across groups and filters in ``compare --between``.
+  Show missing measurements as ``N/A`` when a benchmark is absent from a source.
+
 v5.3.1 (2026-11-01)
 -------------------
 

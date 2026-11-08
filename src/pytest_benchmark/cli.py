@@ -167,12 +167,15 @@ def main():
             print(file)
     elif args.command == 'compare':
         histogram = first_or_value(args.histogram, False)
+        benchmarks = storage.load_benchmarks(*args.glob_or_file)
         if args.between:
             if args.columns:
                 parser.error('--between is not compatible with --columns (--between already specifies the columns)')
             if histogram:
                 parser.error('--between is not compatible with --histogram')
-            results_table_cls = CompareBetweenResults
+            benchmarks = list(benchmarks)
+            sources = tuple(dict.fromkeys(bench.get('source', '') for bench in benchmarks))
+            results_table_cls = partial(CompareBetweenResults, sources=sources)
             args.columns = args.between
         else:
             results_table_cls = TableResults
@@ -190,7 +193,6 @@ def main():
                 config=Config.fromdictargs({'benchmark_time_unit': args.time_unit}, []),
             ),
         )
-        benchmarks = storage.load_benchmarks(*args.glob_or_file)
         if args.filter_expr:
             from _pytest.mark.expression import Expression  # noqa: PLC0415
 

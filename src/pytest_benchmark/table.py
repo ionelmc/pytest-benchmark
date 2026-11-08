@@ -145,6 +145,10 @@ class TableResults:
 
 
 class CompareBetweenResults(TableResults):
+    def __init__(self, *, sources, **kwargs):
+        super().__init__(**kwargs)
+        self.sources = sources
+
     def display(self, tr, groups, progress_reporter=report_progress):
         tr.write_line('')
 
@@ -156,8 +160,8 @@ class CompareBetweenResults(TableResults):
         tr.write_line(f'  {DELTA}: percentage change from reference source.')
 
     def _display_single_between(self, line, group, benchmarks, *, tr, progress_reporter):
-        # Collect sources in order of first appearance and build fullname -> {source: bench} mapping
-        sources = list(dict.fromkeys(bench.get('source', '') for bench in benchmarks))
+        sources = self.sources
+        # Build fullname -> {source: bench} mapping for the current group.
         bench_map = {}
         for bench in benchmarks:
             bench_map.setdefault(bench['fullname'], {})[bench.get('source', '')] = bench
